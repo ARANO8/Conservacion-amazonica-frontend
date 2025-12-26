@@ -48,7 +48,7 @@ const data = {
         },
         {
           title: 'Planificacion',
-          url: '#',
+          url: '/dashboard/planificacion',
         },
         {
           title: 'Rendicion',
