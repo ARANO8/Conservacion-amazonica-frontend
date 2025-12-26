@@ -28,11 +28,11 @@ export function LoginForm({
               <div className="flex size-8 items-center justify-center rounded-md">
                 <GalleryVerticalEnd className="size-6" />
               </div>
-              <span className="sr-only">Acme Inc.</span>
+              {/* <span className="sr-only">Acme Inc.</span> */}
             </a>
-            <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
+            <h1 className="text-xl font-bold">Bienvenido a SyFin</h1>
             <FieldDescription>
-              Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+              No tienes una cuenta? <Link href="/signup">Registrarse</Link>
             </FieldDescription>
           </div>
           <Field>
@@ -46,10 +46,10 @@ export function LoginForm({
           </Field>
           <Field>
             <Button asChild>
-              <Link href="/dashboard">Login</Link>
+              <Link href="/dashboard">Ingresar</Link>
             </Button>
           </Field>
-          <FieldSeparator>Or</FieldSeparator>
+          <FieldSeparator>O</FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-2">
             <Button variant="outline" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export function LoginForm({
                   fill="currentColor"
                 />
               </svg>
-              Continue with Apple
+              Continuar con Apple
             </Button>
             <Button variant="outline" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -67,14 +67,13 @@ export function LoginForm({
                   fill="currentColor"
                 />
               </svg>
-              Continue with Google
+              Continuar con Google
             </Button>
           </Field>
         </FieldGroup>
       </form>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
-        and <a href="#">Privacy Policy</a>.
+        Desarrollado por <a href="#">Team aran08 </a>.
       </FieldDescription>
     </div>
   );
