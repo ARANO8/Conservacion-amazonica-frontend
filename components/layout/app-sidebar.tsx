@@ -18,7 +18,7 @@ import {
 import { NavMain } from '@/components/ui/nav-main';
 
 import { NavSecondary } from '@/components/ui/nav-secondary';
-import { NavUser } from '@/components/ui/nav-user';
+import { NavUser } from '@/components/layout/nav-user';
 import {
   Sidebar,
   SidebarContent,

@@ -1,6 +1,6 @@
 'use client';
 
-import { AppSidebar } from '@/components/ui/app-sidebar';
+import { AppSidebar } from '@/components/layout/app-sidebar';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,7 +33,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import SolicitudItems from '@/components/solicitud-items';
+import SolicitudItems from '@/components/solicitudes/solicitud-items';
 import { useState } from 'react';
 import {
   Combobox,
