@@ -44,7 +44,7 @@ const data = {
       items: [
         {
           title: 'Solicitud',
-          url: '#',
+          url: '/dashboard/solicitud',
         },
         {
           title: 'Rendicion',
