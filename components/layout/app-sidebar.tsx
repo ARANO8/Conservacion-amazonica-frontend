@@ -47,6 +47,10 @@ const data = {
           url: '/dashboard/solicitud',
         },
         {
+          title: 'Planificacion',
+          url: '#',
+        },
+        {
           title: 'Rendicion',
           url: '#',
         },
