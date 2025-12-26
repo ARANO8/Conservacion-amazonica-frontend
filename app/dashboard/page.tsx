@@ -1,3 +1,5 @@
+'use client';
+
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import {
   Breadcrumb,
@@ -23,8 +25,11 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function Page() {
+  const searchParams = useSearchParams();
+  const isApprover = searchParams.get('role') === 'approver';
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -63,78 +68,114 @@ export default function Page() {
           </section>
 
           <section>
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Solicitud de Viaje/Taller</CardTitle>
-                  <CardDescription>
-                    Inicia una nueva solicitud para viajes o talleres
-                    institucionales.
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button asChild>
-                    <Link href="/dashboard/solicitud">Crear solicitud</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+            {isApprover ? (
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revisión de Solicitudes</CardTitle>
+                    <CardDescription>
+                      Accede a las solicitudes pendientes para aprobar o
+                      rechazar.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button asChild>
+                      <Link href="/dashboard/revision?role=approver">
+                        Ir a Revisión
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Solicitud de Viaje/Taller</CardTitle>
+                    <CardDescription>
+                      Inicia una nueva solicitud para viajes o talleres
+                      institucionales.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button asChild>
+                      <Link href="/dashboard/solicitud">Crear solicitud</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Planificación</CardTitle>
-                  <CardDescription>
-                    Registra la planificación de actividades del viaje/taller.
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button asChild>
-                    <Link href="/dashboard/planificacion">
-                      Ir a Planificación
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Planificación</CardTitle>
+                    <CardDescription>
+                      Registra la planificación de actividades del viaje/taller.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button asChild>
+                      <Link href="/dashboard/planificacion">
+                        Ir a Planificación
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Rendición de Gastos</CardTitle>
-                  <CardDescription>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Próximamente.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-muted-foreground text-sm">
-                    En desarrollo
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" disabled>
-                    Abrir
-                  </Button>
-                </CardFooter>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Rendición de Gastos</CardTitle>
+                    <CardDescription>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                      Próximamente.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-muted-foreground text-sm">
+                      En desarrollo
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="outline" disabled>
+                      Ver reportes
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            )}
+          </section>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reportes</CardTitle>
-                  <CardDescription>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Próximamente.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-muted-foreground text-sm">
-                    En desarrollo
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" disabled>
-                    Ver reportes
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
+          <section>
+            <Card>
+              <CardHeader>
+                <CardTitle>Notificaciones</CardTitle>
+                <CardDescription>Resumen de avisos recientes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isApprover ? (
+                  <ul className="space-y-2 text-sm">
+                    <li className="rounded-md border p-3">
+                      Nueva solicitud SOL-004 enviada para revisión.
+                    </li>
+                    <li className="rounded-md border p-3">
+                      Recordatorio: SOL-001 pendiente de decisión.
+                    </li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    <li className="rounded-md border p-3">
+                      Solicitud SOL-001 aprobada por Dirección. Mensaje:
+                      &quot;Aprobado, buen viaje&quot;
+                    </li>
+                    <li className="rounded-md border p-3">
+                      Solicitud SOL-002 rechazada. Mensaje: &quot;Falta detalle
+                      del objetivo&quot;
+                    </li>
+                    <li className="rounded-md border p-3">
+                      Nueva observación en SOL-003
+                    </li>
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
           </section>
         </div>
       </SidebarInset>

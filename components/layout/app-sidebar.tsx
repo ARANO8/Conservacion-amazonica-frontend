@@ -1,21 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import {
-  BookOpen,
-  Bot,
-  ClipboardPlus,
-  Command,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
-  Settings2,
-  SquareTerminal,
-} from 'lucide-react';
+import { ClipboardPlus, Command, LifeBuoy, Send } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
+import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { NavSecondary } from '@/components/ui/nav-secondary';
 import { NavUser } from '@/components/layout/nav-user';
@@ -35,28 +25,6 @@ const data = {
     email: 'm@example.com',
     avatar: '/avatars/shadcn.jpg',
   },
-  navMain: [
-    {
-      title: 'Fondos para Viajes o Talleres',
-      url: '#',
-      icon: ClipboardPlus,
-      isActive: true,
-      items: [
-        {
-          title: 'Solicitud',
-          url: '/dashboard/solicitud',
-        },
-        {
-          title: 'Planificacion',
-          url: '/dashboard/planificacion',
-        },
-        {
-          title: 'Rendicion',
-          url: '#',
-        },
-      ],
-    },
-  ],
   navSecondary: [
     {
       title: 'Soporte',
@@ -72,6 +40,25 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const searchParams = useSearchParams();
+  const isApprover = searchParams.get('role') === 'approver';
+
+  const navMain = [
+    {
+      title: 'Fondos para Viajes o Talleres',
+      url: '#',
+      icon: ClipboardPlus,
+      isActive: true,
+      items: isApprover
+        ? [{ title: 'Revisión', url: '/dashboard/revision?role=approver' }]
+        : [
+            { title: 'Solicitud', url: '/dashboard/solicitud' },
+            { title: 'Planificacion', url: '/dashboard/planificacion' },
+            { title: 'Rendicion', url: '#' },
+          ],
+    },
+  ];
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -91,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
