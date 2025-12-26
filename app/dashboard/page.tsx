@@ -81,6 +81,22 @@ export default function Page() {
 
               <Card>
                 <CardHeader>
+                  <CardTitle>Planificación</CardTitle>
+                  <CardDescription>
+                    Registra la planificación de actividades del viaje/taller.
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <Button asChild>
+                    <Link href="/dashboard/planificacion">
+                      Ir a Planificación
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle>Rendición de Gastos</CardTitle>
                   <CardDescription>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
