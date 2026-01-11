@@ -4,9 +4,6 @@ import * as React from 'react';
 import { ClipboardPlus, Command, LifeBuoy, Send } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
-import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-
 import { NavSecondary } from '@/components/ui/nav-secondary';
 import { NavUser } from '@/components/layout/nav-user';
 import {
@@ -18,25 +15,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useAuthStore } from '@/store/auth-store';
 
-const data = {
-  navSecondary: [
-    {
-      title: 'Soporte',
-      url: '#',
-      icon: LifeBuoy,
-    },
-    {
-      title: 'Feedback',
-      url: '#',
-      icon: Send,
-    },
-  ],
-};
+// Menu items estáticos (se pueden mover a config si crecen)
+const navSecondary = [
+  {
+    title: 'Soporte',
+    url: '#',
+    icon: LifeBuoy,
+  },
+  {
+    title: 'Feedback',
+    url: '#',
+    icon: Send,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const searchParams = useSearchParams();
-  const isApprover = searchParams.get('role') === 'approver';
+  const { user } = useAuthStore();
+
+  // Lógica de roles real
+  const isApprover = user?.role === 'approver' || user?.role === 'admin';
 
   const navMain = [
     {
@@ -74,7 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
