@@ -12,7 +12,8 @@ export function ApiStatus() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkStatus = async () => {
+    const checkStatus = async (isInitial = false) => {
+      if (isInitial) setIsLoading(true);
       try {
         const baseURL =
           process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -28,11 +29,17 @@ export function ApiStatus() {
           setStatus('disconnected');
         }
       } finally {
-        setIsLoading(false);
+        if (isInitial) setIsLoading(false);
       }
     };
 
-    checkStatus();
+    checkStatus(true); // Verificación inicial
+
+    const interval = setInterval(() => {
+      checkStatus(false); // Polling silencioso cada 10s
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (isLoading) return null;
@@ -49,7 +56,7 @@ export function ApiStatus() {
         )}
       />
       <span className="text-[10px] font-medium tracking-wider uppercase">
-        Backend: {status === 'connected' ? 'En línea' : 'Fuera de línea'}
+        Estado: {status === 'connected' ? 'En línea' : 'Fuera de línea'}
       </span>
     </Badge>
   );
