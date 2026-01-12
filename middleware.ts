@@ -3,6 +3,12 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
+  console.log(
+    '[Middleware] Path:',
+    request.nextUrl.pathname,
+    '| Token Cookie:',
+    token
+  );
   const { pathname } = request.nextUrl;
 
   // 1. Proteger rutas que inician con /dashboard

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useAuthStore } from '@/store/auth-store';
 
 // Crear instancia de Axios
 const api = axios.create({
@@ -12,7 +13,8 @@ const api = axios.create({
 // Interceptor de Request: Inyectar token
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('token');
+    // Leer token de useAuthStore (persistido en localStorage) o fallback a cookies
+    const token = useAuthStore.getState().token || Cookies.get('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,16 +25,16 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor de Response: Manejo global de errores (opcional)
+// Interceptor de Response: Manejo global de errores (401)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Si el token expira o es inválido, podríamos limpiar la sesión aquí
-      // o dejar que el store maneje el logout.
-      // Por ahora, solo rechazamos el error para que cada llamada lo maneje.
-      Cookies.remove('token');
-      // Opcional: window.location.href = '/login';
+      // Logout automático si el token es inválido o expiró
+      useAuthStore.getState().logout();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
