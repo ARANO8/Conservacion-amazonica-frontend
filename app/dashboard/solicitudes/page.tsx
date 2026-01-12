@@ -110,7 +110,7 @@ export default function MyRequestsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Mis Solicitudes</h1>
         <Button asChild>
-          <Link href="/dashboard/solicitudes/nueva">Nueva Solicitud</Link>
+          <Link href="/dashboard/solicitud">Nueva Solicitud</Link>
         </Button>
       </div>
 

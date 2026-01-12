@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ClipboardPlus, Command, LifeBuoy, Send } from 'lucide-react';
+import { ClipboardPlus, Command, FileText, LifeBuoy, Send } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
 import { NavSecondary } from '@/components/ui/nav-secondary';
@@ -38,6 +38,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isApprover = user?.role === 'approver' || user?.role === 'admin';
 
   const navMain = [
+    {
+      title: 'Solicitudes',
+      url: '/dashboard/solicitudes',
+      icon: FileText,
+    },
     {
       title: 'Fondos para Viajes o Talleres',
       url: '#',
