@@ -13,7 +13,7 @@ export interface User {
 
 interface loginResponse {
   user: User;
-  token: string;
+  accessToken: string;
 }
 
 interface AuthState {
@@ -44,10 +44,23 @@ export const useAuthStore = create<AuthState>()(
             '/auth/login',
             credentials
           );
-          const { user, token } = response.data;
+
+          console.log('Login Response Debug:', response.data);
+
+          // Backend devuelve accessToken (camelCase)
+          const token = response.data.accessToken;
+          const user = response.data.user;
+
+          console.log('Token extracted:', token); // Debug log
+
+          if (!token || token === 'undefined') {
+            const errorMsg = 'Token no recibido del servidor';
+            console.error(errorMsg, response.data);
+            throw new Error(errorMsg);
+          }
 
           // Guardar token en cookies
-          Cookies.set('token', token, { expires: 7 });
+          Cookies.set('token', token, { expires: 7, path: '/' });
 
           set({
             user,
