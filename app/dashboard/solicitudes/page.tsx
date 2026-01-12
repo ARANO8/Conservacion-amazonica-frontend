@@ -25,21 +25,6 @@ interface Request {
   createdAt: string;
 }
 
-const statusColors: Record<
-  Request['status'],
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-  DRAFT: 'secondary', // Gris (usando secondary o outline suele dar tonos grises)
-  PENDING: 'default', // Shadcn default suele ser negro/oscuro, ajustaremos con clase si es necesario,
-  // pero el usuario pidió Amarillo/Naranja. Shadcn basic badge colors are limited.
-  // We might need custom classes or verify badge variants.
-  // Let's stick to standard variants first and check visual later, or add custom tailwind classes.
-  // 'secondary' is usually gray. 'destructive' red.
-  // We'll use specific className for custom colors.
-  APPROVED: 'default', // Verde (usually success is needed)
-  REJECTED: 'destructive',
-};
-
 // Start simple with mapping, then refine styles inline if needed
 const getStatusBadge = (status: Request['status']) => {
   let className = '';

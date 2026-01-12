@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Outfit } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import { Toaster } from '@/components/ui/sonner';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
