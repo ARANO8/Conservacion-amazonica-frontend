@@ -123,25 +123,57 @@ export default function SolicitudPage() {
       solicitante: 'usuario',
       fechaInicio: '',
       fechaFin: '',
+      codigoPOA: '',
+      codigoProyecto: '',
+      lugarViaje: '',
+      fechaViaje: '',
+      lugarSolicitud: 'La Paz',
+      fechaSolicitud: new Date().toISOString().split('T')[0],
+      motivo: '',
     },
   });
 
   useEffect(() => {
     const fetchOptions = async () => {
+      const MOCK_BUDGET_LINES = [
+        { id: 1, code: '30000', name: 'Pasajes y Viáticos' },
+        { id: 2, code: '40000', name: 'Materiales' },
+      ];
+      const MOCK_FINANCING_SOURCES = [
+        { id: 1, code: '001', name: 'Recursos Propios' },
+        { id: 2, code: '002', name: 'Donación Externa' },
+      ];
+
       try {
         const [blRes, fsRes] = await Promise.allSettled([
           api.get('/budget-lines'),
           api.get('/financing-sources'),
         ]);
 
+        const budgetLines =
+          blRes.status === 'fulfilled' &&
+          Array.isArray(blRes.value.data) &&
+          blRes.value.data.length > 0
+            ? blRes.value.data
+            : MOCK_BUDGET_LINES;
+
+        const financingSources =
+          fsRes.status === 'fulfilled' &&
+          Array.isArray(fsRes.value.data) &&
+          fsRes.value.data.length > 0
+            ? fsRes.value.data
+            : MOCK_FINANCING_SOURCES;
+
         setOptions({
-          budgetLines: blRes.status === 'fulfilled' ? blRes.value.data : [],
-          financingSources:
-            fsRes.status === 'fulfilled' ? fsRes.value.data : [],
+          budgetLines,
+          financingSources,
         });
       } catch (error) {
-        console.error('Error fetching options', error);
-        // Fallback implícito a arrays vacíos por el estado inicial
+        console.error('Error fetching options, using mocks', error);
+        setOptions({
+          budgetLines: MOCK_BUDGET_LINES,
+          financingSources: MOCK_FINANCING_SOURCES,
+        });
       }
     };
     fetchOptions();
