@@ -38,8 +38,8 @@ import { FormData } from '@/app/dashboard/solicitud/page';
 interface SolicitudItemsProps {
   control: Control<FormData>;
   watch: UseFormWatch<FormData>;
-  budgetLines: { id: number; code: string; name: string }[];
-  financingSources: { id: number; code: string; name: string }[]; // Keeping strict type, though we might not use it for 'Grupo'
+  budgetLines: { id: string; code: string; name: string }[];
+  financingSources: { id: string; code: string; name: string }[]; // Keeping strict type, though we might not use it for 'Grupo'
 }
 
 function formatMoney(n: number) {
@@ -55,6 +55,7 @@ export default function SolicitudItems({
   control,
   watch,
   budgetLines,
+  financingSources,
 }: SolicitudItemsProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -103,7 +104,7 @@ export default function SolicitudItems({
         {/* Ensure generic width for scroll */}
         {/* Headers */}
         <div className="text-muted-foreground mb-2 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] gap-2 px-2 text-xs font-medium">
-          <div>Grupo Presup.</div>
+          <div>Fuente</div>
           <div>Partida</div>
           <div>Docum</div>
           <div>Tipo</div>
@@ -127,17 +128,36 @@ export default function SolicitudItems({
               key={field.id}
               className="bg-muted/5 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
             >
-              {/* Grupo (Mock) */}
               <div>
-                <Select>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Grupo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="g1">Grupo 10000</SelectItem>
-                    <SelectItem value="g2">Grupo 20000</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormField
+                  control={control}
+                  name={`items.${idx}.financingSourceId`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Fuente" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {financingSources.map((fs) => (
+                            <SelectItem
+                              key={fs.id}
+                              value={String(fs.id)}
+                              className="text-xs"
+                            >
+                              {fs.code} - {fs.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Partida */}
@@ -163,7 +183,7 @@ export default function SolicitudItems({
                               value={String(bl.id)}
                               className="text-xs"
                             >
-                              {bl.code}
+                              {bl.code} - {bl.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -173,16 +193,18 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Docum */}
+              {/* Document */}
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.docum`}
+                  name={`items.${idx}.document`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
                           {...field}
+                          // Ensure value is never undefined
+                          value={field.value ?? ''}
                           placeholder="Doc."
                           className="h-8 text-xs"
                         />
@@ -192,16 +214,18 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Tipo */}
+              {/* Type */}
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.tipo`}
+                  name={`items.${idx}.type`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
                           {...field}
+                          // Ensure value is never undefined
+                          value={field.value ?? ''}
                           placeholder="Tipo"
                           className="h-8 text-xs"
                         />
@@ -354,13 +378,13 @@ export default function SolicitudItems({
           onClick={() =>
             append({
               budgetLineId: '',
-              financingSourceId: '1',
+              financingSourceId: '',
               amount: 0,
               quantity: 1,
               unitCost: 0,
-              docum: '',
-              tipo: '',
-              description: 'Gasto',
+              document: '',
+              type: '',
+              description: '',
             })
           }
         >

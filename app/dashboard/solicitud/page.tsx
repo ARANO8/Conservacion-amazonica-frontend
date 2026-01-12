@@ -76,8 +76,8 @@ const schema = z.object({
         description: z.string().min(1, 'El concepto es requerido'),
         budgetLineId: z.string().min(1, 'Partida requerida'),
         financingSourceId: z.string().min(1, 'Fuente requerida'),
-        docum: z.string().optional(),
-        tipo: z.string().optional(),
+        document: z.string().optional(),
+        type: z.string().optional(),
         amount: z.number().min(0, 'Monto inválido'),
         quantity: z.number().min(0).optional(),
         unitCost: z.number().min(0).optional(),
@@ -92,8 +92,8 @@ export default function SolicitudPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<{
-    budgetLines: { id: number; code: string; name: string }[];
-    financingSources: { id: number; code: string; name: string }[];
+    budgetLines: { id: string; code: string; name: string }[];
+    financingSources: { id: string; code: string; name: string }[];
   }>({
     budgetLines: [],
     financingSources: [],
@@ -107,10 +107,12 @@ export default function SolicitudPage() {
         {
           description: 'Gasto',
           budgetLineId: '',
-          financingSourceId: '1' /* Default ID for now */,
+          financingSourceId: '',
           amount: 0,
           quantity: 1,
           unitCost: 0,
+          document: '',
+          type: '',
         },
       ],
       viaticos: [],
@@ -136,12 +138,23 @@ export default function SolicitudPage() {
   useEffect(() => {
     const fetchOptions = async () => {
       const MOCK_BUDGET_LINES = [
-        { id: 1, code: '30000', name: 'Pasajes y Viáticos' },
-        { id: 2, code: '40000', name: 'Materiales' },
+        {
+          id: '42858360-665d-4503-926b-dea2fba56e7a',
+          code: '22110',
+          name: 'Pasajes al Interior del Pais',
+        },
+        {
+          id: '4d5aa881-78dc-48ca-b2cb-38183664ef37',
+          code: '22120',
+          name: 'Pasajes al Exterior del Pais',
+        },
       ];
       const MOCK_FINANCING_SOURCES = [
-        { id: 1, code: '001', name: 'Recursos Propios' },
-        { id: 2, code: '002', name: 'Donación Externa' },
+        {
+          id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+          code: 'RECURSOS PROPIOS',
+          name: 'RECURSOS PROPIOS',
+        },
       ];
 
       try {
@@ -180,39 +193,52 @@ export default function SolicitudPage() {
   }, []);
 
   const onSubmit = async (data: FormData) => {
+    // 1. Debugging: Log raw form data
+    console.log('FORM DATA (Raw):', data);
+
     setLoading(true);
     try {
-      // Construir descripción concatenada
-      const descriptionHeader = `
-SOLICITUD DE FONDOS
-Lugar: ${data.lugarViaje || 'N/A'}
-Fecha: ${data.fechaViaje || 'N/A'}
-POA: ${data.codigoPOA || ''}
-Proyecto: ${data.codigoProyecto || ''}
---------------------------------
-Viáticos:
-${data.viaticos?.map((v) => `- ${v.concepto} (${v.ciudad}): ${v.dias} días`).join('\n') || 'Ninguno'}
---------------------------------
-${data.motivo}
-      `.trim();
-
+      // Transformación de datos para el Backend (Strict DTOs)
       const payload = {
-        description: descriptionHeader,
-        items: data.items.map((item) => ({
-          description:
-            item.description ||
-            `${item.docum || ''} ${item.tipo || ''}`.trim() ||
-            'Gasto',
-          budgetLineId: Number(item.budgetLineId),
-          financingSourceId: Number(item.financingSourceId) || 1, // Defaulting to 1 if not selected, as we removed the column visual but backend needs it
-          amount: Number(item.amount),
-        })),
-        // Total calculado automáticamente en backend, pero si se requiere enviar:
-        totalAmount: data.items.reduce(
-          (acc, curr) => acc + (Number(curr.amount) || 0),
-          0
-        ),
+        title: `${data.motivo || ''} - ${data.lugarViaje || ''}`.trim(),
+        description: data.motivo,
+        poaCode: data.codigoPOA,
+        place: data.lugarViaje,
+        startDate: data.fechaInicio
+          ? new Date(data.fechaInicio).toISOString()
+          : null,
+        endDate: data.fechaFin ? new Date(data.fechaFin).toISOString() : null,
+        receiverName: data.destinatario,
+        viaticos:
+          data.viaticos
+            ?.filter((v) => v.concepto && v.concepto.trim() !== '')
+            .map((v) => ({
+              concept: v.concepto,
+              city: v.ciudad,
+              destination: v.destino,
+              transportType: v.tipo,
+              days: Number(v.dias),
+              peopleCount: Number(v.personas),
+            })) || [],
+        items: data.items.map((item) => {
+          const qty = Number(item.quantity) || 0;
+          const cost = Number(item.unitCost) || 0;
+          return {
+            description:
+              item.description ||
+              `${item.document || ''} ${item.type || ''}`.trim() ||
+              'Gasto',
+            budgetLineId: item.budgetLineId, // Debe ser UUID string
+            financingSourceId: item.financingSourceId, // Debe ser UUID string
+            quantity: qty,
+            unitCost: cost,
+            amount: qty * cost,
+          };
+        }),
       };
+
+      // 2. Debugging: Log constructed payload
+      console.log('PAYLOAD (To Backend):', JSON.stringify(payload, null, 2));
 
       await api.post('/requests', payload);
 
