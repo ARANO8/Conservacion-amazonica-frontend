@@ -32,6 +32,14 @@ import {
 } from '@/components/ui/form';
 import SolicitudItems from '@/components/solicitudes/solicitud-items';
 import SolicitudViajeItems from '@/components/solicitudes/solicitud-viaje-items';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { BudgetLine, FinancingSource, UserCatalog } from '@/types/catalogs';
@@ -93,6 +101,7 @@ export default function SolicitudPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [options, setOptions] = useState<{
     budgetLines: BudgetLine[];
     financingSources: FinancingSource[];
@@ -166,6 +175,42 @@ export default function SolicitudPage() {
     fetchOptions();
   }, []);
 
+  // Función para formatear moneda
+  const formatBOB = (n: number) => {
+    return new Intl.NumberFormat('es-BO', {
+      style: 'currency',
+      currency: 'BOB',
+    }).format(n);
+  };
+
+  // Cálculo del monto total para el resumen
+  const watchItems = form.watch('items');
+  const totalMonto = watchItems.reduce(
+    (acc, item) => acc + (Number(item.amount) || 0),
+    0
+  );
+
+  const handlePreSubmit = async () => {
+    // Validar solo campos visibles antes de abrir el modal
+    const isValid = await form.trigger([
+      'motivo',
+      'items',
+      'viaticos',
+      'codigoPOA',
+      'lugarViaje',
+      'fechaInicio',
+      'fechaFin',
+    ]);
+
+    if (isValid) {
+      setIsConfirmModalOpen(true);
+    } else {
+      toast.error('Formulario Incompleto', {
+        description: 'Por favor, revisa los campos requeridos y los errores.',
+      });
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     // 1. Debugging: Log raw form data
     console.log('FORM DATA (Raw):', data);
@@ -237,110 +282,6 @@ export default function SolicitudPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
-              <FieldSet>
-                <FieldLegend>Datos de Destinatario</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="destinatario"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>A:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          disabled={loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                loadingOptions
-                                  ? 'Cargando...'
-                                  : 'Selecciona destinatario'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {options.users.map((u) => (
-                              <SelectItem key={u.id} value={u.name}>
-                                {u.name} - {u.position}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="via"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Vía:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona vía" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="director-programa">
-                              Daniel Marcelo Larrea Alcázar
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="solicitante"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>De (Solicitante):</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona solicitante" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="usuario">
-                              Usuario Actual
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="interino"
-                    render={({ field }) => (
-                      <Field className="flex items-end gap-3">
-                        <div className="flex items-center gap-2">
-                          <input
-                            id="interino"
-                            type="checkbox"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="border-input bg-background size-4 border"
-                          />
-                          <label htmlFor="interino" className="text-sm">
-                            Interino
-                          </label>
-                        </div>
-                      </Field>
-                    )}
-                  />
-                </div>
-              </FieldSet>
-
               <Separator />
 
               <FieldSet>
@@ -590,11 +531,89 @@ export default function SolicitudPage() {
                 >
                   Guardar Borrador
                 </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Enviando...' : 'Enviar Solicitud'}
+                <Button type="button" onClick={handlePreSubmit}>
+                  Revisar y Enviar
                 </Button>
               </div>
             </FieldGroup>
+
+            {/* Modal de Confirmación */}
+            <Dialog
+              open={isConfirmModalOpen}
+              onOpenChange={setIsConfirmModalOpen}
+            >
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Confirmar Solicitud</DialogTitle>
+                  <DialogDescription>
+                    Resumen de la solicitud antes del envío final.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-4 py-4">
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-muted-foreground text-sm font-medium">
+                      Monto Total:
+                    </p>
+                    <p className="text-primary text-2xl font-bold">
+                      {formatBOB(totalMonto)}
+                    </p>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="destinatario"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Dirigido a (Destinatario):</FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={loadingOptions}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                loadingOptions
+                                  ? 'Cargando usuarios...'
+                                  : 'Selecciona destinatario'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[200px]">
+                            {options.users.map((u) => (
+                              <SelectItem key={u.id} value={u.name}>
+                                <span className="block w-full max-w-[380px] truncate">
+                                  {u.name} - {u.position}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </Field>
+                    )}
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsConfirmModalOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading || !form.watch('destinatario')}
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    {loading ? 'Enviando...' : 'Confirmar y Enviar'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </form>
         </Form>
       </div>
