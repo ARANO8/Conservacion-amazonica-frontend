@@ -26,6 +26,7 @@ import {
   useFieldArray,
   UseFormWatch,
   useFormContext,
+  useWatch,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -42,6 +43,7 @@ interface SolicitudItemsProps {
   budgetLines: BudgetLine[];
   financingSources: FinancingSource[];
   isLoading?: boolean;
+  totalAmount?: number;
 }
 
 function formatMoney(n: number) {
@@ -59,6 +61,7 @@ export default function SolicitudItems({
   budgetLines,
   financingSources,
   isLoading = false,
+  totalAmount,
 }: SolicitudItemsProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -67,38 +70,33 @@ export default function SolicitudItems({
 
   const { setValue } = useFormContext();
 
-  const watchItems = watch('items');
+  const watchedItems = useWatch({
+    control,
+    name: 'items',
+  });
 
   // Calculates total (quantity * unitCost)
   useEffect(() => {
-    if (!watchItems) return;
-    (watchItems as FormData['items']).forEach((item, index) => {
+    if (!watchedItems) return;
+    (watchedItems as FormData['items']).forEach((item, index) => {
       const q = Number(item.quantity) || 0;
       const u = Number(item.unitCost) || 0;
       const newTotal = q * u; // Base Total
 
       const currentAmount = Number(item.amount) || 0;
 
-      // Calculate taxes if we were to support them, but for now Liquid = Total based on "Líquido pagable Bs. (Cálculo final)"
-      // If taxes are inputs, we should ideally subtract them.
-      // However, simplified requirement said "Total Bs = Cant * Costo" and then "Liquid = Calculus".
-      // Assuming Liquid = Total for now as taxes are visual placeholders.
-      // If user enters tax, we might want to subtract?
-      // Prompt says "Impuestos ... (Input numérico o visual)".
-      // Let's stick to Total = amount for backend consistency unless specified otherwise.
-
       if (Math.abs(newTotal - currentAmount) > 0.001) {
         setValue(`items.${index}.amount`, newTotal);
       }
     });
-  }, [watchItems, setValue]);
+  }, [watchedItems, setValue]);
 
-  const totalLiquido = useMemo(() => {
-    return (watchItems || []).reduce(
-      (acc: number, item) => acc + (Number(item.amount) || 0),
+  const displayTotal =
+    totalAmount ??
+    (watchedItems || []).reduce(
+      (acc: number, item) => acc + (Number(item?.amount) || 0),
       0
     );
-  }, [watchItems]);
 
   return (
     <div className="space-y-3 overflow-x-auto pb-4">
@@ -121,7 +119,7 @@ export default function SolicitudItems({
           <div></div>
         </div>
         {fields.map((field, idx) => {
-          const currentItem = watchItems?.[idx] || {};
+          const currentItem = watchedItems?.[idx] || {};
           const q = Number(currentItem.quantity) || 0;
           const u = Number(currentItem.unitCost) || 0;
           const total = q * u;
@@ -406,7 +404,7 @@ export default function SolicitudItems({
           <Input
             className="w-36 font-bold"
             readOnly
-            value={formatMoney(totalLiquido)}
+            value={formatMoney(displayTotal)}
           />
         </div>
       </div>

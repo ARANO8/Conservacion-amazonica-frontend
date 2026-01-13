@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -183,10 +183,14 @@ export default function SolicitudPage() {
     }).format(n);
   };
 
-  // Cálculo del monto total para el resumen
-  const watchItems = form.watch('items');
-  const totalMonto = watchItems.reduce(
-    (acc, item) => acc + (Number(item.amount) || 0),
+  // Cálculo del monto total en tiempo real usando useWatch
+  const watchedItems = useWatch({
+    control: form.control,
+    name: 'items',
+  });
+
+  const totalGeneral = (watchedItems || []).reduce(
+    (acc, item) => acc + (Number(item?.amount) || 0),
     0
   );
 
@@ -519,6 +523,7 @@ export default function SolicitudPage() {
                     budgetLines={options.budgetLines}
                     financingSources={options.financingSources}
                     isLoading={loadingOptions}
+                    totalAmount={totalGeneral}
                   />
                 </div>
               </FieldSet>
@@ -556,7 +561,7 @@ export default function SolicitudPage() {
                       Monto Total:
                     </p>
                     <p className="text-primary text-2xl font-bold">
-                      {formatBOB(totalMonto)}
+                      {formatBOB(totalGeneral)}
                     </p>
                   </div>
 
