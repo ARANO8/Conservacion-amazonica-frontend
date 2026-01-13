@@ -34,12 +34,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { FormData } from '@/app/dashboard/solicitud/page';
+import { BudgetLine, FinancingSource } from '@/types/catalogs';
 
 interface SolicitudItemsProps {
   control: Control<FormData>;
   watch: UseFormWatch<FormData>;
-  budgetLines: { id: string; code: string; name: string }[];
-  financingSources: { id: string; code: string; name: string }[]; // Keeping strict type, though we might not use it for 'Grupo'
+  budgetLines: BudgetLine[];
+  financingSources: FinancingSource[];
+  isLoading?: boolean;
 }
 
 function formatMoney(n: number) {
@@ -56,6 +58,7 @@ export default function SolicitudItems({
   watch,
   budgetLines,
   financingSources,
+  isLoading = false,
 }: SolicitudItemsProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -137,10 +140,13 @@ export default function SolicitudItems({
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        disabled={isLoading}
                       >
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Fuente" />
+                            <SelectValue
+                              placeholder={isLoading ? '...' : 'Fuente'}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -170,10 +176,13 @@ export default function SolicitudItems({
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        disabled={isLoading}
                       >
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Partida" />
+                            <SelectValue
+                              placeholder={isLoading ? '...' : 'Partida'}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

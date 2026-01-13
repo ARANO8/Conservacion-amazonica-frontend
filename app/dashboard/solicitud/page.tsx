@@ -34,6 +34,7 @@ import SolicitudItems from '@/components/solicitudes/solicitud-items';
 import SolicitudViajeItems from '@/components/solicitudes/solicitud-viaje-items';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { BudgetLine, FinancingSource, UserCatalog } from '@/types/catalogs';
 
 // Esquema Zod
 const schema = z.object({
@@ -91,12 +92,15 @@ export type FormData = z.infer<typeof schema>;
 export default function SolicitudPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(true);
   const [options, setOptions] = useState<{
-    budgetLines: { id: string; code: string; name: string }[];
-    financingSources: { id: string; code: string; name: string }[];
+    budgetLines: BudgetLine[];
+    financingSources: FinancingSource[];
+    users: UserCatalog[];
   }>({
     budgetLines: [],
     financingSources: [],
+    users: [],
   });
 
   const form = useForm<FormData>({
@@ -117,12 +121,12 @@ export default function SolicitudPage() {
       ],
       viaticos: [],
       // Valores por defecto para selects visuales
-      destinatario: 'director',
-      via: 'director-programa',
-      copia: 'abraham',
-      desembolso: 'abraham',
-      proyecto: 'aaf',
-      solicitante: 'usuario',
+      destinatario: '',
+      via: '',
+      copia: '',
+      desembolso: '',
+      proyecto: '',
+      solicitante: '',
       fechaInicio: '',
       fechaFin: '',
       codigoPOA: '',
@@ -137,56 +141,26 @@ export default function SolicitudPage() {
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const MOCK_BUDGET_LINES = [
-        {
-          id: '42858360-665d-4503-926b-dea2fba56e7a',
-          code: '22110',
-          name: 'Pasajes al Interior del Pais',
-        },
-        {
-          id: '4d5aa881-78dc-48ca-b2cb-38183664ef37',
-          code: '22120',
-          name: 'Pasajes al Exterior del Pais',
-        },
-      ];
-      const MOCK_FINANCING_SOURCES = [
-        {
-          id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-          code: 'RECURSOS PROPIOS',
-          name: 'RECURSOS PROPIOS',
-        },
-      ];
-
       try {
-        const [blRes, fsRes] = await Promise.allSettled([
-          api.get('/budget-lines'),
-          api.get('/financing-sources'),
+        const [blRes, fsRes, uRes] = await Promise.all([
+          api.get<BudgetLine[]>('/catalogs/budget-lines'),
+          api.get<FinancingSource[]>('/catalogs/financing-sources'),
+          api.get<UserCatalog[]>('/catalogs/users'),
         ]);
 
-        const budgetLines =
-          blRes.status === 'fulfilled' &&
-          Array.isArray(blRes.value.data) &&
-          blRes.value.data.length > 0
-            ? blRes.value.data
-            : MOCK_BUDGET_LINES;
-
-        const financingSources =
-          fsRes.status === 'fulfilled' &&
-          Array.isArray(fsRes.value.data) &&
-          fsRes.value.data.length > 0
-            ? fsRes.value.data
-            : MOCK_FINANCING_SOURCES;
-
         setOptions({
-          budgetLines,
-          financingSources,
+          budgetLines: blRes.data,
+          financingSources: fsRes.data,
+          users: uRes.data,
         });
       } catch (error) {
-        console.error('Error fetching options, using mocks', error);
-        setOptions({
-          budgetLines: MOCK_BUDGET_LINES,
-          financingSources: MOCK_FINANCING_SOURCES,
+        console.error('Error fetching catalogs:', error);
+        toast.error('Error de Catálogos', {
+          description:
+            'No se pudieron cargar los datos de las listas. Intente recargar.',
         });
+      } finally {
+        setLoadingOptions(false);
       }
     };
     fetchOptions();
@@ -275,14 +249,23 @@ export default function SolicitudPage() {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled={loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona destinatario" />
+                            <SelectValue
+                              placeholder={
+                                loadingOptions
+                                  ? 'Cargando...'
+                                  : 'Selecciona destinatario'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="director">
-                              Marcos F. Terán Valenzuela
-                            </SelectItem>
+                            {options.users.map((u) => (
+                              <SelectItem key={u.id} value={u.name}>
+                                {u.name} - {u.position}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -594,6 +577,7 @@ export default function SolicitudPage() {
                     watch={form.watch}
                     budgetLines={options.budgetLines}
                     financingSources={options.financingSources}
+                    isLoading={loadingOptions}
                   />
                 </div>
               </FieldSet>
