@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,7 +42,12 @@ import {
 } from '@/components/ui/dialog';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { BudgetLine, FinancingSource, UserCatalog } from '@/types/catalogs';
+import {
+  BudgetLine,
+  FinancingSource,
+  UserCatalog,
+  PoaActivity,
+} from '@/types/catalogs';
 
 // Esquema Zod
 const schema = z.object({
@@ -53,6 +58,7 @@ const schema = z.object({
   copia: z.string().optional(),
   desembolso: z.string().optional(),
   proyecto: z.string().optional(),
+  poaActivityId: z.string().optional(),
   codigoPOA: z.string().optional(),
   codigoProyecto: z.string().optional(),
   lugarViaje: z.string().optional(),
@@ -106,10 +112,12 @@ export default function SolicitudPage() {
     budgetLines: BudgetLine[];
     financingSources: FinancingSource[];
     users: UserCatalog[];
+    poaActivities: PoaActivity[];
   }>({
     budgetLines: [],
     financingSources: [],
     users: [],
+    poaActivities: [],
   });
 
   const form = useForm<FormData>({
@@ -135,6 +143,7 @@ export default function SolicitudPage() {
       copia: '',
       desembolso: '',
       proyecto: '',
+      poaActivityId: '',
       solicitante: '',
       fechaInicio: '',
       fechaFin: '',
@@ -151,16 +160,18 @@ export default function SolicitudPage() {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [blRes, fsRes, uRes] = await Promise.all([
+        const [blRes, fsRes, uRes, poaRes] = await Promise.all([
           api.get<BudgetLine[]>('/catalogs/budget-lines'),
           api.get<FinancingSource[]>('/catalogs/financing-sources'),
           api.get<UserCatalog[]>('/catalogs/users'),
+          api.get<PoaActivity[]>('/catalogs/poa-activities'),
         ]);
 
         setOptions({
           budgetLines: blRes.data,
           financingSources: fsRes.data,
           users: uRes.data,
+          poaActivities: poaRes.data,
         });
       } catch (error) {
         console.error('Error fetching catalogs:', error);
@@ -174,6 +185,28 @@ export default function SolicitudPage() {
     };
     fetchOptions();
   }, []);
+
+  const watchedProject = form.watch('proyecto');
+
+  const projects = useMemo(() => {
+    return Array.from(
+      new Set(options.poaActivities.map((a) => a.project))
+    ).sort();
+  }, [options.poaActivities]);
+
+  const filteredActivities = useMemo(() => {
+    if (!watchedProject) return [];
+    return options.poaActivities.filter((a) => a.project === watchedProject);
+  }, [options.poaActivities, watchedProject]);
+
+  const uniqueUsers = useMemo(() => {
+    const seen = new Set();
+    return options.users.filter((u) => {
+      const duplicate = seen.has(u.name);
+      seen.add(u.name);
+      return !duplicate;
+    });
+  }, [options.users]);
 
   // Función para formatear moneda
   const formatBOB = (n: number) => {
@@ -300,14 +333,23 @@ export default function SolicitudPage() {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled={loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona copia" />
+                            <SelectValue
+                              placeholder={
+                                loadingOptions ? 'Cargando...' : 'Selecciona'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="abraham">
-                              ABRAHAM SALOMÓN POMA
-                            </SelectItem>
+                            {uniqueUsers.map((u) => (
+                              <SelectItem key={u.id} value={u.name}>
+                                <span className="block w-full max-w-[280px] truncate">
+                                  {u.name} - {u.position}
+                                </span>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -323,14 +365,23 @@ export default function SolicitudPage() {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled={loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona persona" />
+                            <SelectValue
+                              placeholder={
+                                loadingOptions ? 'Cargando...' : 'Selecciona'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="abraham">
-                              ABRAHAM SALOMÓN POMA
-                            </SelectItem>
+                            {options.users.map((u) => (
+                              <SelectItem key={u.id} value={u.name}>
+                                <span className="block w-full max-w-[280px] truncate">
+                                  {u.name} - {u.position}
+                                </span>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -341,19 +392,74 @@ export default function SolicitudPage() {
                     control={form.control}
                     name="proyecto"
                     render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>Proyecto / Actividad POA:</FieldLabel>
+                      <Field>
+                        <FieldLabel>Proyecto POA:</FieldLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            form.setValue('poaActivityId', '');
+                            form.setValue('codigoPOA', '');
+                          }}
                           defaultValue={field.value}
+                          disabled={loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona proyecto" />
+                            <SelectValue
+                              placeholder={
+                                loadingOptions
+                                  ? 'Cargando...'
+                                  : 'Selecciona proyecto'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="aaf">
-                              AAF FORTALECIMIENTO
-                            </SelectItem>
+                            {projects.map((p) => (
+                              <SelectItem key={p} value={p}>
+                                {p}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="poaActivityId"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Actividad / POA:</FieldLabel>
+                        <Select
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            const act = options.poaActivities.find(
+                              (a) => a.id === val
+                            );
+                            if (act) {
+                              form.setValue('codigoPOA', act.code);
+                            }
+                          }}
+                          defaultValue={field.value}
+                          disabled={!watchedProject || loadingOptions}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                !watchedProject
+                                  ? 'Primero selecciona proyecto'
+                                  : 'Selecciona actividad'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredActivities.map((a) => (
+                              <SelectItem key={a.id} value={a.id}>
+                                <span className="block w-full max-w-[350px] truncate">
+                                  {a.code} - {a.description}
+                                </span>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -586,7 +692,7 @@ export default function SolicitudPage() {
                             />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
-                            {options.users.map((u) => (
+                            {uniqueUsers.map((u) => (
                               <SelectItem key={u.id} value={u.name}>
                                 <span className="block w-full max-w-[380px] truncate">
                                   {u.name} - {u.position}

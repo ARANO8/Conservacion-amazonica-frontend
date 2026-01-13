@@ -17,3 +17,11 @@ export interface UserCatalog {
   position: string;
   area: string;
 }
+
+export interface PoaActivity {
+  id: string;
+  code: string;
+  project: string;
+  description: string;
+  poaBudgetLine: string | null;
+}
