@@ -249,9 +249,6 @@ export default function SolicitudPage() {
   };
 
   const onSubmit = async (data: FormData) => {
-    // 1. Debugging: Log raw form data
-    console.log('FORM DATA (Raw):', data);
-
     setLoading(true);
     try {
       // Transformación de datos para el Backend (Strict DTOs)
@@ -292,9 +289,6 @@ export default function SolicitudPage() {
           };
         }),
       };
-
-      // 2. Debugging: Log constructed payload
-      console.log('PAYLOAD (To Backend):', JSON.stringify(payload, null, 2));
 
       await api.post('/requests', payload);
 
@@ -635,11 +629,7 @@ export default function SolicitudPage() {
               </FieldSet>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => console.log('Guardar Borrador')}
-                >
+                <Button type="button" variant="secondary" onClick={() => {}}>
                   Guardar Borrador
                 </Button>
                 <Button type="button" onClick={handlePreSubmit}>
