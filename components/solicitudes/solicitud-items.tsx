@@ -104,19 +104,12 @@ export default function SolicitudItems({
         {' '}
         {/* Ensure generic width for scroll */}
         {/* Headers */}
-        <div className="text-muted-foreground mb-2 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] gap-2 px-2 text-xs font-medium">
-          <div>Fuente</div>
-          <div>Partida</div>
-          <div>Docum</div>
-          <div>Tipo</div>
-          <div>Cant</div>
-          <div>Costo U.</div>
-          <div>Total Bs</div>
-          <div>IVA 13%</div>
-          <div>IUE 5%</div>
-          <div>IT 3%</div>
-          <div>Líquido</div>
-          <div></div>
+        {/* Headers */}
+        <div className="text-muted-foreground mb-2 grid grid-cols-12 gap-4 px-2 text-xs font-medium tracking-wider uppercase">
+          <div className="col-span-4 translate-y-2">Fuente</div>
+          <div className="col-span-4 translate-y-2">Partida</div>
+          <div className="col-span-2 translate-y-2">Docum.</div>
+          <div className="col-span-2 translate-y-2">Tipo</div>
         </div>
         {fields.map((field, idx) => {
           const currentItem = watchedItems?.[idx] || {};
@@ -127,9 +120,10 @@ export default function SolicitudItems({
           return (
             <div
               key={field.id}
-              className="bg-muted/5 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
+              className="bg-muted/20 hover:bg-muted/40 mb-4 grid grid-cols-12 items-center gap-4 rounded-lg border p-4 shadow-sm transition-all"
             >
-              <div>
+              {/* FILA 1: Origen y Clasificación */}
+              <div className="col-span-4">
                 <FormField
                   control={control}
                   name={`items.${idx}.financingSourceId`}
@@ -141,19 +135,13 @@ export default function SolicitudItems({
                         disabled={isLoading}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue
-                              placeholder={isLoading ? '...' : 'Fuente'}
-                            />
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Fuente" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {financingSources.map((fs) => (
-                            <SelectItem
-                              key={fs.id}
-                              value={String(fs.id)}
-                              className="text-xs"
-                            >
+                            <SelectItem key={fs.id} value={String(fs.id)}>
                               {fs.code} - {fs.name}
                             </SelectItem>
                           ))}
@@ -164,8 +152,7 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Partida */}
-              <div>
+              <div className="col-span-4">
                 <FormField
                   control={control}
                   name={`items.${idx}.budgetLineId`}
@@ -177,19 +164,13 @@ export default function SolicitudItems({
                         disabled={isLoading}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue
-                              placeholder={isLoading ? '...' : 'Partida'}
-                            />
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Partida" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {budgetLines.map((bl) => (
-                            <SelectItem
-                              key={bl.id}
-                              value={String(bl.id)}
-                              className="text-xs"
-                            >
+                            <SelectItem key={bl.id} value={String(bl.id)}>
                               {bl.code} - {bl.name}
                             </SelectItem>
                           ))}
@@ -200,8 +181,7 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Document */}
-              <div>
+              <div className="col-span-2">
                 <FormField
                   control={control}
                   name={`items.${idx}.document`}
@@ -210,10 +190,9 @@ export default function SolicitudItems({
                       <FormControl>
                         <Input
                           {...field}
-                          // Ensure value is never undefined
                           value={field.value ?? ''}
                           placeholder="Doc."
-                          className="h-8 text-xs"
+                          className="h-9"
                         />
                       </FormControl>
                     </FormItem>
@@ -221,8 +200,7 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Type */}
-              <div>
+              <div className="col-span-2">
                 <FormField
                   control={control}
                   name={`items.${idx}.type`}
@@ -231,10 +209,9 @@ export default function SolicitudItems({
                       <FormControl>
                         <Input
                           {...field}
-                          // Ensure value is never undefined
                           value={field.value ?? ''}
                           placeholder="Tipo"
-                          className="h-8 text-xs"
+                          className="h-9"
                         />
                       </FormControl>
                     </FormItem>
@@ -242,8 +219,36 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Cant */}
-              <div>
+              {/* Header Intermedio (Opcional, para claridad) */}
+              <div className="text-muted-foreground col-span-12 mt-2 grid grid-cols-12 gap-4 text-[10px] font-medium tracking-wider uppercase">
+                <div className="col-span-1"></div>
+                <div className="col-span-7 pl-1">Descripción / Detalle</div>
+                <div className="col-span-2 text-center">Cant.</div>
+                <div className="col-span-2 text-right">Costo U.</div>
+              </div>
+
+              {/* FILA 2: Descripción y Montos */}
+              <div className="col-span-7">
+                <FormField
+                  control={control}
+                  name={`items.${idx}.description`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ''}
+                          placeholder="Descripción del ítem..."
+                          className="h-9"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="col-span-2">
                 <FormField
                   control={control}
                   name={`items.${idx}.quantity`}
@@ -252,12 +257,13 @@ export default function SolicitudItems({
                       <FormControl>
                         <Input
                           type="number"
-                          min={0}
-                          className="h-8 text-xs"
+                          min={1}
+                          className="h-9 px-2 text-center"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? '' : Number(val));
+                          }}
                         />
                       </FormControl>
                     </FormItem>
@@ -265,8 +271,7 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Costo Unit */}
-              <div>
+              <div className="col-span-2">
                 <FormField
                   control={control}
                   name={`items.${idx}.unitCost`}
@@ -276,11 +281,12 @@ export default function SolicitudItems({
                         <Input
                           type="number"
                           min={0}
-                          className="h-8 text-xs"
+                          className="h-9 px-2 text-right"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? '' : Number(val));
+                          }}
                         />
                       </FormControl>
                     </FormItem>
@@ -288,72 +294,18 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Total Bs */}
-              <div>
-                <Input
-                  readOnly
-                  className="bg-muted h-8 font-mono text-xs"
-                  value={total.toFixed(2)}
-                />
+              <div className="col-span-1 flex justify-center">
                 <input
                   type="hidden"
                   {...control.register(`items.${idx}.amount`)}
                 />
-                {/* Hidden description field as it is required by backend but we don't have a column, use Docum/Tipo combination? 
-                     Or we should restore Description column? 
-                     Prompt says: Grupo, Partida, Docum, Tipo, Cant, Costo, Total, Taxes, Liquid.
-                     It does NOT list "Concepto/Detalle". 
-                     Wait, prompt says "Conceptos (detalle)". Maybe "Docum" or "Tipo" is the description? 
-                     Or maybe I need to secretly fill description.
-                     I'll set description to `${docum || ''} ${tipo || ''}` on submit if not present.
-                     Actually, I should add a hidden description field or use one of the inputs as description.
-                     Let's add a hidden description input effectively handled in code or just add it to the form as hidden.
-                     Wait, schema validation requires "items.description". 
-                     I should probably make `docum` or `tipo` map to description or add a column if I missed it.
-                     Prompt lists specific columns: Grupo, Partida, Docum, Tipo, Cant, Costo...
-                     It seems "Conceptos (detalle)" is the table Title.
-                     I will assume "Tipo" or "Docum" serves as description, OR I missed "Detalle" in the list.
-                     "Columnas Exactas: Grupo Presup., Partida, Docum, Tipo, Cant, Costo Unit., Total Bs., Taxes, Liquido."
-                     There is NO "Description/Detalle" column in the requested exact columns for Table 2.
-                     I will have to auto-generate description on submit from Docum + Tipo.
-                 */}
-                <input
-                  type="hidden"
-                  {...control.register(`items.${idx}.description`)}
-                  defaultValue="Gasto"
-                />
-              </div>
-
-              {/* Taxes (Visual) */}
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-
-              {/* Liquido */}
-              <div>
-                <Input
-                  readOnly
-                  className="h-8 font-mono text-xs font-bold"
-                  value={total.toFixed(2)}
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-destructive hover:text-destructive h-8 w-8 shrink-0"
+                  className="text-destructive hover:bg-destructive/10 h-8 w-8"
                   type="button"
                   onClick={() => remove(idx)}
                 >
-                  <span className="sr-only">Eliminar</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"

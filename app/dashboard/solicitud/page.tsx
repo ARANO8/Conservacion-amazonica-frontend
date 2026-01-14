@@ -94,8 +94,8 @@ const schema = z.object({
         document: z.string().optional(),
         type: z.string().optional(),
         amount: z.number().min(0, 'Monto inválido'),
-        quantity: z.number().min(0).optional(),
-        unitCost: z.number().min(0).optional(),
+        quantity: z.coerce.number().min(1, 'Requerido'),
+        unitCost: z.coerce.number().min(0, 'No negativo'),
       })
     )
     .min(1, 'Debes agregar al menos un ítem'),
@@ -261,7 +261,10 @@ export default function SolicitudPage() {
           ? new Date(data.fechaInicio).toISOString()
           : null,
         endDate: data.fechaFin ? new Date(data.fechaFin).toISOString() : null,
-        receiverName: data.destinatario,
+        receiverName: data.destinatario || '',
+        refById: data.copia || null,
+        disbursementToId: data.desembolso || null,
+        poaActivityId: data.poaActivityId || null,
         viaticos:
           data.viaticos
             ?.filter((v) => v.concepto && v.concepto.trim() !== '')
@@ -338,7 +341,7 @@ export default function SolicitudPage() {
                           </SelectTrigger>
                           <SelectContent>
                             {uniqueUsers.map((u) => (
-                              <SelectItem key={u.id} value={u.name}>
+                              <SelectItem key={u.id} value={u.id}>
                                 <span className="block w-full max-w-[280px] truncate">
                                   {u.name} - {u.position}
                                 </span>
@@ -369,8 +372,8 @@ export default function SolicitudPage() {
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {options.users.map((u) => (
-                              <SelectItem key={u.id} value={u.name}>
+                            {uniqueUsers.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
                                 <span className="block w-full max-w-[280px] truncate">
                                   {u.name} - {u.position}
                                 </span>
