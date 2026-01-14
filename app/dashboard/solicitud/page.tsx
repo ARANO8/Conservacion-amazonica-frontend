@@ -186,18 +186,29 @@ export default function SolicitudPage() {
     fetchOptions();
   }, []);
 
+  const watchedPoaCode = form.watch('codigoPOA');
   const watchedProject = form.watch('proyecto');
 
-  const projects = useMemo(() => {
-    return Array.from(
-      new Set(options.poaActivities.map((a) => a.project))
-    ).sort();
+  const uniquePoaCodes = useMemo(() => {
+    return Array.from(new Set(options.poaActivities.map((a) => a.code))).sort(
+      (a, b) => a.localeCompare(b, undefined, { numeric: true })
+    );
   }, [options.poaActivities]);
 
+  const filteredProjects = useMemo(() => {
+    if (!watchedPoaCode) return [];
+    const projects = options.poaActivities
+      .filter((a) => a.code === watchedPoaCode)
+      .map((a) => a.project);
+    return Array.from(new Set(projects)).sort();
+  }, [options.poaActivities, watchedPoaCode]);
+
   const filteredActivities = useMemo(() => {
-    if (!watchedProject) return [];
-    return options.poaActivities.filter((a) => a.project === watchedProject);
-  }, [options.poaActivities, watchedProject]);
+    if (!watchedPoaCode || !watchedProject) return [];
+    return options.poaActivities.filter(
+      (a) => a.code === watchedPoaCode && a.project === watchedProject
+    );
+  }, [options.poaActivities, watchedPoaCode, watchedProject]);
 
   const uniqueUsers = useMemo(() => {
     const seen = new Set();
@@ -387,17 +398,19 @@ export default function SolicitudPage() {
 
                   <FormField
                     control={form.control}
-                    name="proyecto"
+                    name="codigoPOA"
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>Proyecto POA:</FieldLabel>
+                        <FieldLabel>Código POA:</FieldLabel>
                         <Select
                           onValueChange={(val) => {
                             field.onChange(val);
+                            // Reseteo en cascada
+                            form.setValue('proyecto', '');
                             form.setValue('poaActivityId', '');
-                            form.setValue('codigoPOA', '');
+                            form.setValue('items', []); // Limpia ítems por integridad
                           }}
-                          defaultValue={field.value}
+                          value={field.value}
                           disabled={loadingOptions}
                         >
                           <SelectTrigger>
@@ -405,12 +418,47 @@ export default function SolicitudPage() {
                               placeholder={
                                 loadingOptions
                                   ? 'Cargando...'
+                                  : 'Selecciona Código'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {uniquePoaCodes.map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="proyecto"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Proyecto:</FieldLabel>
+                        <Select
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            form.setValue('poaActivityId', '');
+                          }}
+                          value={field.value}
+                          disabled={!watchedPoaCode || loadingOptions}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                !watchedPoaCode
+                                  ? 'Primero selecciona Código POA'
                                   : 'Selecciona proyecto'
                               }
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {projects.map((p) => (
+                            {filteredProjects.map((p) => (
                               <SelectItem key={p} value={p}>
                                 {p}
                               </SelectItem>
@@ -426,18 +474,10 @@ export default function SolicitudPage() {
                     name="poaActivityId"
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>Actividad / POA:</FieldLabel>
+                        <FieldLabel>Actividad / Descripción:</FieldLabel>
                         <Select
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            const act = options.poaActivities.find(
-                              (a) => a.id === val
-                            );
-                            if (act) {
-                              form.setValue('codigoPOA', act.code);
-                            }
-                          }}
-                          defaultValue={field.value}
+                          onValueChange={field.onChange}
+                          value={field.value}
                           disabled={!watchedProject || loadingOptions}
                         >
                           <SelectTrigger>
@@ -453,7 +493,7 @@ export default function SolicitudPage() {
                             {filteredActivities.map((a) => (
                               <SelectItem key={a.id} value={a.id}>
                                 <span className="block w-full max-w-[350px] truncate">
-                                  {a.code} - {a.description}
+                                  {a.description}
                                 </span>
                               </SelectItem>
                             ))}
@@ -470,18 +510,6 @@ export default function SolicitudPage() {
               <FieldSet>
                 <FieldLegend>Información del Viaje/Taller</FieldLegend>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="codigoPOA"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Código de Actividad POA</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. 32113" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="codigoProyecto"
