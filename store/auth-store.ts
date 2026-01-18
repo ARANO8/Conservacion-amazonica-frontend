@@ -6,9 +6,9 @@ import api from '../lib/api';
 // Interfaz User estricta (tipado según backend)
 export interface User {
   id: string;
-  fullName: string;
+  nombreCompleto: string;
   email: string;
-  role: string;
+  rol: string;
 }
 
 interface loginResponse {

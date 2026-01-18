@@ -27,12 +27,10 @@ import {
   Form,
   FormControl,
   FormField,
-  FormItem,
   FormMessage,
 } from '@/components/ui/form';
 import SolicitudItems from '@/components/solicitudes/solicitud-items';
 import SolicitudViajeItems from '@/components/solicitudes/solicitud-viaje-items';
-import api from '@/lib/api';
 import { toast } from 'sonner';
 
 // Esquema Zod
@@ -136,60 +134,33 @@ export default function SolicitudPage() {
   });
 
   useEffect(() => {
+    // Simple static data for Greenfield Migration
+    const STATIC_BUDGET_LINES = [
+      {
+        id: '42858360-665d-4503-926b-dea2fba56e7a',
+        code: '22110',
+        name: 'Pasajes al Interior del Pais',
+      },
+    ];
+    const STATIC_FINANCING_SOURCES = [
+      {
+        id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        code: 'RECURSOS PROPIOS',
+        name: 'RECURSOS PROPIOS',
+      },
+    ];
+
+    setOptions({
+      budgetLines: STATIC_BUDGET_LINES,
+      financingSources: STATIC_FINANCING_SOURCES,
+    });
+
+    /* Legacy fetching disabled
     const fetchOptions = async () => {
-      const MOCK_BUDGET_LINES = [
-        {
-          id: '42858360-665d-4503-926b-dea2fba56e7a',
-          code: '22110',
-          name: 'Pasajes al Interior del Pais',
-        },
-        {
-          id: '4d5aa881-78dc-48ca-b2cb-38183664ef37',
-          code: '22120',
-          name: 'Pasajes al Exterior del Pais',
-        },
-      ];
-      const MOCK_FINANCING_SOURCES = [
-        {
-          id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-          code: 'RECURSOS PROPIOS',
-          name: 'RECURSOS PROPIOS',
-        },
-      ];
-
-      try {
-        const [blRes, fsRes] = await Promise.allSettled([
-          api.get('/budget-lines'),
-          api.get('/financing-sources'),
-        ]);
-
-        const budgetLines =
-          blRes.status === 'fulfilled' &&
-          Array.isArray(blRes.value.data) &&
-          blRes.value.data.length > 0
-            ? blRes.value.data
-            : MOCK_BUDGET_LINES;
-
-        const financingSources =
-          fsRes.status === 'fulfilled' &&
-          Array.isArray(fsRes.value.data) &&
-          fsRes.value.data.length > 0
-            ? fsRes.value.data
-            : MOCK_FINANCING_SOURCES;
-
-        setOptions({
-          budgetLines,
-          financingSources,
-        });
-      } catch (error) {
-        console.error('Error fetching options, using mocks', error);
-        setOptions({
-          budgetLines: MOCK_BUDGET_LINES,
-          financingSources: MOCK_FINANCING_SOURCES,
-        });
-      }
+      // ... (rest of the fetching logic)
     };
     fetchOptions();
+    */
   }, []);
 
   const onSubmit = async (data: FormData) => {
@@ -240,7 +211,8 @@ export default function SolicitudPage() {
       // 2. Debugging: Log constructed payload
       console.log('PAYLOAD (To Backend):', JSON.stringify(payload, null, 2));
 
-      await api.post('/requests', payload);
+      // Post disabled for Greenfield Migration
+      // await api.post('/requests', payload);
 
       toast.success('Solicitud creada', {
         description: 'La solicitud ha sido enviada exitosamente.',
