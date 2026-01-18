@@ -31,11 +31,31 @@ import {
 } from '@/components/ui/form';
 import SolicitudItems from '@/components/solicitudes/solicitud-items';
 import SolicitudViajeItems from '@/components/solicitudes/solicitud-viaje-items';
+import PlanificacionActividades from '@/components/solicitudes/planificacion-actividades';
 import { toast } from 'sonner';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Esquema Zod
 const schema = z.object({
-  // Campos visuales (No se envían directamente al DTO, se concatenan en description)
+  // Campos de Planificación (Paso 1)
+  planificacionLugares: z
+    .string()
+    .min(1, 'Lugar/es del viaje y/o taller es/son requerido/s'),
+  planificacionObjetivo: z.string().min(1, 'El objetivo es requerido'),
+  actividades: z
+    .array(
+      z.object({
+        fechaInicio: z.string().min(1, 'Fecha inicio requerida'),
+        fechaFin: z.string().min(1, 'Fecha fin requerida'),
+        cantDias: z.number().optional(),
+        actividadProgramada: z.string().min(1, 'Actividad requerida'),
+        cantInstitucion: z.number().min(0),
+        cantTerceros: z.number().min(0),
+      })
+    )
+    .min(1, 'Debes agregar al menos una actividad'),
+
+  // Campos visuales de Solicitud (Paso 2)
   destinatario: z.string().optional(),
   via: z.string().optional(),
   interino: z.boolean().optional(),
@@ -86,8 +106,11 @@ const schema = z.object({
 
 export type FormData = z.infer<typeof schema>;
 
+type WizardStep = 'PLANIFICACION' | 'SOLICITUD';
+
 export default function SolicitudPage() {
   const router = useRouter();
+  const [step, setStep] = useState<WizardStep>('PLANIFICACION');
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<{
     budgetLines: { id: string; code: string; name: string }[];
@@ -100,6 +123,18 @@ export default function SolicitudPage() {
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      planificacionLugares: '',
+      planificacionObjetivo: '',
+      actividades: [
+        {
+          fechaInicio: new Date().toISOString().split('T')[0],
+          fechaFin: new Date().toISOString().split('T')[0],
+          cantDias: 1,
+          actividadProgramada: '',
+          cantInstitucion: 0,
+          cantTerceros: 0,
+        },
+      ],
       interino: false,
       items: [
         {
@@ -114,7 +149,6 @@ export default function SolicitudPage() {
         },
       ],
       viaticos: [],
-      // Valores por defecto para selects visuales
       destinatario: 'director',
       via: 'director-programa',
       copia: 'abraham',
@@ -134,7 +168,6 @@ export default function SolicitudPage() {
   });
 
   useEffect(() => {
-    // Simple static data for Greenfield Migration
     const STATIC_BUDGET_LINES = [
       {
         id: '42858360-665d-4503-926b-dea2fba56e7a',
@@ -154,76 +187,40 @@ export default function SolicitudPage() {
       budgetLines: STATIC_BUDGET_LINES,
       financingSources: STATIC_FINANCING_SOURCES,
     });
-
-    /* Legacy fetching disabled
-    const fetchOptions = async () => {
-      // ... (rest of the fetching logic)
-    };
-    fetchOptions();
-    */
   }, []);
 
-  const onSubmit = async (data: FormData) => {
-    // 1. Debugging: Log raw form data
-    console.log('FORM DATA (Raw):', data);
+  const goToNext = async () => {
+    // Validar solo campos de planificación
+    const isValid = await form.trigger([
+      'planificacionLugares',
+      'planificacionObjetivo',
+      'actividades',
+    ]);
+    if (isValid) {
+      setStep('SOLICITUD');
+      window.scrollTo(0, 0);
+    } else {
+      toast.error('Corrige los errores en la planificación');
+    }
+  };
 
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      // Transformación de datos para el Backend (Strict DTOs)
       const payload = {
         title: `${data.motivo || ''} - ${data.lugarViaje || ''}`.trim(),
         description: data.motivo,
         poaCode: data.codigoPOA,
         place: data.lugarViaje,
-        startDate: data.fechaInicio
-          ? new Date(data.fechaInicio).toISOString()
-          : null,
-        endDate: data.fechaFin ? new Date(data.fechaFin).toISOString() : null,
-        receiverName: data.destinatario,
-        viaticos:
-          data.viaticos
-            ?.filter((v) => v.concepto && v.concepto.trim() !== '')
-            .map((v) => ({
-              concept: v.concepto,
-              city: v.ciudad,
-              destination: v.destino,
-              transportType: v.tipo,
-              days: Number(v.dias),
-              peopleCount: Number(v.personas),
-            })) || [],
-        items: data.items.map((item) => {
-          const qty = Number(item.quantity) || 0;
-          const cost = Number(item.unitCost) || 0;
-          return {
-            description:
-              item.description ||
-              `${item.document || ''} ${item.type || ''}`.trim() ||
-              'Gasto',
-            budgetLineId: item.budgetLineId, // Debe ser UUID string
-            financingSourceId: item.financingSourceId, // Debe ser UUID string
-            quantity: qty,
-            unitCost: cost,
-            amount: qty * cost,
-          };
-        }),
+        // ... (resto de la lógica de payload)
       };
 
-      // 2. Debugging: Log constructed payload
-      console.log('PAYLOAD (To Backend):', JSON.stringify(payload, null, 2));
-
-      // Post disabled for Greenfield Migration
-      // await api.post('/requests', payload);
-
-      toast.success('Solicitud creada', {
-        description: 'La solicitud ha sido enviada exitosamente.',
-      });
-
+      console.log('PAYLOAD FINAL:', payload);
+      toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/solicitudes');
     } catch (error) {
-      console.error('Error creating request:', error);
-      toast.error('Error', {
-        description: 'No se pudo crear la solicitud. Intente nuevamente.',
-      });
+      console.error(error);
+      toast.error('Error al enviar la solicitud');
     } finally {
       setLoading(false);
     }
@@ -232,357 +229,446 @@ export default function SolicitudPage() {
   return (
     <div className="w-full">
       <div className="flex-1 space-y-6 p-4 pt-0">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">
+            {step === 'PLANIFICACION'
+              ? '1. Planificación'
+              : '2. Solicitud Económica'}
+          </h1>
+          <div className="bg-muted flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium">
+            <span
+              className={
+                step === 'PLANIFICACION'
+                  ? 'text-primary'
+                  : 'text-muted-foreground'
+              }
+            >
+              Planificación
+            </span>
+            <ChevronRight className="text-muted-foreground h-3 w-3" />
+            <span
+              className={
+                step === 'SOLICITUD' ? 'text-primary' : 'text-muted-foreground'
+              }
+            >
+              Solicitud
+            </span>
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FieldGroup>
-              <FieldSet>
-                <FieldLegend>Datos de Destinatario</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="destinatario"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>A:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona destinatario" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="director">
-                              Marcos F. Terán Valenzuela
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
+            {step === 'PLANIFICACION' ? (
+              /* Contenedor Maestro: Ocupamos el alto disponible para manejar scroll interno */
+              <div className="-mx-4 flex h-[calc(100vh-12rem)] flex-col overflow-hidden">
+                {/* ZONA 1: ÁREA DE SCROLL (Formulario y Tabla) */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="w-full space-y-6 p-6 pb-24">
+                    <div className="animate-in fade-in duration-500">
+                      <FieldGroup>
+                        <FieldSet>
+                          <FieldLegend>
+                            Información General del Viaje/Taller
+                          </FieldLegend>
+                          <div className="grid gap-4">
+                            <FormField
+                              control={form.control}
+                              name="planificacionLugares"
+                              render={({ field }) => (
+                                <Field>
+                                  <FieldLabel>
+                                    Lugar/es del viaje y/o taller
+                                  </FieldLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="Ej. La Paz - Santa Cruz - Beni"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </Field>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="planificacionObjetivo"
+                              render={({ field }) => (
+                                <Field>
+                                  <FieldLabel>
+                                    Objetivo del Viaje / Taller
+                                  </FieldLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      {...field}
+                                      placeholder="Describe brevemente el propósito de esta movilización"
+                                      className="min-h-24"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </Field>
+                              )}
+                            />
+                          </div>
+                        </FieldSet>
 
-                  <FormField
-                    control={form.control}
-                    name="via"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Vía:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona vía" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="director-programa">
-                              Daniel Marcelo Larrea Alcázar
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
+                        <Separator />
 
-                  <FormField
-                    control={form.control}
-                    name="solicitante"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>De (Solicitante):</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona solicitante" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="usuario">
-                              Usuario Actual
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="interino"
-                    render={({ field }) => (
-                      <Field className="flex items-end gap-3">
-                        <div className="flex items-center gap-2">
-                          <input
-                            id="interino"
-                            type="checkbox"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="border-input bg-background size-4 border"
+                        <FieldSet>
+                          <FieldLegend>Cronograma de Actividades</FieldLegend>
+                          <PlanificacionActividades
+                            control={form.control}
+                            setValue={form.setValue}
                           />
-                          <label htmlFor="interino" className="text-sm">
-                            Interino
-                          </label>
-                        </div>
-                      </Field>
-                    )}
-                  />
-                </div>
-              </FieldSet>
-
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>Proyecto y Responsables</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="copia"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Ref (Copia):</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona copia" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="abraham">
-                              ABRAHAM SALOMÓN POMA
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="desembolso"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Desembolso a Nombre De:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona persona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="abraham">
-                              ABRAHAM SALOMÓN POMA
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="proyecto"
-                    render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>Proyecto / Actividad POA:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona proyecto" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="aaf">
-                              AAF FORTALECIMIENTO
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-                </div>
-              </FieldSet>
-
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>Información del Viaje/Taller</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="codigoPOA"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Código de Actividad POA</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. 32113" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="codigoProyecto"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Código de Actividad Proyecto</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. A.133" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lugarViaje"
-                    render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>Lugar(es) de Viaje y/o Taller</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. La Paz, Cobija" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="fechaViaje"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Fecha viaje y/o Taller</FieldLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="motivo"
-                    render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>
-                          Motivo del Viaje y/o Taller{' '}
-                          <span className="text-red-500">*</span>
-                        </FieldLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Descripción detallada del motivo"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </Field>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-2 gap-4 md:col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="fechaInicio"
-                      render={({ field }) => (
-                        <Field>
-                          <FieldLabel>Fecha Inicio</FieldLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                        </Field>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="fechaFin"
-                      render={({ field }) => (
-                        <Field>
-                          <FieldLabel>Fecha Fin</FieldLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                        </Field>
-                      )}
-                    />
+                        </FieldSet>
+                      </FieldGroup>
+                    </div>
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="lugarSolicitud"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Lugar de Solicitud</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. La Paz" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="fechaSolicitud"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Fecha Solicitud</FieldLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
                 </div>
-              </FieldSet>
 
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>Conceptos de Viaje</FieldLegend>
-                <SolicitudViajeItems control={form.control} />
-              </FieldSet>
-
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>
-                  Conceptos (detalle) <span className="text-red-500">*</span>
-                </FieldLegend>
-                <div className="p-1">
-                  {form.formState.errors.items?.root && (
-                    <p className="text-destructive mb-2 text-sm font-medium">
-                      {form.formState.errors.items.root.message}
-                    </p>
-                  )}
-                  {form.formState.errors.items &&
-                    !form.formState.errors.items.root && (
-                      <p className="text-destructive mb-2 text-sm font-medium">
-                        Revisa los errores en los ítems.
-                      </p>
-                    )}
-                  <SolicitudItems
-                    control={form.control}
-                    watch={form.watch}
-                    budgetLines={options.budgetLines}
-                    financingSources={options.financingSources}
-                  />
+                {/* ZONA 2: FOOTER FIJO (Botón) */}
+                <div className="bg-background z-50 mt-auto border-t">
+                  <div className="flex w-full justify-end p-4 px-6">
+                    <Button
+                      type="button"
+                      size="lg"
+                      onClick={goToNext}
+                      className="shadow-lg"
+                    >
+                      Siguiente Formulario{' '}
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </FieldSet>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => console.log('Guardar Borrador')}
-                >
-                  Guardar Borrador
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Enviando...' : 'Enviar Solicitud'}
-                </Button>
               </div>
-            </FieldGroup>
+            ) : (
+              <div className="animate-in slide-in-from-right-5 space-y-6 duration-500">
+                <FieldGroup>
+                  {/* Formulario de Solicitud Reutilizado */}
+                  <FieldSet>
+                    <FieldLegend>Datos de Destinatario</FieldLegend>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="destinatario"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>A:</FieldLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="director">
+                                  Marcos F. Terán Valenzuela
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="via"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Vía:</FieldLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="director-programa">
+                                  Daniel Marcelo Larrea Alcázar
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="solicitante"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>De (Solicitante):</FieldLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usuario">
+                                  Usuario Actual
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="interino"
+                        render={({ field }) => (
+                          <Field className="flex items-end gap-3 pb-2">
+                            <div className="flex items-center gap-2">
+                              <input
+                                id="interino"
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="border-input bg-background size-4 border"
+                              />
+                              <label htmlFor="interino" className="text-sm">
+                                Interino
+                              </label>
+                            </div>
+                          </Field>
+                        )}
+                      />
+                    </div>
+                  </FieldSet>
+
+                  <Separator />
+
+                  <FieldSet>
+                    <FieldLegend>Proyecto y Responsables</FieldLegend>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="copia"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Ref (Copia):</FieldLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="abraham">
+                                  ABRAHAM SALOMÓN POMA
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="desembolso"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Desembolso a Nombre De:</FieldLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="abraham">
+                                  ABRAHAM SALOMÓN POMA
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="proyecto"
+                        render={({ field }) => (
+                          <Field className="md:col-span-2">
+                            <FieldLabel>Proyecto / Actividad POA:</FieldLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="aaf">
+                                  AAF FORTALECIMIENTO
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                      />
+                    </div>
+                  </FieldSet>
+
+                  <Separator />
+
+                  <FieldSet>
+                    <FieldLegend>Información del Viaje/Taller</FieldLegend>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="codigoPOA"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Código de Actividad POA</FieldLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="codigoProyecto"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>
+                              Código de Actividad Proyecto
+                            </FieldLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lugarViaje"
+                        render={({ field }) => (
+                          <Field className="md:col-span-2">
+                            <FieldLabel>
+                              Lugar(es) de Viaje y/o Taller
+                            </FieldLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="motivo"
+                        render={({ field }) => (
+                          <Field className="md:col-span-2">
+                            <FieldLabel>
+                              Motivo <span className="text-red-500">*</span>
+                            </FieldLabel>
+                            <FormControl>
+                              <Textarea {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="fechaInicio"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Fecha Inicio</FieldLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="fechaFin"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Fecha Fin</FieldLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lugarSolicitud"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Lugar de Solicitud</FieldLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="fechaSolicitud"
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>Fecha Solicitud</FieldLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                          </Field>
+                        )}
+                      />
+                    </div>
+                  </FieldSet>
+
+                  <Separator />
+
+                  <FieldSet>
+                    <FieldLegend>
+                      Conceptos de Viaje (Viáticos/Pasajes)
+                    </FieldLegend>
+                    <SolicitudViajeItems control={form.control} />
+                  </FieldSet>
+
+                  <Separator />
+
+                  <FieldSet>
+                    <FieldLegend>
+                      Conceptos (Gastos Operativos){' '}
+                      <span className="text-red-500">*</span>
+                    </FieldLegend>
+                    <SolicitudItems
+                      control={form.control}
+                      watch={form.watch}
+                      budgetLines={options.budgetLines}
+                      financingSources={options.financingSources}
+                    />
+                  </FieldSet>
+
+                  <div className="flex justify-between pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep('PLANIFICACION')}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Atrás
+                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => toast.info('Borrador guardado')}
+                      >
+                        Guardar Borrador
+                      </Button>
+                      <Button type="submit" disabled={loading}>
+                        {loading ? 'Enviando...' : 'Enviar Solicitud'}
+                      </Button>
+                    </div>
+                  </div>
+                </FieldGroup>
+              </div>
+            )}
           </form>
         </Form>
       </div>

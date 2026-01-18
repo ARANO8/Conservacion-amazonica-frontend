@@ -144,3 +144,4 @@ export type PartidaPresupuestaria = EntityBase;
 export type ConceptoViatico = EntityBase;
 export type TipoGasto = EntityBase;
 export type CodigoPresupuestario = EntityBase;
+export type Banco = EntityBase;
