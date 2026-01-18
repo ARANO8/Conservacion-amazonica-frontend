@@ -3,6 +3,7 @@
 import { useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import {
   useFieldArray,
   UseFormWatch,
   useFormContext,
+  useWatch,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -34,12 +36,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { FormData } from '@/app/dashboard/solicitud/page';
+import { BudgetLine, FinancingSource } from '@/types/catalogs';
 
 interface SolicitudItemsProps {
   control: Control<FormData>;
   watch: UseFormWatch<FormData>;
-  budgetLines: { id: string; code: string; name: string }[];
-  financingSources: { id: string; code: string; name: string }[]; // Keeping strict type, though we might not use it for 'Grupo'
+  budgetLines: BudgetLine[];
+  financingSources: FinancingSource[];
+  isLoading?: boolean;
+  totalAmount?: number;
 }
 
 function formatMoney(n: number) {
@@ -56,6 +61,8 @@ export default function SolicitudItems({
   watch,
   budgetLines,
   financingSources,
+  isLoading = false,
+  totalAmount,
 }: SolicitudItemsProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -64,193 +71,176 @@ export default function SolicitudItems({
 
   const { setValue } = useFormContext();
 
-  const watchItems = watch('items');
+  const watchedItems = useWatch({
+    control,
+    name: 'items',
+  });
 
   // Calculates total (quantity * unitCost)
   useEffect(() => {
-    if (!watchItems) return;
-    (watchItems as FormData['items']).forEach((item, index) => {
+    if (!watchedItems) return;
+    (watchedItems as FormData['items']).forEach((item, index) => {
       const q = Number(item.quantity) || 0;
       const u = Number(item.unitCost) || 0;
       const newTotal = q * u; // Base Total
 
       const currentAmount = Number(item.amount) || 0;
 
-      // Calculate taxes if we were to support them, but for now Liquid = Total based on "Líquido pagable Bs. (Cálculo final)"
-      // If taxes are inputs, we should ideally subtract them.
-      // However, simplified requirement said "Total Bs = Cant * Costo" and then "Liquid = Calculus".
-      // Assuming Liquid = Total for now as taxes are visual placeholders.
-      // If user enters tax, we might want to subtract?
-      // Prompt says "Impuestos ... (Input numérico o visual)".
-      // Let's stick to Total = amount for backend consistency unless specified otherwise.
-
       if (Math.abs(newTotal - currentAmount) > 0.001) {
         setValue(`items.${index}.amount`, newTotal);
       }
     });
-  }, [watchItems, setValue]);
+  }, [watchedItems, setValue]);
 
-  const totalLiquido = useMemo(() => {
-    return (watchItems || []).reduce(
-      (acc: number, item) => acc + (Number(item.amount) || 0),
+  const displayTotal =
+    totalAmount ??
+    (watchedItems || []).reduce(
+      (acc: number, item) => acc + (Number(item?.amount) || 0),
       0
     );
-  }, [watchItems]);
 
   return (
-    <div className="space-y-3 overflow-x-auto pb-4">
-      <div className="min-w-[1000px]">
-        {' '}
-        {/* Ensure generic width for scroll */}
-        {/* Headers */}
-        <div className="text-muted-foreground mb-2 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] gap-2 px-2 text-xs font-medium">
-          <div>Fuente</div>
-          <div>Partida</div>
-          <div>Docum</div>
-          <div>Tipo</div>
-          <div>Cant</div>
-          <div>Costo U.</div>
-          <div>Total Bs</div>
-          <div>IVA 13%</div>
-          <div>IUE 5%</div>
-          <div>IT 3%</div>
-          <div>Líquido</div>
-          <div></div>
-        </div>
-        {fields.map((field, idx) => {
-          const currentItem = watchItems?.[idx] || {};
-          const q = Number(currentItem.quantity) || 0;
-          const u = Number(currentItem.unitCost) || 0;
-          const total = q * u;
+    <div className="space-y-4">
+      {fields.map((field, idx) => {
+        const currentItem = watchedItems?.[idx] || {};
+        const q = Number(currentItem.quantity) || 0;
+        const u = Number(currentItem.unitCost) || 0;
+        const total = q * u;
 
-          return (
-            <div
-              key={field.id}
-              className="bg-muted/5 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
-            >
-              <div>
-                <FormField
-                  control={control}
-                  name={`items.${idx}.financingSourceId`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Fuente" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {financingSources.map((fs) => (
-                            <SelectItem
-                              key={fs.id}
-                              value={String(fs.id)}
-                              className="text-xs"
-                            >
-                              {fs.code} - {fs.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
+        // Visual Tax Calculations
+        const iva = total * 0.13;
+        const it = total * 0.03;
+        const iue = total * 0.05;
 
-              {/* Partida */}
-              <div>
-                <FormField
-                  control={control}
-                  name={`items.${idx}.budgetLineId`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Partida" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {budgetLines.map((bl) => (
-                            <SelectItem
-                              key={bl.id}
-                              value={String(bl.id)}
-                              className="text-xs"
-                            >
-                              {bl.code} - {bl.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Document */}
-              <div>
-                <FormField
-                  control={control}
-                  name={`items.${idx}.document`}
-                  render={({ field }) => (
-                    <FormItem>
+        return (
+          <div
+            key={field.id}
+            className="bg-card text-card-foreground relative mb-4 overflow-hidden rounded-xl border shadow-sm transition-all hover:shadow-md"
+          >
+            {/* BLOQUE SUPERIOR: Clasificación (Soft background) */}
+            <div className="bg-muted/30 grid grid-cols-1 gap-4 border-b p-4 sm:grid-cols-4">
+              <FormField
+                control={control}
+                name={`items.${idx}.financingSourceId`}
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                      Fuente Financiera
+                    </Label>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isLoading}
+                    >
                       <FormControl>
-                        <Input
-                          {...field}
-                          // Ensure value is never undefined
-                          value={field.value ?? ''}
-                          placeholder="Doc."
-                          className="h-8 text-xs"
-                        />
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="Seleccionar fuente" />
+                        </SelectTrigger>
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                      <SelectContent>
+                        {financingSources.map((fs) => (
+                          <SelectItem key={fs.id} value={String(fs.id)}>
+                            {fs.code} - {fs.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
 
-              {/* Type */}
-              <div>
-                <FormField
-                  control={control}
-                  name={`items.${idx}.type`}
-                  render={({ field }) => (
-                    <FormItem>
+              <FormField
+                control={control}
+                name={`items.${idx}.budgetLineId`}
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                      Partida Presupuestaria
+                    </Label>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isLoading}
+                    >
                       <FormControl>
-                        <Input
-                          {...field}
-                          // Ensure value is never undefined
-                          value={field.value ?? ''}
-                          placeholder="Tipo"
-                          className="h-8 text-xs"
-                        />
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="Seleccionar partida" />
+                        </SelectTrigger>
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                      <SelectContent>
+                        {budgetLines.map((bl) => (
+                          <SelectItem key={bl.id} value={String(bl.id)}>
+                            {bl.code} - {bl.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
 
-              {/* Cant */}
-              <div>
+              <FormField
+                control={control}
+                name={`items.${idx}.document`}
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                      Tipo Documento
+                    </Label>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ''}
+                        placeholder="Factura, Recibo..."
+                        className="h-9 text-xs"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name={`items.${idx}.type`}
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                      Tipo Gasto
+                    </Label>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ''}
+                        placeholder="Servicio, Compra..."
+                        className="h-9 text-xs"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* BLOQUE CENTRAL: Detalle Económico */}
+            <div className="grid grid-cols-12 items-end gap-4 p-4">
+              <div className="col-span-12 sm:col-span-1">
                 <FormField
                   control={control}
                   name={`items.${idx}.quantity`}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-1">
+                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                        Cant.
+                      </Label>
                       <FormControl>
                         <Input
                           type="number"
-                          min={0}
-                          className="h-8 text-xs"
+                          min={1}
+                          className="bg-muted/10 h-9 text-center text-xs font-bold"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? '' : Number(val));
+                          }}
                         />
                       </FormControl>
                     </FormItem>
@@ -258,119 +248,132 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Costo Unit */}
-              <div>
+              <div className="col-span-12 sm:col-span-9">
+                <FormField
+                  control={control}
+                  name={`items.${idx}.description`}
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                        Descripción / Detalle del Gasto
+                      </Label>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ''}
+                          placeholder="Especificar el concepto del gasto..."
+                          className="h-9 text-xs"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="col-span-12 sm:col-span-2">
                 <FormField
                   control={control}
                   name={`items.${idx}.unitCost`}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-1">
+                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                        Costo Unit. (Bs)
+                      </Label>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
-                          className="h-8 text-xs"
+                          className="h-9 text-right text-xs font-bold"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? '' : Number(val));
+                          }}
                         />
                       </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
-
-              {/* Total Bs */}
-              <div>
-                <Input
-                  readOnly
-                  className="bg-muted h-8 font-mono text-xs"
-                  value={total.toFixed(2)}
-                />
-                <input
-                  type="hidden"
-                  {...control.register(`items.${idx}.amount`)}
-                />
-                {/* Hidden description field as it is required by backend but we don't have a column, use Docum/Tipo combination? 
-                     Or we should restore Description column? 
-                     Prompt says: Grupo, Partida, Docum, Tipo, Cant, Costo, Total, Taxes, Liquid.
-                     It does NOT list "Concepto/Detalle". 
-                     Wait, prompt says "Conceptos (detalle)". Maybe "Docum" or "Tipo" is the description? 
-                     Or maybe I need to secretly fill description.
-                     I'll set description to `${docum || ''} ${tipo || ''}` on submit if not present.
-                     Actually, I should add a hidden description field or use one of the inputs as description.
-                     Let's add a hidden description input effectively handled in code or just add it to the form as hidden.
-                     Wait, schema validation requires "items.description". 
-                     I should probably make `docum` or `tipo` map to description or add a column if I missed it.
-                     Prompt lists specific columns: Grupo, Partida, Docum, Tipo, Cant, Costo...
-                     It seems "Conceptos (detalle)" is the table Title.
-                     I will assume "Tipo" or "Docum" serves as description, OR I missed "Detalle" in the list.
-                     "Columnas Exactas: Grupo Presup., Partida, Docum, Tipo, Cant, Costo Unit., Total Bs., Taxes, Liquido."
-                     There is NO "Description/Detalle" column in the requested exact columns for Table 2.
-                     I will have to auto-generate description on submit from Docum + Tipo.
-                 */}
-                <input
-                  type="hidden"
-                  {...control.register(`items.${idx}.description`)}
-                  defaultValue="Gasto"
-                />
-              </div>
-
-              {/* Taxes (Visual) */}
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-
-              {/* Liquido */}
-              <div>
-                <Input
-                  readOnly
-                  className="h-8 font-mono text-xs font-bold"
-                  value={total.toFixed(2)}
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:text-destructive h-8 w-8 shrink-0"
-                  type="button"
-                  onClick={() => remove(idx)}
-                >
-                  <span className="sr-only">Eliminar</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-4"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    <line x1="10" x2="10" y1="11" y2="17" />
-                    <line x1="14" x2="14" y1="11" y2="17" />
-                  </svg>
-                </Button>
-              </div>
             </div>
-          );
-        })}
-      </div>
 
-      <div className="flex items-center justify-between pt-2">
+            {/* BLOQUE INFERIOR: Resumen e Impuestos (Footer) */}
+            <div className="bg-muted/50 flex flex-wrap items-center gap-6 border-t p-3 px-4">
+              <div className="flex flex-col">
+                <span className="text-muted-foreground text-[9px] font-bold uppercase">
+                  Total Líquido
+                </span>
+                <span className="text-primary text-sm font-black">
+                  {formatMoney(total)}
+                </span>
+              </div>
+
+              <div className="bg-muted-foreground/20 hidden h-8 w-[1px] sm:block" />
+
+              <div className="flex gap-4">
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-[9px] font-bold uppercase">
+                    IVA 13%
+                  </span>
+                  <span className="text-muted-foreground font-mono text-[11px]">
+                    {iva.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-[9px] font-bold uppercase">
+                    IT 3%
+                  </span>
+                  <span className="text-muted-foreground font-mono text-[11px]">
+                    {it.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-[9px] font-bold uppercase">
+                    IUE 5%
+                  </span>
+                  <span className="text-muted-foreground font-mono text-[11px]">
+                    {iue.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <input
+                type="hidden"
+                {...control.register(`items.${idx}.amount`)}
+              />
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10 ml-auto h-8 gap-2 px-3"
+                type="button"
+                onClick={() => remove(idx)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-3.5"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                <span className="text-[10px] font-bold uppercase">
+                  Eliminar
+                </span>
+              </Button>
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
         <Button
           variant="outline"
           size="sm"
@@ -387,18 +390,31 @@ export default function SolicitudItems({
               description: '',
             })
           }
+          className="h-10 border-dashed px-6"
         >
-          + Añadir Gasto
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2 size-4"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+          Nuevo Ítem de Gasto
         </Button>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground font-bold">
-            Total Líquido Pagable Bs. :
+
+        <div className="bg-muted/40 border-primary/10 flex items-center gap-3 rounded-xl border p-2 px-4">
+          <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+            Monto Total Solicitado (Bs)
           </span>
-          <Input
-            className="w-36 font-bold"
-            readOnly
-            value={formatMoney(totalLiquido)}
-          />
+          <div className="text-primary font-mono text-xl font-black">
+            {formatMoney(displayTotal)}
+          </div>
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -32,8 +32,22 @@ import {
 } from '@/components/ui/form';
 import SolicitudItems from '@/components/solicitudes/solicitud-items';
 import SolicitudViajeItems from '@/components/solicitudes/solicitud-viaje-items';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import {
+  BudgetLine,
+  FinancingSource,
+  UserCatalog,
+  PoaActivity,
+} from '@/types/catalogs';
 
 // Esquema Zod
 const schema = z.object({
@@ -44,6 +58,7 @@ const schema = z.object({
   copia: z.string().optional(),
   desembolso: z.string().optional(),
   proyecto: z.string().optional(),
+  poaActivityId: z.string().optional(),
   codigoPOA: z.string().optional(),
   codigoProyecto: z.string().optional(),
   lugarViaje: z.string().optional(),
@@ -79,8 +94,8 @@ const schema = z.object({
         document: z.string().optional(),
         type: z.string().optional(),
         amount: z.number().min(0, 'Monto inválido'),
-        quantity: z.number().min(0).optional(),
-        unitCost: z.number().min(0).optional(),
+        quantity: z.coerce.number().min(1, 'Requerido'),
+        unitCost: z.coerce.number().min(0, 'No negativo'),
       })
     )
     .min(1, 'Debes agregar al menos un ítem'),
@@ -91,12 +106,18 @@ export type FormData = z.infer<typeof schema>;
 export default function SolicitudPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [options, setOptions] = useState<{
-    budgetLines: { id: string; code: string; name: string }[];
-    financingSources: { id: string; code: string; name: string }[];
+    budgetLines: BudgetLine[];
+    financingSources: FinancingSource[];
+    users: UserCatalog[];
+    poaActivities: PoaActivity[];
   }>({
     budgetLines: [],
     financingSources: [],
+    users: [],
+    poaActivities: [],
   });
 
   const form = useForm<FormData>({
@@ -117,12 +138,13 @@ export default function SolicitudPage() {
       ],
       viaticos: [],
       // Valores por defecto para selects visuales
-      destinatario: 'director',
-      via: 'director-programa',
-      copia: 'abraham',
-      desembolso: 'abraham',
-      proyecto: 'aaf',
-      solicitante: 'usuario',
+      destinatario: '',
+      via: '',
+      copia: '',
+      desembolso: '',
+      proyecto: '',
+      poaActivityId: '',
+      solicitante: '',
       fechaInicio: '',
       fechaFin: '',
       codigoPOA: '',
@@ -137,65 +159,107 @@ export default function SolicitudPage() {
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const MOCK_BUDGET_LINES = [
-        {
-          id: '42858360-665d-4503-926b-dea2fba56e7a',
-          code: '22110',
-          name: 'Pasajes al Interior del Pais',
-        },
-        {
-          id: '4d5aa881-78dc-48ca-b2cb-38183664ef37',
-          code: '22120',
-          name: 'Pasajes al Exterior del Pais',
-        },
-      ];
-      const MOCK_FINANCING_SOURCES = [
-        {
-          id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-          code: 'RECURSOS PROPIOS',
-          name: 'RECURSOS PROPIOS',
-        },
-      ];
-
       try {
-        const [blRes, fsRes] = await Promise.allSettled([
-          api.get('/budget-lines'),
-          api.get('/financing-sources'),
+        const [blRes, fsRes, uRes, poaRes] = await Promise.all([
+          api.get<BudgetLine[]>('/catalogs/budget-lines'),
+          api.get<FinancingSource[]>('/catalogs/financing-sources'),
+          api.get<UserCatalog[]>('/catalogs/users'),
+          api.get<PoaActivity[]>('/catalogs/poa-activities'),
         ]);
 
-        const budgetLines =
-          blRes.status === 'fulfilled' &&
-          Array.isArray(blRes.value.data) &&
-          blRes.value.data.length > 0
-            ? blRes.value.data
-            : MOCK_BUDGET_LINES;
-
-        const financingSources =
-          fsRes.status === 'fulfilled' &&
-          Array.isArray(fsRes.value.data) &&
-          fsRes.value.data.length > 0
-            ? fsRes.value.data
-            : MOCK_FINANCING_SOURCES;
-
         setOptions({
-          budgetLines,
-          financingSources,
+          budgetLines: blRes.data,
+          financingSources: fsRes.data,
+          users: uRes.data,
+          poaActivities: poaRes.data,
         });
       } catch (error) {
-        console.error('Error fetching options, using mocks', error);
-        setOptions({
-          budgetLines: MOCK_BUDGET_LINES,
-          financingSources: MOCK_FINANCING_SOURCES,
+        console.error('Error fetching catalogs:', error);
+        toast.error('Error de Catálogos', {
+          description:
+            'No se pudieron cargar los datos de las listas. Intente recargar.',
         });
+      } finally {
+        setLoadingOptions(false);
       }
     };
     fetchOptions();
   }, []);
 
-  const onSubmit = async (data: FormData) => {
-    // 1. Debugging: Log raw form data
-    console.log('FORM DATA (Raw):', data);
+  const watchedPoaCode = form.watch('codigoPOA');
+  const watchedProject = form.watch('proyecto');
 
+  const uniquePoaCodes = useMemo(() => {
+    return Array.from(new Set(options.poaActivities.map((a) => a.code))).sort(
+      (a, b) => a.localeCompare(b, undefined, { numeric: true })
+    );
+  }, [options.poaActivities]);
+
+  const filteredProjects = useMemo(() => {
+    if (!watchedPoaCode) return [];
+    const projects = options.poaActivities
+      .filter((a) => a.code === watchedPoaCode)
+      .map((a) => a.project);
+    return Array.from(new Set(projects)).sort();
+  }, [options.poaActivities, watchedPoaCode]);
+
+  const filteredActivities = useMemo(() => {
+    if (!watchedPoaCode || !watchedProject) return [];
+    return options.poaActivities.filter(
+      (a) => a.code === watchedPoaCode && a.project === watchedProject
+    );
+  }, [options.poaActivities, watchedPoaCode, watchedProject]);
+
+  const uniqueUsers = useMemo(() => {
+    const seen = new Set();
+    return options.users.filter((u) => {
+      const duplicate = seen.has(u.name);
+      seen.add(u.name);
+      return !duplicate;
+    });
+  }, [options.users]);
+
+  // Función para formatear moneda
+  const formatBOB = (n: number) => {
+    return new Intl.NumberFormat('es-BO', {
+      style: 'currency',
+      currency: 'BOB',
+    }).format(n);
+  };
+
+  // Cálculo del monto total en tiempo real usando useWatch
+  const watchedItems = useWatch({
+    control: form.control,
+    name: 'items',
+  });
+
+  const totalGeneral = (watchedItems || []).reduce(
+    (acc, item) => acc + (Number(item?.amount) || 0),
+    0
+  );
+
+  const handlePreSubmit = async () => {
+    // Validar solo campos visibles antes de abrir el modal
+    const isValid = await form.trigger([
+      'motivo',
+      'items',
+      'viaticos',
+      'codigoPOA',
+      'lugarViaje',
+      'fechaInicio',
+      'fechaFin',
+    ]);
+
+    if (isValid) {
+      setIsConfirmModalOpen(true);
+    } else {
+      toast.error('Formulario Incompleto', {
+        description: 'Por favor, revisa los campos requeridos y los errores.',
+      });
+    }
+  };
+
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
       // Transformación de datos para el Backend (Strict DTOs)
@@ -208,7 +272,10 @@ export default function SolicitudPage() {
           ? new Date(data.fechaInicio).toISOString()
           : null,
         endDate: data.fechaFin ? new Date(data.fechaFin).toISOString() : null,
-        receiverName: data.destinatario,
+        receiverName: data.destinatario || '',
+        refById: data.copia || null,
+        disbursementToId: data.desembolso || null,
+        poaActivityId: data.poaActivityId || null,
         viaticos:
           data.viaticos
             ?.filter((v) => v.concepto && v.concepto.trim() !== '')
@@ -237,9 +304,6 @@ export default function SolicitudPage() {
         }),
       };
 
-      // 2. Debugging: Log constructed payload
-      console.log('PAYLOAD (To Backend):', JSON.stringify(payload, null, 2));
-
       await api.post('/requests', payload);
 
       toast.success('Solicitud creada', {
@@ -263,101 +327,6 @@ export default function SolicitudPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
-              <FieldSet>
-                <FieldLegend>Datos de Destinatario</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="destinatario"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>A:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona destinatario" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="director">
-                              Marcos F. Terán Valenzuela
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="via"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Vía:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona vía" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="director-programa">
-                              Daniel Marcelo Larrea Alcázar
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="solicitante"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>De (Solicitante):</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona solicitante" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="usuario">
-                              Usuario Actual
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="interino"
-                    render={({ field }) => (
-                      <Field className="flex items-end gap-3">
-                        <div className="flex items-center gap-2">
-                          <input
-                            id="interino"
-                            type="checkbox"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="border-input bg-background size-4 border"
-                          />
-                          <label htmlFor="interino" className="text-sm">
-                            Interino
-                          </label>
-                        </div>
-                      </Field>
-                    )}
-                  />
-                </div>
-              </FieldSet>
-
               <Separator />
 
               <FieldSet>
@@ -372,14 +341,23 @@ export default function SolicitudPage() {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled={loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona copia" />
+                            <SelectValue
+                              placeholder={
+                                loadingOptions ? 'Cargando...' : 'Selecciona'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="abraham">
-                              ABRAHAM SALOMÓN POMA
-                            </SelectItem>
+                            {uniqueUsers.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                <span className="block w-full max-w-[280px] truncate">
+                                  {u.name} - {u.position}
+                                </span>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -395,14 +373,61 @@ export default function SolicitudPage() {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          disabled={loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona persona" />
+                            <SelectValue
+                              placeholder={
+                                loadingOptions ? 'Cargando...' : 'Selecciona'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="abraham">
-                              ABRAHAM SALOMÓN POMA
-                            </SelectItem>
+                            {uniqueUsers.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                <span className="block w-full max-w-[280px] truncate">
+                                  {u.name} - {u.position}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="codigoPOA"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Código POA:</FieldLabel>
+                        <Select
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            // Reseteo en cascada
+                            form.setValue('proyecto', '');
+                            form.setValue('poaActivityId', '');
+                            form.setValue('items', []); // Limpia ítems por integridad
+                          }}
+                          value={field.value}
+                          disabled={loadingOptions}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                loadingOptions
+                                  ? 'Cargando...'
+                                  : 'Selecciona Código'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {uniquePoaCodes.map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -413,19 +438,65 @@ export default function SolicitudPage() {
                     control={form.control}
                     name="proyecto"
                     render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>Proyecto / Actividad POA:</FieldLabel>
+                      <Field>
+                        <FieldLabel>Proyecto:</FieldLabel>
                         <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            form.setValue('poaActivityId', '');
+                          }}
+                          value={field.value}
+                          disabled={!watchedPoaCode || loadingOptions}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecciona proyecto" />
+                            <SelectValue
+                              placeholder={
+                                !watchedPoaCode
+                                  ? 'Primero selecciona Código POA'
+                                  : 'Selecciona proyecto'
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="aaf">
-                              AAF FORTALECIMIENTO
-                            </SelectItem>
+                            {filteredProjects.map((p) => (
+                              <SelectItem key={p} value={p}>
+                                {p}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="poaActivityId"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Actividad / Descripción:</FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={!watchedProject || loadingOptions}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                !watchedProject
+                                  ? 'Primero selecciona proyecto'
+                                  : 'Selecciona actividad'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredActivities.map((a) => (
+                              <SelectItem key={a.id} value={a.id}>
+                                <span className="block w-full max-w-[350px] truncate">
+                                  {a.description}
+                                </span>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </Field>
@@ -439,18 +510,6 @@ export default function SolicitudPage() {
               <FieldSet>
                 <FieldLegend>Información del Viaje/Taller</FieldLegend>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="codigoPOA"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Código de Actividad POA</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. 32113" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="codigoProyecto"
@@ -594,23 +653,99 @@ export default function SolicitudPage() {
                     watch={form.watch}
                     budgetLines={options.budgetLines}
                     financingSources={options.financingSources}
+                    isLoading={loadingOptions}
+                    totalAmount={totalGeneral}
                   />
                 </div>
               </FieldSet>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => console.log('Guardar Borrador')}
-                >
+                <Button type="button" variant="secondary" onClick={() => {}}>
                   Guardar Borrador
                 </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Enviando...' : 'Enviar Solicitud'}
+                <Button type="button" onClick={handlePreSubmit}>
+                  Revisar y Enviar
                 </Button>
               </div>
             </FieldGroup>
+
+            {/* Modal de Confirmación */}
+            <Dialog
+              open={isConfirmModalOpen}
+              onOpenChange={setIsConfirmModalOpen}
+            >
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Confirmar Solicitud</DialogTitle>
+                  <DialogDescription>
+                    Resumen de la solicitud antes del envío final.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-4 py-4">
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-muted-foreground text-sm font-medium">
+                      Monto Total:
+                    </p>
+                    <p className="text-primary text-2xl font-bold">
+                      {formatBOB(totalGeneral)}
+                    </p>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="destinatario"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Dirigido a (Destinatario):</FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={loadingOptions}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                loadingOptions
+                                  ? 'Cargando usuarios...'
+                                  : 'Selecciona destinatario'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[200px]">
+                            {uniqueUsers.map((u) => (
+                              <SelectItem key={u.id} value={u.name}>
+                                <span className="block w-full max-w-[380px] truncate">
+                                  {u.name} - {u.position}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </Field>
+                    )}
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsConfirmModalOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading || !form.watch('destinatario')}
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    {loading ? 'Enviando...' : 'Confirmar y Enviar'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </form>
         </Form>
       </div>
