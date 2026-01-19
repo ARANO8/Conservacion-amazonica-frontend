@@ -11,28 +11,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import {
   Control,
   useFieldArray,
   UseFormWatch,
   useFormContext,
 } from 'react-hook-form';
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
+import { FormControl, FormField, FormItem } from '@/components/ui/form';
 import { FormData } from '@/app/dashboard/solicitud/page';
 
 interface SolicitudItemsProps {
@@ -218,7 +202,7 @@ export default function SolicitudItems({
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.type`}
+                  name={`items.${idx}.typeId`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -383,7 +367,7 @@ export default function SolicitudItems({
               quantity: 1,
               unitCost: 0,
               document: '',
-              type: '',
+              typeId: '',
               description: '',
             })
           }
