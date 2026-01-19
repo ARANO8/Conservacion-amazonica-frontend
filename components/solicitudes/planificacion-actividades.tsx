@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Trash2 } from 'lucide-react';
-import { FormData } from '@/app/dashboard/solicitud/page';
+import { FormData } from '@/components/solicitudes/solicitud-schema';
 
 interface PlanificacionActividadesProps {
   control: Control<FormData>;

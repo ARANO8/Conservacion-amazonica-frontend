@@ -17,7 +17,7 @@ import {
   useFormContext,
 } from 'react-hook-form';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
-import { FormData } from '@/app/dashboard/solicitud/page';
+import { FormData } from '@/components/solicitudes/solicitud-schema';
 
 interface SolicitudItemsProps {
   control: Control<FormData>;
