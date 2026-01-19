@@ -101,7 +101,6 @@ export default function SolicitudPage() {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      console.log('ENVIANDO DATOS:', data);
       toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/solicitudes');
     } catch (error) {

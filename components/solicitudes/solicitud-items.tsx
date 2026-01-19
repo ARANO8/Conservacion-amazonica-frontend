@@ -61,12 +61,6 @@ export default function SolicitudItems({
       const currentAmount = Number(item.amount) || 0;
 
       // Calculate taxes if we were to support them, but for now Liquid = Total based on "Líquido pagable Bs. (Cálculo final)"
-      // If taxes are inputs, we should ideally subtract them.
-      // However, simplified requirement said "Total Bs = Cant * Costo" and then "Liquid = Calculus".
-      // Assuming Liquid = Total for now as taxes are visual placeholders.
-      // If user enters tax, we might want to subtract?
-      // Prompt says "Impuestos ... (Input numérico o visual)".
-      // Let's stick to Total = amount for backend consistency unless specified otherwise.
 
       if (Math.abs(newTotal - currentAmount) > 0.001) {
         setValue(`items.${index}.amount`, newTotal);
@@ -276,24 +270,7 @@ export default function SolicitudItems({
                   type="hidden"
                   {...control.register(`items.${idx}.amount`)}
                 />
-                {/* Hidden description field as it is required by backend but we don't have a column, use Docum/Tipo combination? 
-                     Or we should restore Description column? 
-                     Prompt says: Grupo, Partida, Docum, Tipo, Cant, Costo, Total, Taxes, Liquid.
-                     It does NOT list "Concepto/Detalle". 
-                     Wait, prompt says "Conceptos (detalle)". Maybe "Docum" or "Tipo" is the description? 
-                     Or maybe I need to secretly fill description.
-                     I'll set description to `${docum || ''} ${tipo || ''}` on submit if not present.
-                     Actually, I should add a hidden description field or use one of the inputs as description.
-                     Let's add a hidden description input effectively handled in code or just add it to the form as hidden.
-                     Wait, schema validation requires "items.description". 
-                     I should probably make `docum` or `tipo` map to description or add a column if I missed it.
-                     Prompt lists specific columns: Grupo, Partida, Docum, Tipo, Cant, Costo...
-                     It seems "Conceptos (detalle)" is the table Title.
-                     I will assume "Tipo" or "Docum" serves as description, OR I missed "Detalle" in the list.
-                     "Columnas Exactas: Grupo Presup., Partida, Docum, Tipo, Cant, Costo Unit., Total Bs., Taxes, Liquido."
-                     There is NO "Description/Detalle" column in the requested exact columns for Table 2.
-                     I will have to auto-generate description on submit from Docum + Tipo.
-                 */}
+                {/* Hidden description field as it is required by backend */}
                 <input
                   type="hidden"
                   {...control.register(`items.${idx}.description`)}
