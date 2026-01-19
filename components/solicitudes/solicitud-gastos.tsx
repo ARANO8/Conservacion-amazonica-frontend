@@ -126,7 +126,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   value={field.value ?? ''}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar Grupo" />
                     </SelectTrigger>
                   </FormControl>
@@ -151,7 +151,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   value={field.value ?? ''}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar Partida" />
                     </SelectTrigger>
                   </FormControl>
@@ -176,7 +176,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   value={field.value ?? 'Factura'}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar Documento" />
                     </SelectTrigger>
                   </FormControl>
@@ -202,7 +202,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   value={field.value ?? ''}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar Tipo" />
                     </SelectTrigger>
                   </FormControl>
@@ -230,6 +230,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   <Input
                     type="number"
                     {...field}
+                    className="w-full"
                     value={field.value ?? 0}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -250,6 +251,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   <Input
                     type="number"
                     {...field}
+                    className="w-full"
                     value={field.value ?? 0}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />

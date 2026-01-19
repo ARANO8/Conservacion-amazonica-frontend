@@ -35,6 +35,8 @@ import PlanificacionActividades from '@/components/solicitudes/planificacion-act
 import { toast } from 'sonner';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatMoney } from '@/lib/utils';
+import NominaTercerosForm from '@/components/solicitudes/nomina-terceros-form';
+import ReviewModal from '@/components/solicitudes/review-modal';
 
 // Esquema Zod
 const schema = z.object({
@@ -101,11 +103,23 @@ const schema = z.object({
       })
     )
     .min(1, 'Debes agregar al menos un ítem'),
+  // Nómina de Terceros (Paso 3)
+  nomina: z
+    .array(
+      z.object({
+        nombreCompleto: z.string().min(1, 'El nombre completo es requerido'),
+        institucion: z.string().min(1, 'La institución es requerida'),
+      })
+    )
+    .optional(),
+
+  // Confirmación Final
+  destinatario: z.string().min(1, 'Debes seleccionar un destinatario'),
 });
 
 export type FormData = z.infer<typeof schema>;
 
-type WizardStep = 'PLANIFICACION' | 'SOLICITUD';
+type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'NOMINA';
 
 export default function SolicitudPage() {
   const router = useRouter();
@@ -163,25 +177,12 @@ export default function SolicitudPage() {
       lugarSolicitud: 'La Paz',
       fechaSolicitud: new Date().toISOString().split('T')[0],
       motivo: '',
+      nomina: [],
+      destinatario: '',
     },
   });
 
   const watchActividades = form.watch('actividades');
-
-  const goToNext = async () => {
-    // Validar solo campos de planificación
-    const isValid = await form.trigger([
-      'planificacionLugares',
-      'planificacionObjetivo',
-      'actividades',
-    ]);
-    if (isValid) {
-      setStep('SOLICITUD');
-      window.scrollTo(0, 0);
-    } else {
-      toast.error('Corrige los errores en la planificación');
-    }
-  };
 
   // Observar cambios para el Monitor de Presupuesto (Paso 2)
   const watchViaticos = useWatch({ control: form.control, name: 'viaticos' });
@@ -202,19 +203,51 @@ export default function SolicitudPage() {
   const assignedBudget = 20000; // Bs 20,000.00 Estático Temporal
   const budgetBalance = assignedBudget - totalRequested;
 
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+  const handleNext = async () => {
+    if (step === 'PLANIFICACION') {
+      const isValid = await form.trigger([
+        'planificacionLugares',
+        'planificacionObjetivo',
+        'actividades',
+      ]);
+      if (isValid) {
+        setStep('SOLICITUD');
+        window.scrollTo(0, 0);
+      } else {
+        toast.error('Corrige los errores en la planificación');
+      }
+      return;
+    }
+
+    if (step === 'SOLICITUD') {
+      const isValid = await form.trigger(['motivo', 'items', 'viaticos']);
+      if (isValid) {
+        setStep('NOMINA');
+        window.scrollTo(0, 0);
+      } else {
+        toast.error('Corrige los errores en la solicitud económica');
+      }
+      return;
+    }
+
+    if (step === 'NOMINA') {
+      const isValid = await form.trigger(['nomina']);
+      if (isValid) {
+        setIsReviewModalOpen(true);
+      } else {
+        toast.error('Corrige los errores en la nómina');
+      }
+      return;
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
+    // Final submission logic (triggered from Modal)
     setLoading(true);
     try {
-      const payload = {
-        title:
-          `${data.motivo || ''} - ${data.planificacionLugares || ''}`.trim(),
-        description: data.motivo,
-        poaCode: data.codigoPOA,
-        place: data.planificacionLugares,
-        // ... (resto de la lógica de payload)
-      };
-
-      console.log('PAYLOAD FINAL:', payload);
+      console.log('ENVIANDO DATOS:', data);
       toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/solicitudes');
     } catch (error) {
@@ -222,6 +255,7 @@ export default function SolicitudPage() {
       toast.error('Error al enviar la solicitud');
     } finally {
       setLoading(false);
+      setIsReviewModalOpen(false);
     }
   };
 
@@ -231,34 +265,52 @@ export default function SolicitudPage() {
       <div className="shrink-0 border-b p-4 px-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">
-            {step === 'PLANIFICACION'
-              ? '1. Planificación'
-              : '2. Solicitud Económica'}
+            {step === 'PLANIFICACION' && '1. Planificación'}
+            {step === 'SOLICITUD' && '2. Solicitud Económica'}
+            {step === 'NOMINA' && '3. Nómina de Terceros'}
           </h1>
           <div className="bg-muted flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium">
             <span
               className={
                 step === 'PLANIFICACION'
-                  ? 'text-primary'
+                  ? 'text-primary font-bold'
                   : 'text-muted-foreground'
               }
             >
-              Planificación
+              1. Planificación
             </span>
             <ChevronRight className="text-muted-foreground h-3 w-3" />
             <span
               className={
-                step === 'SOLICITUD' ? 'text-primary' : 'text-muted-foreground'
+                step === 'SOLICITUD'
+                  ? 'text-primary font-bold'
+                  : 'text-muted-foreground'
               }
             >
-              Solicitud
+              2. Solicitud
+            </span>
+            <ChevronRight className="text-muted-foreground h-3 w-3" />
+            <span
+              className={
+                step === 'NOMINA'
+                  ? 'text-primary font-bold'
+                  : 'text-muted-foreground'
+              }
+            >
+              3. Nómina
             </span>
           </div>
         </div>
       </div>
 
       <Form {...form}>
-        {step === 'PLANIFICACION' ? (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onOpenChange={setIsReviewModalOpen}
+          onSubmit={onSubmit}
+          loading={loading}
+        />
+        {step === 'PLANIFICACION' && (
           /* PASO 1: PLANIFICACIÓN */
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* ZONA 1: ÁREA DE SCROLL */}
@@ -266,7 +318,7 @@ export default function SolicitudPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  goToNext();
+                  handleNext();
                 }}
                 className="space-y-6"
               >
@@ -337,7 +389,7 @@ export default function SolicitudPage() {
                 <Button
                   type="button"
                   size="lg"
-                  onClick={goToNext}
+                  onClick={handleNext}
                   className="shadow-lg"
                 >
                   Siguiente Formulario <ChevronRight className="ml-2 h-4 w-4" />
@@ -345,7 +397,9 @@ export default function SolicitudPage() {
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
+        {step === 'SOLICITUD' && (
           /* PASO 2: SOLICITUD ECONÓMICA */
           <div className="relative flex flex-1 flex-col overflow-hidden">
             {/* ZONA 1: ÁREA DE SCROLL */}
@@ -600,8 +654,8 @@ export default function SolicitudPage() {
                   </div>
 
                   <Button
-                    type="submit"
-                    form="solicitud-form"
+                    type="button"
+                    onClick={handleNext}
                     disabled={loading}
                     size="lg"
                     className="min-w-[200px] shadow-lg"
@@ -610,6 +664,44 @@ export default function SolicitudPage() {
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 'NOMINA' && (
+          /* PASO 3: NÓMINA DE TERCEROS */
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6">
+              <form
+                id="nomina-form"
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <div className="animate-in fade-in duration-500">
+                  <NominaTercerosForm control={form.control} />
+                </div>
+              </form>
+            </div>
+
+            <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">
+              <div className="flex w-full justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setStep('SOLICITUD')}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Atrás
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  size="lg"
+                  className="shadow-lg"
+                >
+                  Revisar y Enviar <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>

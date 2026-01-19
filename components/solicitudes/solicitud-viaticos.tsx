@@ -140,7 +140,7 @@ function ViaticoCard({
                   value={field.value ?? 'viaticos'}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Concepto..." />
                     </SelectTrigger>
                   </FormControl>
@@ -168,7 +168,7 @@ function ViaticoCard({
                   value={field.value ?? ''}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar actividad..." />
                     </SelectTrigger>
                   </FormControl>
@@ -203,7 +203,7 @@ function ViaticoCard({
                   value={field.value ?? 'institucional'}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -232,6 +232,7 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
+                    className="w-full"
                     value={field.value ?? 0}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -252,6 +253,7 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
+                    className="w-full"
                     value={field.value ?? 0}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -272,6 +274,7 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
+                    className="w-full"
                     value={field.value ?? 0}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
