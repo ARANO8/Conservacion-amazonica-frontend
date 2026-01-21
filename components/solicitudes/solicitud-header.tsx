@@ -11,7 +11,7 @@ export default function SolicitudHeader({ step }: SolicitudHeaderProps) {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">
           {step === 'PLANIFICACION' && '1. Planificación'}
-          {step === 'SOLICITUD' && '2. Solicitud Económica'}
+          {step === 'SOLICITUD' && '2. Solicitud de Fondos'}
           {step === 'NOMINA' && '3. Nómina de Terceros'}
         </h1>
         <div className="bg-muted flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium">

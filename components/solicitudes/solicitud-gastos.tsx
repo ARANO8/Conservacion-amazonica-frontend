@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import {
   Control,
   useFieldArray,
   useWatch,
   useFormContext,
 } from 'react-hook-form';
+import { catalogosService } from '@/services/catalogos.service';
 import {
   FormControl,
   FormField,
@@ -26,12 +27,21 @@ import { Trash2 } from 'lucide-react';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import { Grupo, Partida, TipoGasto } from '@/types/catalogs';
 
 interface SolicitudGastosProps {
   control: Control<FormData>;
+  grupos: Grupo[];
+  tiposGasto: TipoGasto[];
+  proyectoId?: number;
 }
 
-export default function SolicitudGastos({ control }: SolicitudGastosProps) {
+export default function SolicitudGastos({
+  control,
+  grupos,
+  tiposGasto,
+  proyectoId,
+}: SolicitudGastosProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'items',
@@ -46,6 +56,9 @@ export default function SolicitudGastos({ control }: SolicitudGastosProps) {
             index={index}
             control={control}
             remove={remove}
+            grupos={grupos}
+            tiposGasto={tiposGasto}
+            isDisabled={!proyectoId}
           />
         ))}
       </div>
@@ -78,10 +91,22 @@ interface GastoCardProps {
   index: number;
   control: Control<FormData>;
   remove: (index: number) => void;
+  grupos: Grupo[];
+  tiposGasto: TipoGasto[];
+  isDisabled?: boolean;
 }
 
-function GastoCard({ index, control, remove }: GastoCardProps) {
+function GastoCard({
+  index,
+  control,
+  remove,
+  grupos,
+  tiposGasto,
+  isDisabled,
+}: GastoCardProps) {
   const { setValue } = useFormContext<FormData>();
+  const [partidas, setPartidas] = useState<Partida[]>([]);
+  const [isLoadingPartidas, setIsLoadingPartidas] = useState(false);
 
   const quantity = useWatch({
     control,
@@ -93,20 +118,106 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
     name: `items.${index}.unitCost`,
   }) as number;
 
-  const total = useMemo(() => {
+  const liquidoPagable = useWatch({
+    control,
+    name: `items.${index}.liquidoPagable`,
+  }) as number;
+
+  const selectedGroupId = useWatch({
+    control,
+    name: `items.${index}.groupId`,
+  }) as unknown as number;
+
+  const watchDocument = useWatch({
+    control,
+    name: `items.${index}.document`,
+  }) as string;
+
+  const watchTypeId = useWatch({
+    control,
+    name: `items.${index}.typeId`,
+  }) as number;
+
+  const netoTotal = useMemo(() => {
     const q = Number(quantity) || 0;
     const u = Number(unitCost) || 0;
     return q * u;
   }, [quantity, unitCost]);
 
-  useEffect(() => {
-    setValue(`items.${index}.amount`, total);
-  }, [total, setValue, index]);
+  const brutoTotal = useMemo(() => {
+    const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
+    const tipoObj = tiposGasto.find(
+      (t) => Number(t.id) === Number(watchTypeId)
+    );
+    const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
 
-  // Impuestos informativos
-  const iva = total * 0.13;
-  const it = total * 0.03;
-  const iue = total * 0.05;
+    let extraRate = 0;
+    if (isRecibo) {
+      if (tipoNombre === 'COMPRA') {
+        extraRate = 0.08;
+      } else if (
+        tipoNombre.includes('ALQUILER') ||
+        tipoNombre.includes('SERVICIO')
+      ) {
+        extraRate = 0.16;
+      }
+    }
+    return netoTotal * (1 + extraRate);
+  }, [netoTotal, watchDocument, watchTypeId, tiposGasto]);
+
+  useEffect(() => {
+    // Neto -> amount, Bruto -> liquidoPagable
+    setValue(`items.${index}.amount`, Number(netoTotal.toFixed(2)));
+    setValue(`items.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
+  }, [brutoTotal, netoTotal, setValue, index]);
+
+  // Fetch partidas when group changes
+  useEffect(() => {
+    const fetchPartidas = async () => {
+      // Reset logic handled in Select onChange, but ensure we clear options if invalid group
+      if (!selectedGroupId || isNaN(Number(selectedGroupId))) {
+        setPartidas([]);
+        return;
+      }
+
+      try {
+        setIsLoadingPartidas(true);
+        const data = await catalogosService.getPartidasByGrupo(
+          Number(selectedGroupId)
+        );
+        setPartidas(data);
+      } catch (error) {
+        console.error('Error fetching partidas for row:', error);
+        setPartidas([]);
+      } finally {
+        setIsLoadingPartidas(false);
+      }
+    };
+
+    fetchPartidas();
+  }, [selectedGroupId]);
+
+  // Impuestos informativos (Retenciones)
+  const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
+  const tipoObj = tiposGasto.find((t) => Number(t.id) === Number(watchTypeId));
+  const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
+
+  let iva = 0;
+  let it = 0;
+  let iue = 0;
+
+  if (isRecibo) {
+    if (tipoNombre === 'COMPRA') {
+      iue = netoTotal * 0.05;
+      it = netoTotal * 0.03;
+    } else if (
+      tipoNombre.includes('ALQUILER') ||
+      tipoNombre.includes('SERVICIO')
+    ) {
+      iva = netoTotal * 0.13;
+      it = netoTotal * 0.03;
+    }
+  }
 
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
@@ -122,16 +233,37 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   Grupo
                 </Label>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ''}
+                  onValueChange={(val) => {
+                    field.onChange(Number(val));
+                    // Resetear partida al cambiar de grupo
+                    setValue(`items.${index}.budgetLineId`, '');
+                    setPartidas([]); // Clear immediately while fetching
+                  }}
+                  value={field.value?.toString() || ''}
+                  disabled={isDisabled}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar Grupo" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {/* Opciones se cargarán de catálogos en el futuro */}
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    {grupos.length > 0 ? (
+                      grupos.map((grupo) => (
+                        <SelectItem key={grupo.id} value={grupo.id.toString()}>
+                          {grupo.nombre}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        No hay grupos con presupuesto para este proyecto
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -147,16 +279,43 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   Partida
                 </Label>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ''}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString() || ''}
+                  disabled={!selectedGroupId || isLoadingPartidas}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar Partida" />
+                      {isLoadingPartidas ? (
+                        <span className="text-muted-foreground">
+                          Cargando...
+                        </span>
+                      ) : (
+                        <SelectValue placeholder="Seleccionar Partida" />
+                      )}
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {/* Opciones se cargarán de catálogos */}
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    {partidas.length > 0 ? (
+                      partidas.map((partida) => (
+                        <SelectItem
+                          key={partida.id}
+                          value={partida.id.toString()}
+                        >
+                          {partida.codigo} - {partida.nombre}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        {isLoadingPartidas
+                          ? 'Cargando...'
+                          : 'No hay partidas disponibles'}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -180,7 +339,12 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                       <SelectValue placeholder="Seleccionar Documento" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
                     <SelectItem value="Factura">Factura</SelectItem>
                     <SelectItem value="Recibo">Recibo</SelectItem>
                   </SelectContent>
@@ -198,16 +362,25 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                   Tipo
                 </Label>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ''}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString() || ''}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar Tipo" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {/* Opciones se cargarán de catálogos */}
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    {tiposGasto.map((tipo) => (
+                      <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                        {tipo.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -232,6 +405,10 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                     {...field}
                     className="w-full"
                     value={field.value ?? 0}
+                    min={0}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
@@ -245,7 +422,7 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Costo Unitario (Bs)
+                  Costo Unitario Líquido (Bs)
                 </Label>
                 <FormControl>
                   <Input
@@ -253,6 +430,10 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
                     {...field}
                     className="w-full"
                     value={field.value ?? 0}
+                    min={0}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
@@ -262,10 +443,10 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
           />
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Total (Bs)
+              Total Neto (Bs)
             </Label>
             <Input
-              value={formatMoney(total)}
+              value={formatMoney(netoTotal)}
               readOnly
               className="bg-muted font-bold"
             />
@@ -278,14 +459,14 @@ function GastoCard({ index, control, remove }: GastoCardProps) {
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] leading-tight font-bold uppercase">
-              Total Líquido
+              Costo Total Presupuestado
             </span>
             <span className="text-primary text-sm font-bold">
-              {formatMoney(total)}
+              {formatMoney(liquidoPagable || 0)}
             </span>
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
               <span className="text-muted-foreground text-[10px] uppercase">
                 IVA 13%

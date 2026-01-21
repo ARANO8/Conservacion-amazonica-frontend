@@ -12,13 +12,7 @@ import {
   FieldLegend,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -27,9 +21,8 @@ import {
   FormField,
   FormMessage,
 } from '@/components/ui/form';
-import SolicitudViaticos from '@/components/solicitudes/solicitud-viaticos';
-import SolicitudGastos from '@/components/solicitudes/solicitud-gastos';
 import PlanificacionActividades from '@/components/solicitudes/planificacion-actividades';
+import SolicitudEconomica from '@/components/solicitudes/solicitud-economica';
 import { toast } from 'sonner';
 import NominaTercerosForm from '@/components/solicitudes/nomina-terceros-form';
 import ReviewModal from '@/components/solicitudes/review-modal';
@@ -41,12 +34,36 @@ import {
   FormData,
   WizardStep,
 } from '@/components/solicitudes/solicitud-schema';
+import { useCatalogos } from '@/hooks/use-catalogos';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function SolicitudPage() {
   const router = useRouter();
   const [step, setStep] = useState<WizardStep>('PLANIFICACION');
   const [loading, setLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [presupuestoSeleccionado, setPresupuestoSeleccionado] =
+    useState<number>(0);
+  const [showBudgetWarning, setShowBudgetWarning] = useState(false);
+
+  const {
+    conceptos,
+    grupos,
+    partidas,
+    tiposGasto,
+    usuarios,
+    poaCodes,
+    isLoading,
+  } = useCatalogos();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -74,10 +91,16 @@ export default function SolicitudPage() {
     if (step === 'SOLICITUD') {
       const isValid = await form.trigger(['motivo', 'items', 'viaticos']);
       if (isValid) {
+        // Validación de Presupuesto: Si el total excede el presupuesto, bloqueamos.
+        if (granTotalLiquido > presupuestoSeleccionado) {
+          setShowBudgetWarning(true);
+          return;
+        }
+
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
-        toast.error('Corrige los errores en la solicitud económica');
+        toast.error('Corrige los errores en la solicitud de fondos');
       }
       return;
     }
@@ -98,7 +121,7 @@ export default function SolicitudPage() {
     if (step === 'NOMINA') setStep('SOLICITUD');
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (_data: FormData) => {
     setLoading(true);
     try {
       toast.success('Solicitud enviada exitosamente');
@@ -111,6 +134,30 @@ export default function SolicitudPage() {
       setIsReviewModalOpen(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="text-primary size-10 animate-spin" />
+        <span className="text-muted-foreground ml-3 text-sm">
+          Cargando catálogos...
+        </span>
+      </div>
+    );
+  }
+
+  const watchViaticos = form.watch('viaticos') || [];
+  const watchItems = form.watch('items') || [];
+
+  const totalLiquidoViaticos = watchViaticos.reduce(
+    (acc: number, v) => acc + Number(v.liquidoPagable || 0),
+    0
+  );
+  const totalLiquidoGastos = watchItems.reduce(
+    (acc: number, g) => acc + Number(g.liquidoPagable || 0),
+    0
+  );
+  const granTotalLiquido = totalLiquidoViaticos + totalLiquidoGastos;
 
   // VISTA EXCLUSIVA PASO 3 (NOMINA)
   if (step === 'NOMINA') {
@@ -135,6 +182,8 @@ export default function SolicitudPage() {
               onNext={handleNext}
               onBack={handleBack}
               loading={loading}
+              monto={presupuestoSeleccionado}
+              totalLiquido={granTotalLiquido}
             />
           </div>
           <ReviewModal
@@ -142,6 +191,7 @@ export default function SolicitudPage() {
             onOpenChange={setIsReviewModalOpen}
             onSubmit={onSubmit}
             loading={loading}
+            usuarios={usuarios}
           />
         </Form>
       </div>
@@ -226,197 +276,17 @@ export default function SolicitudPage() {
                 )}
 
                 {step === 'SOLICITUD' && (
-                  /* PASO 2: SOLICITUD ECONÓMICA */
-                  <FieldGroup className="space-y-6">
-                    {/* SECCIÓN 1: PROYECTOS */}
-                    <FieldSet>
-                      <FieldLegend>Proyectos</FieldLegend>
-                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <FormField
-                          control={form.control}
-                          name="codigoPOA"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Código POA</FieldLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar..." />
-                                </SelectTrigger>
-                                <SelectContent side="bottom" align="start">
-                                  {/* Opciones vacías por ahora */}
-                                </SelectContent>
-                              </Select>
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="proyecto"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Proyecto</FieldLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent side="bottom" align="start">
-                                  <SelectItem value="aaf">
-                                    AAF FORTALECIMIENTO
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="grupo"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Grupo</FieldLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar..." />
-                                </SelectTrigger>
-                                <SelectContent side="bottom" align="start">
-                                  {/* Opciones vacías por ahora */}
-                                </SelectContent>
-                              </Select>
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="partida"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Partida</FieldLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar..." />
-                                </SelectTrigger>
-                                <SelectContent side="bottom" align="start">
-                                  {/* Opciones vacías por ahora */}
-                                </SelectContent>
-                              </Select>
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="codigoProyecto"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>
-                                Código de Actividad Proyecto
-                              </FieldLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Seleccionar..." />
-                                </SelectTrigger>
-                                <SelectContent side="bottom" align="start">
-                                  {/* Opciones vacías por ahora */}
-                                </SelectContent>
-                              </Select>
-                            </Field>
-                          )}
-                        />
-                      </div>
-                    </FieldSet>
-
-                    <Separator />
-
-                    {/* SECCIÓN 2: INFORMACIÓN DEL VIAJE/TALLER */}
-                    <FieldSet>
-                      <FieldLegend>Información del Viaje/Taller</FieldLegend>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <FormField
-                          control={form.control}
-                          name="motivo"
-                          render={({ field }) => (
-                            <Field className="md:col-span-2">
-                              <FieldLabel>
-                                Motivo <span className="text-red-500">*</span>
-                              </FieldLabel>
-                              <FormControl>
-                                <Textarea
-                                  {...field}
-                                  placeholder="Explicar motivo de la comisión..."
-                                  className="min-h-24"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="planificacionLugares"
-                          render={({ field }) => (
-                            <Field className="md:col-span-2">
-                              <FieldLabel>
-                                Lugar del viaje y/o taller{' '}
-                                <span className="text-red-500">*</span>
-                              </FieldLabel>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder="Ej. Riberalta, Puerto Maldonado..."
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="fechaSolicitud"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Fecha Solicitud</FieldLabel>
-                              <FormControl>
-                                <Input type="date" {...field} />
-                              </FormControl>
-                            </Field>
-                          )}
-                        />
-                      </div>
-                    </FieldSet>
-
-                    <Separator />
-
-                    <FieldSet>
-                      <FieldLegend>Viáticos / Pasajes</FieldLegend>
-                      <SolicitudViaticos
-                        control={form.control}
-                        actividadesPlanificadas={watchActividades || []}
-                      />
-                    </FieldSet>
-
-                    <Separator />
-
-                    <FieldSet>
-                      <FieldLegend>
-                        Otros Gastos <span className="text-red-500">*</span>
-                      </FieldLegend>
-                      <SolicitudGastos control={form.control} />
-                    </FieldSet>
-                  </FieldGroup>
+                  /* PASO 2: SOLICITUD DE FONDOS */
+                  <SolicitudEconomica
+                    control={form.control}
+                    watchActividades={watchActividades || []}
+                    conceptos={conceptos}
+                    grupos={grupos}
+                    partidas={partidas}
+                    tiposGasto={tiposGasto}
+                    poaCodes={poaCodes}
+                    onBudgetChange={setPresupuestoSeleccionado}
+                  />
                 )}
               </div>
             </form>
@@ -427,6 +297,8 @@ export default function SolicitudPage() {
             onNext={handleNext}
             onBack={handleBack}
             loading={loading}
+            monto={presupuestoSeleccionado}
+            totalLiquido={granTotalLiquido}
           />
         </div>
         <ReviewModal
@@ -434,7 +306,37 @@ export default function SolicitudPage() {
           onOpenChange={setIsReviewModalOpen}
           onSubmit={onSubmit}
           loading={loading}
+          usuarios={usuarios}
         />
+
+        <AlertDialog
+          open={showBudgetWarning}
+          onOpenChange={setShowBudgetWarning}
+        >
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader className="flex flex-col items-center text-center sm:items-center sm:text-center">
+              <div className="bg-destructive/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-6 w-6" />
+              </div>
+              <AlertDialogTitle className="text-xl font-bold">
+                Presupuesto Excedido
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-muted-foreground mt-2">
+                El monto total solicitado supera el saldo disponible en la
+                partida seleccionada. Por favor, ajuste los viáticos o gastos
+                antes de continuar.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+              <AlertDialogAction
+                onClick={() => setShowBudgetWarning(false)}
+                className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
+              >
+                Entendido
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Form>
     </div>
   );

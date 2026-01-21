@@ -24,17 +24,19 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { FormData } from '@/app/dashboard/solicitud/page';
+import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckCircle2, SendHorizonal } from 'lucide-react';
+import { Usuario } from '@/types/catalogs';
 
 interface ReviewModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: FormData) => void;
   loading?: boolean;
+  usuarios: Usuario[];
 }
 
 export default function ReviewModal({
@@ -42,25 +44,37 @@ export default function ReviewModal({
   onOpenChange,
   onSubmit,
   loading = false,
+  usuarios,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit } = useFormContext<FormData>();
 
   const data = watch();
 
   const totalViaticos = (data.viaticos || []).reduce(
-    (acc, v) => acc + (Number(v.amount) || 0),
+    (acc: number, v) => acc + (Number(v.amount) || 0),
     0
   );
+  const totalLiquidoViaticos = (data.viaticos || []).reduce(
+    (acc: number, v) => acc + Number(v.liquidoPagable || 0),
+    0
+  );
+
   const totalGastos = (data.items || []).reduce(
-    (acc, i) => acc + (Number(i.amount) || 0),
+    (acc: number, i) => acc + (Number(i.amount) || 0),
     0
   );
+  const totalLiquidoGastos = (data.items || []).reduce(
+    (acc: number, i) => acc + Number(i.liquidoPagable || 0),
+    0
+  );
+
   const totalGeneral = totalViaticos + totalGastos;
+  const totalLiquidoGeneral = totalLiquidoViaticos + totalLiquidoGastos;
   const countNomina = data.nomina?.length || 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-full sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <CheckCircle2 className="h-6 w-6 text-emerald-500" />
@@ -107,23 +121,45 @@ export default function ReviewModal({
                   <span className="text-muted-foreground">
                     Total Viáticos / Pasajes:
                   </span>
-                  <span className="text-primary font-medium">
-                    {formatMoney(totalViaticos)}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-primary font-medium">
+                      {formatMoney(totalViaticos)}
+                    </span>
+                    <p className="text-muted-foreground text-[10px] italic">
+                      Líquido: {formatMoney(totalLiquidoViaticos)}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
                     Total Otros Gastos:
                   </span>
-                  <span className="text-primary font-medium">
-                    {formatMoney(totalGastos)}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-primary font-medium">
+                      {formatMoney(totalGastos)}
+                    </span>
+                    <p className="text-muted-foreground text-[10px] italic">
+                      Líquido: {formatMoney(totalLiquidoGastos)}
+                    </p>
+                  </div>
                 </div>
-                <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold">
-                  <span>Total General Bs.:</span>
-                  <span className="text-emerald-600">
-                    {formatMoney(totalGeneral)}
-                  </span>
+                <div className="mt-2 space-y-1 border-t pt-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Total Bruto Solicitado:
+                    </span>
+                    <span className="font-bold">
+                      {formatMoney(totalGeneral)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-base font-black">
+                    <span className="text-emerald-700">
+                      TOTAL LÍQUIDO PAGABLE:
+                    </span>
+                    <span className="text-emerald-700">
+                      {formatMoney(totalLiquidoGeneral)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -163,18 +199,24 @@ export default function ReviewModal({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="grid w-full grid-cols-[1fr_auto] items-center gap-2 [&>span]:min-w-0 [&>span]:truncate [&>span]:text-left">
                           <SelectValue placeholder="Seleccionar responsable..." />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="jefe_inmediato">
-                          Jefe Inmediato
-                        </SelectItem>
-                        <SelectItem value="gerente_area">
-                          Gerente de Área
-                        </SelectItem>
-                        <SelectItem value="director">Director</SelectItem>
+                      <SelectContent
+                        position="popper"
+                        side="bottom"
+                        className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                      >
+                        {usuarios.map((usuario) => (
+                          <SelectItem
+                            key={usuario.id}
+                            value={String(usuario.id)}
+                          >
+                            {usuario.nombreCompleto}{' '}
+                            {usuario.cargo ? `- ${usuario.cargo}` : ''}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

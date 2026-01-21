@@ -26,15 +26,18 @@ import { Trash2 } from 'lucide-react';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import { Concepto } from '@/types/catalogs';
 
 interface SolicitudViaticosProps {
   control: Control<FormData>;
   actividadesPlanificadas: FormData['actividades'];
+  conceptos: Concepto[];
 }
 
 export default function SolicitudViaticos({
   control,
   actividadesPlanificadas,
+  conceptos,
 }: SolicitudViaticosProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -51,6 +54,7 @@ export default function SolicitudViaticos({
             control={control}
             remove={remove}
             actividadesPlanificadas={actividadesPlanificadas}
+            conceptos={conceptos}
           />
         ))}
       </div>
@@ -82,6 +86,7 @@ interface ViaticoCardProps {
   control: Control<FormData>;
   remove: (index: number) => void;
   actividadesPlanificadas: FormData['actividades'];
+  conceptos: Concepto[];
 }
 
 function ViaticoCard({
@@ -89,6 +94,7 @@ function ViaticoCard({
   control,
   remove,
   actividadesPlanificadas,
+  conceptos,
 }: ViaticoCardProps) {
   const { setValue } = useFormContext<FormData>();
 
@@ -107,7 +113,54 @@ function ViaticoCard({
     name: `viaticos.${index}.unitCost`,
   }) as number;
 
-  const total = useMemo(() => {
+  const liquidoPagable = useWatch({
+    control,
+    name: `viaticos.${index}.liquidoPagable`,
+  }) as number;
+
+  const watchConcepto = useWatch({
+    control,
+    name: `viaticos.${index}.concepto`,
+  });
+
+  const watchTipo = useWatch({
+    control,
+    name: `viaticos.${index}.tipo`,
+  });
+
+  const watchPlanificacionId = useWatch({
+    control,
+    name: `viaticos.${index}.planificacionId`,
+  });
+
+  const selectedPlanificacion = useMemo(() => {
+    return actividadesPlanificadas.find(
+      (act) => act.actividadProgramada === watchPlanificacionId
+    );
+  }, [actividadesPlanificadas, watchPlanificacionId]);
+
+  const maxDias = selectedPlanificacion?.cantDias ?? 0;
+  const maxPersonas =
+    watchTipo === 'institucional'
+      ? (selectedPlanificacion?.cantInstitucion ?? 0)
+      : (selectedPlanificacion?.cantTerceros ?? 0);
+
+  const isZeroLimit = selectedPlanificacion ? maxPersonas === 0 : false;
+
+  useEffect(() => {
+    if (selectedPlanificacion && maxPersonas === 0) {
+      setValue(`viaticos.${index}.personas`, 0);
+    }
+  }, [maxPersonas, selectedPlanificacion, setValue, index]);
+
+  const isExterior = useMemo(() => {
+    const conceptoObj = conceptos.find(
+      (c) => String(c.id) === String(watchConcepto)
+    );
+    return conceptoObj?.nombre === 'EXTERIOR';
+  }, [watchConcepto, conceptos]);
+
+  const netoTotal = useMemo(() => {
     const d = Number(dias) || 0;
     const p = Number(personas) || 0;
     const u = Number(unitCost) || 0;
@@ -115,12 +168,29 @@ function ViaticoCard({
   }, [dias, personas, unitCost]);
 
   useEffect(() => {
-    setValue(`viaticos.${index}.amount`, total);
-  }, [total, setValue, index]);
+    // Impacto presupuestario (Bruto) = Neto + 16% impuestos
+    const brutoTotal = netoTotal * 1.16;
 
-  // Impuestos informativos
-  const iva = total * 0.13;
-  const it = total * 0.03;
+    setValue(`viaticos.${index}.amount`, Number(netoTotal.toFixed(2)));
+    setValue(`viaticos.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
+  }, [netoTotal, setValue, index]);
+
+  useEffect(() => {
+    if (!watchConcepto || !watchTipo) return;
+
+    const conceptoObj = conceptos.find(
+      (c) => String(c.id) === String(watchConcepto)
+    );
+    if (conceptoObj) {
+      const priceStr =
+        watchTipo === 'institucional'
+          ? conceptoObj.precioInstitucional
+          : conceptoObj.precioTerceros;
+
+      const price = priceStr ? parseFloat(priceStr) : 0;
+      setValue(`viaticos.${index}.unitCost`, price);
+    }
+  }, [watchConcepto, watchTipo, conceptos, setValue, index]);
 
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
@@ -144,11 +214,17 @@ function ViaticoCard({
                       <SelectValue placeholder="Concepto..." />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="viaticos">Viáticos</SelectItem>
-                    <SelectItem value="pasajes">Pasajes</SelectItem>
-                    <SelectItem value="refrigerios">Refrigerios</SelectItem>
-                    <SelectItem value="otros">Otros</SelectItem>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    {conceptos.map((concepto) => (
+                      <SelectItem key={concepto.id} value={String(concepto.id)}>
+                        {concepto.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -172,7 +248,12 @@ function ViaticoCard({
                       <SelectValue placeholder="Seleccionar actividad..." />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
                     {actividadesPlanificadas.length > 0 ? (
                       actividadesPlanificadas.map((act, idx) => (
                         <SelectItem key={idx} value={act.actividadProgramada}>
@@ -207,7 +288,12 @@ function ViaticoCard({
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
                     <SelectItem value="institucional">Institucional</SelectItem>
                     <SelectItem value="tercero">Tercero</SelectItem>
                   </SelectContent>
@@ -219,7 +305,7 @@ function ViaticoCard({
         </div>
 
         {/* Fila Central */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid items-start gap-4 md:grid-cols-4">
           <FormField
             control={control}
             name={`viaticos.${index}.dias`}
@@ -234,9 +320,19 @@ function ViaticoCard({
                     {...field}
                     className="w-full"
                     value={field.value ?? 0}
+                    min={0}
+                    max={maxDias > 0 ? maxDias : undefined}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                {selectedPlanificacion && (
+                  <p className="text-muted-foreground mt-1 text-[10px] italic">
+                    Máximo permitido: {maxDias}
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -255,9 +351,28 @@ function ViaticoCard({
                     {...field}
                     className="w-full"
                     value={field.value ?? 0}
+                    min={0}
+                    max={maxPersonas > 0 ? maxPersonas : undefined}
+                    disabled={isZeroLimit}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                {selectedPlanificacion && (
+                  <div className="mt-1">
+                    {isZeroLimit ? (
+                      <p className="text-destructive text-[10px] font-medium italic">
+                        Sin cupo en Planificación para este tipo
+                      </p>
+                    ) : (
+                      <p className="text-muted-foreground text-[10px] italic">
+                        Máximo permitido: {maxPersonas}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -274,9 +389,14 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
-                    className="w-full"
+                    className={`w-full ${!isExterior ? 'bg-muted/50 cursor-not-allowed' : ''}`}
                     value={field.value ?? 0}
+                    min={0}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
                     onChange={(e) => field.onChange(Number(e.target.value))}
+                    readOnly={!isExterior}
                   />
                 </FormControl>
                 <FormMessage />
@@ -285,10 +405,10 @@ function ViaticoCard({
           />
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Total (Bs)
+              Total Neto (Bs)
             </Label>
             <Input
-              value={formatMoney(total)}
+              value={formatMoney(netoTotal)}
               readOnly
               className="bg-muted font-bold"
             />
@@ -301,25 +421,29 @@ function ViaticoCard({
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] leading-tight font-bold uppercase">
-              Total Líquido
+              Costo Total Presupuestado
             </span>
             <span className="text-primary text-sm font-bold">
-              {formatMoney(total)}
+              {formatMoney(liquidoPagable || 0)}
             </span>
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
               <span className="text-muted-foreground text-[10px] uppercase">
-                IVA 13%
+                RC-IVA 13%
               </span>
-              <span className="text-xs font-medium">{formatMoney(iva)}</span>
+              <span className="text-xs font-medium">
+                {formatMoney(netoTotal * 0.13)}
+              </span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground text-[10px] uppercase">
                 IT 3%
               </span>
-              <span className="text-xs font-medium">{formatMoney(it)}</span>
+              <span className="text-xs font-medium">
+                {formatMoney(netoTotal * 0.03)}
+              </span>
             </div>
           </div>
         </div>

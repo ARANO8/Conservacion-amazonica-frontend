@@ -1,84 +1,88 @@
 import api from '@/lib/api';
 import {
-  Proyecto,
-  GrupoContable,
-  PartidaPresupuestaria,
-  ConceptoViatico,
+  Concepto,
+  Grupo,
+  Partida,
   TipoGasto,
+  Usuario,
+  PoaLookup,
+  Proyecto,
   CodigoPresupuestario,
-  Banco,
-} from '@/types/backend';
+} from '@/types/catalogs';
 
-/**
- * Servicio para obtener catálogos y datos maestros del sistema.
- */
 export const catalogosService = {
-  /**
-   * Obtener lista de proyectos activos.
-   */
-  getProyectos: async (): Promise<Proyecto[]> => {
-    const { data } = await api.get<Proyecto[]>('/proyectos');
+  getConceptos: async (): Promise<Concepto[]> => {
+    const { data } = await api.get<Concepto[]>('/conceptos');
     return data;
   },
 
-  /**
-   * Obtener grupos contables filtrados por proyecto.
-   * Según spec, usa path parameters en /poa/grupos/{proyectoId}
-   */
-  getGrupos: async (proyectoId: number): Promise<GrupoContable[]> => {
-    const { data } = await api.get<GrupoContable[]>(
-      `/poa/grupos/${proyectoId}`
-    );
+  getGrupos: async (): Promise<Grupo[]> => {
+    const { data } = await api.get<Grupo[]>('/grupos');
     return data;
   },
 
-  /**
-   * Obtener partidas presupuestarias con saldo filtradas por proyecto y grupo.
-   * Según spec, usa path parameters en /poa/partidas/{proyectoId}/{grupoId}
-   */
-  getPartidas: async (
-    proyectoId: number,
-    grupoId: number
-  ): Promise<PartidaPresupuestaria[]> => {
-    const { data } = await api.get<PartidaPresupuestaria[]>(
-      `/poa/partidas/${proyectoId}/${grupoId}`
-    );
+  getPartidas: async (): Promise<Partida[]> => {
+    const { data } = await api.get<Partida[]>('/partidas');
     return data;
   },
 
-  /**
-   * Obtener fuentes de financiamiento (Códigos Presupuestarios).
-   */
-  getFuentes: async (): Promise<CodigoPresupuestario[]> => {
-    const { data } = await api.get<CodigoPresupuestario[]>(
-      '/codigos-presupuestarios'
-    );
-    return data;
-  },
-
-  /**
-   * Obtener lista de bancos.
-   * NOTA: Este endpoint no fue encontrado en el backend-spec.json,
-   * se implementa por requerimiento del usuario.
-   */
-  getBancos: async (): Promise<Banco[]> => {
-    const { data } = await api.get<Banco[]>('/bancos');
-    return data;
-  },
-
-  /**
-   * Obtener conceptos de viáticos.
-   */
-  getConceptos: async (): Promise<ConceptoViatico[]> => {
-    const { data } = await api.get<ConceptoViatico[]>('/conceptos');
-    return data;
-  },
-
-  /**
-   * Obtener tipos de gasto.
-   */
-  getTipoGastos: async (): Promise<TipoGasto[]> => {
+  getTiposGasto: async (): Promise<TipoGasto[]> => {
     const { data } = await api.get<TipoGasto[]>('/tipo-gastos');
+    return data;
+  },
+
+  getUsuarios: async (): Promise<Usuario[]> => {
+    const { data } = await api.get<Usuario[]>('/usuarios');
+    return data;
+  },
+
+  getPoaLookup: async (): Promise<PoaLookup[]> => {
+    const { data } = await api.get<PoaLookup[]>('/poa/lookup');
+    return data;
+  },
+
+  getProyectosByPoa: async (codigo: string): Promise<Proyecto[]> => {
+    const { data } = await api.get<Proyecto[]>(`/proyectos/by-poa/${codigo}`);
+    return data;
+  },
+
+  getGruposByProyecto: async (proyectoId: number): Promise<Grupo[]> => {
+    const { data } = await api.get<Grupo[]>(
+      `/grupos/by-proyecto/${proyectoId}`
+    );
+    return data;
+  },
+
+  getPartidasByGrupo: async (grupoId: number): Promise<Partida[]> => {
+    const { data } = await api.get<Partida[]>(`/partidas/by-grupo/${grupoId}`);
+    return data;
+  },
+
+  getCodigosPresupuestariosFilter: async (
+    poa: string,
+    proyectoId: number,
+    grupoId: number,
+    partidaId: number
+  ): Promise<CodigoPresupuestario[]> => {
+    const { data } = await api.get<CodigoPresupuestario[]>(
+      '/codigos-presupuestarios/filter',
+      {
+        params: { poa, proyectoId, grupoId, partidaId },
+      }
+    );
+    return data;
+  },
+
+  getPoaDetail: async (params: {
+    codigoPoa: string;
+    proyectoId: number;
+    grupoId: number;
+    partidaId: number;
+    codigoPresupuestarioId: string | number;
+  }): Promise<{ costoTotal: number }> => {
+    const { data } = await api.get<{ costoTotal: number }>('/poa/detail', {
+      params,
+    });
     return data;
   },
 };

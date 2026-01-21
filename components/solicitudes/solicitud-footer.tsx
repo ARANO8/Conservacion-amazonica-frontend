@@ -10,6 +10,8 @@ interface SolicitudFooterProps {
   onNext: () => void;
   onBack: () => void;
   loading?: boolean;
+  monto?: number;
+  totalLiquido?: number;
 }
 
 export default function SolicitudFooter({
@@ -17,6 +19,8 @@ export default function SolicitudFooter({
   onNext,
   onBack,
   loading = false,
+  monto = 0,
+  totalLiquido = 0,
 }: SolicitudFooterProps) {
   const { control } = useFormContext<FormData>();
 
@@ -36,8 +40,8 @@ export default function SolicitudFooter({
     return vTotal + iTotal;
   }, [watchViaticos, watchItems]);
 
-  const assignedBudget = 20000; // Bs 20,000.00 Estático Temporal
-  const budgetBalance = assignedBudget - totalRequested;
+  const assignedBudget = monto;
+  const budgetBalance = assignedBudget - totalLiquido;
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">
@@ -69,6 +73,15 @@ export default function SolicitudFooter({
                 </span>
                 <span className="text-primary font-bold">
                   {formatMoney(totalRequested)}
+                </span>
+              </div>
+              <div className="bg-border h-8 w-[1px]" />
+              <div className="flex flex-col items-end">
+                <span className="text-muted-foreground text-[10px] leading-tight font-bold tracking-wider uppercase">
+                  Total Líquido
+                </span>
+                <span className="font-bold text-emerald-600">
+                  {formatMoney(totalLiquido)}
                 </span>
               </div>
               <div className="bg-border h-8 w-[1px]" />

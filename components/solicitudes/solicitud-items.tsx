@@ -114,7 +114,7 @@ export default function SolicitudItems({
                     <FormItem>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={field.value?.toString() || ''}
                       >
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs">
@@ -147,7 +147,7 @@ export default function SolicitudItems({
                     <FormItem>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={field.value?.toString() || ''}
                       >
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs">

@@ -1,0 +1,10 @@
+
+> frontend@0.1.0 lint
+> eslint
+
+
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\app\dashboard\solicitud\page.tsx
+  115:27  warning  'data' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 1 problem (0 errors, 1 warning)
+

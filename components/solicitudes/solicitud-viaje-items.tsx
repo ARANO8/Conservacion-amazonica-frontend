@@ -9,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { FormData } from '@/app/dashboard/solicitud/page';
+import { FormData } from '@/components/solicitudes/solicitud-schema';
 
 interface SolicitudViajeItemsProps {
   control: Control<FormData>;

@@ -22,13 +22,11 @@ export const formSchema = z.object({
 
   // Campos visuales de Solicitud (Paso 2)
   interino: z.boolean().optional(),
-  proyecto: z.string().optional(),
+  proyecto: z.union([z.string(), z.number()]).optional(),
   codigoPOA: z.string().optional(),
-  grupo: z.string().optional(),
-  partida: z.string().optional(),
-  codigoProyecto: z.string().optional(),
-  lugarSolicitud: z.string().optional(),
-  fechaSolicitud: z.string().optional(),
+  grupo: z.union([z.string(), z.number()]).optional(),
+  partida: z.union([z.string(), z.number()]).optional(),
+  codigoProyecto: z.union([z.string(), z.number()]).optional(),
   solicitante: z.string().optional(),
   fechaInicio: z.string().optional(),
   fechaFin: z.string().optional(),
@@ -39,11 +37,14 @@ export const formSchema = z.object({
       z.object({
         concepto: z.string().optional(),
         planificacionId: z.string().optional(),
+        ciudad: z.string().optional(),
+        destino: z.string().optional(),
         tipo: z.string().optional(),
         dias: z.number().optional(),
         personas: z.number().optional(),
         unitCost: z.number().optional(),
         amount: z.number().optional(),
+        liquidoPagable: z.number().optional(),
       })
     )
     .optional(),
@@ -53,15 +54,16 @@ export const formSchema = z.object({
   items: z
     .array(
       z.object({
-        groupId: z.string().optional(),
-        budgetLineId: z.string().optional(),
+        groupId: z.union([z.string(), z.number()]).optional(),
+        budgetLineId: z.union([z.string(), z.number()]).optional(),
         document: z.string().optional(),
-        typeId: z.string().optional(),
+        typeId: z.union([z.string(), z.number()]).optional(),
         amount: z.number().min(0, 'Monto inválido'),
         quantity: z.number().min(0).optional(),
         unitCost: z.number().min(0).optional(),
         description: z.string().optional(),
         financingSourceId: z.string().optional(),
+        liquidoPagable: z.number().optional(),
       })
     )
     .min(1, 'Debes agregar al menos un ítem'),
@@ -108,17 +110,21 @@ export const defaultValues: FormData = {
       amount: 0,
       description: '',
       financingSourceId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', // UUID válido por defecto
+      liquidoPagable: 0,
     },
   ],
   viaticos: [
     {
       concepto: 'viaticos',
       planificacionId: '',
+      ciudad: '',
+      destino: '',
       tipo: 'institucional',
       dias: 1,
       personas: 1,
       unitCost: 0,
       amount: 0,
+      liquidoPagable: 0,
     },
   ],
   proyecto: 'aaf',
@@ -129,8 +135,6 @@ export const defaultValues: FormData = {
   solicitante: 'usuario',
   fechaInicio: '',
   fechaFin: '',
-  lugarSolicitud: 'La Paz',
-  fechaSolicitud: new Date().toISOString().split('T')[0],
   motivo: '',
   nomina: [],
   destinatario: '',
