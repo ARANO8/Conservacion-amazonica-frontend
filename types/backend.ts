@@ -52,6 +52,25 @@ export interface CreatePoaDto {
   codigoPresupuestarioId: number;
 }
 
+export interface Poa extends CreatePoaDto {
+  costoTotal: number;
+  proyecto?: Proyecto;
+  grupo?: GrupoContable;
+  partida?: PartidaPresupuestaria;
+  actividad?: unknown;
+  codigoPresupuestario?: CodigoPresupuestario;
+}
+
+export interface PresupuestoReserva {
+  id: number;
+  solicitudId?: number;
+  poaId: number;
+  poa?: Poa;
+  montoPresupuestado: number;
+  montoNeto: number;
+  estado: 'TEMPORAL' | 'CONFIRMADO' | 'CANCELADO';
+}
+
 export type UpdatePoaDto = Partial<CreatePoaDto>;
 export interface CreatePlanificacionDto {
   actividad: string;
@@ -67,15 +86,16 @@ export interface CreateViaticoDto {
   tipoDestino: 'INSTITUCIONAL' | 'TERCEROS';
   dias: number;
   cantidadPersonas: number;
+  montoNeto: number;
+  solicitudPresupuestoId: number;
 }
 
 export interface CreateGastoDto {
-  grupoId: number;
-  partidaId: number;
+  solicitudPresupuestoId: number;
   tipoGastoId: number;
   tipoDocumento: 'FACTURA' | 'RECIBO';
   cantidad: number;
-  costoUnitario: number;
+  montoNeto: number;
   detalle?: string;
 }
 
@@ -85,7 +105,7 @@ export interface CreateNominaDto {
 }
 
 export interface CreateSolicitudDto {
-  poaId: number;
+  presupuestosIds: number[];
   aprobadorId: number;
   lugarViaje: string;
   motivoViaje: string;
@@ -100,7 +120,7 @@ export type UpdateSolicitudDto = Partial<CreateSolicitudDto>;
 
 export interface Solicitud {
   id: number;
-  poaId: number;
+  presupuestos: PresupuestoReserva[];
   usuarioId: string;
   aprobadorId: number;
   codigo: string;
@@ -108,7 +128,8 @@ export interface Solicitud {
   motivoViaje: string;
   descripcion?: string;
   estado: 'PENDIENTE' | 'APROBADO' | 'OBSERVADO' | 'RECHAZADO' | 'DESEMBOLSADO';
-  totalMonto: number;
+  montoTotalNeto: number;
+  montoTotalPresupuestado: number;
   createdAt: string;
   updatedAt: string;
   usuario?: Usuario;
@@ -143,5 +164,23 @@ export type GrupoContable = EntityBase;
 export type PartidaPresupuestaria = EntityBase;
 export type ConceptoViatico = EntityBase;
 export type TipoGasto = EntityBase;
-export type CodigoPresupuestario = EntityBase;
+export type CodigoPresupuestario = EntityBase & {
+  codigoCompleto?: string;
+  descripcion?: string;
+};
 export type Banco = EntityBase;
+
+export interface PoaStructureItem {
+  id: number;
+  estructura?: {
+    proyecto?: Proyecto;
+    grupo?: GrupoContable;
+    partida?: PartidaPresupuestaria;
+  };
+  codigoPresupuestario?: CodigoPresupuestario;
+  poa?: {
+    codigoPoa: string;
+    costoTotal: number;
+  };
+  codigoPoa?: string;
+}

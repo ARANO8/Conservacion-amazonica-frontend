@@ -23,7 +23,21 @@ export const formSchema = z.object({
   // Campos visuales de Solicitud (Paso 2)
   interino: z.boolean().optional(),
   proyecto: z.union([z.string(), z.number()]).optional(),
-  codigoPOA: z.string().optional(),
+  presupuestosIds: z
+    .array(z.number())
+    .min(1, 'Debes seleccionar al menos un presupuesto'),
+  fuentesSeleccionadas: z
+    .array(
+      z.object({
+        grupoId: z.union([z.string(), z.number()]).optional(),
+        partidaId: z.union([z.string(), z.number()]).optional(),
+        codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
+        reservaId: z.number().nullable().optional(),
+        montoReservado: z.number().optional(),
+        isLocked: z.boolean().optional(),
+      })
+    )
+    .optional(),
   grupo: z.union([z.string(), z.number()]).optional(),
   partida: z.union([z.string(), z.number()]).optional(),
   codigoProyecto: z.union([z.string(), z.number()]).optional(),
@@ -42,7 +56,8 @@ export const formSchema = z.object({
         tipo: z.string().optional(),
         dias: z.number().optional(),
         personas: z.number().optional(),
-        unitCost: z.number().optional(),
+        montoNeto: z.number().min(0, 'Monto inválido'),
+        solicitudPresupuestoId: z.number(),
         amount: z.number().optional(),
         liquidoPagable: z.number().optional(),
       })
@@ -54,13 +69,12 @@ export const formSchema = z.object({
   items: z
     .array(
       z.object({
-        groupId: z.union([z.string(), z.number()]).optional(),
-        budgetLineId: z.union([z.string(), z.number()]).optional(),
+        solicitudPresupuestoId: z.number(),
         document: z.string().optional(),
         typeId: z.union([z.string(), z.number()]).optional(),
         amount: z.number().min(0, 'Monto inválido'),
         quantity: z.number().min(0).optional(),
-        unitCost: z.number().min(0).optional(),
+        montoNeto: z.number().min(0, 'Monto inválido'),
         description: z.string().optional(),
         financingSourceId: z.string().optional(),
         liquidoPagable: z.number().optional(),
@@ -101,15 +115,14 @@ export const defaultValues: FormData = {
   interino: false,
   items: [
     {
-      groupId: '',
-      budgetLineId: '42858360-665d-4503-926b-dea2fba56e7a', // UUID válido por defecto
+      solicitudPresupuestoId: 0,
       document: 'Factura',
       typeId: '',
       quantity: 1,
-      unitCost: 0,
+      montoNeto: 0,
       amount: 0,
       description: '',
-      financingSourceId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', // UUID válido por defecto
+      financingSourceId: '',
       liquidoPagable: 0,
     },
   ],
@@ -122,13 +135,15 @@ export const defaultValues: FormData = {
       tipo: 'institucional',
       dias: 1,
       personas: 1,
-      unitCost: 0,
+      montoNeto: 0,
+      solicitudPresupuestoId: 0,
       amount: 0,
       liquidoPagable: 0,
     },
   ],
   proyecto: 'aaf',
-  codigoPOA: '',
+  presupuestosIds: [],
+  fuentesSeleccionadas: [],
   grupo: '',
   partida: '',
   codigoProyecto: '',

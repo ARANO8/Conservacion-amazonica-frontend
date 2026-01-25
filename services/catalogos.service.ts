@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import { PoaStructureItem } from '@/types/backend';
 import {
   Concepto,
   Grupo,
@@ -82,6 +83,15 @@ export const catalogosService = {
   }): Promise<{ costoTotal: number }> => {
     const { data } = await api.get<{ costoTotal: number }>('/poa/detail', {
       params,
+    });
+    return data;
+  },
+
+  getEstructuraByPoa: async (
+    codigoPoa: string
+  ): Promise<PoaStructureItem[]> => {
+    const { data } = await api.get<PoaStructureItem[]>('/poa/structure', {
+      params: { codigoPoa },
     });
     return data;
   },

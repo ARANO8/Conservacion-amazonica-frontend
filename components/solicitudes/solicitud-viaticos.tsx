@@ -27,17 +27,20 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Concepto } from '@/types/catalogs';
+import { PresupuestoReserva } from '@/types/backend';
 
 interface SolicitudViaticosProps {
   control: Control<FormData>;
   actividadesPlanificadas: FormData['actividades'];
   conceptos: Concepto[];
+  fuentesDisponibles: PresupuestoReserva[];
 }
 
 export default function SolicitudViaticos({
   control,
   actividadesPlanificadas,
   conceptos,
+  fuentesDisponibles,
 }: SolicitudViaticosProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -55,6 +58,7 @@ export default function SolicitudViaticos({
             remove={remove}
             actividadesPlanificadas={actividadesPlanificadas}
             conceptos={conceptos}
+            fuentesDisponibles={fuentesDisponibles}
           />
         ))}
       </div>
@@ -70,8 +74,8 @@ export default function SolicitudViaticos({
             tipo: 'institucional',
             dias: 0,
             personas: 0,
-            unitCost: 0,
-            amount: 0,
+            montoNeto: 0,
+            solicitudPresupuestoId: 0,
           })
         }
       >
@@ -87,6 +91,7 @@ interface ViaticoCardProps {
   remove: (index: number) => void;
   actividadesPlanificadas: FormData['actividades'];
   conceptos: Concepto[];
+  fuentesDisponibles: PresupuestoReserva[];
 }
 
 function ViaticoCard({
@@ -95,6 +100,7 @@ function ViaticoCard({
   remove,
   actividadesPlanificadas,
   conceptos,
+  fuentesDisponibles,
 }: ViaticoCardProps) {
   const { setValue } = useFormContext<FormData>();
 
@@ -108,9 +114,9 @@ function ViaticoCard({
     name: `viaticos.${index}.personas`,
   }) as number;
 
-  const unitCost = useWatch({
+  const montoNeto = useWatch({
     control,
-    name: `viaticos.${index}.unitCost`,
+    name: `viaticos.${index}.montoNeto`,
   }) as number;
 
   const liquidoPagable = useWatch({
@@ -153,25 +159,13 @@ function ViaticoCard({
     }
   }, [maxPersonas, selectedPlanificacion, setValue, index]);
 
-  const isExterior = useMemo(() => {
-    const conceptoObj = conceptos.find(
-      (c) => String(c.id) === String(watchConcepto)
-    );
-    return conceptoObj?.nombre === 'EXTERIOR';
-  }, [watchConcepto, conceptos]);
-
   const netoTotal = useMemo(() => {
-    const d = Number(dias) || 0;
-    const p = Number(personas) || 0;
-    const u = Number(unitCost) || 0;
-    return d * p * u;
-  }, [dias, personas, unitCost]);
+    return Number(montoNeto) || 0;
+  }, [montoNeto]);
 
   useEffect(() => {
     // Impacto presupuestario (Bruto) = Neto + 16% impuestos
     const brutoTotal = netoTotal * 1.16;
-
-    setValue(`viaticos.${index}.amount`, Number(netoTotal.toFixed(2)));
     setValue(`viaticos.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
   }, [netoTotal, setValue, index]);
 
@@ -188,15 +182,62 @@ function ViaticoCard({
           : conceptoObj.precioTerceros;
 
       const price = priceStr ? parseFloat(priceStr) : 0;
-      setValue(`viaticos.${index}.unitCost`, price);
+      const total = Number(dias || 0) * Number(personas || 0) * price;
+      setValue(`viaticos.${index}.montoNeto`, total, { shouldValidate: true });
     }
-  }, [watchConcepto, watchTipo, conceptos, setValue, index]);
+  }, [watchConcepto, watchTipo, conceptos, setValue, index, dias, personas]);
 
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
       <div className="space-y-4 p-4">
-        {/* Fila Superior: Distribución Equitativa (33% c/u) */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {/* Fila Superior: Distribución Equitativa (4 columnas) */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+          <FormField
+            control={control}
+            name={`viaticos.${index}.solicitudPresupuestoId`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                  1. Fuente de Financiamiento
+                </Label>
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString() || ''}
+                  disabled={fuentesDisponibles.length === 0}
+                >
+                  <FormControl>
+                    <SelectTrigger className="border-primary/20 bg-primary/5 w-full">
+                      <SelectValue
+                        placeholder={
+                          fuentesDisponibles.length === 0
+                            ? 'Primero agregue fuente...'
+                            : 'Seleccionar fuente...'
+                        }
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    {[
+                      ...new Map(
+                        fuentesDisponibles.map((f) => [f.id, f])
+                      ).values(),
+                    ].map((fuente) => (
+                      <SelectItem key={fuente.id} value={fuente.id.toString()}>
+                        ID: {fuente.id} - {fuente.poa?.partida?.nombre} (
+                        {fuente.poa?.codigoPresupuestario?.codigoCompleto})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={control}
             name={`viaticos.${index}.concepto`}
@@ -305,7 +346,7 @@ function ViaticoCard({
         </div>
 
         {/* Fila Central */}
-        <div className="grid items-start gap-4 md:grid-cols-4">
+        <div className="grid items-start gap-4 md:grid-cols-3">
           <FormField
             control={control}
             name={`viaticos.${index}.dias`}
@@ -379,24 +420,22 @@ function ViaticoCard({
           />
           <FormField
             control={control}
-            name={`viaticos.${index}.unitCost`}
+            name={`viaticos.${index}.montoNeto`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Costo Unitario (Bs)
+                  Monto Unitario Calculado (Bs)
                 </Label>
                 <FormControl>
                   <Input
                     type="number"
                     {...field}
-                    className={`w-full ${!isExterior ? 'bg-muted/50 cursor-not-allowed' : ''}`}
+                    className="bg-muted text-muted-foreground w-full cursor-not-allowed focus-visible:ring-0"
                     value={field.value ?? 0}
-                    min={0}
+                    readOnly={true}
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    readOnly={!isExterior}
                   />
                 </FormControl>
                 <FormMessage />

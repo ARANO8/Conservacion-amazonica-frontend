@@ -231,6 +231,111 @@
         "tags": ["POA"]
       }
     },
+    "/poa/lookup": {
+      "get": {
+        "operationId": "PoaController_getLookup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de códigos POA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PoaLookupDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar códigos POA para selectores",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/detail": {
+      "get": {
+        "operationId": "PoaController_getDetail",
+        "parameters": [
+          {
+            "name": "codigoPoa",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "partidaId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "codigoPresupuestarioId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle financiero del POA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "costoTotal": {
+                      "type": "number"
+                    },
+                    "descripcion": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener detalle financiero de un POA específico",
+        "tags": ["POA"]
+      }
+    },
     "/poa/proyectos": {
       "get": {
         "operationId": "PoaController_getProyectos",
@@ -789,6 +894,92 @@
         "tags": ["Solicitudes"]
       }
     },
+    "/presupuestos/reservar": {
+      "post": {
+        "operationId": "SolicitudPresupuestoController_reservar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservarFuenteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reserva creada o renovada"
+          },
+          "409": {
+            "description": "Conflicto: Reservado por otro o ya confirmado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reservar una partida POA temporalmente (Sistema tipo Cine)",
+        "tags": ["Presupuestos (Reservas)"]
+      }
+    },
+    "/presupuestos/{id}": {
+      "delete": {
+        "operationId": "SolicitudPresupuestoController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Liberar una partida reservada si el usuario se arrepiente",
+        "tags": ["Presupuestos (Reservas)"]
+      }
+    },
+    "/presupuestos/my-active": {
+      "get": {
+        "operationId": "SolicitudPresupuestoController_findMyActive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar reservas temporales del usuario actual",
+        "tags": ["Presupuestos (Reservas)"]
+      }
+    },
     "/conceptos": {
       "get": {
         "operationId": "ConceptosController_findAll",
@@ -843,6 +1034,51 @@
         "tags": ["Catálogos"]
       }
     },
+    "/grupos/by-proyecto/{proyectoId}": {
+      "get": {
+        "operationId": "GruposController_findByProyectoId",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de grupos únicos con presupuesto asignado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener grupos únicos que tienen presupuesto en un proyecto",
+        "tags": ["Catálogos"]
+      }
+    },
     "/partidas": {
       "get": {
         "operationId": "PartidasController_findAll",
@@ -858,6 +1094,51 @@
           }
         ],
         "summary": "Listar partidas presupuestarias",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/partidas/by-grupo/{grupoId}": {
+      "get": {
+        "operationId": "PartidasController_findByGrupoId",
+        "parameters": [
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de partidas asociadas al grupo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar partidas por grupo (Cascada)",
         "tags": ["Catálogos"]
       }
     },
@@ -879,6 +1160,33 @@
         "tags": ["Catálogos"]
       }
     },
+    "/proyectos/by-poa/{codigo}": {
+      "get": {
+        "operationId": "ProyectosController_findByPoaCode",
+        "parameters": [
+          {
+            "name": "codigo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener proyectos únicos vinculados a un código POA",
+        "tags": ["Catálogos"]
+      }
+    },
     "/codigos-presupuestarios": {
       "get": {
         "operationId": "CodigosPresupuestariosController_findAll",
@@ -894,6 +1202,75 @@
           }
         ],
         "summary": "Listar códigos presupuestarios",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/codigos-presupuestarios/filter": {
+      "get": {
+        "operationId": "CodigosPresupuestariosController_filterByStructure",
+        "parameters": [
+          {
+            "name": "codigoPoa",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "partidaId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Código presupuestario encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "codigoCompleto": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Filtrar código presupuestario por estructura (4 niveles)",
         "tags": ["Catálogos"]
       }
     }
@@ -999,6 +1376,16 @@
             "description": "Rol asignado al usuario en el sistema"
           }
         }
+      },
+      "PoaLookupDto": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "description": "Código POA"
+          }
+        },
+        "required": ["codigo"]
       },
       "CreatePoaDto": {
         "type": "object",
@@ -1150,6 +1537,18 @@
             "type": "number",
             "minimum": 1,
             "example": 1
+          },
+          "montoNeto": {
+            "type": "number",
+            "minimum": 0,
+            "example": 200,
+            "description": "Monto neto a recibir (Opcional, sobreescribe catálogo)"
+          },
+          "solicitudPresupuestoId": {
+            "type": "number",
+            "minimum": 1,
+            "example": 1,
+            "description": "ID de la reserva de presupuesto"
           }
         },
         "required": [
@@ -1157,19 +1556,18 @@
           "conceptoId",
           "tipoDestino",
           "dias",
-          "cantidadPersonas"
+          "cantidadPersonas",
+          "solicitudPresupuestoId"
         ]
       },
       "CreateGastoDto": {
         "type": "object",
         "properties": {
-          "grupoId": {
+          "solicitudPresupuestoId": {
             "type": "number",
-            "example": 1
-          },
-          "partidaId": {
-            "type": "number",
-            "example": 1
+            "minimum": 1,
+            "example": 1,
+            "description": "ID de la reserva de presupuesto"
           },
           "tipoGastoId": {
             "type": "number",
@@ -1185,10 +1583,11 @@
             "minimum": 1,
             "example": 2
           },
-          "costoUnitario": {
+          "montoNeto": {
             "type": "number",
             "minimum": 0,
-            "example": 50.5
+            "example": 50.5,
+            "description": "Monto neto unitario a recibir"
           },
           "detalle": {
             "type": "string",
@@ -1196,12 +1595,11 @@
           }
         },
         "required": [
-          "grupoId",
-          "partidaId",
+          "solicitudPresupuestoId",
           "tipoGastoId",
           "tipoDocumento",
           "cantidad",
-          "costoUnitario"
+          "montoNeto"
         ]
       },
       "CreateNominaDto": {
@@ -1221,10 +1619,13 @@
       "CreateSolicitudDto": {
         "type": "object",
         "properties": {
-          "poaId": {
-            "type": "number",
-            "example": 1,
-            "description": "ID del registro POA vinculado"
+          "presupuestosIds": {
+            "example": [1, 2],
+            "description": "IDs de los registros de reserva de presupuesto (SolicitudPresupuesto)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
           },
           "aprobadorId": {
             "type": "number",
@@ -1270,15 +1671,23 @@
             }
           }
         },
-        "required": ["poaId", "aprobadorId", "lugarViaje", "motivoViaje"]
+        "required": [
+          "presupuestosIds",
+          "aprobadorId",
+          "lugarViaje",
+          "motivoViaje"
+        ]
       },
       "UpdateSolicitudDto": {
         "type": "object",
         "properties": {
-          "poaId": {
-            "type": "number",
-            "example": 1,
-            "description": "ID del registro POA vinculado"
+          "presupuestosIds": {
+            "example": [1, 2],
+            "description": "IDs de los registros de reserva de presupuesto (SolicitudPresupuesto)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
           },
           "aprobadorId": {
             "type": "number",
@@ -1357,6 +1766,16 @@
           }
         },
         "required": ["codigoDesembolso"]
+      },
+      "ReservarFuenteDto": {
+        "type": "object",
+        "properties": {
+          "poaId": {
+            "type": "number",
+            "description": "ID de la línea POA a reservar"
+          }
+        },
+        "required": ["poaId"]
       }
     }
   }

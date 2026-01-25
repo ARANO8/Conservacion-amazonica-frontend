@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +28,8 @@ import NominaTercerosForm from '@/components/solicitudes/nomina-terceros-form';
 import ReviewModal from '@/components/solicitudes/review-modal';
 import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
+import { presupuestosService } from '@/services/presupuestos.service';
+import { PresupuestoReserva } from '@/types/backend';
 import {
   formSchema,
   defaultValues,
@@ -51,24 +53,37 @@ export default function SolicitudPage() {
   const [step, setStep] = useState<WizardStep>('PLANIFICACION');
   const [loading, setLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [presupuestoSeleccionado, setPresupuestoSeleccionado] =
-    useState<number>(0);
+  const [misReservas, setMisReservas] = useState<PresupuestoReserva[]>([]);
   const [showBudgetWarning, setShowBudgetWarning] = useState(false);
 
-  const {
-    conceptos,
-    grupos,
-    partidas,
-    tiposGasto,
-    usuarios,
-    poaCodes,
-    isLoading,
-  } = useCatalogos();
+  const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
+    useCatalogos();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
+  // Carga inicial de reservas activas
+  useEffect(() => {
+    const fetchReservas = async () => {
+      try {
+        const data = await presupuestosService.getMisReservas();
+        setMisReservas(data);
+        if (data.length > 0) {
+          form.setValue(
+            'presupuestosIds',
+            data.map((r) => r.id)
+          );
+        }
+      } catch (error) {
+        console.error('Error al cargar reservas:', error);
+        toast.error('No se pudieron cargar tus reservas activas');
+      } finally {
+      }
+    };
+    fetchReservas();
+  }, [form]);
 
   const watchActividades = form.watch('actividades');
 
@@ -91,9 +106,21 @@ export default function SolicitudPage() {
     if (step === 'SOLICITUD') {
       const isValid = await form.trigger(['motivo', 'items', 'viaticos']);
       if (isValid) {
-        // Validación de Presupuesto: Si el total excede el presupuesto, bloqueamos.
-        if (granTotalLiquido > presupuestoSeleccionado) {
-          setShowBudgetWarning(true);
+        // Validación de Presupuestos: Verificar que todos los viáticos/gastos tengan reserva
+        const watchViaticos = form.getValues('viaticos') || [];
+        const watchGastos = form.getValues('items') || [];
+
+        const tieneViaticosSinReserva = watchViaticos.some(
+          (v) => !v.solicitudPresupuestoId
+        );
+        const tieneGastosSinReserva = watchGastos.some(
+          (g) => !g.solicitudPresupuestoId
+        );
+
+        if (tieneViaticosSinReserva || tieneGastosSinReserva) {
+          toast.error(
+            'Todos los ítems deben estar vinculados a una fuente de financiamiento'
+          );
           return;
         }
 
@@ -121,7 +148,7 @@ export default function SolicitudPage() {
     if (step === 'NOMINA') setStep('SOLICITUD');
   };
 
-  const onSubmit = async (_data: FormData) => {
+  const onSubmit = async () => {
     setLoading(true);
     try {
       toast.success('Solicitud enviada exitosamente');
@@ -146,18 +173,8 @@ export default function SolicitudPage() {
     );
   }
 
-  const watchViaticos = form.watch('viaticos') || [];
-  const watchItems = form.watch('items') || [];
-
-  const totalLiquidoViaticos = watchViaticos.reduce(
-    (acc: number, v) => acc + Number(v.liquidoPagable || 0),
-    0
-  );
-  const totalLiquidoGastos = watchItems.reduce(
-    (acc: number, g) => acc + Number(g.liquidoPagable || 0),
-    0
-  );
-  const granTotalLiquido = totalLiquidoViaticos + totalLiquidoGastos;
+  // Cálculos de totales movidos al Footer autónomo
+  // granTotalLiquido ya no es necesario aquí.
 
   // VISTA EXCLUSIVA PASO 3 (NOMINA)
   if (step === 'NOMINA') {
@@ -182,8 +199,6 @@ export default function SolicitudPage() {
               onNext={handleNext}
               onBack={handleBack}
               loading={loading}
-              monto={presupuestoSeleccionado}
-              totalLiquido={granTotalLiquido}
             />
           </div>
           <ReviewModal
@@ -281,11 +296,10 @@ export default function SolicitudPage() {
                     control={form.control}
                     watchActividades={watchActividades || []}
                     conceptos={conceptos}
-                    grupos={grupos}
-                    partidas={partidas}
                     tiposGasto={tiposGasto}
                     poaCodes={poaCodes}
-                    onBudgetChange={setPresupuestoSeleccionado}
+                    misReservas={misReservas}
+                    setMisReservas={setMisReservas}
                   />
                 )}
               </div>
@@ -297,8 +311,6 @@ export default function SolicitudPage() {
             onNext={handleNext}
             onBack={handleBack}
             loading={loading}
-            monto={presupuestoSeleccionado}
-            totalLiquido={granTotalLiquido}
           />
         </div>
         <ReviewModal

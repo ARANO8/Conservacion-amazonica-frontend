@@ -10,8 +10,6 @@ interface SolicitudFooterProps {
   onNext: () => void;
   onBack: () => void;
   loading?: boolean;
-  monto?: number;
-  totalLiquido?: number;
 }
 
 export default function SolicitudFooter({
@@ -19,88 +17,111 @@ export default function SolicitudFooter({
   onNext,
   onBack,
   loading = false,
-  monto = 0,
-  totalLiquido = 0,
 }: SolicitudFooterProps) {
   const { control } = useFormContext<FormData>();
 
-  // Observar cambios para el Monitor de Presupuesto
+  // TAREA 1: CALCULAR TOTALES GLOBALES (Reactividad Total)
+  const watchFuentes = useWatch({ control, name: 'fuentesSeleccionadas' });
   const watchViaticos = useWatch({ control, name: 'viaticos' });
   const watchItems = useWatch({ control, name: 'items' });
 
-  const totalRequested = useMemo(() => {
-    const vTotal = (watchViaticos || []).reduce(
-      (acc, v) => acc + (v?.amount || 0),
-      0
-    );
-    const iTotal = (watchItems || []).reduce(
-      (acc, i) => acc + (i?.amount || 0),
-      0
-    );
-    return vTotal + iTotal;
-  }, [watchViaticos, watchItems]);
+  const totales = useMemo(() => {
+    const fuentes = watchFuentes || [];
+    const viaticos = watchViaticos || [];
+    const items = watchItems || [];
 
-  const assignedBudget = monto;
-  const budgetBalance = assignedBudget - totalLiquido;
+    // 1. PRESUPUESTO TOTAL (Suma de montos reservados en las fuentes)
+    const totalFuentes = fuentes.reduce(
+      (acc: number, f) => acc + (Number(f?.montoReservado) || 0),
+      0
+    );
+
+    // 2. TOTAL NETO (Lo que pide el usuario sin impuestos)
+    const totalNeto = [...viaticos, ...items].reduce(
+      (acc: number, item) => acc + (Number(item?.montoNeto) || 0),
+      0
+    );
+
+    // 3. TOTAL EJECUTADO (BRUTO) (Costo Real con Impuestos)
+    const totalBruto = [...viaticos, ...items].reduce(
+      (acc: number, item) => acc + (Number(item?.liquidoPagable) || 0),
+      0
+    );
+
+    // 4. SALDO RESTANTE
+    const saldoGlobal = totalFuentes - totalBruto;
+
+    return { totalFuentes, totalNeto, totalBruto, saldoGlobal };
+  }, [watchFuentes, watchViaticos, watchItems]);
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">
       <div className="flex w-full justify-between">
         {step !== 'PLANIFICACION' ? (
           <Button type="button" variant="outline" size="lg" onClick={onBack}>
-            <ChevronLeft className="mr-2 h-4 w-4" /> Atrás
+            <ChevronLeft className="mr-2 size-4" /> Atrás
           </Button>
         ) : (
-          <div /> /* Spacer to keep "Siguiente" on the right */
+          <div />
         )}
 
         <div className="flex items-center gap-8">
-          {/* MONITOR DE PRESUPUESTO - Solo visible en SOLICITUD */}
-          {step === 'SOLICITUD' && (
+          {/* TAREA 2: MONITOR DE PRESUPUESTO GLOBAL */}
+          {(step === 'SOLICITUD' && (
             <div className="hidden items-center gap-6 text-sm sm:flex">
               <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-bold tracking-wider uppercase">
-                  Presupuesto
+                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
+                  PRESUPUESTO TOTAL
                 </span>
                 <span className="font-semibold">
-                  {formatMoney(assignedBudget)}
+                  {formatMoney(totales.totalFuentes)}
                 </span>
               </div>
               <div className="bg-border h-8 w-[1px]" />
               <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-bold tracking-wider uppercase">
-                  Total Solicitado
+                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
+                  TOTAL NETO (SOLICITADO)
                 </span>
                 <span className="text-primary font-bold">
-                  {formatMoney(totalRequested)}
+                  {formatMoney(totales.totalNeto)}
                 </span>
               </div>
               <div className="bg-border h-8 w-[1px]" />
               <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-bold tracking-wider uppercase">
-                  Total Líquido
+                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
+                  TOTAL EJECUTADO (BRUTO)
                 </span>
-                <span className="font-bold text-emerald-600">
-                  {formatMoney(totalLiquido)}
+                <span className="text-foreground font-bold">
+                  {formatMoney(totales.totalBruto)}
                 </span>
               </div>
               <div className="bg-border h-8 w-[1px]" />
               <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-bold tracking-wider uppercase">
-                  Saldo
+                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
+                  SALDO RESTANTE
                 </span>
                 <span
-                  className={`font-black ${
-                    budgetBalance < 0
-                      ? 'text-destructive animate-bounce'
+                  className={`font-black tracking-tight ${
+                    totales.saldoGlobal < 0
+                      ? 'text-destructive animate-pulse'
                       : 'text-emerald-600'
                   }`}
                 >
-                  {formatMoney(budgetBalance)}
+                  {formatMoney(totales.saldoGlobal)}
                 </span>
               </div>
             </div>
-          )}
+          )) ||
+            (step === 'NOMINA' && (
+              <div className="mr-4 flex flex-col items-end">
+                <span className="text-muted-foreground text-[10px] font-black uppercase">
+                  TOTAL A PAGAR (BRUTO)
+                </span>
+                <span className="text-primary text-lg font-black">
+                  {formatMoney(totales.totalBruto)}
+                </span>
+              </div>
+            ))}
 
           <Button
             type="button"

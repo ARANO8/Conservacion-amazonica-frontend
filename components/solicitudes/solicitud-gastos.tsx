@@ -1,13 +1,12 @@
 'use client';
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect } from 'react';
 import {
   Control,
   useFieldArray,
   useWatch,
   useFormContext,
 } from 'react-hook-form';
-import { catalogosService } from '@/services/catalogos.service';
 import {
   FormControl,
   FormField,
@@ -27,13 +26,15 @@ import { Trash2 } from 'lucide-react';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import { Grupo, Partida, TipoGasto } from '@/types/catalogs';
+import { Grupo, TipoGasto } from '@/types/catalogs';
+import { PresupuestoReserva } from '@/types/backend';
 
 interface SolicitudGastosProps {
   control: Control<FormData>;
   grupos: Grupo[];
   tiposGasto: TipoGasto[];
   proyectoId?: number;
+  fuentesDisponibles: PresupuestoReserva[];
 }
 
 export default function SolicitudGastos({
@@ -41,6 +42,7 @@ export default function SolicitudGastos({
   grupos,
   tiposGasto,
   proyectoId,
+  fuentesDisponibles,
 }: SolicitudGastosProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -59,6 +61,7 @@ export default function SolicitudGastos({
             grupos={grupos}
             tiposGasto={tiposGasto}
             isDisabled={!proyectoId}
+            fuentesDisponibles={fuentesDisponibles}
           />
         ))}
       </div>
@@ -69,15 +72,14 @@ export default function SolicitudGastos({
         size="sm"
         onClick={() =>
           append({
-            groupId: '',
-            budgetLineId: '',
+            solicitudPresupuestoId: 0,
             document: 'Factura',
             typeId: '',
             quantity: 1,
-            unitCost: 0,
             amount: 0,
+            montoNeto: 0,
             description: '',
-            financingSourceId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+            financingSourceId: '',
           })
         }
       >
@@ -94,39 +96,26 @@ interface GastoCardProps {
   grupos: Grupo[];
   tiposGasto: TipoGasto[];
   isDisabled?: boolean;
+  fuentesDisponibles: PresupuestoReserva[];
 }
 
 function GastoCard({
   index,
   control,
   remove,
-  grupos,
   tiposGasto,
-  isDisabled,
+  fuentesDisponibles,
 }: GastoCardProps) {
   const { setValue } = useFormContext<FormData>();
-  const [partidas, setPartidas] = useState<Partida[]>([]);
-  const [isLoadingPartidas, setIsLoadingPartidas] = useState(false);
-
-  const quantity = useWatch({
+  const montoNeto = useWatch({
     control,
-    name: `items.${index}.quantity`,
-  }) as number;
-
-  const unitCost = useWatch({
-    control,
-    name: `items.${index}.unitCost`,
+    name: `items.${index}.montoNeto`,
   }) as number;
 
   const liquidoPagable = useWatch({
     control,
     name: `items.${index}.liquidoPagable`,
   }) as number;
-
-  const selectedGroupId = useWatch({
-    control,
-    name: `items.${index}.groupId`,
-  }) as unknown as number;
 
   const watchDocument = useWatch({
     control,
@@ -136,13 +125,11 @@ function GastoCard({
   const watchTypeId = useWatch({
     control,
     name: `items.${index}.typeId`,
-  }) as number;
+  });
 
   const netoTotal = useMemo(() => {
-    const q = Number(quantity) || 0;
-    const u = Number(unitCost) || 0;
-    return q * u;
-  }, [quantity, unitCost]);
+    return Number(montoNeto) || 0;
+  }, [montoNeto]);
 
   const brutoTotal = useMemo(() => {
     const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
@@ -171,31 +158,8 @@ function GastoCard({
     setValue(`items.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
   }, [brutoTotal, netoTotal, setValue, index]);
 
-  // Fetch partidas when group changes
-  useEffect(() => {
-    const fetchPartidas = async () => {
-      // Reset logic handled in Select onChange, but ensure we clear options if invalid group
-      if (!selectedGroupId || isNaN(Number(selectedGroupId))) {
-        setPartidas([]);
-        return;
-      }
-
-      try {
-        setIsLoadingPartidas(true);
-        const data = await catalogosService.getPartidasByGrupo(
-          Number(selectedGroupId)
-        );
-        setPartidas(data);
-      } catch (error) {
-        console.error('Error fetching partidas for row:', error);
-        setPartidas([]);
-      } finally {
-        setIsLoadingPartidas(false);
-      }
-    };
-
-    fetchPartidas();
-  }, [selectedGroupId]);
+  // Los gastos ahora se vinculan directamente a una reserva de la canasta,
+  // por lo que no requieren cargar partidas dinámicamente aquí.
 
   // Impuestos informativos (Retenciones)
   const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
@@ -226,72 +190,26 @@ function GastoCard({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           <FormField
             control={control}
-            name={`items.${index}.groupId`}
+            name={`items.${index}.solicitudPresupuestoId`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Grupo
-                </Label>
-                <Select
-                  onValueChange={(val) => {
-                    field.onChange(Number(val));
-                    // Resetear partida al cambiar de grupo
-                    setValue(`items.${index}.budgetLineId`, '');
-                    setPartidas([]); // Clear immediately while fetching
-                  }}
-                  value={field.value?.toString() || ''}
-                  disabled={isDisabled}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar Grupo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent
-                    position="popper"
-                    side="bottom"
-                    align="start"
-                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
-                  >
-                    {grupos.length > 0 ? (
-                      grupos.map((grupo) => (
-                        <SelectItem key={grupo.id} value={grupo.id.toString()}>
-                          {grupo.nombre}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="none" disabled>
-                        No hay grupos con presupuesto para este proyecto
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`items.${index}.budgetLineId`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Partida
+                  Fuente de Financiamiento
                 </Label>
                 <Select
                   onValueChange={(val) => field.onChange(Number(val))}
                   value={field.value?.toString() || ''}
-                  disabled={!selectedGroupId || isLoadingPartidas}
+                  disabled={fuentesDisponibles.length === 0}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      {isLoadingPartidas ? (
-                        <span className="text-muted-foreground">
-                          Cargando...
-                        </span>
-                      ) : (
-                        <SelectValue placeholder="Seleccionar Partida" />
-                      )}
+                      <SelectValue
+                        placeholder={
+                          fuentesDisponibles.length === 0
+                            ? 'Primero agregue una fuente arriba'
+                            : 'Seleccionar fuente...'
+                        }
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent
@@ -300,22 +218,16 @@ function GastoCard({
                     align="start"
                     className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
                   >
-                    {partidas.length > 0 ? (
-                      partidas.map((partida) => (
-                        <SelectItem
-                          key={partida.id}
-                          value={partida.id.toString()}
-                        >
-                          {partida.codigo} - {partida.nombre}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="none" disabled>
-                        {isLoadingPartidas
-                          ? 'Cargando...'
-                          : 'No hay partidas disponibles'}
+                    {[
+                      ...new Map(
+                        fuentesDisponibles.map((f) => [f.id, f])
+                      ).values(),
+                    ].map((fuente) => (
+                      <SelectItem key={fuente.id} value={fuente.id.toString()}>
+                        ID: {fuente.id} - {fuente.poa?.partida?.nombre} (
+                        {fuente.poa?.codigoPresupuestario?.codigoCompleto})
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -418,11 +330,11 @@ function GastoCard({
           />
           <FormField
             control={control}
-            name={`items.${index}.unitCost`}
+            name={`items.${index}.montoNeto`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Costo Unitario Líquido (Bs)
+                  Monto Neto Líquido (Bs)
                 </Label>
                 <FormControl>
                   <Input
