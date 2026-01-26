@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { ClipboardPlus, Command, FileText, LifeBuoy, Send } from 'lucide-react';
+import Image from 'next/image';
+import { ClipboardPlus, FileText, LifeBuoy, Send } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
 import { NavSecondary } from '@/components/ui/nav-secondary';
@@ -65,11 +66,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">SyFin</span>
+                <div className="flex items-center justify-start px-2 py-4">
+                  <Image
+                    src="/Logo-AMZ-desk-ok.webp"
+                    alt="AMZ Desk"
+                    width={120}
+                    height={40}
+                    priority
+                    className="h-auto w-auto max-w-[140px]"
+                  />
                 </div>
               </a>
             </SidebarMenuButton>

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { LoginForm } from '@/components/auth/login-form';
 import { ApiStatus } from '@/components/auth/api-status';
 
@@ -8,6 +9,14 @@ export default function LoginPage() {
         <ApiStatus />
       </div>
       <div className="w-full max-w-sm">
+        <Image
+          src="/Logo-AMZ-desk-ok.webp"
+          alt="AMZ Desk"
+          width={180}
+          height={60}
+          priority
+          className="mx-auto mb-6"
+        />
         <LoginForm />
       </div>
     </div>
