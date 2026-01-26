@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Field,
@@ -47,6 +47,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
 
 export default function SolicitudPage() {
   const router = useRouter();
@@ -79,7 +80,6 @@ export default function SolicitudPage() {
       } catch (error) {
         console.error('Error al cargar reservas:', error);
         toast.error('No se pudieron cargar tus reservas activas');
-      } finally {
       }
     };
     fetchReservas();
@@ -148,14 +148,30 @@ export default function SolicitudPage() {
     if (step === 'NOMINA') setStep('SOLICITUD');
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: FormData) => {
+    const aprobadorId = Number(data.destinatario);
+
+    if (!aprobadorId) {
+      toast.error('Por favor, selecciona un destinatario (aprobador)');
+      return;
+    }
+
     setLoading(true);
     try {
+      const payload = adaptFormToPayload(data, aprobadorId);
+      console.log(
+        '🚀 PAYLOAD FINAL PARA EL BACKEND:',
+        JSON.stringify(payload, null, 2)
+      );
+
+      // Simular latencia de red
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/solicitudes');
     } catch (error) {
-      console.error(error);
-      toast.error('Error al enviar la solicitud');
+      console.error('Error al preparar el payload:', error);
+      toast.error('Ocurrió un error al procesar la solicitud');
     } finally {
       setLoading(false);
       setIsReviewModalOpen(false);
@@ -173,48 +189,6 @@ export default function SolicitudPage() {
     );
   }
 
-  // Cálculos de totales movidos al Footer autónomo
-  // granTotalLiquido ya no es necesario aquí.
-
-  // VISTA EXCLUSIVA PASO 3 (NOMINA)
-  if (step === 'NOMINA') {
-    return (
-      <div className="bg-background flex h-[calc(100vh-4rem)] w-full flex-col overflow-hidden">
-        <SolicitudHeader step={step} />
-        <Form {...form}>
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-6">
-              <form
-                id="nomina-form"
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <div className="animate-in fade-in duration-500">
-                  <NominaTercerosForm control={form.control} />
-                </div>
-              </form>
-            </div>
-            <SolicitudFooter
-              step={step}
-              onNext={handleNext}
-              onBack={handleBack}
-              loading={loading}
-            />
-          </div>
-          <ReviewModal
-            isOpen={isReviewModalOpen}
-            onOpenChange={setIsReviewModalOpen}
-            onSubmit={onSubmit}
-            loading={loading}
-            usuarios={usuarios}
-            misReservas={misReservas}
-          />
-        </Form>
-      </div>
-    );
-  }
-
-  // VISTA COMPARTIDA PASOS 1 y 2
   return (
     <div className="bg-background flex h-[calc(100vh-4rem)] w-full flex-col overflow-hidden">
       <SolicitudHeader step={step} />
@@ -232,7 +206,6 @@ export default function SolicitudPage() {
             >
               <div className="animate-in fade-in duration-500">
                 {step === 'PLANIFICACION' && (
-                  /* PASO 1: PLANIFICACIÓN */
                   <FieldGroup>
                     <FieldSet>
                       <FieldLegend>
@@ -268,7 +241,7 @@ export default function SolicitudPage() {
                               <FormControl>
                                 <Textarea
                                   {...field}
-                                  placeholder="Describe brevemente el propósito de esta movilización"
+                                  placeholder="Describe el propósito de esta movilización"
                                   className="min-h-24"
                                 />
                               </FormControl>
@@ -278,9 +251,7 @@ export default function SolicitudPage() {
                         />
                       </div>
                     </FieldSet>
-
                     <Separator />
-
                     <FieldSet>
                       <FieldLegend>Cronograma de Actividades</FieldLegend>
                       <PlanificacionActividades
@@ -292,7 +263,6 @@ export default function SolicitudPage() {
                 )}
 
                 {step === 'SOLICITUD' && (
-                  /* PASO 2: SOLICITUD DE FONDOS */
                   <SolicitudEconomica
                     control={form.control}
                     watchActividades={watchActividades || []}
@@ -302,6 +272,10 @@ export default function SolicitudPage() {
                     misReservas={misReservas}
                     setMisReservas={setMisReservas}
                   />
+                )}
+
+                {step === 'NOMINA' && (
+                  <NominaTercerosForm control={form.control} />
                 )}
               </div>
             </form>
@@ -314,6 +288,7 @@ export default function SolicitudPage() {
             loading={loading}
           />
         </div>
+
         <ReviewModal
           isOpen={isReviewModalOpen}
           onOpenChange={setIsReviewModalOpen}
@@ -328,17 +303,16 @@ export default function SolicitudPage() {
           onOpenChange={setShowBudgetWarning}
         >
           <AlertDialogContent className="max-w-md">
-            <AlertDialogHeader className="flex flex-col items-center text-center sm:items-center sm:text-center">
+            <AlertDialogHeader className="flex flex-col items-center text-center">
               <div className="bg-destructive/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
                 <AlertTriangle className="text-destructive h-6 w-6" />
               </div>
               <AlertDialogTitle className="text-xl font-bold">
                 Presupuesto Excedido
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-muted-foreground mt-2">
-                El monto total solicitado supera el saldo disponible en la
-                partida seleccionada. Por favor, ajuste los viáticos o gastos
-                antes de continuar.
+              <AlertDialogDescription>
+                El monto total solicitado supera el saldo disponible. Por favor
+                ajuste los montos.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">
