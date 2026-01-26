@@ -3,6 +3,7 @@
 import { useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -15,6 +16,7 @@ import {
   useFieldArray,
   UseFormWatch,
   useFormContext,
+  useWatch,
 } from 'react-hook-form';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
@@ -22,8 +24,10 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 interface SolicitudItemsProps {
   control: Control<FormData>;
   watch: UseFormWatch<FormData>;
-  budgetLines: { id: string; code: string; name: string }[];
-  financingSources: { id: string; code: string; name: string }[]; // Keeping strict type, though we might not use it for 'Grupo'
+  budgetLines: BudgetLine[];
+  financingSources: FinancingSource[];
+  isLoading?: boolean;
+  totalAmount?: number;
 }
 
 function formatMoney(n: number) {
@@ -40,6 +44,8 @@ export default function SolicitudItems({
   watch,
   budgetLines,
   financingSources,
+  isLoading = false,
+  totalAmount,
 }: SolicitudItemsProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -48,7 +54,10 @@ export default function SolicitudItems({
 
   const { setValue } = useFormContext();
 
-  const watchItems = watch('items');
+  const watchedItems = useWatch({
+    control,
+    name: 'items',
+  });
 
   // Calculates total (cantidad * costoUnitario)
   useEffect(() => {
@@ -65,14 +74,13 @@ export default function SolicitudItems({
         setValue(`items.${index}.montoNeto`, newTotal);
       }
     });
-  }, [watchItems, setValue]);
+  }, [watchedItems, setValue]);
 
   const totalLiquido = useMemo(() => {
     return (watchItems || []).reduce(
       (acc: number, item) => acc + (Number(item.liquidoPagable) || 0),
       0
     );
-  }, [watchItems]);
 
   return (
     <div className="space-y-3 overflow-x-auto pb-4">
@@ -211,18 +219,22 @@ export default function SolicitudItems({
                   control={control}
                   name={`items.${idx}.cantidad`}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-1">
+                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                        Descripción / Detalle del Gasto
+                      </Label>
                       <FormControl>
                         <Input
                           type="number"
                           min={1}
                           className="h-8 text-xs"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          value={field.value ?? ''}
+                          placeholder="Especificar el concepto del gasto..."
+                          className="h-9 text-xs"
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -234,22 +246,27 @@ export default function SolicitudItems({
                   control={control}
                   name={`items.${idx}.costoUnitario`}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-1">
+                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
+                        Costo Unit. (Bs)
+                      </Label>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
-                          className="h-8 text-xs"
+                          className="h-9 text-right text-xs font-bold"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? '' : Number(val));
+                          }}
                         />
                       </FormControl>
                     </FormItem>
                   )}
                 />
               </div>
+            </div>
 
               {/* Total Bs */}
               <div>
@@ -264,16 +281,7 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Taxes (Visual) */}
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
-              <div>
-                <Input placeholder="0" className="h-8 text-xs" disabled />
-              </div>
+              <div className="bg-muted-foreground/20 hidden h-8 w-[1px] sm:block" />
 
               {/* Liquido */}
               <div>
@@ -288,40 +296,42 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Actions */}
-              <div className="flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:text-destructive h-8 w-8 shrink-0"
-                  type="button"
-                  onClick={() => remove(idx)}
-                >
-                  <span className="sr-only">Eliminar</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-4"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    <line x1="10" x2="10" y1="11" y2="17" />
-                    <line x1="14" x2="14" y1="11" y2="17" />
-                  </svg>
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              <input
+                type="hidden"
+                {...control.register(`items.${idx}.amount`)}
+              />
 
-      <div className="flex items-center justify-between pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10 ml-auto h-8 gap-2 px-3"
+                type="button"
+                onClick={() => remove(idx)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-3.5"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                <span className="text-[10px] font-bold uppercase">
+                  Eliminar
+                </span>
+              </Button>
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
         <Button
           variant="outline"
           size="sm"
@@ -338,18 +348,31 @@ export default function SolicitudItems({
               liquidoPagable: 0,
             })
           }
+          className="h-10 border-dashed px-6"
         >
-          + Añadir Gasto
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2 size-4"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+          Nuevo Ítem de Gasto
         </Button>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground font-bold">
-            Total Líquido Pagable Bs. :
+
+        <div className="bg-muted/40 border-primary/10 flex items-center gap-3 rounded-xl border p-2 px-4">
+          <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+            Monto Total Solicitado (Bs)
           </span>
-          <Input
-            className="w-36 font-bold"
-            readOnly
-            value={formatMoney(totalLiquido)}
-          />
+          <div className="text-primary font-mono text-xl font-black">
+            {formatMoney(displayTotal)}
+          </div>
         </div>
       </div>
     </div>
