@@ -49,16 +49,15 @@ export const formSchema = z.object({
   viaticos: z
     .array(
       z.object({
-        concepto: z.string().optional(),
-        planificacionId: z.string().optional(),
+        conceptoId: z.number().optional(),
+        planificacionIndex: z.number().optional(),
         ciudad: z.string().optional(),
         destino: z.string().optional(),
-        tipo: z.string().optional(),
+        tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
         dias: z.number().optional(),
-        personas: z.number().optional(),
+        cantidadPersonas: z.number().optional(),
         montoNeto: z.number().min(0, 'Monto inválido'),
         solicitudPresupuestoId: z.number(),
-        amount: z.number().optional(),
         liquidoPagable: z.number().optional(),
       })
     )
@@ -70,13 +69,12 @@ export const formSchema = z.object({
     .array(
       z.object({
         solicitudPresupuestoId: z.number(),
-        document: z.string().optional(),
-        typeId: z.union([z.string(), z.number()]).optional(),
-        amount: z.number().min(0, 'Monto inválido'),
-        quantity: z.number().min(0).optional(),
+        tipoDocumento: z.enum(['FACTURA', 'RECIBO']).optional(),
+        tipoGastoId: z.number().optional(),
         montoNeto: z.number().min(0, 'Monto inválido'),
-        description: z.string().optional(),
-        financingSourceId: z.string().optional(),
+        cantidad: z.number().min(1).optional(),
+        costoUnitario: z.number().min(0).optional(),
+        detalle: z.string().optional(),
         liquidoPagable: z.number().optional(),
       })
     )
@@ -86,7 +84,7 @@ export const formSchema = z.object({
     .array(
       z.object({
         nombreCompleto: z.string().min(1, 'El nombre completo es requerido'),
-        institucion: z.string().min(1, 'La institución es requerida'),
+        ci: z.string().min(1, 'El CI es requerido'),
       })
     )
     .optional(),
@@ -116,28 +114,26 @@ export const defaultValues: FormData = {
   items: [
     {
       solicitudPresupuestoId: 0,
-      document: 'Factura',
-      typeId: '',
-      quantity: 1,
+      tipoDocumento: 'FACTURA',
+      tipoGastoId: 0,
+      cantidad: 1,
+      costoUnitario: 0,
       montoNeto: 0,
-      amount: 0,
-      description: '',
-      financingSourceId: '',
+      detalle: '',
       liquidoPagable: 0,
     },
   ],
   viaticos: [
     {
-      concepto: 'viaticos',
-      planificacionId: '',
+      conceptoId: 0,
+      planificacionIndex: 0,
       ciudad: '',
       destino: '',
-      tipo: 'institucional',
+      tipoDestino: 'INSTITUCIONAL',
       dias: 1,
-      personas: 1,
+      cantidadPersonas: 1,
       montoNeto: 0,
       solicitudPresupuestoId: 0,
-      amount: 0,
       liquidoPagable: 0,
     },
   ],

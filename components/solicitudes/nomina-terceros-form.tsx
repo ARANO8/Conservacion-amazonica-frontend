@@ -10,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Trash2, UserPlus } from 'lucide-react';
-import { FormData } from '@/app/dashboard/solicitud/page';
+import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { Label } from '@/components/ui/label';
 
 interface NominaTercerosFormProps {
@@ -55,7 +55,7 @@ export default function NominaTercerosForm({
         onClick={() =>
           append({
             nombreCompleto: '',
-            institucion: '',
+            ci: '',
           })
         }
       >
@@ -93,17 +93,14 @@ function NominaCard({ index, control, remove }: NominaCardProps) {
         />
         <FormField
           control={control}
-          name={`nomina.${index}.institucion`}
+          name={`nomina.${index}.ci`}
           render={({ field }) => (
             <FormItem>
               <Label className="text-muted-foreground text-xs font-bold uppercase">
-                Institución o Procedencia
+                C.I. / Documento de Identidad
               </Label>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Ej. Universidad Mayor de San Andrés"
-                />
+                <Input {...field} placeholder="Ej. 1234567 LP" />
               </FormControl>
               <FormMessage />
             </FormItem>

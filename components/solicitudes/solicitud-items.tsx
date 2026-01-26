@@ -50,27 +50,26 @@ export default function SolicitudItems({
 
   const watchItems = watch('items');
 
-  // Calculates total (quantity * unitCost)
+  // Calculates total (cantidad * costoUnitario)
   useEffect(() => {
     if (!watchItems) return;
     (watchItems as FormData['items']).forEach((item, index) => {
-      const q = Number(item.quantity) || 0;
-      const u = Number(item.unitCost) || 0;
+      const q = Number(item.cantidad) || 0;
+      const u = Number(item.costoUnitario) || 0;
       const newTotal = q * u; // Base Total
 
-      const currentAmount = Number(item.amount) || 0;
-
-      // Calculate taxes if we were to support them, but for now Liquid = Total based on "Líquido pagable Bs. (Cálculo final)"
+      const currentAmount = Number(item.liquidoPagable) || 0;
 
       if (Math.abs(newTotal - currentAmount) > 0.001) {
-        setValue(`items.${index}.amount`, newTotal);
+        setValue(`items.${index}.liquidoPagable`, newTotal);
+        setValue(`items.${index}.montoNeto`, newTotal);
       }
     });
   }, [watchItems, setValue]);
 
   const totalLiquido = useMemo(() => {
     return (watchItems || []).reduce(
-      (acc: number, item) => acc + (Number(item.amount) || 0),
+      (acc: number, item) => acc + (Number(item.liquidoPagable) || 0),
       0
     );
   }, [watchItems]);
@@ -78,11 +77,9 @@ export default function SolicitudItems({
   return (
     <div className="space-y-3 overflow-x-auto pb-4">
       <div className="min-w-[1000px]">
-        {' '}
-        {/* Ensure generic width for scroll */}
         {/* Headers */}
-        <div className="text-muted-foreground mb-2 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] gap-2 px-2 text-xs font-medium">
-          <div>Fuente</div>
+        <div className="text-muted-foreground mb-2 grid grid-cols-[1.5fr_1.5fr_1fr_1fr_0.5fr_0.7fr_0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_0.3fr] gap-2 px-2 text-xs font-medium">
+          <div>Detalle</div>
           <div>Partida</div>
           <div>Docum</div>
           <div>Tipo</div>
@@ -97,28 +94,49 @@ export default function SolicitudItems({
         </div>
         {fields.map((field, idx) => {
           const currentItem = watchItems?.[idx] || {};
-          const q = Number(currentItem.quantity) || 0;
-          const u = Number(currentItem.unitCost) || 0;
+          const q = Number(currentItem.cantidad) || 0;
+          const u = Number(currentItem.costoUnitario) || 0;
           const total = q * u;
 
           return (
             <div
               key={field.id}
-              className="bg-muted/5 grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.7fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
+              className="bg-muted/5 grid grid-cols-[1.5fr_1.5fr_1fr_1fr_0.5fr_0.7fr_0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
             >
+              {/* Detalle */}
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.financingSourceId`}
+                  name={`items.${idx}.detalle`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ''}
+                          placeholder="Descripción..."
+                          className="h-8 text-xs"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Partida / Fuente (solicitudPresupuestoId) */}
+              <div>
+                <FormField
+                  control={control}
+                  name={`items.${idx}.solicitudPresupuestoId`}
                   render={({ field }) => (
                     <FormItem>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(val) => field.onChange(Number(val))}
                         value={field.value?.toString() || ''}
                       >
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Fuente" />
+                            <SelectValue placeholder="Presupuesto" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -138,32 +156,25 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Partida */}
+              {/* Tipo Documento */}
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.budgetLineId`}
+                  name={`items.${idx}.tipoDocumento`}
                   render={({ field }) => (
                     <FormItem>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value?.toString() || ''}
+                        value={field.value || 'FACTURA'}
                       >
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Partida" />
+                            <SelectValue placeholder="Doc." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {budgetLines.map((bl) => (
-                            <SelectItem
-                              key={bl.id}
-                              value={String(bl.id)}
-                              className="text-xs"
-                            >
-                              {bl.code} - {bl.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="FACTURA">Factura</SelectItem>
+                          <SelectItem value="RECIBO">Recibo</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -171,59 +182,17 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Document */}
+              {/* Tipo Gasto */}
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.document`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          // Ensure value is never undefined
-                          value={field.value ?? ''}
-                          placeholder="Doc."
-                          className="h-8 text-xs"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Type */}
-              <div>
-                <FormField
-                  control={control}
-                  name={`items.${idx}.typeId`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          // Ensure value is never undefined
-                          value={field.value ?? ''}
-                          placeholder="Tipo"
-                          className="h-8 text-xs"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Cant */}
-              <div>
-                <FormField
-                  control={control}
-                  name={`items.${idx}.quantity`}
+                  name={`items.${idx}.tipoGastoId`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <Input
                           type="number"
-                          min={0}
+                          placeholder="ID Tipo"
                           className="h-8 text-xs"
                           {...field}
                           onChange={(e) =>
@@ -236,11 +205,34 @@ export default function SolicitudItems({
                 />
               </div>
 
-              {/* Costo Unit */}
+              {/* Cantidad */}
               <div>
                 <FormField
                   control={control}
-                  name={`items.${idx}.unitCost`}
+                  name={`items.${idx}.cantidad`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          className="h-8 text-xs"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Costo Unitario */}
+              <div>
+                <FormField
+                  control={control}
+                  name={`items.${idx}.costoUnitario`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -268,13 +260,7 @@ export default function SolicitudItems({
                 />
                 <input
                   type="hidden"
-                  {...control.register(`items.${idx}.amount`)}
-                />
-                {/* Hidden description field as it is required by backend */}
-                <input
-                  type="hidden"
-                  {...control.register(`items.${idx}.description`)}
-                  defaultValue="Gasto"
+                  {...control.register(`items.${idx}.montoNeto`)}
                 />
               </div>
 
@@ -295,6 +281,10 @@ export default function SolicitudItems({
                   readOnly
                   className="h-8 font-mono text-xs font-bold"
                   value={total.toFixed(2)}
+                />
+                <input
+                  type="hidden"
+                  {...control.register(`items.${idx}.liquidoPagable`)}
                 />
               </div>
 
@@ -338,14 +328,14 @@ export default function SolicitudItems({
           type="button"
           onClick={() =>
             append({
-              budgetLineId: '',
-              financingSourceId: '',
-              amount: 0,
-              quantity: 1,
-              unitCost: 0,
-              document: '',
-              typeId: '',
-              description: '',
+              solicitudPresupuestoId: 0,
+              tipoDocumento: 'FACTURA',
+              tipoGastoId: 0,
+              cantidad: 1,
+              costoUnitario: 0,
+              montoNeto: 0,
+              detalle: '',
+              liquidoPagable: 0,
             })
           }
         >

@@ -73,13 +73,13 @@ export default function SolicitudGastos({
         onClick={() =>
           append({
             solicitudPresupuestoId: 0,
-            document: 'Factura',
-            typeId: '',
-            quantity: 1,
-            amount: 0,
+            tipoDocumento: 'FACTURA',
+            tipoGastoId: 0,
+            cantidad: 1,
+            costoUnitario: 0,
             montoNeto: 0,
-            description: '',
-            financingSourceId: '',
+            detalle: '',
+            liquidoPagable: 0,
           })
         }
       >
@@ -110,7 +110,12 @@ function GastoCard({
 
   const cantidad = useWatch({
     control,
-    name: `items.${index}.quantity`,
+    name: `items.${index}.cantidad`,
+  }) as number;
+
+  const costoUnitario = useWatch({
+    control,
+    name: `items.${index}.costoUnitario`,
   }) as number;
 
   const montoNeto = useWatch({
@@ -123,26 +128,26 @@ function GastoCard({
     name: `items.${index}.liquidoPagable`,
   }) as number;
 
-  const watchDocument = useWatch({
+  const watchDocumento = useWatch({
     control,
-    name: `items.${index}.document`,
+    name: `items.${index}.tipoDocumento`,
   }) as string;
 
-  const watchTypeId = useWatch({
+  const watchTipoGastoId = useWatch({
     control,
-    name: `items.${index}.typeId`,
+    name: `items.${index}.tipoGastoId`,
   });
 
   const netoTotal = useMemo(() => {
     const qty = Number(cantidad) || 0;
-    const monto = Number(montoNeto) || 0;
-    return qty * monto;
-  }, [cantidad, montoNeto]);
+    const cost = Number(costoUnitario) || 0;
+    return qty * cost;
+  }, [cantidad, costoUnitario]);
 
   const brutoTotal = useMemo(() => {
-    const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
+    const isRecibo = (watchDocumento || '').toUpperCase() === 'RECIBO';
     const tipoObj = tiposGasto.find(
-      (t) => Number(t.id) === Number(watchTypeId)
+      (t) => Number(t.id) === Number(watchTipoGastoId)
     );
     const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
 
@@ -158,11 +163,10 @@ function GastoCard({
       }
     }
     return netoTotal * (1 + extraRate);
-  }, [netoTotal, watchDocument, watchTypeId, tiposGasto]);
+  }, [netoTotal, watchDocumento, watchTipoGastoId, tiposGasto]);
 
   useEffect(() => {
-    // Neto -> amount, Bruto -> liquidoPagable
-    setValue(`items.${index}.amount`, Number(netoTotal.toFixed(2)));
+    setValue(`items.${index}.montoNeto`, Number(netoTotal.toFixed(2)));
     setValue(`items.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
   }, [brutoTotal, netoTotal, setValue, index]);
 
@@ -170,8 +174,10 @@ function GastoCard({
   // por lo que no requieren cargar partidas dinámicamente aquí.
 
   // Impuestos informativos (Retenciones)
-  const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
-  const tipoObj = tiposGasto.find((t) => Number(t.id) === Number(watchTypeId));
+  const isRecibo = (watchDocumento || '').toUpperCase() === 'RECIBO';
+  const tipoObj = tiposGasto.find(
+    (t) => Number(t.id) === Number(watchTipoGastoId)
+  );
   const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
 
   let iva = 0;
@@ -244,7 +250,7 @@ function GastoCard({
           />
           <FormField
             control={control}
-            name={`items.${index}.document`}
+            name={`items.${index}.tipoDocumento`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
@@ -252,7 +258,7 @@ function GastoCard({
                 </Label>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value ?? 'Factura'}
+                  value={field.value ?? 'FACTURA'}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -265,8 +271,8 @@ function GastoCard({
                     align="start"
                     className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
                   >
-                    <SelectItem value="Factura">Factura</SelectItem>
-                    <SelectItem value="Recibo">Recibo</SelectItem>
+                    <SelectItem value="FACTURA">Factura</SelectItem>
+                    <SelectItem value="RECIBO">Recibo</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -275,7 +281,7 @@ function GastoCard({
           />
           <FormField
             control={control}
-            name={`items.${index}.typeId`}
+            name={`items.${index}.tipoGastoId`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
@@ -313,7 +319,7 @@ function GastoCard({
         <div className="grid gap-4 md:grid-cols-3">
           <FormField
             control={control}
-            name={`items.${index}.quantity`}
+            name={`items.${index}.cantidad`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
@@ -338,18 +344,18 @@ function GastoCard({
           />
           <FormField
             control={control}
-            name={`items.${index}.montoNeto`}
+            name={`items.${index}.costoUnitario`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Monto Neto Líquido (Bs)
+                  Costo Unitario (Bs)
                 </Label>
                 <FormControl>
                   <Input
                     type="number"
                     {...field}
                     className="w-full"
-                    value={field.value ?? 0}
+                    value={field.value}
                     min={0}
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()

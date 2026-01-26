@@ -51,7 +51,7 @@ export default function ReviewModal({
   const data = watch();
 
   const totalViaticos = (data.viaticos || []).reduce(
-    (acc: number, v) => acc + (Number(v.amount) || 0),
+    (acc: number, v) => acc + (Number(v.montoNeto) || 0),
     0
   );
   const totalLiquidoViaticos = (data.viaticos || []).reduce(
@@ -60,7 +60,7 @@ export default function ReviewModal({
   );
 
   const totalGastos = (data.items || []).reduce(
-    (acc: number, i) => acc + (Number(i.amount) || 0),
+    (acc: number, i) => acc + (Number(i.montoNeto) || 0),
     0
   );
   const totalLiquidoGastos = (data.items || []).reduce(

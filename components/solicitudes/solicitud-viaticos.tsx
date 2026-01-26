@@ -69,13 +69,14 @@ export default function SolicitudViaticos({
         size="sm"
         onClick={() =>
           append({
-            concepto: '',
-            planificacionId: '',
-            tipo: 'institucional',
+            conceptoId: 0,
+            planificacionIndex: 0,
+            tipoDestino: 'INSTITUCIONAL',
             dias: 0,
-            personas: 0,
+            cantidadPersonas: 0,
             montoNeto: 0,
             solicitudPresupuestoId: 0,
+            liquidoPagable: 0,
           })
         }
       >
@@ -111,7 +112,7 @@ function ViaticoCard({
 
   const personas = useWatch({
     control,
-    name: `viaticos.${index}.personas`,
+    name: `viaticos.${index}.cantidadPersonas`,
   }) as number;
 
   const montoNeto = useWatch({
@@ -124,30 +125,29 @@ function ViaticoCard({
     name: `viaticos.${index}.liquidoPagable`,
   }) as number;
 
-  const watchConcepto = useWatch({
+  const watchConceptoId = useWatch({
     control,
-    name: `viaticos.${index}.concepto`,
+    name: `viaticos.${index}.conceptoId`,
   });
 
-  const watchTipo = useWatch({
+  const watchTipoDestino = useWatch({
     control,
-    name: `viaticos.${index}.tipo`,
+    name: `viaticos.${index}.tipoDestino`,
   });
 
-  const watchPlanificacionId = useWatch({
+  const watchPlanificacionIndex = useWatch({
     control,
-    name: `viaticos.${index}.planificacionId`,
+    name: `viaticos.${index}.planificacionIndex`,
   });
 
   const selectedPlanificacion = useMemo(() => {
-    return actividadesPlanificadas.find(
-      (act) => act.actividadProgramada === watchPlanificacionId
-    );
-  }, [actividadesPlanificadas, watchPlanificacionId]);
+    // Assuming planificacionIndex corresponds to the array index of actividadesPlanificadas
+    return actividadesPlanificadas[Number(watchPlanificacionIndex)];
+  }, [actividadesPlanificadas, watchPlanificacionIndex]);
 
   const maxDias = selectedPlanificacion?.cantDias ?? 0;
   const maxPersonas =
-    watchTipo === 'institucional'
+    watchTipoDestino === 'INSTITUCIONAL'
       ? (selectedPlanificacion?.cantInstitucion ?? 0)
       : (selectedPlanificacion?.cantTerceros ?? 0);
 
@@ -155,27 +155,27 @@ function ViaticoCard({
 
   useEffect(() => {
     if (selectedPlanificacion && maxPersonas === 0) {
-      setValue(`viaticos.${index}.personas`, 0);
+      setValue(`viaticos.${index}.cantidadPersonas`, 0);
     }
   }, [maxPersonas, selectedPlanificacion, setValue, index]);
 
   // Get the unit price from the selected concept
   const precioUnitario = useMemo(() => {
-    if (!watchConcepto || !watchTipo) return 0;
+    if (!watchConceptoId || !watchTipoDestino) return 0;
 
     const conceptoObj = conceptos.find(
-      (c) => String(c.id) === String(watchConcepto)
+      (c) => String(c.id) === String(watchConceptoId)
     );
 
     if (!conceptoObj) return 0;
 
     const priceStr =
-      watchTipo === 'institucional'
+      watchTipoDestino === 'INSTITUCIONAL'
         ? conceptoObj.precioInstitucional
         : conceptoObj.precioTerceros;
 
     return priceStr ? parseFloat(priceStr) : 0;
-  }, [watchConcepto, watchTipo, conceptos]);
+  }, [watchConceptoId, watchTipoDestino, conceptos]);
 
   // Calculate total: días × personas × precio unitario
   const netoTotal = useMemo(() => {
@@ -251,15 +251,15 @@ function ViaticoCard({
           />
           <FormField
             control={control}
-            name={`viaticos.${index}.concepto`}
+            name={`viaticos.${index}.conceptoId`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
                   Concepto Viático
                 </Label>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? 'viaticos'}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString() || ''}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -285,15 +285,15 @@ function ViaticoCard({
           />
           <FormField
             control={control}
-            name={`viaticos.${index}.planificacionId`}
+            name={`viaticos.${index}.planificacionIndex`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
                   Planificación
                 </Label>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? ''}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString() || ''}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -308,7 +308,7 @@ function ViaticoCard({
                   >
                     {actividadesPlanificadas.length > 0 ? (
                       actividadesPlanificadas.map((act, idx) => (
-                        <SelectItem key={idx} value={act.actividadProgramada}>
+                        <SelectItem key={idx} value={String(idx)}>
                           {act.actividadProgramada}
                         </SelectItem>
                       ))
@@ -325,7 +325,7 @@ function ViaticoCard({
           />
           <FormField
             control={control}
-            name={`viaticos.${index}.tipo`}
+            name={`viaticos.${index}.tipoDestino`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
@@ -333,7 +333,7 @@ function ViaticoCard({
                 </Label>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value ?? 'institucional'}
+                  value={field.value ?? 'INSTITUCIONAL'}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -346,10 +346,40 @@ function ViaticoCard({
                     align="start"
                     className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
                   >
-                    <SelectItem value="institucional">Institucional</SelectItem>
-                    <SelectItem value="tercero">Tercero</SelectItem>
+                    <SelectItem value="INSTITUCIONAL">Institucional</SelectItem>
+                    <SelectItem value="TERCEROS">Tercero</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`viaticos.${index}.ciudad`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Ciudad
+                </Label>
+                <FormControl>
+                  <Input {...field} placeholder="P ej. Cobija" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`viaticos.${index}.destino`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Destino / Comunidad
+                </Label>
+                <FormControl>
+                  <Input {...field} placeholder="P ej. San Lorenzo" />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -391,7 +421,7 @@ function ViaticoCard({
           />
           <FormField
             control={control}
-            name={`viaticos.${index}.personas`}
+            name={`viaticos.${index}.cantidadPersonas`}
             render={({ field }) => (
               <FormItem>
                 <Label className="text-muted-foreground text-xs font-bold uppercase">
