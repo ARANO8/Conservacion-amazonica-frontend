@@ -159,33 +159,44 @@ function ViaticoCard({
     }
   }, [maxPersonas, selectedPlanificacion, setValue, index]);
 
+  // Get the unit price from the selected concept
+  const precioUnitario = useMemo(() => {
+    if (!watchConcepto || !watchTipo) return 0;
+
+    const conceptoObj = conceptos.find(
+      (c) => String(c.id) === String(watchConcepto)
+    );
+
+    if (!conceptoObj) return 0;
+
+    const priceStr =
+      watchTipo === 'institucional'
+        ? conceptoObj.precioInstitucional
+        : conceptoObj.precioTerceros;
+
+    return priceStr ? parseFloat(priceStr) : 0;
+  }, [watchConcepto, watchTipo, conceptos]);
+
+  // Calculate total: días × personas × precio unitario
   const netoTotal = useMemo(() => {
-    return Number(montoNeto) || 0;
-  }, [montoNeto]);
+    const d = Number(dias) || 0;
+    const p = Number(personas) || 0;
+    const precio = Number(precioUnitario) || 0;
+    return d * p * precio;
+  }, [dias, personas, precioUnitario]);
+
+  // Update montoNeto whenever the calculation changes
+  useEffect(() => {
+    setValue(`viaticos.${index}.montoNeto`, Number(netoTotal.toFixed(2)), {
+      shouldValidate: true,
+    });
+  }, [netoTotal, setValue, index]);
 
   useEffect(() => {
     // Impacto presupuestario (Bruto) = Neto + 16% impuestos
     const brutoTotal = netoTotal * 1.16;
     setValue(`viaticos.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
   }, [netoTotal, setValue, index]);
-
-  useEffect(() => {
-    if (!watchConcepto || !watchTipo) return;
-
-    const conceptoObj = conceptos.find(
-      (c) => String(c.id) === String(watchConcepto)
-    );
-    if (conceptoObj) {
-      const priceStr =
-        watchTipo === 'institucional'
-          ? conceptoObj.precioInstitucional
-          : conceptoObj.precioTerceros;
-
-      const price = priceStr ? parseFloat(priceStr) : 0;
-      const total = Number(dias || 0) * Number(personas || 0) * price;
-      setValue(`viaticos.${index}.montoNeto`, total, { shouldValidate: true });
-    }
-  }, [watchConcepto, watchTipo, conceptos, setValue, index, dias, personas]);
 
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
@@ -418,30 +429,17 @@ function ViaticoCard({
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.montoNeto`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Monto Unitario Calculado (Bs)
-                </Label>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    className="bg-muted text-muted-foreground w-full cursor-not-allowed focus-visible:ring-0"
-                    value={field.value ?? 0}
-                    readOnly={true}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-2">
+            <Label className="text-muted-foreground text-xs font-bold uppercase">
+              Monto Unitario (Bs)
+            </Label>
+            <Input
+              type="number"
+              value={precioUnitario.toFixed(2)}
+              readOnly
+              className="bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0"
+            />
+          </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
               Total Neto (Bs)

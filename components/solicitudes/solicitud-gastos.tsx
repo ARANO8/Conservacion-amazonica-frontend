@@ -107,6 +107,12 @@ function GastoCard({
   fuentesDisponibles,
 }: GastoCardProps) {
   const { setValue } = useFormContext<FormData>();
+
+  const cantidad = useWatch({
+    control,
+    name: `items.${index}.quantity`,
+  }) as number;
+
   const montoNeto = useWatch({
     control,
     name: `items.${index}.montoNeto`,
@@ -128,8 +134,10 @@ function GastoCard({
   });
 
   const netoTotal = useMemo(() => {
-    return Number(montoNeto) || 0;
-  }, [montoNeto]);
+    const qty = Number(cantidad) || 0;
+    const monto = Number(montoNeto) || 0;
+    return qty * monto;
+  }, [cantidad, montoNeto]);
 
   const brutoTotal = useMemo(() => {
     const isRecibo = (watchDocument || '').toUpperCase() === 'RECIBO';
