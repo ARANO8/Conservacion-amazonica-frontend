@@ -1,5 +1,7 @@
-import { GalleryVerticalEnd } from 'lucide-react';
+'use client';
 
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -16,23 +18,16 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <form>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
-            <a
-              href="#"
-              className="flex flex-col items-center gap-2 font-medium"
-            >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEnd className="size-6" />
-              </div>
-              <span className="sr-only">Acme Inc.</span>
-            </a>
-            <h1 className="text-xl font-bold">Crear cuenta</h1>
+            <h1 className="text-xl font-bold">Crear Cuenta en AMZ Desk</h1>
             <FieldDescription>
-              Ya tienes una cuenta? <a href="/login">Inicia Sesion</a>
+              Ya tienes una cuenta? <Link href="/login">Inicia Sesion</Link>
             </FieldDescription>
           </div>
 
@@ -53,7 +48,24 @@ export function SignupForm({
 
           <Field>
             <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-            <Input id="password" type="password" required />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </button>
+            </div>
           </Field>
 
           <Field>

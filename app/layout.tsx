@@ -1,20 +1,11 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Outfit } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { Toaster } from '@/components/ui/sonner';
+import { ThemeToaster } from '@/components/theme-toaster';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'SyFin | Conservacion Amazonica',
@@ -32,11 +23,16 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn('dark', outfit.variable)}
     >
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-        <Toaster />
+      <body className="font-sans antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <ThemeToaster />
+        </ThemeProvider>
       </body>
     </html>
   );

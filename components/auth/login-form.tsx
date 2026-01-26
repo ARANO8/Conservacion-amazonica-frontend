@@ -1,13 +1,13 @@
 'use client';
 
-import { GalleryVerticalEnd } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import * as z from 'zod';
-import { useState } from 'react'; // Import useState explicitly just in case
+import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,7 @@ export function LoginForm({
   const { login, isLoading: authLoading } = useAuthStore();
   // Estado local para errores generales (fuera de campos específicos)
   const [formRootError, setFormRootError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -71,16 +72,7 @@ export function LoginForm({
       <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
-            <a
-              href="#"
-              className="flex flex-col items-center gap-2 font-medium"
-            >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEnd className="size-6" />
-              </div>
-              {/* <span className="sr-only">SyFin</span> */}
-            </a>
-            <h1 className="text-xl font-bold">Bienvenido a SyFin</h1>
+            <h1 className="text-xl font-bold">Bienvenido a AMZ Desk</h1>
             <FieldDescription>
               No tienes una cuenta? <Link href="/signup">Registrarse</Link>
             </FieldDescription>
@@ -109,7 +101,24 @@ export function LoginForm({
                 Olvidaste tu contraseña?
               </Link>
             </div>
-            <Input id="password" type="password" {...register('password')} />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                {...register('password')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-sm text-red-500">{errors.password.message}</p>
             )}

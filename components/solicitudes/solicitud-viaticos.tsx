@@ -49,6 +49,9 @@ export default function SolicitudViaticos({
 
   return (
     <div className="space-y-4">
+      <h3 className="text-foreground mb-2 font-semibold">
+        Detalle de Viáticos
+      </h3>
       <div className="space-y-4">
         {fields.map((field, index) => (
           <ViaticoCard
@@ -350,36 +353,6 @@ function ViaticoCard({
                     <SelectItem value="TERCEROS">Tercero</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.ciudad`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Ciudad
-                </Label>
-                <FormControl>
-                  <Input {...field} placeholder="P ej. Cobija" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.destino`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Destino / Comunidad
-                </Label>
-                <FormControl>
-                  <Input {...field} placeholder="P ej. San Lorenzo" />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

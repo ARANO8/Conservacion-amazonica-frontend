@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { ClipboardPlus, Command, FileText, LifeBuoy, Send } from 'lucide-react';
+import Image from 'next/image';
+import { ClipboardPlus, FileText, LifeBuoy, Send } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
 import { NavSecondary } from '@/components/ui/nav-secondary';
@@ -16,6 +17,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/auth-store';
+import { ModeToggle } from '@/components/mode-toggle';
 
 // Menu items estáticos (se pueden mover a config si crecen)
 const navSecondary = [
@@ -61,20 +63,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">SyFin</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex flex-row items-center justify-between px-2 py-2">
+          <a href="#">
+            <Image
+              src="/Logo-AMZ-desk-ok.webp"
+              alt="AMZ Desk"
+              width={120}
+              height={40}
+              priority
+              className="h-auto w-auto max-w-[120px]"
+            />
+          </a>
+          <ModeToggle />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />

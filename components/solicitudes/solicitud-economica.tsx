@@ -181,111 +181,117 @@ export default function SolicitudEconomica({
 
   return (
     <FieldGroup className="space-y-6">
-      <FieldSet className="bg-muted/20 rounded-xl border p-4 shadow-sm">
-        <FieldLegend className="text-primary font-bold">
+      <div className="space-y-2">
+        <h3 className="text-foreground font-semibold">
           Configuración Global de Presupuesto
-        </FieldLegend>
-        <div className="grid gap-6 md:grid-cols-2">
-          <Field>
-            <FieldLabel>Actividad / POA Macro</FieldLabel>
-            <Popover open={isPoaOpen} onOpenChange={setIsPoaOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={isPoaOpen}
-                  className="w-full justify-between font-normal"
-                >
-                  {selectedPoa || 'Seleccionar POA...'}
-                  <div className="flex items-center gap-1">
-                    {selectedPoa && (
-                      <X
-                        className="h-4 w-4 opacity-50 hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleClearPoa();
-                        }}
-                      />
-                    )}
-                    <ChevronDown className="h-4 w-4 opacity-50" />
-                  </div>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[var(--radix-popover-trigger-width)] p-0"
-                align="start"
-              >
-                <Command>
-                  <CommandInput placeholder="Buscar código POA..." />
-                  <CommandList>
-                    <CommandEmpty>No se encontraron resultados</CommandEmpty>
-                    <CommandGroup>
-                      {poaCodes.map((item) => (
-                        <CommandItem
-                          key={item.codigo}
-                          value={item.codigo}
-                          onSelect={(val) => {
-                            handlePoaChange(val);
-                            setIsPoaOpen(false);
+        </h3>
+        <FieldSet className="bg-muted/20 rounded-xl border p-4 shadow-sm">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Field>
+              <FieldLabel>Actividad / POA Macro</FieldLabel>
+              <Popover open={isPoaOpen} onOpenChange={setIsPoaOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={isPoaOpen}
+                    className="w-full justify-between font-normal"
+                  >
+                    {selectedPoa || 'Seleccionar POA...'}
+                    <div className="flex items-center gap-1">
+                      {selectedPoa && (
+                        <X
+                          className="h-4 w-4 opacity-50 hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleClearPoa();
                           }}
-                        >
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              selectedPoa === item.codigo
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                            )}
-                          />
-                          {item.codigo}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </Field>
-
-          <FormField
-            control={control}
-            name="proyecto"
-            render={({ field }) => (
-              <Field>
-                <FieldLabel>Proyecto Destino</FieldLabel>
-                <Select
-                  disabled={!selectedPoa || isLoadingStructure}
-                  onValueChange={(val) => {
-                    field.onChange(Number(val));
-                    setValue('fuentesSeleccionadas', []); // Reset cards on project change
-                  }}
-                  value={field.value?.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      {isLoadingStructure ? (
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Cargando Estructura...</span>
-                        </div>
-                      ) : (
-                        <SelectValue placeholder="Seleccionar Proyecto..." />
+                        />
                       )}
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent position="popper" side="bottom" sideOffset={5}>
-                    {availableProjects.map((p) => (
-                      <SelectItem key={p.id} value={p.id.toString()}>
-                        {p.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
-        </div>
-      </FieldSet>
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0"
+                  align="start"
+                >
+                  <Command>
+                    <CommandInput placeholder="Buscar código POA..." />
+                    <CommandList>
+                      <CommandEmpty>No se encontraron resultados</CommandEmpty>
+                      <CommandGroup>
+                        {poaCodes.map((item) => (
+                          <CommandItem
+                            key={item.codigo}
+                            value={item.codigo}
+                            onSelect={(val) => {
+                              handlePoaChange(val);
+                              setIsPoaOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                selectedPoa === item.codigo
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {item.codigo}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </Field>
+
+            <FormField
+              control={control}
+              name="proyecto"
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>Proyecto Destino</FieldLabel>
+                  <Select
+                    disabled={!selectedPoa || isLoadingStructure}
+                    onValueChange={(val) => {
+                      field.onChange(Number(val));
+                      setValue('fuentesSeleccionadas', []); // Reset cards on project change
+                    }}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        {isLoadingStructure ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Cargando Estructura...</span>
+                          </div>
+                        ) : (
+                          <SelectValue placeholder="Seleccionar Proyecto..." />
+                        )}
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent
+                      position="popper"
+                      side="bottom"
+                      sideOffset={5}
+                    >
+                      {availableProjects.map((p) => (
+                        <SelectItem key={p.id} value={p.id.toString()}>
+                          {p.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            />
+          </div>
+        </FieldSet>
+      </div>
 
       {/* CARDS DE FUENTES */}
       <FieldSet>
