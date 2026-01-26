@@ -51,6 +51,7 @@ export default function SolicitudGastos({
 
   return (
     <div className="space-y-4">
+      <h3 className="text-foreground mb-2 font-semibold">Detalle de Gastos</h3>
       <div className="space-y-4">
         {fields.map((field, index) => (
           <GastoCard
@@ -200,8 +201,8 @@ function GastoCard({
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
       <div className="space-y-4 p-4">
-        {/* FILA SUPERIOR (CLASIFICADORES): 4 Dropdowns */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+        {/* FILA SUPERIOR (CLASIFICADORES): 3 Dropdowns */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           <FormField
             control={control}
             name={`items.${index}.solicitudPresupuestoId`}
