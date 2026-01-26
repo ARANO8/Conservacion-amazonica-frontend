@@ -9,7 +9,14 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { FormData } from '@/app/dashboard/solicitud/page';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { FormData } from '@/components/solicitudes/solicitud-schema';
 
 interface SolicitudViajeItemsProps {
   control: Control<FormData>;
@@ -47,14 +54,16 @@ export default function SolicitudViajeItems({
             </div>
             <FormField
               control={control}
-              name={`viaticos.${idx}.concepto`}
+              name={`viaticos.${idx}.conceptoId`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
+                      type="number"
                       {...field}
-                      placeholder="Concepto"
+                      placeholder="ID Concepto"
                       className="h-8 text-xs"
+                      onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -109,22 +118,31 @@ export default function SolicitudViajeItems({
             />
           </div>
 
-          {/* Tipo */}
+          {/* Tipo Destino */}
           <div className="md:col-span-2">
             <div className="text-muted-foreground mb-1 text-xs md:hidden">
               Tipo
             </div>
             <FormField
               control={control}
-              name={`viaticos.${idx}.tipo`}
+              name={`viaticos.${idx}.tipoDestino`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Tipo"
-                      className="h-8 text-xs"
-                    />
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || 'INSTITUCIONAL'}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INSTITUCIONAL">
+                          Institucional
+                        </SelectItem>
+                        <SelectItem value="TERCEROS">Terceros</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +188,7 @@ export default function SolicitudViajeItems({
             </div>
             <FormField
               control={control}
-              name={`viaticos.${idx}.personas`}
+              name={`viaticos.${idx}.cantidadPersonas`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -232,12 +250,16 @@ export default function SolicitudViajeItems({
           type="button"
           onClick={() =>
             append({
-              concepto: '',
+              conceptoId: 0,
+              planificacionIndex: 0,
               ciudad: '',
               destino: '',
-              tipo: '',
-              dias: 0,
-              personas: 1,
+              tipoDestino: 'INSTITUCIONAL',
+              dias: 1,
+              cantidadPersonas: 1,
+              montoNeto: 0,
+              solicitudPresupuestoId: 0,
+              liquidoPagable: 0,
             })
           }
         >

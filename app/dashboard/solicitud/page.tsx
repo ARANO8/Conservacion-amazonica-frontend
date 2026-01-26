@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
 import {
   Field,
   FieldLabel,
@@ -14,741 +12,344 @@ import {
   FieldLegend,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
   FormField,
-  FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import SolicitudItems from '@/components/solicitudes/solicitud-items';
-import SolicitudViajeItems from '@/components/solicitudes/solicitud-viaje-items';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import api from '@/lib/api';
+import PlanificacionActividades from '@/components/solicitudes/planificacion-actividades';
+import SolicitudEconomica from '@/components/solicitudes/solicitud-economica';
 import { toast } from 'sonner';
+import NominaTercerosForm from '@/components/solicitudes/nomina-terceros-form';
+import ReviewModal from '@/components/solicitudes/review-modal';
+import SolicitudHeader from '@/components/solicitudes/solicitud-header';
+import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
+import { presupuestosService } from '@/services/presupuestos.service';
+import { PresupuestoReserva } from '@/types/backend';
 import {
-  BudgetLine,
-  FinancingSource,
-  UserCatalog,
-  PoaActivity,
-} from '@/types/catalogs';
-
-// Esquema Zod
-const schema = z.object({
-  // Campos visuales (No se envían directamente al DTO, se concatenan en description)
-  destinatario: z.string().optional(),
-  via: z.string().optional(),
-  interino: z.boolean().optional(),
-  copia: z.string().optional(),
-  desembolso: z.string().optional(),
-  proyecto: z.string().optional(),
-  poaActivityId: z.string().optional(),
-  codigoPOA: z.string().optional(),
-  codigoProyecto: z.string().optional(),
-  lugarViaje: z.string().optional(),
-  fechaViaje: z.string().optional(),
-  lugarSolicitud: z.string().optional(),
-  fechaSolicitud: z.string().optional(),
-  solicitante: z.string().optional(),
-  fechaInicio: z.string().optional(),
-  fechaFin: z.string().optional(),
-
-  // Tabla 1: Conceptos de Viaje (Visual)
-  viaticos: z
-    .array(
-      z.object({
-        concepto: z.string().optional(),
-        ciudad: z.string().optional(),
-        destino: z.string().optional(),
-        tipo: z.string().optional(),
-        dias: z.number().optional(),
-        personas: z.number().optional(),
-      })
-    )
-    .optional(),
-
-  // Campos del Backend
-  motivo: z.string().min(1, 'El motivo es requerido'),
-  items: z
-    .array(
-      z.object({
-        description: z.string().min(1, 'El concepto es requerido'),
-        budgetLineId: z.string().min(1, 'Partida requerida'),
-        financingSourceId: z.string().min(1, 'Fuente requerida'),
-        document: z.string().optional(),
-        type: z.string().optional(),
-        amount: z.number().min(0, 'Monto inválido'),
-        quantity: z.coerce.number().min(1, 'Requerido'),
-        unitCost: z.coerce.number().min(0, 'No negativo'),
-      })
-    )
-    .min(1, 'Debes agregar al menos un ítem'),
-});
-
-export type FormData = z.infer<typeof schema>;
+  formSchema,
+  defaultValues,
+  FormData,
+  WizardStep,
+} from '@/components/solicitudes/solicitud-schema';
+import { useCatalogos } from '@/hooks/use-catalogos';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function SolicitudPage() {
   const router = useRouter();
+  const [step, setStep] = useState<WizardStep>('PLANIFICACION');
   const [loading, setLoading] = useState(false);
-  const [loadingOptions, setLoadingOptions] = useState(true);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [options, setOptions] = useState<{
-    budgetLines: BudgetLine[];
-    financingSources: FinancingSource[];
-    users: UserCatalog[];
-    poaActivities: PoaActivity[];
-  }>({
-    budgetLines: [],
-    financingSources: [],
-    users: [],
-    poaActivities: [],
-  });
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [misReservas, setMisReservas] = useState<PresupuestoReserva[]>([]);
+  const [showBudgetWarning, setShowBudgetWarning] = useState(false);
+
+  const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
+    useCatalogos();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      interino: false,
-      items: [
-        {
-          description: 'Gasto',
-          budgetLineId: '',
-          financingSourceId: '',
-          amount: 0,
-          quantity: 1,
-          unitCost: 0,
-          document: '',
-          type: '',
-        },
-      ],
-      viaticos: [],
-      // Valores por defecto para selects visuales
-      destinatario: '',
-      via: '',
-      copia: '',
-      desembolso: '',
-      proyecto: '',
-      poaActivityId: '',
-      solicitante: '',
-      fechaInicio: '',
-      fechaFin: '',
-      codigoPOA: '',
-      codigoProyecto: '',
-      lugarViaje: '',
-      fechaViaje: '',
-      lugarSolicitud: 'La Paz',
-      fechaSolicitud: new Date().toISOString().split('T')[0],
-      motivo: '',
-    },
+    resolver: zodResolver(formSchema),
+    defaultValues,
   });
 
+  // Carga inicial de reservas activas
   useEffect(() => {
-    const fetchOptions = async () => {
+    const fetchReservas = async () => {
       try {
-        const [blRes, fsRes, uRes, poaRes] = await Promise.all([
-          api.get<BudgetLine[]>('/catalogs/budget-lines'),
-          api.get<FinancingSource[]>('/catalogs/financing-sources'),
-          api.get<UserCatalog[]>('/catalogs/users'),
-          api.get<PoaActivity[]>('/catalogs/poa-activities'),
-        ]);
-
-        setOptions({
-          budgetLines: blRes.data,
-          financingSources: fsRes.data,
-          users: uRes.data,
-          poaActivities: poaRes.data,
-        });
+        const data = await presupuestosService.getMisReservas();
+        setMisReservas(data);
+        if (data.length > 0) {
+          form.setValue(
+            'presupuestosIds',
+            data.map((r) => r.id)
+          );
+        }
       } catch (error) {
-        console.error('Error fetching catalogs:', error);
-        toast.error('Error de Catálogos', {
-          description:
-            'No se pudieron cargar los datos de las listas. Intente recargar.',
-        });
+        console.error('Error al cargar reservas:', error);
+        toast.error('No se pudieron cargar tus reservas activas');
       } finally {
-        setLoadingOptions(false);
       }
     };
-    fetchOptions();
-  }, []);
+    fetchReservas();
+  }, [form]);
 
-  const watchedPoaCode = form.watch('codigoPOA');
-  const watchedProject = form.watch('proyecto');
+  const watchActividades = form.watch('actividades');
 
-  const uniquePoaCodes = useMemo(() => {
-    return Array.from(new Set(options.poaActivities.map((a) => a.code))).sort(
-      (a, b) => a.localeCompare(b, undefined, { numeric: true })
-    );
-  }, [options.poaActivities]);
+  const handleNext = async () => {
+    if (step === 'PLANIFICACION') {
+      const isValid = await form.trigger([
+        'planificacionLugares',
+        'planificacionObjetivo',
+        'actividades',
+      ]);
+      if (isValid) {
+        setStep('SOLICITUD');
+        window.scrollTo(0, 0);
+      } else {
+        toast.error('Corrige los errores en la planificación');
+      }
+      return;
+    }
 
-  const filteredProjects = useMemo(() => {
-    if (!watchedPoaCode) return [];
-    const projects = options.poaActivities
-      .filter((a) => a.code === watchedPoaCode)
-      .map((a) => a.project);
-    return Array.from(new Set(projects)).sort();
-  }, [options.poaActivities, watchedPoaCode]);
+    if (step === 'SOLICITUD') {
+      const isValid = await form.trigger(['motivo', 'items', 'viaticos']);
+      if (isValid) {
+        // Validación de Presupuestos: Verificar que todos los viáticos/gastos tengan reserva
+        const watchViaticos = form.getValues('viaticos') || [];
+        const watchGastos = form.getValues('items') || [];
 
-  const filteredActivities = useMemo(() => {
-    if (!watchedPoaCode || !watchedProject) return [];
-    return options.poaActivities.filter(
-      (a) => a.code === watchedPoaCode && a.project === watchedProject
-    );
-  }, [options.poaActivities, watchedPoaCode, watchedProject]);
+        const tieneViaticosSinReserva = watchViaticos.some(
+          (v) => !v.solicitudPresupuestoId
+        );
+        const tieneGastosSinReserva = watchGastos.some(
+          (g) => !g.solicitudPresupuestoId
+        );
 
-  const uniqueUsers = useMemo(() => {
-    const seen = new Set();
-    return options.users.filter((u) => {
-      const duplicate = seen.has(u.name);
-      seen.add(u.name);
-      return !duplicate;
-    });
-  }, [options.users]);
+        if (tieneViaticosSinReserva || tieneGastosSinReserva) {
+          toast.error(
+            'Todos los ítems deben estar vinculados a una fuente de financiamiento'
+          );
+          return;
+        }
 
-  // Función para formatear moneda
-  const formatBOB = (n: number) => {
-    return new Intl.NumberFormat('es-BO', {
-      style: 'currency',
-      currency: 'BOB',
-    }).format(n);
-  };
+        setStep('NOMINA');
+        window.scrollTo(0, 0);
+      } else {
+        toast.error('Corrige los errores en la solicitud de fondos');
+      }
+      return;
+    }
 
-  // Cálculo del monto total en tiempo real usando useWatch
-  const watchedItems = useWatch({
-    control: form.control,
-    name: 'items',
-  });
-
-  const totalGeneral = (watchedItems || []).reduce(
-    (acc, item) => acc + (Number(item?.amount) || 0),
-    0
-  );
-
-  const handlePreSubmit = async () => {
-    // Validar solo campos visibles antes de abrir el modal
-    const isValid = await form.trigger([
-      'motivo',
-      'items',
-      'viaticos',
-      'codigoPOA',
-      'lugarViaje',
-      'fechaInicio',
-      'fechaFin',
-    ]);
-
-    if (isValid) {
-      setIsConfirmModalOpen(true);
-    } else {
-      toast.error('Formulario Incompleto', {
-        description: 'Por favor, revisa los campos requeridos y los errores.',
-      });
+    if (step === 'NOMINA') {
+      const isValid = await form.trigger(['nomina']);
+      if (isValid) {
+        setIsReviewModalOpen(true);
+      } else {
+        toast.error('Corrige los errores en la nómina');
+      }
+      return;
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const handleBack = () => {
+    if (step === 'SOLICITUD') setStep('PLANIFICACION');
+    if (step === 'NOMINA') setStep('SOLICITUD');
+  };
+
+  const onSubmit = async () => {
     setLoading(true);
     try {
-      // Transformación de datos para el Backend (Strict DTOs)
-      const payload = {
-        title: `${data.motivo || ''} - ${data.lugarViaje || ''}`.trim(),
-        description: data.motivo,
-        poaCode: data.codigoPOA,
-        place: data.lugarViaje,
-        startDate: data.fechaInicio
-          ? new Date(data.fechaInicio).toISOString()
-          : null,
-        endDate: data.fechaFin ? new Date(data.fechaFin).toISOString() : null,
-        receiverName: data.destinatario || '',
-        refById: data.copia || null,
-        disbursementToId: data.desembolso || null,
-        poaActivityId: data.poaActivityId || null,
-        viaticos:
-          data.viaticos
-            ?.filter((v) => v.concepto && v.concepto.trim() !== '')
-            .map((v) => ({
-              concept: v.concepto,
-              city: v.ciudad,
-              destination: v.destino,
-              transportType: v.tipo,
-              days: Number(v.dias),
-              peopleCount: Number(v.personas),
-            })) || [],
-        items: data.items.map((item) => {
-          const qty = Number(item.quantity) || 0;
-          const cost = Number(item.unitCost) || 0;
-          return {
-            description:
-              item.description ||
-              `${item.document || ''} ${item.type || ''}`.trim() ||
-              'Gasto',
-            budgetLineId: item.budgetLineId, // Debe ser UUID string
-            financingSourceId: item.financingSourceId, // Debe ser UUID string
-            quantity: qty,
-            unitCost: cost,
-            amount: qty * cost,
-          };
-        }),
-      };
-
-      await api.post('/requests', payload);
-
-      toast.success('Solicitud creada', {
-        description: 'La solicitud ha sido enviada exitosamente.',
-      });
-
+      toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/solicitudes');
     } catch (error) {
-      console.error('Error creating request:', error);
-      toast.error('Error', {
-        description: 'No se pudo crear la solicitud. Intente nuevamente.',
-      });
+      console.error(error);
+      toast.error('Error al enviar la solicitud');
     } finally {
       setLoading(false);
+      setIsReviewModalOpen(false);
     }
   };
 
-  return (
-    <div className="w-full">
-      <div className="flex-1 space-y-6 p-4 pt-0">
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="text-primary size-10 animate-spin" />
+        <span className="text-muted-foreground ml-3 text-sm">
+          Cargando catálogos...
+        </span>
+      </div>
+    );
+  }
+
+  // Cálculos de totales movidos al Footer autónomo
+  // granTotalLiquido ya no es necesario aquí.
+
+  // VISTA EXCLUSIVA PASO 3 (NOMINA)
+  if (step === 'NOMINA') {
+    return (
+      <div className="bg-background flex h-[calc(100vh-4rem)] w-full flex-col overflow-hidden">
+        <SolicitudHeader step={step} />
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FieldGroup>
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>Proyecto y Responsables</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="copia"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Ref (Copia):</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          disabled={loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                loadingOptions ? 'Cargando...' : 'Selecciona'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {uniqueUsers.map((u) => (
-                              <SelectItem key={u.id} value={u.id}>
-                                <span className="block w-full max-w-[280px] truncate">
-                                  {u.name} - {u.position}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="desembolso"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Desembolso a Nombre De:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          disabled={loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                loadingOptions ? 'Cargando...' : 'Selecciona'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {uniqueUsers.map((u) => (
-                              <SelectItem key={u.id} value={u.id}>
-                                <span className="block w-full max-w-[280px] truncate">
-                                  {u.name} - {u.position}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="codigoPOA"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Código POA:</FieldLabel>
-                        <Select
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            // Reseteo en cascada
-                            form.setValue('proyecto', '');
-                            form.setValue('poaActivityId', '');
-                            form.setValue('items', []); // Limpia ítems por integridad
-                          }}
-                          value={field.value}
-                          disabled={loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                loadingOptions
-                                  ? 'Cargando...'
-                                  : 'Selecciona Código'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {uniquePoaCodes.map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="proyecto"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Proyecto:</FieldLabel>
-                        <Select
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            form.setValue('poaActivityId', '');
-                          }}
-                          value={field.value}
-                          disabled={!watchedPoaCode || loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                !watchedPoaCode
-                                  ? 'Primero selecciona Código POA'
-                                  : 'Selecciona proyecto'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {filteredProjects.map((p) => (
-                              <SelectItem key={p} value={p}>
-                                {p}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="poaActivityId"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Actividad / Descripción:</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={!watchedProject || loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                !watchedProject
-                                  ? 'Primero selecciona proyecto'
-                                  : 'Selecciona actividad'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {filteredActivities.map((a) => (
-                              <SelectItem key={a.id} value={a.id}>
-                                <span className="block w-full max-w-[350px] truncate">
-                                  {a.description}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6">
+              <form
+                id="nomina-form"
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <div className="animate-in fade-in duration-500">
+                  <NominaTercerosForm control={form.control} />
                 </div>
-              </FieldSet>
-
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>Información del Viaje/Taller</FieldLegend>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="codigoProyecto"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Código de Actividad Proyecto</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. A.133" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lugarViaje"
-                    render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>Lugar(es) de Viaje y/o Taller</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. La Paz, Cobija" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="fechaViaje"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Fecha viaje y/o Taller</FieldLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="motivo"
-                    render={({ field }) => (
-                      <Field className="md:col-span-2">
-                        <FieldLabel>
-                          Motivo del Viaje y/o Taller{' '}
-                          <span className="text-red-500">*</span>
-                        </FieldLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Descripción detallada del motivo"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </Field>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-2 gap-4 md:col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="fechaInicio"
-                      render={({ field }) => (
-                        <Field>
-                          <FieldLabel>Fecha Inicio</FieldLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                        </Field>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="fechaFin"
-                      render={({ field }) => (
-                        <Field>
-                          <FieldLabel>Fecha Fin</FieldLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                        </Field>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="lugarSolicitud"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Lugar de Solicitud</FieldLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Ej. La Paz" />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="fechaSolicitud"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Fecha Solicitud</FieldLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </Field>
-                    )}
-                  />
-                </div>
-              </FieldSet>
-
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>Conceptos de Viaje</FieldLegend>
-                <SolicitudViajeItems control={form.control} />
-              </FieldSet>
-
-              <Separator />
-
-              <FieldSet>
-                <FieldLegend>
-                  Conceptos (detalle) <span className="text-red-500">*</span>
-                </FieldLegend>
-                <div className="p-1">
-                  {form.formState.errors.items?.root && (
-                    <p className="text-destructive mb-2 text-sm font-medium">
-                      {form.formState.errors.items.root.message}
-                    </p>
-                  )}
-                  {form.formState.errors.items &&
-                    !form.formState.errors.items.root && (
-                      <p className="text-destructive mb-2 text-sm font-medium">
-                        Revisa los errores en los ítems.
-                      </p>
-                    )}
-                  <SolicitudItems
-                    control={form.control}
-                    watch={form.watch}
-                    budgetLines={options.budgetLines}
-                    financingSources={options.financingSources}
-                    isLoading={loadingOptions}
-                    totalAmount={totalGeneral}
-                  />
-                </div>
-              </FieldSet>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="secondary" onClick={() => {}}>
-                  Guardar Borrador
-                </Button>
-                <Button type="button" onClick={handlePreSubmit}>
-                  Revisar y Enviar
-                </Button>
-              </div>
-            </FieldGroup>
-
-            {/* Modal de Confirmación */}
-            <Dialog
-              open={isConfirmModalOpen}
-              onOpenChange={setIsConfirmModalOpen}
-            >
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Confirmar Solicitud</DialogTitle>
-                  <DialogDescription>
-                    Resumen de la solicitud antes del envío final.
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="grid gap-4 py-4">
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-muted-foreground text-sm font-medium">
-                      Monto Total:
-                    </p>
-                    <p className="text-primary text-2xl font-bold">
-                      {formatBOB(totalGeneral)}
-                    </p>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="destinatario"
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>Dirigido a (Destinatario):</FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          disabled={loadingOptions}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                loadingOptions
-                                  ? 'Cargando usuarios...'
-                                  : 'Selecciona destinatario'
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[200px]">
-                            {uniqueUsers.map((u) => (
-                              <SelectItem key={u.id} value={u.name}>
-                                <span className="block w-full max-w-[380px] truncate">
-                                  {u.name} - {u.position}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </Field>
-                    )}
-                  />
-                </div>
-
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsConfirmModalOpen(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={loading || !form.watch('destinatario')}
-                    onClick={form.handleSubmit(onSubmit)}
-                  >
-                    {loading ? 'Enviando...' : 'Confirmar y Enviar'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </form>
+              </form>
+            </div>
+            <SolicitudFooter
+              step={step}
+              onNext={handleNext}
+              onBack={handleBack}
+              loading={loading}
+            />
+          </div>
+          <ReviewModal
+            isOpen={isReviewModalOpen}
+            onOpenChange={setIsReviewModalOpen}
+            onSubmit={onSubmit}
+            loading={loading}
+            usuarios={usuarios}
+          />
         </Form>
       </div>
+    );
+  }
+
+  // VISTA COMPARTIDA PASOS 1 y 2
+  return (
+    <div className="bg-background flex h-[calc(100vh-4rem)] w-full flex-col overflow-hidden">
+      <SolicitudHeader step={step} />
+
+      <Form {...form}>
+        <div className="relative flex flex-1 flex-col overflow-hidden">
+          {/* ÁREA DE SCROLL */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleNext();
+              }}
+              className="space-y-6"
+            >
+              <div className="animate-in fade-in duration-500">
+                {step === 'PLANIFICACION' && (
+                  /* PASO 1: PLANIFICACIÓN */
+                  <FieldGroup>
+                    <FieldSet>
+                      <FieldLegend>
+                        Información General del Viaje/Taller
+                      </FieldLegend>
+                      <div className="grid gap-4">
+                        <FormField
+                          control={form.control}
+                          name="planificacionLugares"
+                          render={({ field }) => (
+                            <Field>
+                              <FieldLabel>
+                                Lugar/es del viaje y/o taller
+                              </FieldLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  placeholder="Ej. La Paz - Santa Cruz - Beni"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </Field>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="planificacionObjetivo"
+                          render={({ field }) => (
+                            <Field>
+                              <FieldLabel>
+                                Objetivo del Viaje / Taller
+                              </FieldLabel>
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  placeholder="Describe brevemente el propósito de esta movilización"
+                                  className="min-h-24"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </Field>
+                          )}
+                        />
+                      </div>
+                    </FieldSet>
+
+                    <Separator />
+
+                    <FieldSet>
+                      <FieldLegend>Cronograma de Actividades</FieldLegend>
+                      <PlanificacionActividades
+                        control={form.control}
+                        setValue={form.setValue}
+                      />
+                    </FieldSet>
+                  </FieldGroup>
+                )}
+
+                {step === 'SOLICITUD' && (
+                  /* PASO 2: SOLICITUD DE FONDOS */
+                  <SolicitudEconomica
+                    control={form.control}
+                    watchActividades={watchActividades || []}
+                    conceptos={conceptos}
+                    tiposGasto={tiposGasto}
+                    poaCodes={poaCodes}
+                    misReservas={misReservas}
+                    setMisReservas={setMisReservas}
+                  />
+                )}
+              </div>
+            </form>
+          </div>
+
+          <SolicitudFooter
+            step={step}
+            onNext={handleNext}
+            onBack={handleBack}
+            loading={loading}
+          />
+        </div>
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onOpenChange={setIsReviewModalOpen}
+          onSubmit={onSubmit}
+          loading={loading}
+          usuarios={usuarios}
+        />
+
+        <AlertDialog
+          open={showBudgetWarning}
+          onOpenChange={setShowBudgetWarning}
+        >
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader className="flex flex-col items-center text-center sm:items-center sm:text-center">
+              <div className="bg-destructive/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-6 w-6" />
+              </div>
+              <AlertDialogTitle className="text-xl font-bold">
+                Presupuesto Excedido
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-muted-foreground mt-2">
+                El monto total solicitado supera el saldo disponible en la
+                partida seleccionada. Por favor, ajuste los viáticos o gastos
+                antes de continuar.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+              <AlertDialogAction
+                onClick={() => setShowBudgetWarning(false)}
+                className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
+              >
+                Entendido
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Form>
     </div>
   );
 }

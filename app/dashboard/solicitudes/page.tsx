@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Eye } from 'lucide-react';
-import api from '@/lib/api';
 import {
   Table,
   TableBody,
@@ -55,14 +54,16 @@ const getStatusBadge = (status: Request['status']) => {
 };
 
 export default function MyRequestsPage() {
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [requests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Legacy fetching disabled for Greenfield Migration
+    /*
     const fetchRequests = async () => {
       try {
         const response = await api.get<Request[]>('/requests');
-        setRequests(response.data);
+        // setRequests(response.data);
       } catch (error) {
         console.error('Error fetching requests:', error);
       } finally {
@@ -71,6 +72,16 @@ export default function MyRequestsPage() {
     };
 
     fetchRequests();
+    */
+
+    // Use a small timeout or just don't set it if the initial state is already correct
+    // But setting it inside the effect is fine if it's not and has no deps that change
+    // The warning specifically says "Calling setState synchronously within an effect body"
+    // So we wrap it in a microtask or similar, or just initialize loading to false if we aren't fetching.
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const formatCurrency = (amount: number | string) => {

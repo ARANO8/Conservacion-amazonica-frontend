@@ -1,0 +1,19 @@
+
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\app\dashboard\solicitud\page.tsx
+  172:11  warning  'STATIC_BUDGET_LINES' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  179:11  warning  'STATIC_FINANCING_SOURCES' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\components\solicitudes\solicitud-items.tsx
+  14:3  warning  'AlertDialog' is defined but never used             @typescript-eslint/no-unused-vars
+  15:3  warning  'AlertDialogAction' is defined but never used       @typescript-eslint/no-unused-vars
+  16:3  warning  'AlertDialogCancel' is defined but never used       @typescript-eslint/no-unused-vars
+  17:3  warning  'AlertDialogContent' is defined but never used      @typescript-eslint/no-unused-vars
+  18:3  warning  'AlertDialogDescription' is defined but never used  @typescript-eslint/no-unused-vars
+  19:3  warning  'AlertDialogFooter' is defined but never used       @typescript-eslint/no-unused-vars
+  20:3  warning  'AlertDialogHeader' is defined but never used       @typescript-eslint/no-unused-vars
+  21:3  warning  'AlertDialogTitle' is defined but never used        @typescript-eslint/no-unused-vars
+  22:3  warning  'AlertDialogTrigger' is defined but never used      @typescript-eslint/no-unused-vars
+  34:3  warning  'FormMessage' is defined but never used             @typescript-eslint/no-unused-vars
+
+Ô£û 12 problems (0 errors, 12 warnings)
+

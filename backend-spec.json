@@ -1,0 +1,1782 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso, devuelve el token de acceso y datos del usuario"
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          }
+        },
+        "summary": "Iniciar sesión en el sistema",
+        "tags": ["Auth"]
+      }
+    },
+    "/usuarios": {
+      "post": {
+        "operationId": "UsuariosController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUsuarioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear un nuevo usuario",
+        "tags": ["Usuarios"]
+      },
+      "get": {
+        "operationId": "UsuariosController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener lista de usuarios activos",
+        "tags": ["Usuarios"]
+      }
+    },
+    "/usuarios/{id}": {
+      "get": {
+        "operationId": "UsuariosController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener un usuario por ID",
+        "tags": ["Usuarios"]
+      },
+      "patch": {
+        "operationId": "UsuariosController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUsuarioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar un usuario",
+        "tags": ["Usuarios"]
+      },
+      "delete": {
+        "operationId": "UsuariosController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un usuario (Borrado lógico)",
+        "tags": ["Usuarios"]
+      }
+    },
+    "/poa": {
+      "get": {
+        "operationId": "PoaController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener lista de POA con paginación y búsqueda",
+        "tags": ["POA"]
+      },
+      "post": {
+        "operationId": "PoaController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePoaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Fila creada exitosamente"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una nueva fila de POA",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/lookup": {
+      "get": {
+        "operationId": "PoaController_getLookup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de códigos POA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PoaLookupDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar códigos POA para selectores",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/detail": {
+      "get": {
+        "operationId": "PoaController_getDetail",
+        "parameters": [
+          {
+            "name": "codigoPoa",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "partidaId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "codigoPresupuestarioId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle financiero del POA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "costoTotal": {
+                      "type": "number"
+                    },
+                    "descripcion": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener detalle financiero de un POA específico",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/proyectos": {
+      "get": {
+        "operationId": "PoaController_getProyectos",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar proyectos activos",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/grupos/{proyectoId}": {
+      "get": {
+        "operationId": "PoaController_getGrupos",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar grupos de un proyecto",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/partidas/{proyectoId}/{grupoId}": {
+      "get": {
+        "operationId": "PoaController_getPartidas",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar partidas con saldo calculado",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/items/{proyectoId}/{grupoId}/{partidaId}": {
+      "get": {
+        "operationId": "PoaController_getItems",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "partidaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar filas de POA disponibles (Actividades) para una partida específica",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/{id}": {
+      "get": {
+        "operationId": "PoaController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener una fila de POA por ID",
+        "tags": ["POA"]
+      },
+      "patch": {
+        "operationId": "PoaController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePoaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar una fila de POA",
+        "tags": ["POA"]
+      },
+      "delete": {
+        "operationId": "PoaController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar una fila de POA (Borrado lógico)",
+        "tags": ["POA"]
+      }
+    },
+    "/poa/{id}/restore": {
+      "patch": {
+        "operationId": "PoaController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Restaurar un registro de POA eliminado",
+        "tags": ["POA"]
+      }
+    },
+    "/solicitudes": {
+      "post": {
+        "operationId": "SolicitudesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSolicitudDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una nueva solicitud en estado PENDIENTE",
+        "tags": ["Solicitudes"]
+      },
+      "get": {
+        "operationId": "SolicitudesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar solicitudes (Filtrado por rol)",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/solicitudes/{id}": {
+      "get": {
+        "operationId": "SolicitudesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener detalle de una solicitud",
+        "tags": ["Solicitudes"]
+      },
+      "patch": {
+        "operationId": "SolicitudesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSolicitudDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar una solicitud (Solo permitido si está OBSERVADO)",
+        "tags": ["Solicitudes"]
+      },
+      "delete": {
+        "operationId": "SolicitudesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar una solicitud (Soft Delete)",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/solicitudes/{id}/restore": {
+      "patch": {
+        "operationId": "SolicitudesController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Restaurar una solicitud eliminada",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/solicitudes/{id}/aprobar": {
+      "patch": {
+        "operationId": "SolicitudesController_aprobar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AprobarSolicitudDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Derivar solicitud (Mantiene PENDIENTE, cambia el aprobador)",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/solicitudes/{id}/observar": {
+      "patch": {
+        "operationId": "SolicitudesController_observar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObservarSolicitudDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Observar solicitud (Cambia de PENDIENTE a OBSERVADO)",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/solicitudes/{id}/desembolsar": {
+      "patch": {
+        "operationId": "SolicitudesController_desembolsar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesembolsarSolicitudDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Desembolsar solicitud (Cambia de PENDIENTE a DESEMBOLSADO)",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/solicitudes/{id}/pdf": {
+      "get": {
+        "operationId": "SolicitudesController_generatePdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archivo PDF generado exitosamente.",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generar y descargar reporte PDF de la solicitud",
+        "tags": ["Solicitudes"]
+      }
+    },
+    "/presupuestos/reservar": {
+      "post": {
+        "operationId": "SolicitudPresupuestoController_reservar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservarFuenteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reserva creada o renovada"
+          },
+          "409": {
+            "description": "Conflicto: Reservado por otro o ya confirmado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reservar una partida POA temporalmente (Sistema tipo Cine)",
+        "tags": ["Presupuestos (Reservas)"]
+      }
+    },
+    "/presupuestos/{id}": {
+      "delete": {
+        "operationId": "SolicitudPresupuestoController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Liberar una partida reservada si el usuario se arrepiente",
+        "tags": ["Presupuestos (Reservas)"]
+      }
+    },
+    "/presupuestos/my-active": {
+      "get": {
+        "operationId": "SolicitudPresupuestoController_findMyActive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar reservas temporales del usuario actual",
+        "tags": ["Presupuestos (Reservas)"]
+      }
+    },
+    "/conceptos": {
+      "get": {
+        "operationId": "ConceptosController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar conceptos de viáticos",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/tipo-gastos": {
+      "get": {
+        "operationId": "TipoGastosController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar tipos de gasto",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/grupos": {
+      "get": {
+        "operationId": "GruposController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar grupos contables",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/grupos/by-proyecto/{proyectoId}": {
+      "get": {
+        "operationId": "GruposController_findByProyectoId",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de grupos únicos con presupuesto asignado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener grupos únicos que tienen presupuesto en un proyecto",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/partidas": {
+      "get": {
+        "operationId": "PartidasController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar partidas presupuestarias",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/partidas/by-grupo/{grupoId}": {
+      "get": {
+        "operationId": "PartidasController_findByGrupoId",
+        "parameters": [
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de partidas asociadas al grupo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar partidas por grupo (Cascada)",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/proyectos": {
+      "get": {
+        "operationId": "ProyectosController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar proyectos",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/proyectos/by-poa/{codigo}": {
+      "get": {
+        "operationId": "ProyectosController_findByPoaCode",
+        "parameters": [
+          {
+            "name": "codigo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener proyectos únicos vinculados a un código POA",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/codigos-presupuestarios": {
+      "get": {
+        "operationId": "CodigosPresupuestariosController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar códigos presupuestarios",
+        "tags": ["Catálogos"]
+      }
+    },
+    "/codigos-presupuestarios/filter": {
+      "get": {
+        "operationId": "CodigosPresupuestariosController_filterByStructure",
+        "parameters": [
+          {
+            "name": "codigoPoa",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "proyectoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "grupoId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "partidaId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Código presupuestario encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "codigoCompleto": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Filtrar código presupuestario por estructura (4 niveles)",
+        "tags": ["Catálogos"]
+      }
+    }
+  },
+  "info": {
+    "title": "SIFIN API - Conservación Amazónica",
+    "description": "API para el Sistema Financiero Integrado (POA, Solicitudes, Rendiciones)",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "mteran@conservacion.org.bo",
+            "description": "Correo corporativo"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "123456",
+            "description": "Contraseña del usuario"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "CreateUsuarioDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@conservacion.gob.bo",
+            "description": "Correo electrónico institucional del usuario"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "password123",
+            "description": "Contraseña de acceso (mínimo 6 caracteres)"
+          },
+          "nombreCompleto": {
+            "type": "string",
+            "example": "Juan Perez",
+            "description": "Nombre completo del usuario"
+          },
+          "cargo": {
+            "type": "string",
+            "example": "Director de Area",
+            "description": "Cargo o posición del usuario"
+          },
+          "rol": {
+            "type": "string",
+            "enum": ["ADMIN", "TESORERO", "USUARIO"],
+            "example": "USUARIO",
+            "description": "Rol asignado al usuario en el sistema"
+          }
+        },
+        "required": ["email", "password", "nombreCompleto", "rol"]
+      },
+      "UpdateUsuarioDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@conservacion.gob.bo",
+            "description": "Correo electrónico institucional del usuario"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "password123",
+            "description": "Contraseña de acceso (mínimo 6 caracteres)"
+          },
+          "nombreCompleto": {
+            "type": "string",
+            "example": "Juan Perez",
+            "description": "Nombre completo del usuario"
+          },
+          "cargo": {
+            "type": "string",
+            "example": "Director de Area",
+            "description": "Cargo o posición del usuario"
+          },
+          "rol": {
+            "type": "string",
+            "enum": ["ADMIN", "TESORERO", "USUARIO"],
+            "example": "USUARIO",
+            "description": "Rol asignado al usuario en el sistema"
+          }
+        }
+      },
+      "PoaLookupDto": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "description": "Código POA"
+          }
+        },
+        "required": ["codigo"]
+      },
+      "CreatePoaDto": {
+        "type": "object",
+        "properties": {
+          "codigoPoa": {
+            "type": "string",
+            "example": "POA-2026-001"
+          },
+          "cantidad": {
+            "type": "number",
+            "minimum": 1,
+            "example": 10
+          },
+          "costoUnitario": {
+            "type": "number",
+            "minimum": 0,
+            "example": 500.5
+          },
+          "proyectoId": {
+            "type": "number",
+            "example": 1
+          },
+          "grupoId": {
+            "type": "number",
+            "example": 1
+          },
+          "partidaId": {
+            "type": "number",
+            "example": 1
+          },
+          "actividadId": {
+            "type": "number",
+            "example": 1
+          },
+          "codigoPresupuestarioId": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "codigoPoa",
+          "cantidad",
+          "costoUnitario",
+          "proyectoId",
+          "grupoId",
+          "partidaId",
+          "actividadId",
+          "codigoPresupuestarioId"
+        ]
+      },
+      "UpdatePoaDto": {
+        "type": "object",
+        "properties": {
+          "codigoPoa": {
+            "type": "string",
+            "example": "POA-2026-001"
+          },
+          "cantidad": {
+            "type": "number",
+            "minimum": 1,
+            "example": 10
+          },
+          "costoUnitario": {
+            "type": "number",
+            "minimum": 0,
+            "example": 500.5
+          },
+          "proyectoId": {
+            "type": "number",
+            "example": 1
+          },
+          "grupoId": {
+            "type": "number",
+            "example": 1
+          },
+          "partidaId": {
+            "type": "number",
+            "example": 1
+          },
+          "actividadId": {
+            "type": "number",
+            "example": 1
+          },
+          "codigoPresupuestarioId": {
+            "type": "number",
+            "example": 1
+          }
+        }
+      },
+      "CreatePlanificacionDto": {
+        "type": "object",
+        "properties": {
+          "actividad": {
+            "type": "string",
+            "example": "Reunión con comunarios"
+          },
+          "fechaInicio": {
+            "type": "string",
+            "example": "2026-02-01T10:00:00Z"
+          },
+          "fechaFin": {
+            "type": "string",
+            "example": "2026-02-15T18:00:00Z"
+          },
+          "cantInstitucional": {
+            "type": "number",
+            "minimum": 0,
+            "example": 2
+          },
+          "cantTerceros": {
+            "type": "number",
+            "minimum": 0,
+            "example": 5
+          }
+        },
+        "required": [
+          "actividad",
+          "fechaInicio",
+          "fechaFin",
+          "cantInstitucional",
+          "cantTerceros"
+        ]
+      },
+      "CreateViaticoDto": {
+        "type": "object",
+        "properties": {
+          "planificacionIndex": {
+            "type": "number",
+            "minimum": 0,
+            "example": 0,
+            "description": "Índice de la planificación relacionada"
+          },
+          "conceptoId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID del Concepto (Viático)"
+          },
+          "tipoDestino": {
+            "type": "string",
+            "enum": ["INSTITUCIONAL", "TERCEROS"],
+            "example": "INSTITUCIONAL"
+          },
+          "dias": {
+            "type": "number",
+            "minimum": 1,
+            "example": 3
+          },
+          "cantidadPersonas": {
+            "type": "number",
+            "minimum": 1,
+            "example": 1
+          },
+          "montoNeto": {
+            "type": "number",
+            "minimum": 0,
+            "example": 200,
+            "description": "Monto neto a recibir (Opcional, sobreescribe catálogo)"
+          },
+          "solicitudPresupuestoId": {
+            "type": "number",
+            "minimum": 1,
+            "example": 1,
+            "description": "ID de la reserva de presupuesto"
+          }
+        },
+        "required": [
+          "planificacionIndex",
+          "conceptoId",
+          "tipoDestino",
+          "dias",
+          "cantidadPersonas",
+          "solicitudPresupuestoId"
+        ]
+      },
+      "CreateGastoDto": {
+        "type": "object",
+        "properties": {
+          "solicitudPresupuestoId": {
+            "type": "number",
+            "minimum": 1,
+            "example": 1,
+            "description": "ID de la reserva de presupuesto"
+          },
+          "tipoGastoId": {
+            "type": "number",
+            "example": 1
+          },
+          "tipoDocumento": {
+            "type": "string",
+            "enum": ["FACTURA", "RECIBO"],
+            "example": "FACTURA"
+          },
+          "cantidad": {
+            "type": "number",
+            "minimum": 1,
+            "example": 2
+          },
+          "montoNeto": {
+            "type": "number",
+            "minimum": 0,
+            "example": 50.5,
+            "description": "Monto neto unitario a recibir"
+          },
+          "detalle": {
+            "type": "string",
+            "example": "Compra de herramientas"
+          }
+        },
+        "required": [
+          "solicitudPresupuestoId",
+          "tipoGastoId",
+          "tipoDocumento",
+          "cantidad",
+          "montoNeto"
+        ]
+      },
+      "CreateNominaDto": {
+        "type": "object",
+        "properties": {
+          "nombreCompleto": {
+            "type": "string",
+            "example": "Juan Pérez"
+          },
+          "ci": {
+            "type": "string",
+            "example": "1234567 LP"
+          }
+        },
+        "required": ["nombreCompleto", "ci"]
+      },
+      "CreateSolicitudDto": {
+        "type": "object",
+        "properties": {
+          "presupuestosIds": {
+            "example": [1, 2],
+            "description": "IDs de los registros de reserva de presupuesto (SolicitudPresupuesto)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "aprobadorId": {
+            "type": "number",
+            "example": 2,
+            "description": "ID del usuario aprobador"
+          },
+          "lugarViaje": {
+            "type": "string",
+            "example": "Trinidad",
+            "description": "Lugar del viaje"
+          },
+          "motivoViaje": {
+            "type": "string",
+            "example": "Supervisión de campo",
+            "description": "Motivo del viaje"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Solicitud para la misión de febrero"
+          },
+          "planificaciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePlanificacionDto"
+            }
+          },
+          "viaticos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateViaticoDto"
+            }
+          },
+          "gastos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateGastoDto"
+            }
+          },
+          "nominasTerceros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateNominaDto"
+            }
+          }
+        },
+        "required": [
+          "presupuestosIds",
+          "aprobadorId",
+          "lugarViaje",
+          "motivoViaje"
+        ]
+      },
+      "UpdateSolicitudDto": {
+        "type": "object",
+        "properties": {
+          "presupuestosIds": {
+            "example": [1, 2],
+            "description": "IDs de los registros de reserva de presupuesto (SolicitudPresupuesto)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "aprobadorId": {
+            "type": "number",
+            "example": 2,
+            "description": "ID del usuario aprobador"
+          },
+          "lugarViaje": {
+            "type": "string",
+            "example": "Trinidad",
+            "description": "Lugar del viaje"
+          },
+          "motivoViaje": {
+            "type": "string",
+            "example": "Supervisión de campo",
+            "description": "Motivo del viaje"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Solicitud para la misión de febrero"
+          },
+          "planificaciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePlanificacionDto"
+            }
+          },
+          "viaticos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateViaticoDto"
+            }
+          },
+          "gastos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateGastoDto"
+            }
+          },
+          "nominasTerceros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateNominaDto"
+            }
+          }
+        }
+      },
+      "AprobarSolicitudDto": {
+        "type": "object",
+        "properties": {
+          "nuevoAprobadorId": {
+            "type": "number",
+            "example": 3,
+            "description": "ID del nuevo usuario para derivar la solicitud (Obligatorio)"
+          }
+        },
+        "required": ["nuevoAprobadorId"]
+      },
+      "ObservarSolicitudDto": {
+        "type": "object",
+        "properties": {
+          "observacion": {
+            "type": "string",
+            "example": "Falta adjuntar el justificativo del gasto proyectado.",
+            "description": "Mensaje de feedback para el solicitante"
+          }
+        },
+        "required": ["observacion"]
+      },
+      "DesembolsarSolicitudDto": {
+        "type": "object",
+        "properties": {
+          "codigoDesembolso": {
+            "type": "string",
+            "example": "CP-2026-0001",
+            "description": "Código de comprobante de desembolso o cheque"
+          }
+        },
+        "required": ["codigoDesembolso"]
+      },
+      "ReservarFuenteDto": {
+        "type": "object",
+        "properties": {
+          "poaId": {
+            "type": "number",
+            "description": "ID de la línea POA a reservar"
+          }
+        },
+        "required": ["poaId"]
+      }
+    }
+  }
+}

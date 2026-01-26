@@ -35,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore();
 
   // Lógica de roles real
-  const isApprover = user?.role === 'approver' || user?.role === 'admin';
+  const isApprover = user?.rol === 'ADMIN' || user?.rol === 'TESORERO';
 
   const navMain = [
     {

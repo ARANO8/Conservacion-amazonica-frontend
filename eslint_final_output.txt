@@ -1,0 +1,6 @@
+
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\app\dashboard\solicitud\page.tsx
+  3:10  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 1 problem (0 errors, 1 warning)
+

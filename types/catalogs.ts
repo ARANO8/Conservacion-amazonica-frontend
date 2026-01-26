@@ -1,27 +1,45 @@
-export interface BudgetLine {
-  id: string;
-  code: string;
-  name: string;
-  category: string;
+export interface Concepto {
+  id: number;
+  nombre: string;
+  precioInstitucional?: string;
+  precioTerceros?: string;
 }
 
-export interface FinancingSource {
-  id: string;
-  code: string;
-  name: string;
+export interface Grupo {
+  id: number;
+  nombre: string;
 }
 
-export interface UserCatalog {
-  id: string;
-  name: string;
-  position: string;
-  area: string;
+export interface Partida {
+  id: number;
+  codigo: string;
+  nombre: string;
+  grupoId: number;
 }
 
-export interface PoaActivity {
-  id: string;
-  code: string;
-  project: string;
-  description: string;
-  poaBudgetLine: string | null;
+export interface TipoGasto {
+  id: number;
+  nombre: string;
+}
+
+export interface Usuario {
+  id: number;
+  nombreCompleto: string;
+  cargo?: string;
+}
+
+export interface PoaLookup {
+  codigo: string;
+}
+
+export interface Proyecto {
+  id: number;
+  nombre: string;
+}
+
+export interface CodigoPresupuestario {
+  id: number;
+  codigo?: string;
+  descripcion?: string;
+  codigoCompleto?: string;
 }
