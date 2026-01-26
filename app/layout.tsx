@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { Toaster } from '@/components/ui/sonner';
+import { ThemeToaster } from '@/components/theme-toaster';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -23,8 +24,15 @@ export default function RootLayout({
       className={cn('dark', outfit.variable)}
     >
       <body className="font-sans antialiased">
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <ThemeToaster />
+        </ThemeProvider>
       </body>
     </html>
   );

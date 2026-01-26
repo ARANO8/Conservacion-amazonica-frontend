@@ -5,15 +5,21 @@
 
 @layer base {
   :root {
+    /* LIGHT MODE PALETTE (Zinc & Emerald) */
     --background: 0 0% 100%;
+    /* Blanco puro */
     --foreground: 240 10% 3.9%;
+    /* Zinc 950 */
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    /* Fondo blanco para dropdowns */
     --popover-foreground: 240 10% 3.9%;
     --primary: 142.1 76.2% 36.3%;
+    /* Emerald 600 */
     --primary-foreground: 355.7 100% 97.3%;
     --secondary: 240 4.8% 95.9%;
+    /* Zinc 100 */
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
@@ -22,6 +28,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 240 5.9% 90%;
+    /* Zinc 200 */
     --input: 240 5.9% 90%;
     --ring: 142.1 76.2% 36.3%;
     --radius: 0.5rem;
@@ -30,13 +37,14 @@
     --chart-3: 142 70% 50%;
     --chart-4: 160 60% 60%;
     --chart-5: 142 76% 20%;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-background: 240 4.8% 95.9%;
+    /* Zinc 100 for Sidebar in Light */
+    --sidebar-foreground: 240 5.9% 10%;
     --sidebar-primary: 142.1 76.2% 36.3%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 240 5.9% 90%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 240 5.9% 90%;
     --sidebar-ring: 142.1 76.2% 36.3%;
   }
 

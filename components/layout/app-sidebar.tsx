@@ -17,6 +17,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/auth-store';
+import { ModeToggle } from '@/components/mode-toggle';
 
 // Menu items estáticos (se pueden mover a config si crecen)
 const navSecondary = [
@@ -62,24 +63,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex items-center justify-start px-2 py-4">
-                  <Image
-                    src="/Logo-AMZ-desk-ok.webp"
-                    alt="AMZ Desk"
-                    width={120}
-                    height={40}
-                    priority
-                    className="h-auto w-auto max-w-[140px]"
-                  />
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex flex-row items-center justify-between px-2 py-2">
+          <a href="#">
+            <Image
+              src="/Logo-AMZ-desk-ok.webp"
+              alt="AMZ Desk"
+              width={120}
+              height={40}
+              priority
+              className="h-auto w-auto max-w-[120px]"
+            />
+          </a>
+          <ModeToggle />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
