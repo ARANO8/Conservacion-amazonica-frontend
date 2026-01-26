@@ -31,12 +31,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckCircle2, SendHorizonal } from 'lucide-react';
 import { Usuario } from '@/types/catalogs';
 
+import { PresupuestoReserva } from '@/types/backend';
+
 interface ReviewModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: FormData) => void;
   loading?: boolean;
   usuarios: Usuario[];
+  misReservas: PresupuestoReserva[];
 }
 
 export default function ReviewModal({
@@ -45,6 +48,7 @@ export default function ReviewModal({
   onSubmit,
   loading = false,
   usuarios,
+  misReservas,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit } = useFormContext<FormData>();
 
@@ -109,9 +113,62 @@ export default function ReviewModal({
               </div>
             </section>
 
+            {/* 2. Fuentes de Financiamiento */}
+            <section className="space-y-3">
+              <h3 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
+                Fuentes de Financiamiento
+              </h3>
+              <div className="grid gap-3">
+                {(data.fuentesSeleccionadas || []).map((fuente, idx) => {
+                  const reserva = misReservas.find(
+                    (r) => r.id === fuente.reservaId
+                  );
+                  const nombreFuente =
+                    reserva?.poa?.codigoPresupuestario?.codigoCompleto ||
+                    reserva?.poa?.codigoPresupuestario?.descripcion ||
+                    `Fuente ${idx + 1}`;
+
+                  // Calcular cuánto de esta fuente se está usando en esta solicitud
+                  const montoUsoViaticos = (data.viaticos || [])
+                    .filter(
+                      (v) => v.solicitudPresupuestoId === fuente.reservaId
+                    )
+                    .reduce(
+                      (acc, v) => acc + (Number(v.liquidoPagable) || 0),
+                      0
+                    );
+
+                  const montoUsoGastos = (data.items || [])
+                    .filter(
+                      (i) => i.solicitudPresupuestoId === fuente.reservaId
+                    )
+                    .reduce(
+                      (acc, i) => acc + (Number(i.liquidoPagable) || 0),
+                      0
+                    );
+
+                  const totalUsoFuente = montoUsoViaticos + montoUsoGastos;
+
+                  return (
+                    <div
+                      key={fuente.reservaId || idx}
+                      className="bg-muted/30 flex items-center justify-between rounded-lg border p-2.5 text-sm"
+                    >
+                      <span className="text-muted-foreground line-clamp-2 max-w-[280px] text-xs font-medium">
+                        {nombreFuente}
+                      </span>
+                      <span className="font-bold text-emerald-600 tabular-nums">
+                        {formatMoney(totalUsoFuente)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
             <Separator />
 
-            {/* 2. Resumen Económico */}
+            {/* 3. Resumen Económico */}
             <section className="space-y-3">
               <h3 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
                 Resumen Económico

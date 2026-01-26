@@ -207,6 +207,7 @@ export default function SolicitudPage() {
             onSubmit={onSubmit}
             loading={loading}
             usuarios={usuarios}
+            misReservas={misReservas}
           />
         </Form>
       </div>
@@ -319,6 +320,7 @@ export default function SolicitudPage() {
           onSubmit={onSubmit}
           loading={loading}
           usuarios={usuarios}
+          misReservas={misReservas}
         />
 
         <AlertDialog
