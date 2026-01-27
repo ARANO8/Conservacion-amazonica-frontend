@@ -118,11 +118,6 @@ function ViaticoCard({
     name: `viaticos.${index}.cantidadPersonas`,
   }) as number;
 
-  const montoNeto = useWatch({
-    control,
-    name: `viaticos.${index}.montoNeto`,
-  }) as number;
-
   const liquidoPagable = useWatch({
     control,
     name: `viaticos.${index}.liquidoPagable`,

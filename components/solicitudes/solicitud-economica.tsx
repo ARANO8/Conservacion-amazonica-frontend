@@ -104,8 +104,6 @@ export default function SolicitudEconomica({
 
   // Observar montos para cálculos globales y sincronización de fuentes
   const watchFuentesRaw = useWatch({ control, name: 'fuentesSeleccionadas' });
-  const watchViaticosRaw = useWatch({ control, name: 'viaticos' });
-  const watchGastosRaw = useWatch({ control, name: 'items' });
 
   const watchedFuentes = useMemo(
     () => watchFuentesRaw || [],

@@ -12,9 +12,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/auth-store';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -72,6 +69,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               height={40}
               priority
               className="h-auto w-auto max-w-[120px]"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </a>
           <ModeToggle />

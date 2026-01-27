@@ -119,11 +119,6 @@ function GastoCard({
     name: `items.${index}.costoUnitario`,
   }) as number;
 
-  const montoNeto = useWatch({
-    control,
-    name: `items.${index}.montoNeto`,
-  }) as number;
-
   const liquidoPagable = useWatch({
     control,
     name: `items.${index}.liquidoPagable`,
