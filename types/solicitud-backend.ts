@@ -33,3 +33,36 @@ export interface CreateSolicitudPayload {
     ci: string;
   }[];
 }
+
+export interface SolicitudResponse {
+  id: number;
+  codigoSolicitud: string;
+  motivoViaje: string;
+  fechaSolicitud: string;
+  descripcion: string;
+  fechaCreacion: string; // ISO String
+  estado: string;
+  montoTotalNeto: string;
+  montoTotalPresupuestado: string;
+  usuarioEmisor?: {
+    nombreCompleto: string;
+    email?: string;
+  };
+  usuario?: {
+    nombreCompleto: string;
+    email: string;
+  };
+  viaticos?: Array<{
+    montoNeto: number | string;
+    solicitudPresupuesto?: {
+      poa?: { codigo: string };
+    };
+  }>;
+  gastos?: Array<{
+    montoNeto: number | string;
+    solicitudPresupuesto?: {
+      poa?: { codigo: string };
+    };
+  }>;
+  codigoPoa?: string; // Fallback if direct
+}

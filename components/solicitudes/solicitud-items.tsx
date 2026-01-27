@@ -3,7 +3,6 @@
 import { useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -14,19 +13,33 @@ import {
 import {
   Control,
   useFieldArray,
-  UseFormWatch,
   useFormContext,
   useWatch,
 } from 'react-hook-form';
-import { FormControl, FormField, FormItem } from '@/components/ui/form';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
+
+interface BudgetLine {
+  id: number;
+  code: string;
+  name: string;
+}
+
+interface FinancingSource {
+  id: number;
+  code: string;
+  name: string;
+}
 
 interface SolicitudItemsProps {
   control: Control<FormData>;
-  watch: UseFormWatch<FormData>;
   budgetLines: BudgetLine[];
   financingSources: FinancingSource[];
-  isLoading?: boolean;
   totalAmount?: number;
 }
 
@@ -39,12 +52,11 @@ function formatMoney(n: number) {
   }).format(isFinite(n) ? n : 0);
 }
 
+type ItemType = NonNullable<FormData['items']>[number];
+
 export default function SolicitudItems({
   control,
-  watch,
-  budgetLines,
   financingSources,
-  isLoading = false,
   totalAmount,
 }: SolicitudItemsProps) {
   const { fields, append, remove } = useFieldArray({
@@ -61,8 +73,8 @@ export default function SolicitudItems({
 
   // Calculates total (cantidad * costoUnitario)
   useEffect(() => {
-    if (!watchItems) return;
-    (watchItems as FormData['items']).forEach((item, index) => {
+    if (!watchedItems) return;
+    (watchedItems as ItemType[]).forEach((item, index) => {
       const q = Number(item.cantidad) || 0;
       const u = Number(item.costoUnitario) || 0;
       const newTotal = q * u; // Base Total
@@ -77,10 +89,13 @@ export default function SolicitudItems({
   }, [watchedItems, setValue]);
 
   const totalLiquido = useMemo(() => {
-    return (watchItems || []).reduce(
+    return (watchedItems || []).reduce(
       (acc: number, item) => acc + (Number(item.liquidoPagable) || 0),
       0
     );
+  }, [watchedItems]);
+
+  const displayTotal = totalAmount ?? totalLiquido;
 
   return (
     <div className="space-y-3 overflow-x-auto pb-4">
@@ -101,7 +116,7 @@ export default function SolicitudItems({
           <div></div>
         </div>
         {fields.map((field, idx) => {
-          const currentItem = watchItems?.[idx] || {};
+          const currentItem = (watchedItems?.[idx] as ItemType) || {};
           const q = Number(currentItem.cantidad) || 0;
           const u = Number(currentItem.costoUnitario) || 0;
           const total = q * u;
@@ -109,7 +124,7 @@ export default function SolicitudItems({
           return (
             <div
               key={field.id}
-              className="bg-muted/5 grid grid-cols-[1.5fr_1.5fr_1fr_1fr_0.5fr_0.7fr_0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
+              className="bg-muted/5 mb-2 grid grid-cols-[1.5fr_1.5fr_1fr_1fr_0.5fr_0.7fr_0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_0.3fr] items-start gap-2 rounded-md border p-2 text-sm"
             >
               {/* Detalle */}
               <div>
@@ -219,10 +234,7 @@ export default function SolicitudItems({
                   control={control}
                   name={`items.${idx}.cantidad`}
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
-                        Descripción / Detalle del Gasto
-                      </Label>
+                    <FormItem>
                       <FormControl>
                         <Input
                           type="number"
@@ -230,8 +242,6 @@ export default function SolicitudItems({
                           className="h-8 text-xs"
                           {...field}
                           value={field.value ?? ''}
-                          placeholder="Especificar el concepto del gasto..."
-                          className="h-9 text-xs"
                         />
                       </FormControl>
                       <FormMessage />
@@ -246,15 +256,12 @@ export default function SolicitudItems({
                   control={control}
                   name={`items.${idx}.costoUnitario`}
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <Label className="text-muted-foreground text-[10px] font-bold uppercase">
-                        Costo Unit. (Bs)
-                      </Label>
+                    <FormItem>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
-                          className="h-9 text-right text-xs font-bold"
+                          className="h-8 text-right text-xs"
                           {...field}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -266,7 +273,6 @@ export default function SolicitudItems({
                   )}
                 />
               </div>
-            </div>
 
               {/* Total Bs */}
               <div>
@@ -275,13 +281,13 @@ export default function SolicitudItems({
                   className="bg-muted h-8 font-mono text-xs"
                   value={total.toFixed(2)}
                 />
-                <input
-                  type="hidden"
-                  {...control.register(`items.${idx}.montoNeto`)}
-                />
               </div>
 
               <div className="bg-muted-foreground/20 hidden h-8 w-[1px] sm:block" />
+
+              <div className="h-8"></div>
+              <div className="h-8"></div>
+              <div className="h-8"></div>
 
               {/* Liquido */}
               <div>
@@ -290,16 +296,7 @@ export default function SolicitudItems({
                   className="h-8 font-mono text-xs font-bold"
                   value={total.toFixed(2)}
                 />
-                <input
-                  type="hidden"
-                  {...control.register(`items.${idx}.liquidoPagable`)}
-                />
               </div>
-
-              <input
-                type="hidden"
-                {...control.register(`items.${idx}.amount`)}
-              />
 
               <Button
                 variant="ghost"
@@ -308,73 +305,85 @@ export default function SolicitudItems({
                 type="button"
                 onClick={() => remove(idx)}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-3.5"
-                >
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                </svg>
+                <Trash2Icon className="size-3.5" />
                 <span className="text-[10px] font-bold uppercase">
                   Eliminar
                 </span>
               </Button>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
-      <div className="flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          onClick={() =>
-            append({
-              solicitudPresupuestoId: 0,
-              tipoDocumento: 'FACTURA',
-              tipoGastoId: 0,
-              cantidad: 1,
-              costoUnitario: 0,
-              montoNeto: 0,
-              detalle: '',
-              liquidoPagable: 0,
-            })
-          }
-          className="h-10 border-dashed px-6"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mr-2 size-4"
+        <div className="flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={() =>
+              append({
+                solicitudPresupuestoId: 0,
+                tipoDocumento: 'FACTURA',
+                tipoGastoId: 0,
+                cantidad: 1,
+                costoUnitario: 0,
+                montoNeto: 0,
+                detalle: '',
+                liquidoPagable: 0,
+              })
+            }
+            className="h-10 border-dashed px-6"
           >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-          Nuevo Ítem de Gasto
-        </Button>
+            <PlusIcon className="mr-2 size-4" />
+            Nuevo Ítem de Gasto
+          </Button>
 
-        <div className="bg-muted/40 border-primary/10 flex items-center gap-3 rounded-xl border p-2 px-4">
-          <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
-            Monto Total Solicitado (Bs)
-          </span>
-          <div className="text-primary font-mono text-xl font-black">
-            {formatMoney(displayTotal)}
+          <div className="bg-muted/40 border-primary/10 flex items-center gap-3 rounded-xl border p-2 px-4">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+              Monto Total Solicitado (Bs)
+            </span>
+            <div className="text-primary font-mono text-xl font-black">
+              {formatMoney(displayTotal)}
+            </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function Trash2Icon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 6h18" />
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    </svg>
+  );
+}
+
+function PlusIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
   );
 }

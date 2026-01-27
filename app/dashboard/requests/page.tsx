@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { columns, RequestTableData } from './columns';
+import { columns } from './columns';
+import { SolicitudResponse } from '@/types/solicitud-backend';
 import { DataTable } from './data-table';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -10,13 +11,14 @@ import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RequestsPage() {
-  const [data, setData] = useState<RequestTableData[]>([]);
+  const [data, setData] = useState<SolicitudResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await api.get<RequestTableData[]>('/requests');
+        const response = await api.get<SolicitudResponse[]>('/solicitudes');
+        console.log('🚀 Data recibida del backend:', response.data);
         setData(response.data);
       } catch (error) {
         console.error('Error fetching requests:', error);

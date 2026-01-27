@@ -1,26 +1,24 @@
 
-> frontend@0.1.0 lint
+> frontend@0.1.0 lint E:\Alan\Trabajo\Conservacion-amazonica-frontend
 > eslint
 
 
 E:\Alan\Trabajo\Conservacion-amazonica-frontend\app\dashboard\solicitud\page.tsx
-   16:3   warning  'Select' is defined but never used         @typescript-eslint/no-unused-vars
-   17:3   warning  'SelectContent' is defined but never used  @typescript-eslint/no-unused-vars
-   18:3   warning  'SelectItem' is defined but never used     @typescript-eslint/no-unused-vars
-   19:3   warning  'SelectTrigger' is defined but never used  @typescript-eslint/no-unused-vars
-   20:3   warning  'SelectValue' is defined but never used    @typescript-eslint/no-unused-vars
-  121:27  warning  'data' is defined but never used           @typescript-eslint/no-unused-vars
-  148:22  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
-  152:22  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  174:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Alan\Trabajo\Conservacion-amazonica-frontend\components\solicitudes\solicitud-economica.tsx
-  16:10  warning  'Input' is defined but never used                             @typescript-eslint/no-unused-vars
-  31:19  warning  'Check' is defined but never used                             @typescript-eslint/no-unused-vars
-  31:26  warning  'ChevronsUpDown' is defined but never used                    @typescript-eslint/no-unused-vars
-  38:5   warning  'ComboboxEmpty' is defined but never used                     @typescript-eslint/no-unused-vars
-  65:5   warning  'grupos' is defined but never used                            @typescript-eslint/no-unused-vars
-  66:5   warning  'partidas' is defined but never used                          @typescript-eslint/no-unused-vars
-  73:12  warning  'presupuestoSeleccionado' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  107:9  warning  'watchViaticosRaw' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  108:9  warning  'watchGastosRaw' is assigned a value but never used    @typescript-eslint/no-unused-vars
 
-Ô£û 15 problems (2 errors, 13 warnings)
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\components\solicitudes\solicitud-gastos.tsx
+  122:9  warning  'montoNeto' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\components\solicitudes\solicitud-items.tsx
+  271:14  error  Parsing error: ')' expected
+
+E:\Alan\Trabajo\Conservacion-amazonica-frontend\components\solicitudes\solicitud-viaticos.tsx
+  121:9  warning  'montoNeto' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 6 problems (2 errors, 4 warnings)
+
+ÔÇëELIFECYCLEÔÇë Command failed with exit code 1.

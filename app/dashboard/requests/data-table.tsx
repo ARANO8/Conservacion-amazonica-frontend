@@ -62,25 +62,30 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center gap-2 py-4">
         <Input
-          placeholder="Filtrar por descripción..."
+          placeholder="Filtrar por motivo..."
           value={
-            (table.getColumn('description')?.getFilterValue() as string) ?? ''
+            (table.getColumn('motivoViaje')?.getFilterValue() as string) ?? ''
           }
           onChange={(event) =>
-            table.getColumn('description')?.setFilterValue(event.target.value)
+            table.getColumn('motivoViaje')?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <Input
-          placeholder="Filtrar por Código POA..."
-          value={(table.getColumn('poaCode')?.getFilterValue() as string) ?? ''}
+          placeholder="Filtrar por Código..."
+          value={
+            (table.getColumn('codigoSolicitud')?.getFilterValue() as string) ??
+            ''
+          }
           onChange={(event) =>
-            table.getColumn('poaCode')?.setFilterValue(event.target.value)
+            table
+              .getColumn('codigoSolicitud')
+              ?.setFilterValue(event.target.value)
           }
           className="max-w-[200px]"
         />
       </div>
-      <div className="rounded-md border bg-white">
+      <div className="bg-card rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>) => (

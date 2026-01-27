@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +29,8 @@ import NominaTercerosForm from '@/components/solicitudes/nomina-terceros-form';
 import ReviewModal from '@/components/solicitudes/review-modal';
 import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
+import { solicitudesService } from '@/lib/services/solicitudes-service';
+import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
 import { presupuestosService } from '@/services/presupuestos.service';
 import { PresupuestoReserva } from '@/types/backend';
 import {
@@ -47,7 +50,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
 
 export default function SolicitudPage() {
   const router = useRouter();
@@ -164,14 +166,23 @@ export default function SolicitudPage() {
         JSON.stringify(payload, null, 2)
       );
 
-      // Simular latencia de red
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Enviar la solicitud al backend
+      await solicitudesService.createSolicitud(payload);
 
       toast.success('Solicitud enviada exitosamente');
-      router.push('/dashboard/solicitudes');
-    } catch (error) {
-      console.error('Error al preparar el payload:', error);
-      toast.error('Ocurrió un error al procesar la solicitud');
+      router.push('/dashboard/requests');
+    } catch (error: unknown) {
+      console.error('Error al enviar la solicitud:', error);
+
+      let errorMessage = 'Ocurrió un error al procesar la solicitud';
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
       setIsReviewModalOpen(false);
