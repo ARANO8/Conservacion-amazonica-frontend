@@ -226,15 +226,15 @@ export default function ReviewModal({
 
                       <div className="mt-4 flex items-center justify-end gap-6 border-t pt-3">
                         <div className="text-right">
-                          <p className="text-muted-foreground text-[9px] font-bold uppercase">
+                          <p className="text-muted-foreground text-[12px] font-bold uppercase">
                             Subtotal Líquido
                           </p>
-                          <p className="text-muted-foreground text-xs font-semibold">
+                          <p className="text-muted-foreground text-base font-semibold">
                             {formatMoney(subtotalLiq)}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-primary text-[9px] font-bold uppercase">
+                          <p className="text-primary text-[12px] font-bold uppercase">
                             Subtotal Presupuestado
                           </p>
                           <p className="text-primary text-base font-black">
@@ -264,7 +264,7 @@ export default function ReviewModal({
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400">
                       <div className="flex items-start gap-2">
                         <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                        <p className="text-[10px] leading-tight font-medium">
+                        <p className="text-[13px] leading-tight font-medium">
                           Importante: Selecciona a tu inmediato superior o al
                           coordinador del área para la aprobación de esta
                           solicitud.
