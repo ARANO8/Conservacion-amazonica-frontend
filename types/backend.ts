@@ -52,13 +52,17 @@ export interface CreatePoaDto {
   codigoPresupuestarioId: number;
 }
 
+export interface Actividad extends EntityBase {
+  detalleDescripcion?: string;
+}
+
 export interface Poa extends CreatePoaDto {
   costoTotal: number;
   saldoDisponible?: number | string;
   proyecto?: Proyecto;
   grupo?: GrupoContable;
   partida?: PartidaPresupuestaria;
-  actividad?: unknown;
+  actividad?: Actividad;
   codigoPresupuestario?: CodigoPresupuestario;
 }
 
