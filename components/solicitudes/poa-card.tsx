@@ -36,11 +36,9 @@ export function PoaCard({
   const hasNoFunds = saldoDisponible <= 0.001;
   const isCompromised = saldoDisponible < costoTotal && !hasNoFunds;
 
-  const codigoCompleto =
-    item.actividad?.detalleDescripcion ||
-    item.codigoPresupuestario?.codigoCompleto ||
-    item.codigoPresupuestario?.descripcion ||
-    `Item ${item.id}`;
+  const codigoCompleto = [item.actividad?.detalleDescripcion]
+    .filter(Boolean)
+    .join(' - ');
 
   const labelPoa = item.codigoPoa || 'Presupuesto';
 

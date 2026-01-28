@@ -715,6 +715,9 @@ function FuenteCard({
                       key={item.id}
                       item={item}
                       isSelected={true}
+                      codigoActividad={
+                        item.codigoPresupuestario?.codigoCompleto
+                      }
                       onSelect={() => {}}
                       isDisabled={true}
                     />
