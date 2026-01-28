@@ -277,7 +277,7 @@ export default function ReviewModal({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full truncate overflow-hidden">
                           <SelectValue placeholder="Seleccionar responsable..." />
                         </SelectTrigger>
                       </FormControl>
