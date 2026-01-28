@@ -176,24 +176,14 @@ export default function ReviewModal({
                     0
                   );
 
-                // Accedemos a la relación donde vive el "A2.3"
-                const relacionPartida = reserva.poa?.codigoPresupuestario;
-
-                // 1. TÍTULO PRINCIPAL (El código corto, ej: A2.3)
-                // IMPORTANTE: NO usar reserva.poa.codigoPoa aquí.
-                const codigoVisual = relacionPartida?.codigo || 'S/C';
-
                 // 2. DESCRIPCIÓN (El nombre largo, ej: Consultorías...)
                 const nombreVisual =
-                  relacionPartida?.descripcion ||
-                  relacionPartida?.nombre ||
+                  reserva.poa?.codigoPresupuestario?.codigoCompleto ||
                   'Sin Descripción';
 
                 // 3. SUBTÍTULO (Detalle de actividad)
                 const descActividad =
-                  reserva.poa?.actividad?.detalleDescripcion ||
-                  reserva.poa?.actividad?.nombre ||
-                  '';
+                  reserva.poa?.actividad?.detalleDescripcion || '';
 
                 return (
                   <div
@@ -203,7 +193,7 @@ export default function ReviewModal({
                     <div className="bg-muted/30 border-b p-3">
                       {/* TÍTULO VERDE: Código - Nombre Partida */}
                       <p className="text-primary text-base leading-tight font-black uppercase">
-                        {codigoVisual} - {nombreVisual}
+                        {nombreVisual}
                       </p>
 
                       {/* SUBTÍTULO GRIS: Descripción de la Actividad */}
