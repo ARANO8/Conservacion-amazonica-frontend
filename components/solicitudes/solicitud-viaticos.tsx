@@ -138,6 +138,11 @@ function ViaticoCard({
     name: `viaticos.${index}.planificacionIndex`,
   });
 
+  const montoNeto = useWatch({
+    control,
+    name: `viaticos.${index}.montoNeto`,
+  });
+
   const selectedPlanificacion = useMemo(() => {
     // Assuming planificacionIndex corresponds to the array index of actividadesPlanificadas
     return actividadesPlanificadas[Number(watchPlanificacionIndex)];
@@ -183,17 +188,17 @@ function ViaticoCard({
     return d * p * precio;
   }, [dias, personas, precioUnitario]);
 
-  // Update montoNeto whenever the calculation changes
   useEffect(() => {
-    setValue(`viaticos.${index}.montoNeto`, Number(netoTotal.toFixed(2)), {
+    // Impacto presupuestario (Bruto) = Neto + 16% impuestos
+    const brutoTotal = netoTotal * 1.16;
+    setValue(`viaticos.${index}.montoNeto`, Number(brutoTotal.toFixed(2)), {
       shouldValidate: true,
     });
   }, [netoTotal, setValue, index]);
 
   useEffect(() => {
-    // Impacto presupuestario (Bruto) = Neto + 16% impuestos
-    const brutoTotal = netoTotal * 1.16;
-    setValue(`viaticos.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
+    // Neto a Recibir (Liquido Pagable)
+    setValue(`viaticos.${index}.liquidoPagable`, Number(netoTotal.toFixed(2)));
   }, [netoTotal, setValue, index]);
 
   return (
@@ -459,7 +464,7 @@ function ViaticoCard({
               TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
-              {formatMoney(liquidoPagable || 0)}
+              {formatMoney(montoNeto || 0)}
             </span>
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />

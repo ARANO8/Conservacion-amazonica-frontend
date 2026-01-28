@@ -134,6 +134,11 @@ function GastoCard({
     name: `items.${index}.tipoGastoId`,
   });
 
+  const montoNeto = useWatch({
+    control,
+    name: `items.${index}.montoNeto`,
+  });
+
   const netoTotal = useMemo(() => {
     const qty = Number(cantidad) || 0;
     const cost = Number(costoUnitario) || 0;
@@ -162,8 +167,8 @@ function GastoCard({
   }, [netoTotal, watchDocumento, watchTipoGastoId, tiposGasto]);
 
   useEffect(() => {
-    setValue(`items.${index}.montoNeto`, Number(netoTotal.toFixed(2)));
-    setValue(`items.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
+    setValue(`items.${index}.montoNeto`, Number(brutoTotal.toFixed(2)));
+    setValue(`items.${index}.liquidoPagable`, Number(netoTotal.toFixed(2)));
   }, [brutoTotal, netoTotal, setValue, index]);
 
   // Los gastos ahora se vinculan directamente a una reserva de la canasta,
@@ -384,7 +389,7 @@ function GastoCard({
               TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
-              {formatMoney(liquidoPagable || 0)}
+              {formatMoney(montoNeto || 0)}
             </span>
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />

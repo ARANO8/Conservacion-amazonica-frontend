@@ -72,8 +72,18 @@ export default function ReviewModal({
     0
   );
 
-  const totalGeneral = totalViaticos + totalGastos;
-  const totalLiquidoGeneral = totalLiquidoViaticos + totalLiquidoGastos;
+  const totalNomina = (data.nomina || []).reduce(
+    (acc: number, n) => acc + (Number(n.montoNeto) || 0),
+    0
+  );
+  const totalLiquidoNomina = (data.nomina || []).reduce(
+    (acc: number, n) => acc + (Number(n.liquidoPagable) || 0),
+    0
+  );
+
+  const totalGeneral = totalViaticos + totalGastos + totalNomina;
+  const totalLiquidoGeneral =
+    totalLiquidoViaticos + totalLiquidoGastos + totalLiquidoNomina;
   const countNomina = data.nomina?.length || 0;
 
   return (
@@ -168,58 +178,28 @@ export default function ReviewModal({
 
             <Separator />
 
-            {/* 3. Resumen Económico */}
-            <section className="space-y-3">
-              <h3 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
-                Resumen Económico
-              </h3>
-              <div className="grid gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Total Viáticos / Pasajes:
-                  </span>
-                  <div className="text-right">
-                    <span className="text-primary font-medium">
-                      {formatMoney(totalViaticos)}
-                    </span>
-                    <p className="text-muted-foreground text-[10px] italic">
-                      Líquido: {formatMoney(totalLiquidoViaticos)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Total Otros Gastos:
-                  </span>
-                  <div className="text-right">
-                    <span className="text-primary font-medium">
-                      {formatMoney(totalGastos)}
-                    </span>
-                    <p className="text-muted-foreground text-[10px] italic">
-                      Líquido: {formatMoney(totalLiquidoGastos)}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-2 space-y-1 border-t pt-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      Total Bruto Solicitado:
-                    </span>
-                    <span className="font-bold">
-                      {formatMoney(totalGeneral)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-base font-black">
-                    <span className="text-emerald-700">
-                      TOTAL LÍQUIDO PAGABLE:
-                    </span>
-                    <span className="text-emerald-700">
-                      {formatMoney(totalLiquidoGeneral)}
-                    </span>
-                  </div>
-                </div>
+            {/* 3. Resumen Económico Consolidado (Diseño Limpio) */}
+            <div className="flex flex-col gap-4 px-2 py-2">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                  TOTAL LÍQUIDO (A Recibir)
+                </span>
+                <span className="text-foreground text-lg font-bold">
+                  {formatMoney(totalLiquidoGeneral)}
+                </span>
               </div>
-            </section>
+
+              <div className="bg-border h-[1px] w-full" />
+
+              <div className="flex items-center justify-between">
+                <span className="text-primary text-[10px] font-black tracking-widest uppercase">
+                  TOTAL PRESUPUESTADO (Incl. Impuestos)
+                </span>
+                <span className="text-primary text-xl font-black">
+                  {formatMoney(totalGeneral)}
+                </span>
+              </div>
+            </div>
 
             <Separator />
 
