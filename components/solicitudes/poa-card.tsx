@@ -69,10 +69,7 @@ export function PoaCard({
 
       {/* Header: Activity Code & Highlights */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-primary text-[10px] font-black tracking-widest uppercase">
-            {labelPoa}
-          </span>
+        <div className="flex items-center justify-end">
           <div className="flex gap-1">
             {hasNoFunds && (
               <Badge

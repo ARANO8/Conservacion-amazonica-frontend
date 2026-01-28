@@ -623,7 +623,7 @@ function FuenteCard({
       )}
 
       <div className="space-y-4 p-5">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
           {/* GRUPO */}
           <FormField
             control={control}
@@ -722,7 +722,16 @@ function FuenteCard({
               </div>
             ) : (
               // Selector cuando no hay nada seleccionado
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div
+                className={cn(
+                  'grid gap-4',
+                  availableItems.length === 1
+                    ? 'grid-cols-1'
+                    : availableItems.length === 2
+                      ? 'grid-cols-1 md:grid-cols-2'
+                      : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                )}
+              >
                 {availableItems.length > 0 ? (
                   availableItems.map((item) => {
                     const isAlreadyAdded = watchedFuentes.some(
