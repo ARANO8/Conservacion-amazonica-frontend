@@ -54,6 +54,7 @@ export interface CreatePoaDto {
 
 export interface Poa extends CreatePoaDto {
   costoTotal: number;
+  saldoDisponible?: number | string;
   proyecto?: Proyecto;
   grupo?: GrupoContable;
   partida?: PartidaPresupuestaria;
@@ -172,15 +173,19 @@ export type Banco = EntityBase;
 
 export interface PoaStructureItem {
   id: number;
+  codigoPoa: string;
+  cantidad: number;
+  costoUnitario: number | string;
+  costoTotal: number | string;
+  saldoDisponible: number | string;
+  actividad?: {
+    id: number;
+    detalleDescripcion: string;
+  };
   estructura?: {
     proyecto?: Proyecto;
     grupo?: GrupoContable;
     partida?: PartidaPresupuestaria;
   };
   codigoPresupuestario?: CodigoPresupuestario;
-  poa?: {
-    codigoPoa: string;
-    costoTotal: number;
-  };
-  codigoPoa?: string;
 }
