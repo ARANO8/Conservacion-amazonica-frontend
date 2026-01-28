@@ -206,8 +206,8 @@ function ViaticoCard({
             name={`viaticos.${index}.solicitudPresupuestoId`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                  1. Fuente de Financiamiento
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Partida Presupuestaria
                 </Label>
                 <Select
                   onValueChange={(val) => field.onChange(Number(val))}
@@ -429,7 +429,7 @@ function ViaticoCard({
           />
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Monto Unitario (Bs)
+              Costo Unitario (Bs)
             </Label>
             <Input
               type="number"
@@ -440,7 +440,7 @@ function ViaticoCard({
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Total Neto (Bs)
+              TOTAL LÍQUIDO (A Recibir)
             </Label>
             <Input
               value={formatMoney(netoTotal)}
@@ -455,8 +455,8 @@ function ViaticoCard({
       <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-4 border-t p-3 px-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] leading-tight font-bold uppercase">
-              Costo Total Presupuestado
+            <span className="text-muted-foreground text-xs font-bold uppercase">
+              TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
               {formatMoney(liquidoPagable || 0)}

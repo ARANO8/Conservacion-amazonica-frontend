@@ -66,48 +66,28 @@ export default function SolicitudFooter({
         )}
 
         <div className="flex items-center gap-8">
-          {/* TAREA 2: MONITOR DE PRESUPUESTO GLOBAL */}
+          {/* TAREA 2: MONITOR DE PRESUPUESTO GLOBAL (Versión Simplificada) */}
           {(step === 'SOLICITUD' && (
-            <div className="hidden items-center gap-6 text-sm sm:flex">
-              <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
-                  PRESUPUESTO TOTAL
+            <div className="flex items-center justify-center gap-12 rounded-xl bg-zinc-950 px-12 py-3 shadow-2xl ring-1 ring-white/10">
+              {/* 1. TOTAL LÍQUIDO (A Recibir) */}
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] leading-tight font-black tracking-widest text-zinc-400 uppercase">
+                  TOTAL LÍQUIDO (A Recibir)
                 </span>
-                <span className="font-semibold">
-                  {formatMoney(totales.totalFuentes)}
-                </span>
-              </div>
-              <div className="bg-border h-8 w-[1px]" />
-              <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
-                  TOTAL NETO (SOLICITADO)
-                </span>
-                <span className="text-primary font-bold">
+                <span className="text-lg font-bold text-white">
                   {formatMoney(totales.totalNeto)}
                 </span>
               </div>
-              <div className="bg-border h-8 w-[1px]" />
-              <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
-                  TOTAL EJECUTADO (BRUTO)
+
+              <div className="h-10 w-[1px] bg-white/10" />
+
+              {/* 2. TOTAL PRESUPUESTADO (Incl. Impuestos) */}
+              <div className="flex flex-col items-center">
+                <span className="text-primary text-[10px] leading-tight font-black tracking-widest uppercase">
+                  TOTAL PRESUPUESTADO (Incl. Impuestos)
                 </span>
-                <span className="text-foreground font-bold">
+                <span className="text-primary text-xl font-black">
                   {formatMoney(totales.totalBruto)}
-                </span>
-              </div>
-              <div className="bg-border h-8 w-[1px]" />
-              <div className="flex flex-col items-end">
-                <span className="text-muted-foreground text-[10px] leading-tight font-black tracking-widest uppercase">
-                  SALDO RESTANTE
-                </span>
-                <span
-                  className={`font-black tracking-tight ${
-                    totales.saldoGlobal < 0
-                      ? 'text-destructive animate-pulse'
-                      : 'text-emerald-600'
-                  }`}
-                >
-                  {formatMoney(totales.saldoGlobal)}
                 </span>
               </div>
             </div>

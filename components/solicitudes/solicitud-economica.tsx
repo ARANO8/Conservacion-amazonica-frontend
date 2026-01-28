@@ -295,7 +295,7 @@ export default function SolicitudEconomica({
       {/* CARDS DE FUENTES */}
       <FieldSet>
         <div className="mb-4 flex items-center justify-between">
-          <FieldLegend>Fuentes de Financiamiento</FieldLegend>
+          <FieldLegend>Partida Presupuestaria</FieldLegend>
           <Button
             type="button"
             variant="outline"
@@ -314,7 +314,7 @@ export default function SolicitudEconomica({
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
-            Agregar Fuente
+            Agregar Partida
           </Button>
         </div>
 
@@ -336,8 +336,8 @@ export default function SolicitudEconomica({
             <div className="text-muted-foreground flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed">
               <Wallet className="mb-2 h-8 w-8 opacity-40" />
               <p className="text-sm italic">
-                No hay fuentes agregadas. Selecciona un proyecto y haz clic en
-                &quot;Agregar Fuente&quot;.
+                No hay partidas agregadas. Selecciona un proyecto y haz clic en
+                &quot;Agregar Partida&quot;.
               </p>
             </div>
           )}
@@ -614,7 +614,7 @@ function FuenteCard({
         <div className="bg-primary/5 flex items-center justify-between rounded-t-xl border-b px-4 py-2">
           <div className="text-primary flex items-center gap-2">
             <Lock className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">Fuente Reservada</span>
+            <span className="text-xs font-medium">Partida Reservada</span>
           </div>
           <Badge variant="secondary" className="font-mono text-xs">
             ID: {reservaId}
