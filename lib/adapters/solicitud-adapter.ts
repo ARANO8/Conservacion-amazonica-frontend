@@ -45,7 +45,7 @@ export const adaptFormToPayload = (
   // 4. Mapeo de Nómina
   const nominasTerceros = (formData.nomina || []).map((n) => ({
     nombreCompleto: n.nombreCompleto,
-    ci: n.ci,
+    procedenciaInstitucion: n.procedenciaInstitucion,
   }));
 
   return {

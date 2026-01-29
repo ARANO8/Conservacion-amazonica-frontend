@@ -31,10 +31,10 @@ export function PoaCard({
 }: PoaCardProps) {
   // Parsing amounts (Backend sends decimals as strings or numbers)
   const costoTotal = Number(item.costoTotal || 0);
-  const saldoDisponible = Number(item.saldoDisponible ?? costoTotal);
+  const saldoActual = Number(item.saldoDisponible ?? costoTotal);
 
-  const hasNoFunds = saldoDisponible <= 0.001;
-  const isCompromised = saldoDisponible < costoTotal && !hasNoFunds;
+  const hasNoFunds = saldoActual <= 0.001;
+  const shouldShowWarning = item.tieneCompromisos && saldoActual < costoTotal;
 
   const codigoCompleto = [item.actividad?.detalleDescripcion]
     .filter(Boolean)
@@ -75,6 +75,14 @@ export function PoaCard({
                 className="h-4 text-[9px] font-bold uppercase"
               >
                 Sin Fondos
+              </Badge>
+            )}
+            {shouldShowWarning && (
+              <Badge
+                variant="outline"
+                className="h-4 border-amber-200 bg-amber-100 text-[9px] font-bold text-amber-800 uppercase"
+              >
+                ⚠️ Saldo Comprometido
               </Badge>
             )}
             {isAlreadyAdded && (
@@ -128,7 +136,7 @@ export function PoaCard({
               <span className="text-muted-foreground text-[10px] font-bold uppercase">
                 Disponible
               </span>
-              {isCompromised && (
+              {shouldShowWarning && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -141,23 +149,30 @@ export function PoaCard({
                 </TooltipProvider>
               )}
             </div>
-            <span
-              className={cn(
-                'text-sm font-black',
-                hasNoFunds
-                  ? 'text-destructive'
-                  : isCompromised
-                    ? 'text-amber-600'
-                    : 'text-emerald-600'
+            <div className="flex flex-wrap items-baseline">
+              <span
+                className={cn(
+                  'text-sm font-black',
+                  hasNoFunds
+                    ? 'text-destructive'
+                    : shouldShowWarning
+                      ? 'text-amber-600'
+                      : 'text-emerald-600'
+                )}
+              >
+                {formatMoney(saldoActual)}
+              </span>
+              {item.tieneCompromisos && (
+                <span className="text-muted-foreground ml-1 text-[10px]">
+                  de {formatMoney(costoTotal)}
+                </span>
               )}
-            >
-              {formatMoney(saldoDisponible)}
-            </span>
+            </div>
           </div>
         </div>
 
         {/* Status Badges */}
-        {isCompromised && !isAlreadyAdded && (
+        {shouldShowWarning && !isAlreadyAdded && (
           <div className="flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-2 py-1 text-amber-700">
             <AlertCircle className="h-3.5 w-3.5" />
             <span className="text-[10px] font-bold tracking-tight uppercase">

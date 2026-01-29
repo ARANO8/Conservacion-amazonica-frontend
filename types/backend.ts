@@ -59,6 +59,8 @@ export interface Actividad extends EntityBase {
 export interface Poa extends CreatePoaDto {
   costoTotal: number;
   saldoDisponible?: number | string;
+  montoComprometido?: number | string;
+  tieneCompromisos?: boolean;
   proyecto?: Proyecto;
   grupo?: GrupoContable;
   partida?: PartidaPresupuestaria;
@@ -106,7 +108,7 @@ export interface CreateGastoDto {
 
 export interface CreateNominaDto {
   nombreCompleto: string;
-  ci: string;
+  procedenciaInstitucion: string;
 }
 
 export interface CreateSolicitudDto {
@@ -181,7 +183,9 @@ export interface PoaStructureItem {
   cantidad: number;
   costoUnitario: number | string;
   costoTotal: number | string;
-  saldoDisponible: number | string;
+  saldoDisponible?: number | string;
+  montoComprometido?: number | string;
+  tieneCompromisos?: boolean;
   actividad?: {
     id: number;
     detalleDescripcion: string;

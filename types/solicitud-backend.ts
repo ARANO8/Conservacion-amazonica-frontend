@@ -30,7 +30,7 @@ export interface CreateSolicitudPayload {
   }[];
   nominasTerceros: {
     nombreCompleto: string;
-    ci: string;
+    procedenciaInstitucion: string;
   }[];
 }
 

@@ -85,7 +85,9 @@ export const formSchema = z.object({
     .array(
       z.object({
         nombreCompleto: z.string().min(1, 'El nombre completo es requerido'),
-        ci: z.string().min(1, 'El CI es requerido'),
+        procedenciaInstitucion: z
+          .string()
+          .min(1, 'La procedencia/institución es requerida'),
         montoNeto: z.number().min(0).optional(),
         liquidoPagable: z.number().min(0).optional(),
       })
