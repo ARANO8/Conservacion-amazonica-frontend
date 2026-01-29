@@ -94,6 +94,7 @@ export interface CreateViaticoDto {
   dias: number;
   cantidadPersonas: number;
   montoNeto: number;
+  montoPresupuestado: number;
   solicitudPresupuestoId: number;
 }
 
@@ -103,6 +104,7 @@ export interface CreateGastoDto {
   tipoDocumento: 'FACTURA' | 'RECIBO';
   cantidad: number;
   montoNeto: number;
+  montoPresupuestado: number;
   detalle?: string;
 }
 

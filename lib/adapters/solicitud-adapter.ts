@@ -28,7 +28,8 @@ export const adaptFormToPayload = (
     tipoDestino: v.tipoDestino || 'INSTITUCIONAL',
     dias: Number(v.dias) || 0,
     cantidadPersonas: Number(v.cantidadPersonas) || 0,
-    montoNeto: Number(v.montoNeto) || 0,
+    montoNeto: Number(v.liquidoPagable) || 0,
+    montoPresupuestado: Number(v.montoNeto) || 0,
     solicitudPresupuestoId: Number(v.solicitudPresupuestoId) || 0,
   }));
 
@@ -38,7 +39,8 @@ export const adaptFormToPayload = (
     tipoGastoId: Number(item.tipoGastoId) || 0,
     tipoDocumento: item.tipoDocumento || 'FACTURA',
     cantidad: Number(item.cantidad) || 1,
-    montoNeto: Number(item.montoNeto) || 0,
+    montoNeto: Number(item.liquidoPagable) || 0,
+    montoPresupuestado: Number(item.montoNeto) || 0,
     detalle: item.detalle || '',
   }));
 
