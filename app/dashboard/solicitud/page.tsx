@@ -153,6 +153,26 @@ export default function SolicitudPage() {
           }
         }
 
+        // Orphaned Budget Lines Validation: Every selected source must have at least one use
+        for (const reserva of misReservas) {
+          const tieneUso =
+            watchViaticos.some(
+              (v) => Number(v.solicitudPresupuestoId) === reserva.id
+            ) ||
+            watchGastos.some(
+              (g) => Number(g.solicitudPresupuestoId) === reserva.id
+            );
+
+          if (!tieneUso) {
+            toast.warning(
+              `La partida ${
+                reserva.poa?.codigoPoa || reserva.id
+              } fue seleccionada pero no tiene montos asignados. Úsala o elimínala de la selección.`
+            );
+            return;
+          }
+        }
+
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
