@@ -126,6 +126,33 @@ export default function SolicitudPage() {
           return;
         }
 
+        // Budget Balance Validation
+        for (const reserva of misReservas) {
+          const totalSolicitado =
+            watchViaticos
+              .filter((v) => v.solicitudPresupuestoId === reserva.id)
+              .reduce((sum, v) => sum + (Number(v.montoNeto) || 0), 0) +
+            watchGastos
+              .filter((g) => g.solicitudPresupuestoId === reserva.id)
+              .reduce((sum, g) => sum + (Number(g.montoNeto) || 0), 0);
+
+          const saldoDisponibleReal = Number(
+            reserva.poa?.saldoDisponible ?? reserva.poa?.costoTotal ?? 0
+          );
+
+          if (totalSolicitado > saldoDisponibleReal + 0.01) {
+            const exceso = totalSolicitado - saldoDisponibleReal;
+            toast.error(
+              `Saldo Insuficiente en ${reserva.poa?.codigoPoa}:
+              Disponible: Bs ${saldoDisponibleReal.toFixed(2)}
+              Solicitado: Bs ${totalSolicitado.toFixed(2)}
+              Exceso: Bs ${exceso.toFixed(2)}`,
+              { duration: 5000 }
+            );
+            return;
+          }
+        }
+
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {

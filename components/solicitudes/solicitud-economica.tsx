@@ -489,19 +489,19 @@ function FuenteCard({
 
     const sumaViaticosNeto = viaticos
       .filter((v) => Number(v.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, v) => acc + (Number(v.montoNeto) || 0), 0);
+      .reduce((acc: number, v) => acc + (Number(v.liquidoPagable) || 0), 0);
 
     const sumaViaticosBruto = viaticos
       .filter((v) => Number(v.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, v) => acc + (Number(v.liquidoPagable) || 0), 0);
+      .reduce((acc: number, v) => acc + (Number(v.montoNeto) || 0), 0);
 
     const sumaGastosNeto = gastos
       .filter((g) => Number(g.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
+      .reduce((acc: number, g) => acc + (Number(g.liquidoPagable) || 0), 0);
 
     const sumaGastosBruto = gastos
       .filter((g) => Number(g.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, g) => acc + (Number(g.liquidoPagable) || 0), 0);
+      .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
 
     return {
       neto: sumaViaticosNeto + sumaGastosNeto,
