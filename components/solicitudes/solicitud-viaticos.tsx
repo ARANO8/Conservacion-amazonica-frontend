@@ -189,8 +189,8 @@ function ViaticoCard({
   }, [dias, personas, precioUnitario]);
 
   useEffect(() => {
-    // Impacto presupuestario (Bruto) = Neto + 16% impuestos
-    const brutoTotal = netoTotal * 1.16;
+    // Impacto presupuestario (Bruto) = Neto / 0.87 (RC-IVA 13% Grossing Up)
+    const brutoTotal = netoTotal / 0.87;
     setValue(`viaticos.${index}.montoNeto`, Number(brutoTotal.toFixed(2)), {
       shouldValidate: true,
     });
@@ -471,18 +471,10 @@ function ViaticoCard({
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
               <span className="text-muted-foreground text-[10px] uppercase">
-                RC-IVA 13%
+                RC-IVA 13% (Gross Up)
               </span>
               <span className="text-xs font-medium">
-                {formatMoney(netoTotal * 0.13)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IT 3%
-              </span>
-              <span className="text-xs font-medium">
-                {formatMoney(netoTotal * 0.03)}
+                {formatMoney((Number(montoNeto) || 0) * 0.13)}
               </span>
             </div>
           </div>
