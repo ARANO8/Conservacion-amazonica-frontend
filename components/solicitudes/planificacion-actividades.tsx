@@ -139,6 +139,18 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                   {...field}
                   min={today}
                   className="h-9 text-xs"
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    field.onChange(newValue);
+
+                    // Date Push Logic: If new start date > current end date, push end date
+                    if (fechaFin && newValue > fechaFin) {
+                      setValue(`actividades.${idx}.fechaFin`, newValue, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />
