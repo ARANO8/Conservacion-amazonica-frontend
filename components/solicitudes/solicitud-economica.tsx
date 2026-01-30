@@ -143,12 +143,9 @@ export default function SolicitudEconomica({
       try {
         setIsLoadingStructure(true);
         // TAREA 1: Cargar estructura completa usando el nuevo endpoint
-        console.log(
-          '🌳 Cargando estructura completa para POA de forma segura:',
-          codigo
-        );
+
         const structure = await catalogosService.getEstructuraByPoa(codigo);
-        console.log('✅ Estructura cargada:', structure.length, 'items');
+
         setPoaStructure(structure);
       } catch (error) {
         console.error('Error fetching POA structure:', error);
@@ -519,8 +516,6 @@ function FuenteCard({
     const performReserve = async () => {
       setIsReserving(true);
       try {
-        console.log('🎯 Reservando ítem (Tree-Walker Logic):', selectedItemId);
-
         // Encontrar el objeto completo en la estructura local (evita llamar al backend para detalles)
         const selectedItemObj = availableItems.find(
           (i) => i.id.toString() === selectedItemId.toString()
@@ -542,8 +537,6 @@ function FuenteCard({
 
         // Reservar usando el ID del item del POA (presupuesto)
         const reserva = await presupuestosService.reservar(poaItem.id);
-
-        console.log('🔍 Reserva Response:', JSON.stringify(reserva, null, 2));
 
         const rawMonto = poaItem.costoTotal ?? 0;
 

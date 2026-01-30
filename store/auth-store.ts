@@ -45,13 +45,9 @@ export const useAuthStore = create<AuthState>()(
             credentials
           );
 
-          console.log('Login Response Debug:', response.data);
-
           // Backend devuelve accessToken (camelCase)
           const token = response.data.accessToken;
           const user = response.data.user;
-
-          console.log('Token extracted:', token); // Debug log
 
           if (!token || token === 'undefined') {
             const errorMsg = 'Token no recibido del servidor';

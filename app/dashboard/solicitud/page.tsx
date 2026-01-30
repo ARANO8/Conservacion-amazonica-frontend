@@ -208,10 +208,6 @@ export default function SolicitudPage() {
     setLoading(true);
     try {
       const payload = adaptFormToPayload(data, aprobadorId);
-      console.log(
-        '🚀 PAYLOAD FINAL PARA EL BACKEND:',
-        JSON.stringify(payload, null, 2)
-      );
 
       // Enviar la solicitud al backend
       await solicitudesService.createSolicitud(payload);
