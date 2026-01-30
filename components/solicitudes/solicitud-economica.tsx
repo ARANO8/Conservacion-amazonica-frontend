@@ -802,7 +802,7 @@ function FuenteCard({
           {/* 2. Solicitado (Neto) */}
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
-              Solicitado (Neto)
+              Subtotal Liquido
             </span>
             <span className="text-muted-foreground text-sm font-medium">
               {isLocked ? formatMoney(resumenFinanciero.neto) : '---'}
@@ -814,7 +814,7 @@ function FuenteCard({
           {/* 3. Solicitado (Bruto) - Costo Real */}
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
-              Solicitado (Bruto)
+              Subtotal Presupuestado (Incl. Impuestos)
             </span>
             <span className="text-foreground text-base font-bold">
               {isLocked ? formatMoney(resumenFinanciero.bruto) : '---'}

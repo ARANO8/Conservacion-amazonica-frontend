@@ -166,7 +166,7 @@ export default function SolicitudPage() {
           if (!tieneUso) {
             toast.warning(
               `La partida ${
-                reserva.poa?.codigoPoa || reserva.id
+                reserva.id
               } fue seleccionada pero no tiene montos asignados. Úsala o elimínala de la selección.`
             );
             return;
