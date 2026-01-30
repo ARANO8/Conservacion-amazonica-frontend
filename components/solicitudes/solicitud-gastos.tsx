@@ -147,23 +147,27 @@ function GastoCard({
 
   const brutoTotal = useMemo(() => {
     const isRecibo = (watchDocumento || '').toUpperCase() === 'RECIBO';
+    if (!isRecibo) return netoTotal; // FACTURA is 1:1
+
     const tipoObj = tiposGasto.find(
       (t) => Number(t.id) === Number(watchTipoGastoId)
     );
     const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
 
-    let extraRate = 0;
-    if (isRecibo) {
-      if (tipoNombre === 'COMPRA') {
-        extraRate = 0.08;
-      } else if (
-        tipoNombre.includes('ALQUILER') ||
-        tipoNombre.includes('SERVICIO')
-      ) {
-        extraRate = 0.16;
-      }
+    let factor = 1.0;
+    if (tipoNombre === 'COMPRA') {
+      factor = 0.92; // 8% Retención
+    } else if (
+      tipoNombre.includes('ALQUILER') ||
+      tipoNombre.includes('SERVICIO')
+    ) {
+      factor = 0.84; // 16% Retención
+    } else if (tipoNombre === 'PEAJE' || tipoNombre === 'AUTO_COMPRA') {
+      factor = 1.0; // Sin retención
     }
-    return netoTotal * (1 + extraRate);
+
+    // Safety: Rounding to 2 decimal places to avoid floating point issues
+    return Number((netoTotal / factor).toFixed(2));
   }, [netoTotal, watchDocumento, watchTipoGastoId, tiposGasto]);
 
   useEffect(() => {
@@ -174,12 +178,13 @@ function GastoCard({
   // Los gastos ahora se vinculan directamente a una reserva de la canasta,
   // por lo que no requieren cargar partidas dinámicamente aquí.
 
-  // Impuestos informativos (Retenciones)
+  // Impuestos informativos (Retenciones) - Calculados sobre el BRUTO
   const isRecibo = (watchDocumento || '').toUpperCase() === 'RECIBO';
   const tipoObj = tiposGasto.find(
     (t) => Number(t.id) === Number(watchTipoGastoId)
   );
   const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
+  const currentBruto = Number(montoNeto) || 0;
 
   let iva = 0;
   let it = 0;
@@ -187,14 +192,18 @@ function GastoCard({
 
   if (isRecibo) {
     if (tipoNombre === 'COMPRA') {
-      iue = netoTotal * 0.05;
-      it = netoTotal * 0.03;
-    } else if (
-      tipoNombre.includes('ALQUILER') ||
-      tipoNombre.includes('SERVICIO')
-    ) {
-      iva = netoTotal * 0.13;
-      it = netoTotal * 0.03;
+      // 8% total: IUE (5%) + IT (3%)
+      iue = currentBruto * 0.05;
+      it = currentBruto * 0.03;
+    } else if (tipoNombre.includes('SERVICIO')) {
+      // 15.5% total: IUE-Servicios (12.5%) + IT (3%)
+      // Aunque el factor es 0.84 (16%), desglosamos el estándar legal o lo más cercano
+      iue = currentBruto * 0.125;
+      it = currentBruto * 0.03;
+    } else if (tipoNombre.includes('ALQUILER')) {
+      // 16% total: RC-IVA (13%) + IT (3%)
+      iva = currentBruto * 0.13;
+      it = currentBruto * 0.03;
     }
   }
 
