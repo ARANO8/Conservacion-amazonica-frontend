@@ -189,12 +189,16 @@ function ViaticoCard({
   }, [dias, personas, precioUnitario]);
 
   useEffect(() => {
-    // Impacto presupuestario (Bruto) = Neto / 0.87 (RC-IVA 13% Grossing Up)
-    const brutoTotal = netoTotal / 0.87;
+    // Impacto presupuestario (Bruto) = Neto / factor (Grossing Up)
+    // Institucional: / 0.87 (13% RC-IVA)
+    // Terceros: / 0.84 (13% RC-IVA + 3% IT)
+    const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
+    const brutoTotal = netoTotal / factor;
+
     setValue(`viaticos.${index}.montoNeto`, Number(brutoTotal.toFixed(2)), {
       shouldValidate: true,
     });
-  }, [netoTotal, setValue, index]);
+  }, [netoTotal, watchTipoDestino, setValue, index]);
 
   useEffect(() => {
     // Neto a Recibir (Liquido Pagable)
@@ -471,12 +475,22 @@ function ViaticoCard({
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
               <span className="text-muted-foreground text-[10px] uppercase">
-                RC-IVA 13% (Gross Up)
+                RC-IVA 13%
               </span>
               <span className="text-xs font-medium">
                 {formatMoney((Number(montoNeto) || 0) * 0.13)}
               </span>
             </div>
+            {watchTipoDestino === 'TERCEROS' && (
+              <div className="flex flex-col">
+                <span className="text-muted-foreground text-[10px] uppercase">
+                  IT 3%
+                </span>
+                <span className="text-xs font-medium">
+                  {formatMoney((Number(montoNeto) || 0) * 0.03)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
