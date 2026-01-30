@@ -52,12 +52,19 @@ export interface CreatePoaDto {
   codigoPresupuestarioId: number;
 }
 
+export interface Actividad extends EntityBase {
+  detalleDescripcion?: string;
+}
+
 export interface Poa extends CreatePoaDto {
   costoTotal: number;
+  saldoDisponible?: number | string;
+  montoComprometido?: number | string;
+  tieneCompromisos?: boolean;
   proyecto?: Proyecto;
   grupo?: GrupoContable;
   partida?: PartidaPresupuestaria;
-  actividad?: unknown;
+  actividad?: Actividad;
   codigoPresupuestario?: CodigoPresupuestario;
 }
 
@@ -87,6 +94,7 @@ export interface CreateViaticoDto {
   dias: number;
   cantidadPersonas: number;
   montoNeto: number;
+  montoPresupuestado: number;
   solicitudPresupuestoId: number;
 }
 
@@ -96,12 +104,13 @@ export interface CreateGastoDto {
   tipoDocumento: 'FACTURA' | 'RECIBO';
   cantidad: number;
   montoNeto: number;
+  montoPresupuestado: number;
   detalle?: string;
 }
 
 export interface CreateNominaDto {
   nombreCompleto: string;
-  ci: string;
+  procedenciaInstitucion: string;
 }
 
 export interface CreateSolicitudDto {
@@ -172,15 +181,21 @@ export type Banco = EntityBase;
 
 export interface PoaStructureItem {
   id: number;
+  codigoPoa: string;
+  cantidad: number;
+  costoUnitario: number | string;
+  costoTotal: number | string;
+  saldoDisponible?: number | string;
+  montoComprometido?: number | string;
+  tieneCompromisos?: boolean;
+  actividad?: {
+    id: number;
+    detalleDescripcion: string;
+  };
   estructura?: {
     proyecto?: Proyecto;
     grupo?: GrupoContable;
     partida?: PartidaPresupuestaria;
   };
   codigoPresupuestario?: CodigoPresupuestario;
-  poa?: {
-    codigoPoa: string;
-    costoTotal: number;
-  };
-  codigoPoa?: string;
 }

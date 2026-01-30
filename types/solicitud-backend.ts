@@ -18,6 +18,7 @@ export interface CreateSolicitudPayload {
     dias: number;
     cantidadPersonas: number;
     montoNeto: number;
+    montoPresupuestado: number;
     solicitudPresupuestoId: number;
   }[];
   gastos: {
@@ -26,11 +27,12 @@ export interface CreateSolicitudPayload {
     tipoDocumento: string;
     cantidad: number;
     montoNeto: number;
+    montoPresupuestado: number;
     detalle: string;
   }[];
   nominasTerceros: {
     nombreCompleto: string;
-    ci: string;
+    procedenciaInstitucion: string;
   }[];
 }
 

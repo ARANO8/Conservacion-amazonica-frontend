@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import Cookies from 'js-cookie';
 import api from '../lib/api';
+import { toast } from 'sonner';
 
 // Interfaz User estricta (tipado según backend)
 export interface User {
@@ -45,17 +46,13 @@ export const useAuthStore = create<AuthState>()(
             credentials
           );
 
-          console.log('Login Response Debug:', response.data);
-
           // Backend devuelve accessToken (camelCase)
           const token = response.data.accessToken;
           const user = response.data.user;
 
-          console.log('Token extracted:', token); // Debug log
-
           if (!token || token === 'undefined') {
             const errorMsg = 'Token no recibido del servidor';
-            console.error(errorMsg, response.data);
+            toast.error(errorMsg);
             throw new Error(errorMsg);
           }
 

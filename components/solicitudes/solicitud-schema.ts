@@ -34,6 +34,7 @@ export const formSchema = z.object({
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
         reservaId: z.number().nullable().optional(),
         montoReservado: z.number().optional(),
+        saldoDisponible: z.number().optional(),
         isLocked: z.boolean().optional(),
       })
     )
@@ -78,13 +79,17 @@ export const formSchema = z.object({
         liquidoPagable: z.number().optional(),
       })
     )
-    .min(1, 'Debes agregar al menos un ítem'),
+    .optional(),
   // Nómina de Terceros (Paso 3)
   nomina: z
     .array(
       z.object({
         nombreCompleto: z.string().min(1, 'El nombre completo es requerido'),
-        ci: z.string().min(1, 'El CI es requerido'),
+        procedenciaInstitucion: z
+          .string()
+          .min(1, 'La procedencia/institución es requerida'),
+        montoNeto: z.number().min(0).optional(),
+        liquidoPagable: z.number().min(0).optional(),
       })
     )
     .optional(),
@@ -111,32 +116,8 @@ export const defaultValues: FormData = {
     },
   ],
   interino: false,
-  items: [
-    {
-      solicitudPresupuestoId: 0,
-      tipoDocumento: 'FACTURA',
-      tipoGastoId: 0,
-      cantidad: 1,
-      costoUnitario: 0,
-      montoNeto: 0,
-      detalle: '',
-      liquidoPagable: 0,
-    },
-  ],
-  viaticos: [
-    {
-      conceptoId: 0,
-      planificacionIndex: 0,
-      ciudad: '',
-      destino: '',
-      tipoDestino: 'INSTITUCIONAL',
-      dias: 1,
-      cantidadPersonas: 1,
-      montoNeto: 0,
-      solicitudPresupuestoId: 0,
-      liquidoPagable: 0,
-    },
-  ],
+  items: [],
+  viaticos: [],
   proyecto: 'aaf',
   presupuestosIds: [],
   fuentesSeleccionadas: [],

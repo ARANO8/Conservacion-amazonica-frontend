@@ -138,6 +138,11 @@ function ViaticoCard({
     name: `viaticos.${index}.planificacionIndex`,
   });
 
+  const montoNeto = useWatch({
+    control,
+    name: `viaticos.${index}.montoNeto`,
+  });
+
   const selectedPlanificacion = useMemo(() => {
     // Assuming planificacionIndex corresponds to the array index of actividadesPlanificadas
     return actividadesPlanificadas[Number(watchPlanificacionIndex)];
@@ -183,17 +188,21 @@ function ViaticoCard({
     return d * p * precio;
   }, [dias, personas, precioUnitario]);
 
-  // Update montoNeto whenever the calculation changes
   useEffect(() => {
-    setValue(`viaticos.${index}.montoNeto`, Number(netoTotal.toFixed(2)), {
+    // Impacto presupuestario (Bruto) = Neto / factor (Grossing Up)
+    // Institucional: / 0.87 (13% RC-IVA)
+    // Terceros: / 0.84 (13% RC-IVA + 3% IT)
+    const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
+    const brutoTotal = netoTotal / factor;
+
+    setValue(`viaticos.${index}.montoNeto`, Number(brutoTotal.toFixed(2)), {
       shouldValidate: true,
     });
-  }, [netoTotal, setValue, index]);
+  }, [netoTotal, watchTipoDestino, setValue, index]);
 
   useEffect(() => {
-    // Impacto presupuestario (Bruto) = Neto + 16% impuestos
-    const brutoTotal = netoTotal * 1.16;
-    setValue(`viaticos.${index}.liquidoPagable`, Number(brutoTotal.toFixed(2)));
+    // Neto a Recibir (Liquido Pagable)
+    setValue(`viaticos.${index}.liquidoPagable`, Number(netoTotal.toFixed(2)));
   }, [netoTotal, setValue, index]);
 
   return (
@@ -206,8 +215,8 @@ function ViaticoCard({
             name={`viaticos.${index}.solicitudPresupuestoId`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                  1. Fuente de Financiamiento
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Partida Presupuestaria
                 </Label>
                 <Select
                   onValueChange={(val) => field.onChange(Number(val))}
@@ -429,7 +438,7 @@ function ViaticoCard({
           />
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Monto Unitario (Bs)
+              Costo Unitario (Bs)
             </Label>
             <Input
               type="number"
@@ -440,7 +449,7 @@ function ViaticoCard({
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Total Neto (Bs)
+              TOTAL LÍQUIDO (A Recibir)
             </Label>
             <Input
               value={formatMoney(netoTotal)}
@@ -455,11 +464,11 @@ function ViaticoCard({
       <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-4 border-t p-3 px-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] leading-tight font-bold uppercase">
-              Costo Total Presupuestado
+            <span className="text-muted-foreground text-xs font-bold uppercase">
+              TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
-              {formatMoney(liquidoPagable || 0)}
+              {formatMoney(montoNeto || 0)}
             </span>
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
@@ -469,17 +478,19 @@ function ViaticoCard({
                 RC-IVA 13%
               </span>
               <span className="text-xs font-medium">
-                {formatMoney(netoTotal * 0.13)}
+                {formatMoney((Number(montoNeto) || 0) * 0.13)}
               </span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IT 3%
-              </span>
-              <span className="text-xs font-medium">
-                {formatMoney(netoTotal * 0.03)}
-              </span>
-            </div>
+            {watchTipoDestino === 'TERCEROS' && (
+              <div className="flex flex-col">
+                <span className="text-muted-foreground text-[10px] uppercase">
+                  IT 3%
+                </span>
+                <span className="text-xs font-medium">
+                  {formatMoney((Number(montoNeto) || 0) * 0.03)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

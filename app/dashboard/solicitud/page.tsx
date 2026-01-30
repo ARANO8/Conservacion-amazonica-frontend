@@ -80,7 +80,6 @@ export default function SolicitudPage() {
           );
         }
       } catch (error) {
-        console.error('Error al cargar reservas:', error);
         toast.error('No se pudieron cargar tus reservas activas');
       }
     };
@@ -126,6 +125,53 @@ export default function SolicitudPage() {
           return;
         }
 
+        // Budget Balance Validation
+        for (const reserva of misReservas) {
+          const totalSolicitado =
+            watchViaticos
+              .filter((v) => v.solicitudPresupuestoId === reserva.id)
+              .reduce((sum, v) => sum + (Number(v.montoNeto) || 0), 0) +
+            watchGastos
+              .filter((g) => g.solicitudPresupuestoId === reserva.id)
+              .reduce((sum, g) => sum + (Number(g.montoNeto) || 0), 0);
+
+          const saldoDisponibleReal = Number(
+            reserva.poa?.saldoDisponible ?? reserva.poa?.costoTotal ?? 0
+          );
+
+          if (totalSolicitado > saldoDisponibleReal + 0.01) {
+            const exceso = totalSolicitado - saldoDisponibleReal;
+            toast.error(
+              `Saldo Insuficiente en ${reserva.poa?.codigoPoa}:
+              Disponible: Bs ${saldoDisponibleReal.toFixed(2)}
+              Solicitado: Bs ${totalSolicitado.toFixed(2)}
+              Exceso: Bs ${exceso.toFixed(2)}`,
+              { duration: 5000 }
+            );
+            return;
+          }
+        }
+
+        // Orphaned Budget Lines Validation: Every selected source must have at least one use
+        for (const reserva of misReservas) {
+          const tieneUso =
+            watchViaticos.some(
+              (v) => Number(v.solicitudPresupuestoId) === reserva.id
+            ) ||
+            watchGastos.some(
+              (g) => Number(g.solicitudPresupuestoId) === reserva.id
+            );
+
+          if (!tieneUso) {
+            toast.warning(
+              `La partida ${
+                reserva.id
+              } fue seleccionada pero no tiene montos asignados. Úsala o elimínala de la selección.`
+            );
+            return;
+          }
+        }
+
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
@@ -161,10 +207,6 @@ export default function SolicitudPage() {
     setLoading(true);
     try {
       const payload = adaptFormToPayload(data, aprobadorId);
-      console.log(
-        '🚀 PAYLOAD FINAL PARA EL BACKEND:',
-        JSON.stringify(payload, null, 2)
-      );
 
       // Enviar la solicitud al backend
       await solicitudesService.createSolicitud(payload);
@@ -172,8 +214,7 @@ export default function SolicitudPage() {
       toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/requests');
     } catch (error: unknown) {
-      console.error('Error al enviar la solicitud:', error);
-
+      toast.error('Error al enviar la solicitud');
       let errorMessage = 'Ocurrió un error al procesar la solicitud';
 
       if (axios.isAxiosError(error)) {

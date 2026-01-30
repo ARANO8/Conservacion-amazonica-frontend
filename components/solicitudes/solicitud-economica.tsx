@@ -59,6 +59,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { formatMoney, cn } from '@/lib/utils';
+import { PoaCard } from '@/components/solicitudes/poa-card';
 import { EntityBase } from '@/types/backend';
 
 // Helper para deduplicar arrays de objetos por ID
@@ -142,15 +143,11 @@ export default function SolicitudEconomica({
       try {
         setIsLoadingStructure(true);
         // TAREA 1: Cargar estructura completa usando el nuevo endpoint
-        console.log(
-          '🌳 Cargando estructura completa para POA de forma segura:',
-          codigo
-        );
+
         const structure = await catalogosService.getEstructuraByPoa(codigo);
-        console.log('✅ Estructura cargada:', structure.length, 'items');
+
         setPoaStructure(structure);
       } catch (error) {
-        console.error('Error fetching POA structure:', error);
         toast.error('Error al cargar la estructura del POA');
       } finally {
         setIsLoadingStructure(false);
@@ -294,7 +291,7 @@ export default function SolicitudEconomica({
       {/* CARDS DE FUENTES */}
       <FieldSet>
         <div className="mb-4 flex items-center justify-between">
-          <FieldLegend>Fuentes de Financiamiento</FieldLegend>
+          <FieldLegend>Partida Presupuestaria</FieldLegend>
           <Button
             type="button"
             variant="outline"
@@ -313,7 +310,7 @@ export default function SolicitudEconomica({
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
-            Agregar Fuente
+            Agregar Partida
           </Button>
         </div>
 
@@ -335,8 +332,8 @@ export default function SolicitudEconomica({
             <div className="text-muted-foreground flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed">
               <Wallet className="mb-2 h-8 w-8 opacity-40" />
               <p className="text-sm italic">
-                No hay fuentes agregadas. Selecciona un proyecto y haz clic en
-                &quot;Agregar Fuente&quot;.
+                No hay partidas agregadas. Selecciona un proyecto y haz clic en
+                &quot;Agregar Partida&quot;.
               </p>
             </div>
           )}
@@ -417,9 +414,13 @@ function FuenteCard({
   const isLocked = watch(`fuentesSeleccionadas.${index}.isLocked`) as boolean;
   const selectedGrupoId = watch(`fuentesSeleccionadas.${index}.grupoId`);
   const selectedPartidaId = watch(`fuentesSeleccionadas.${index}.partidaId`);
+  const watchedFuentes = watch('fuentesSeleccionadas') || [];
   const selectedItemId = watch(
     `fuentesSeleccionadas.${index}.codigoPresupuestarioId`
   );
+  const watchedSaldoBackend = watch(
+    `fuentesSeleccionadas.${index}.saldoDisponible`
+  ) as number;
 
   // B. Selector de Grupo (Derivado)
   const availableGrupos = useMemo(() => {
@@ -460,8 +461,9 @@ function FuenteCard({
           i.estructura?.partida?.id === Number(selectedPartidaId)
       )
       .map((i) => ({
-        id: i.codigoPresupuestario?.id || i.id, // Ajustar según estructura real
+        id: i.id,
         codigoCompleto:
+          i.actividad?.detalleDescripcion ||
           i.codigoPresupuestario?.codigoCompleto ||
           i.codigoPresupuestario?.descripcion ||
           `Item ${i.id}`,
@@ -483,19 +485,19 @@ function FuenteCard({
 
     const sumaViaticosNeto = viaticos
       .filter((v) => Number(v.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, v) => acc + (Number(v.montoNeto) || 0), 0);
+      .reduce((acc: number, v) => acc + (Number(v.liquidoPagable) || 0), 0);
 
     const sumaViaticosBruto = viaticos
       .filter((v) => Number(v.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, v) => acc + (Number(v.liquidoPagable) || 0), 0);
+      .reduce((acc: number, v) => acc + (Number(v.montoNeto) || 0), 0);
 
     const sumaGastosNeto = gastos
       .filter((g) => Number(g.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
+      .reduce((acc: number, g) => acc + (Number(g.liquidoPagable) || 0), 0);
 
     const sumaGastosBruto = gastos
       .filter((g) => Number(g.solicitudPresupuestoId) === reservaId)
-      .reduce((acc: number, g) => acc + (Number(g.liquidoPagable) || 0), 0);
+      .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
 
     return {
       neto: sumaViaticosNeto + sumaGastosNeto,
@@ -503,7 +505,8 @@ function FuenteCard({
     };
   }, [viaticos, gastos, reservaId]);
 
-  const saldoDisponible = Number(montoReservado || 0) - resumenFinanciero.bruto;
+  const limit = watchedSaldoBackend || Number(montoReservado || 0);
+  const saldoDisponibleLocal = limit - resumenFinanciero.bruto;
 
   // Reserva automática
   useEffect(() => {
@@ -512,8 +515,6 @@ function FuenteCard({
     const performReserve = async () => {
       setIsReserving(true);
       try {
-        console.log('🎯 Reservando ítem (Tree-Walker Logic):', selectedItemId);
-
         // Encontrar el objeto completo en la estructura local (evita llamar al backend para detalles)
         const selectedItemObj = availableItems.find(
           (i) => i.id.toString() === selectedItemId.toString()
@@ -526,8 +527,7 @@ function FuenteCard({
         const poaItem = selectedItemObj.original;
 
         // Validación de integridad YA está garantizada por la derivación, pero doble check:
-        const poaDevuelto =
-          poaItem.poa?.codigoPoa || poaItem.codigoPoa || codigoPoa;
+        const poaDevuelto = poaItem.codigoPoa || codigoPoa;
         if (poaDevuelto !== codigoPoa) {
           throw new Error(
             `Integrity Error: Item belongs to ${poaDevuelto}, expected ${codigoPoa}`
@@ -537,18 +537,22 @@ function FuenteCard({
         // Reservar usando el ID del item del POA (presupuesto)
         const reserva = await presupuestosService.reservar(poaItem.id);
 
-        console.log('🔍 Reserva Response:', JSON.stringify(reserva, null, 2));
-
-        const rawMonto =
-          reserva.poa?.costoTotal ?? reserva.montoPresupuestado ?? 0;
+        const rawMonto = poaItem.costoTotal ?? 0;
 
         const monto =
           typeof rawMonto === 'string'
             ? parseFloat(rawMonto)
             : Number(rawMonto);
 
+        const rawSaldo = poaItem.saldoDisponible ?? rawMonto;
+        const saldo =
+          typeof rawSaldo === 'string'
+            ? parseFloat(rawSaldo)
+            : Number(rawSaldo);
+
         setValue(`fuentesSeleccionadas.${index}.reservaId`, reserva.id);
         setValue(`fuentesSeleccionadas.${index}.montoReservado`, monto);
+        setValue(`fuentesSeleccionadas.${index}.saldoDisponible`, saldo);
         setValue(`fuentesSeleccionadas.${index}.isLocked`, true);
 
         const nuevas = [...misReservas, reserva];
@@ -602,7 +606,7 @@ function FuenteCard({
         <div className="bg-primary/5 flex items-center justify-between rounded-t-xl border-b px-4 py-2">
           <div className="text-primary flex items-center gap-2">
             <Lock className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">Fuente Reservada</span>
+            <span className="text-xs font-medium">Partida Reservada</span>
           </div>
           <Badge variant="secondary" className="font-mono text-xs">
             ID: {reservaId}
@@ -611,7 +615,7 @@ function FuenteCard({
       )}
 
       <div className="space-y-4 p-5">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
           {/* GRUPO */}
           <FormField
             control={control}
@@ -687,36 +691,88 @@ function FuenteCard({
             )}
           />
 
-          {/* ÍTEM */}
-          <FormField
-            control={control}
-            name={`fuentesSeleccionadas.${index}.codigoPresupuestarioId`}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel className="text-[10px] font-bold tracking-wider uppercase">
-                  Ítem / Actividad
-                </FieldLabel>
-                <Select
-                  disabled={!selectedPartidaId || isLocked}
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  value={field.value?.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Seleccionar..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent position="popper" side="bottom" sideOffset={5}>
-                    {availableItems.map((item) => (
-                      <SelectItem key={item.id} value={item.id.toString()}>
-                        {item.codigoCompleto}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+          {/* ÍTEM / ACTIVIDAD (NUEVA VISUALIZACIÓN CON POACARD) */}
+          <div className="col-span-full space-y-3">
+            <FieldLabel className="text-[10px] font-bold tracking-wider uppercase">
+              Seleccionar Ítem / Actividad de Presupuesto
+            </FieldLabel>
+
+            {isLocked ? (
+              // Vista cuando ya está bloqueado (Seleccionado)
+              <div className="grid grid-cols-1">
+                {poaStructure
+                  .filter((i) => i.id === Number(selectedItemId))
+                  .map((item) => (
+                    <PoaCard
+                      key={item.id}
+                      item={item}
+                      isSelected={true}
+                      codigoActividad={
+                        item.codigoPresupuestario?.codigoCompleto
+                      }
+                      onSelect={() => {}}
+                      isDisabled={true}
+                    />
+                  ))}
+              </div>
+            ) : (
+              // Selector cuando no hay nada seleccionado
+              <div
+                className={cn(
+                  'grid gap-4',
+                  availableItems.length === 1
+                    ? 'grid-cols-1'
+                    : availableItems.length === 2
+                      ? 'grid-cols-1 md:grid-cols-2'
+                      : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                )}
+              >
+                {availableItems.length > 0 ? (
+                  availableItems.map((item) => {
+                    const isAlreadyAdded = watchedFuentes.some(
+                      (f) => Number(f.codigoPresupuestarioId) === item.id
+                    );
+
+                    return (
+                      <PoaCard
+                        key={item.id}
+                        item={item.original}
+                        isSelected={Number(selectedItemId) === item.id}
+                        codigoActividad={
+                          item.original.codigoPresupuestario?.codigoCompleto
+                        }
+                        isAlreadyAdded={isAlreadyAdded}
+                        onSelect={(selected) => {
+                          setValue(
+                            `fuentesSeleccionadas.${index}.codigoPresupuestarioId`,
+                            selected.id
+                          );
+                        }}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="text-muted-foreground col-span-full py-4 text-center text-xs italic">
+                    {selectedPartidaId
+                      ? 'No hay items disponibles para esta partida.'
+                      : 'Seleccione Grupo y Partida para ver los items disponibles.'}
+                  </div>
+                )}
+              </div>
             )}
-          />
+
+            <FormField
+              control={control}
+              name={`fuentesSeleccionadas.${index}.codigoPresupuestarioId`}
+              render={({ field }) => (
+                <input
+                  type="hidden"
+                  {...field}
+                  value={field.value?.toString() || ''}
+                />
+              )}
+            />
+          </div>
         </div>
       </div>
 
@@ -738,7 +794,7 @@ function FuenteCard({
           {/* 2. Solicitado (Neto) */}
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
-              Solicitado (Neto)
+              Subtotal Liquido
             </span>
             <span className="text-muted-foreground text-sm font-medium">
               {isLocked ? formatMoney(resumenFinanciero.neto) : '---'}
@@ -750,7 +806,7 @@ function FuenteCard({
           {/* 3. Solicitado (Bruto) - Costo Real */}
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
-              Solicitado (Bruto)
+              Subtotal Presupuestado (Incl. Impuestos)
             </span>
             <span className="text-foreground text-base font-bold">
               {isLocked ? formatMoney(resumenFinanciero.bruto) : '---'}
@@ -767,12 +823,12 @@ function FuenteCard({
             <span
               className={cn(
                 'text-lg font-black',
-                saldoDisponible < 0
+                saldoDisponibleLocal < 0
                   ? 'text-destructive animate-pulse'
                   : 'text-emerald-600'
               )}
             >
-              {isLocked ? formatMoney(saldoDisponible) : '---'}
+              {isLocked ? formatMoney(saldoDisponibleLocal) : '---'}
             </span>
           </div>
         </div>

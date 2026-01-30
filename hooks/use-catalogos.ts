@@ -8,6 +8,7 @@ import {
   Usuario,
   PoaLookup,
 } from '@/types/catalogs';
+import { toast } from 'sonner';
 
 interface UseCatalogosReturn {
   conceptos: Concepto[];
@@ -57,7 +58,7 @@ export function useCatalogos(): UseCatalogosReturn {
         setUsuarios(usuariosData);
         setPoaCodes(poaCodesData);
       } catch (err) {
-        console.error('Error loading catalogs:', err);
+        toast.error('Error al cargar los catálogos');
         setError(err);
       } finally {
         setIsLoading(false);

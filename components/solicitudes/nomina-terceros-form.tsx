@@ -55,7 +55,7 @@ export default function NominaTercerosForm({
         onClick={() =>
           append({
             nombreCompleto: '',
-            ci: '',
+            procedenciaInstitucion: '',
           })
         }
       >
@@ -93,14 +93,17 @@ function NominaCard({ index, control, remove }: NominaCardProps) {
         />
         <FormField
           control={control}
-          name={`nomina.${index}.ci`}
+          name={`nomina.${index}.procedenciaInstitucion`}
           render={({ field }) => (
             <FormItem>
               <Label className="text-muted-foreground text-xs font-bold uppercase">
-                C.I. / Documento de Identidad
+                Procedencia / Institución
               </Label>
               <FormControl>
-                <Input {...field} placeholder="Ej. 1234567 LP" />
+                <Input
+                  {...field}
+                  placeholder="Ej. Consultor Externo, Comunidad X, etc."
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
