@@ -39,20 +39,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
     {
       title: 'Solicitudes',
-      url: '/dashboard/solicitudes',
+      url: '/dashboard/requests',
       icon: FileText,
     },
     {
-      title: 'Fondos para Viajes o Talleres',
+      title: 'Formularios',
       url: '#',
       icon: ClipboardPlus,
-      isActive: true,
       items: isApprover
         ? [{ title: 'Revisión', url: '/dashboard/revision?role=approver' }]
         : [
             { title: 'Solicitud', url: '/dashboard/solicitud' },
-            { title: 'Planificacion', url: '/dashboard/planificacion' },
-            { title: 'Rendicion', url: '#' },
+            { title: 'Rendicion', url: '/dashboard/rendicion' },
           ],
     },
   ];

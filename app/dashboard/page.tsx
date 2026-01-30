@@ -18,14 +18,10 @@ export default function Page() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
       <section className="bg-card rounded-xl border p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold">
-          Bienvenido al Sistema de Fondos
-        </h1>
+        <h1 className="text-2xl font-semibold">Bienvenidos AMZ desk</h1>
         <p className="text-muted-foreground mt-2 text-sm">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
-          euismod, nunc sed cursus pretium, sapien felis varius lorem, vitae
-          viverra arcu augue sed neque. Este panel es el punto de partida para
-          gestionar solicitudes y rendiciones.
+          Este panel es el punto de partida para gestionar solicitudes y
+          rendiciones y mucho más.
         </p>
       </section>
 
@@ -49,7 +45,7 @@ export default function Page() {
             </Card>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Solicitud de Viaje/Taller</CardTitle>
@@ -61,22 +57,6 @@ export default function Page() {
               <CardFooter>
                 <Button asChild>
                   <Link href="/dashboard/solicitud">Crear solicitud</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Planificación</CardTitle>
-                <CardDescription>
-                  Registra la planificación de actividades del viaje/taller.
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button asChild>
-                  <Link href="/dashboard/planificacion">
-                    Ir a Planificación
-                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -111,30 +91,7 @@ export default function Page() {
             <CardDescription>Resumen de avisos recientes</CardDescription>
           </CardHeader>
           <CardContent>
-            {isApprover ? (
-              <ul className="space-y-2 text-sm">
-                <li className="rounded-md border p-3">
-                  Nueva solicitud SOL-004 enviada para revisión.
-                </li>
-                <li className="rounded-md border p-3">
-                  Recordatorio: SOL-001 pendiente de decisión.
-                </li>
-              </ul>
-            ) : (
-              <ul className="space-y-2 text-sm">
-                <li className="rounded-md border p-3">
-                  Solicitud SOL-001 aprobada por Dirección. Mensaje:
-                  &quot;Aprobado, buen viaje&quot;
-                </li>
-                <li className="rounded-md border p-3">
-                  Solicitud SOL-002 rechazada. Mensaje: &quot;Falta detalle del
-                  objetivo&quot;
-                </li>
-                <li className="rounded-md border p-3">
-                  Nueva observación en SOL-003
-                </li>
-              </ul>
-            )}
+            {isApprover ? <ul className="space-y-2 text-sm"></ul> : null}
           </CardContent>
         </Card>
       </section>
