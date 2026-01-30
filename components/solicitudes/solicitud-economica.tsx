@@ -148,7 +148,6 @@ export default function SolicitudEconomica({
 
         setPoaStructure(structure);
       } catch (error) {
-        console.error('Error fetching POA structure:', error);
         toast.error('Error al cargar la estructura del POA');
       } finally {
         setIsLoadingStructure(false);

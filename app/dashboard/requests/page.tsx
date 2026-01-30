@@ -9,6 +9,7 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export default function RequestsPage() {
   const [data, setData] = useState<SolicitudResponse[]>([]);
@@ -18,10 +19,11 @@ export default function RequestsPage() {
     const fetchRequests = async () => {
       try {
         const response = await api.get<SolicitudResponse[]>('/solicitudes');
-        console.log('🚀 Data recibida del backend:', response.data);
         setData(response.data);
       } catch (error) {
-        console.error('Error fetching requests:', error);
+        toast.error(
+          'No se pudieron cargar las solicitudes. Intente nuevamente.'
+        );
       } finally {
         setLoading(false);
       }

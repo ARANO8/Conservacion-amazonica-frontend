@@ -80,7 +80,6 @@ export default function SolicitudPage() {
           );
         }
       } catch (error) {
-        console.error('Error al cargar reservas:', error);
         toast.error('No se pudieron cargar tus reservas activas');
       }
     };
@@ -215,8 +214,7 @@ export default function SolicitudPage() {
       toast.success('Solicitud enviada exitosamente');
       router.push('/dashboard/requests');
     } catch (error: unknown) {
-      console.error('Error al enviar la solicitud:', error);
-
+      toast.error('Error al enviar la solicitud');
       let errorMessage = 'Ocurrió un error al procesar la solicitud';
 
       if (axios.isAxiosError(error)) {

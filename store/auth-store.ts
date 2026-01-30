@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import Cookies from 'js-cookie';
 import api from '../lib/api';
+import { toast } from 'sonner';
 
 // Interfaz User estricta (tipado según backend)
 export interface User {
@@ -51,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
 
           if (!token || token === 'undefined') {
             const errorMsg = 'Token no recibido del servidor';
-            console.error(errorMsg, response.data);
+            toast.error(errorMsg);
             throw new Error(errorMsg);
           }
 
