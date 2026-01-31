@@ -785,7 +785,9 @@ function FuenteCard({
               Límite POA
             </span>
             <span className="text-muted-foreground text-sm font-medium">
-              {isLocked ? formatMoney(Number(montoReservado) || 0) : '---'}
+              {isLocked
+                ? formatMoney(Number(saldoDisponibleLocal) || 0)
+                : '---'}
             </span>
           </div>
 
