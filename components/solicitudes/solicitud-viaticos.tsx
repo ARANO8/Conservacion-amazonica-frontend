@@ -392,7 +392,14 @@ function ViaticoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      if (maxDias > 0 && val > maxDias) {
+                        field.onChange(maxDias);
+                      } else {
+                        field.onChange(val);
+                      }
+                    }}
                   />
                 </FormControl>
                 {selectedPlanificacion && (
@@ -424,7 +431,14 @@ function ViaticoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      if (maxPersonas > 0 && val > maxPersonas) {
+                        field.onChange(maxPersonas);
+                      } else {
+                        field.onChange(val);
+                      }
+                    }}
                   />
                 </FormControl>
                 {selectedPlanificacion && (
