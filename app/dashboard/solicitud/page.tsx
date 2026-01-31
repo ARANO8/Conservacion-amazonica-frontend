@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -85,6 +85,38 @@ export default function SolicitudPage() {
     };
     fetchReservas();
   }, [form]);
+
+  // Calculate initial form state based on active reservations
+  const initialFormState = useMemo(() => {
+    if (!misReservas || misReservas.length === 0) return undefined;
+
+    const firstReserva = misReservas[0];
+    const proyectoId =
+      firstReserva.poa?.estructura?.proyecto?.id ??
+      firstReserva.poa?.proyectoId;
+
+    const fuentesTransformadas = misReservas.map((r) => ({
+      grupoId: r.poa?.estructura?.grupo?.id ?? r.poa?.grupoId,
+      partidaId: r.poa?.estructura?.partida?.id ?? r.poa?.partidaId,
+      codigoPresupuestarioId: r.poa?.id,
+      reservaId: r.id,
+      montoReservado: r.montoPresupuestado,
+      saldoDisponible: Number(r.poa?.saldoDisponible ?? 0),
+      isLocked: true,
+    }));
+
+    // Cast explicitly to Partial<FormData> to satisfy TS if needed, mostly it matches shape
+    return {
+      proyecto: proyectoId,
+      fuentesSeleccionadas: fuentesTransformadas,
+      presupuestosIds: misReservas.map((r) => r.id),
+    };
+  }, [misReservas]);
+
+  const initialPoaCode = useMemo(
+    () => misReservas[0]?.poa?.codigoPoa,
+    [misReservas]
+  );
 
   const watchActividades = form.watch('actividades');
 
@@ -323,6 +355,8 @@ export default function SolicitudPage() {
                     poaCodes={poaCodes}
                     misReservas={misReservas}
                     setMisReservas={setMisReservas}
+                    initialData={initialFormState}
+                    initialPoaCode={initialPoaCode}
                   />
                 )}
 
