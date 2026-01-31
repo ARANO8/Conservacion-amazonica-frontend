@@ -127,12 +127,22 @@ export default function ReviewModal({
 
                 <p className="text-sm">
                   <span className="text-muted-foreground text-xs font-bold uppercase">
-                    PROYECTO / POA:
+                    CODIGO / POA:
                   </span>{' '}
                   <span className="font-bold">
                     {misReservas.find(
                       (r) => r.id === data.fuentesSeleccionadas?.[0]?.reservaId
                     )?.poa?.codigoPoa || 'S/N'}
+                  </span>
+                </p>
+                <p className="text-sm">
+                  <span className="text-muted-foreground text-xs font-bold uppercase">
+                    PROYECTO:
+                  </span>{' '}
+                  <span className="font-bold">
+                    {misReservas.find(
+                      (r) => r.id === data.fuentesSeleccionadas?.[0]?.reservaId
+                    )?.poa?.estructura?.proyecto?.nombre || 'S/N'}
                   </span>
                 </p>
               </div>
@@ -178,12 +188,13 @@ export default function ReviewModal({
 
                 // 2. DESCRIPCIÓN (El nombre largo, ej: Consultorías...)
                 const nombreVisual =
-                  reserva.poa?.codigoPresupuestario?.codigoCompleto ||
-                  'Sin Descripción';
+                  reserva.poa?.estructura?.partida?.nombre ||
+                  'Sin Nombre Partida';
 
                 // 3. SUBTÍTULO (Detalle de actividad)
                 const descActividad =
-                  reserva.poa?.actividad?.detalleDescripcion || '';
+                  reserva.poa?.actividad?.detalleDescripcion ||
+                  'Sin Descripción';
 
                 return (
                   <div

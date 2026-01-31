@@ -183,7 +183,7 @@ export default function SolicitudEconomica({
         <FieldSet className="bg-muted/20 rounded-xl border p-4 shadow-sm">
           <div className="grid gap-6 md:grid-cols-2">
             <Field>
-              <FieldLabel>Actividad / POA Macro</FieldLabel>
+              <FieldLabel>Codigo / POA</FieldLabel>
               <Popover open={isPoaOpen} onOpenChange={setIsPoaOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -248,7 +248,7 @@ export default function SolicitudEconomica({
               name="proyecto"
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Proyecto Destino</FieldLabel>
+                  <FieldLabel>Proyecto</FieldLabel>
                   <Select
                     disabled={!selectedPoa || isLoadingStructure}
                     onValueChange={(val) => {
@@ -682,7 +682,7 @@ function FuenteCard({
                   <SelectContent position="popper" side="bottom" sideOffset={5}>
                     {availablePartidas.map((p) => (
                       <SelectItem key={p.id} value={p.id.toString()}>
-                        {p.codigo} - {p.nombre}
+                        {p.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
