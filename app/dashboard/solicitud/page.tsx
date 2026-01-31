@@ -72,8 +72,9 @@ export default function SolicitudPage() {
     formState: { isDirty, isSubmitSuccessful, isSubmitting },
   } = form;
 
-  // Dirty Form Protection: Prevent accidental reload/close if form has unsaved changes
-  usePreventNavigation(isDirty && !isSubmitSuccessful && !isSubmitting);
+  // Dirty Form Protection: Prevent accidental reload/close ALWAYS until success.
+  // We want to protect the session even if the user hasn't typed in the current step (but has data from previous steps).
+  usePreventNavigation(!isSubmitSuccessful);
 
   // Carga inicial de reservas activas
   // Carga inicial y HARD RESET del estado
