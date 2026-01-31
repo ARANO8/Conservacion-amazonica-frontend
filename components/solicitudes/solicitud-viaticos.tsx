@@ -224,7 +224,7 @@ function ViaticoCard({
                   disabled={fuentesDisponibles.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="border-primary/20 bg-primary/5 w-full">
+                    <SelectTrigger className="w-full truncate overflow-hidden">
                       <SelectValue
                         placeholder={
                           fuentesDisponibles.length === 0
@@ -237,7 +237,6 @@ function ViaticoCard({
                   <SelectContent
                     position="popper"
                     side="bottom"
-                    align="start"
                     className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
                   >
                     {[

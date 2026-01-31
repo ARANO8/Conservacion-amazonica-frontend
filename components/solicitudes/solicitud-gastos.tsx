@@ -226,7 +226,7 @@ function GastoCard({
                   disabled={fuentesDisponibles.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full truncate overflow-hidden">
                       <SelectValue
                         placeholder={
                           fuentesDisponibles.length === 0
