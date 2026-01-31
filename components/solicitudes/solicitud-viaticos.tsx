@@ -243,12 +243,21 @@ function ViaticoCard({
                       ...new Map(
                         fuentesDisponibles.map((f) => [f.id, f])
                       ).values(),
-                    ].map((fuente) => (
-                      <SelectItem key={fuente.id} value={fuente.id.toString()}>
-                        ID: {fuente.id} -{' '}
-                        {fuente.poa?.estructura?.partida?.nombre}
-                      </SelectItem>
-                    ))}
+                    ]
+                      .filter((f) =>
+                        (f.poa?.estructura?.partida?.nombre ?? '')
+                          .toUpperCase()
+                          .includes('VIATICOS')
+                      )
+                      .map((fuente) => (
+                        <SelectItem
+                          key={fuente.id}
+                          value={fuente.id.toString()}
+                        >
+                          ID: {fuente.id} -{' '}
+                          {fuente.poa?.estructura?.partida?.nombre}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
