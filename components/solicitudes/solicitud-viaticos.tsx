@@ -246,8 +246,8 @@ function ViaticoCard({
                       ).values(),
                     ].map((fuente) => (
                       <SelectItem key={fuente.id} value={fuente.id.toString()}>
-                        ID: {fuente.id} - {fuente.poa?.partida?.nombre} (
-                        {fuente.poa?.codigoPresupuestario?.codigoCompleto})
+                        ID: {fuente.id} -{' '}
+                        {fuente.poa?.estructura?.partida?.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
