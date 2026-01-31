@@ -40,6 +40,7 @@ import {
   WizardStep,
 } from '@/components/solicitudes/solicitud-schema';
 import { useCatalogos } from '@/hooks/use-catalogos';
+import { usePreventNavigation } from '@/hooks/use-prevent-navigation';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
@@ -67,23 +68,45 @@ export default function SolicitudPage() {
     defaultValues,
   });
 
+  const {
+    formState: { isDirty, isSubmitSuccessful, isSubmitting },
+  } = form;
+
+  // Dirty Form Protection: Prevent accidental reload/close if form has unsaved changes
+  usePreventNavigation(isDirty && !isSubmitSuccessful && !isSubmitting);
+
   // Carga inicial de reservas activas
+  // Carga inicial y HARD RESET del estado
   useEffect(() => {
-    const fetchReservas = async () => {
+    const hardResetAndFetch = async () => {
       try {
-        const data = await presupuestosService.getMisReservas();
-        setMisReservas(data);
-        if (data.length > 0) {
-          form.setValue(
-            'presupuestosIds',
-            data.map((r) => r.id)
+        // 1. Fetch active references ("zombies") from backend
+        // This is crucial to prevent "Zombie Data" from previous sessions.
+        // We consider "Page Reload" as "Start Fresh".
+        const activeReservations = await presupuestosService.getMisReservas();
+
+        // 2. Clear any existing reservation on backend to ensure a clean slate
+        if (activeReservations.length > 0) {
+          await Promise.all(
+            activeReservations.map((r) => presupuestosService.liberar(r.id))
           );
         }
+
+        // 3. Reset local state
+        setMisReservas([]);
+        form.setValue('presupuestosIds', []);
+
+        // 4. Force form reset (optional but recommended for safety)
+        // If there was any 'defaultValues' related to an ID, this clears it.
+        // Since we don't have a global `solicitudId` to reset (per analysis),
+        // clearing `misReservas` effectively clears the "context".
       } catch (error) {
-        toast.error('No se pudieron cargar tus reservas activas');
+        console.error('Error executing hard reset', error);
+        toast.error('Error al preparar una nueva solicitud');
       }
     };
-    fetchReservas();
+
+    hardResetAndFetch();
   }, [form]);
 
   // Calculate initial form state based on active reservations
