@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   Dialog,
@@ -28,8 +29,28 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle2, SendHorizonal, AlertTriangle } from 'lucide-react';
+import {
+  CheckCircle2,
+  SendHorizonal,
+  AlertTriangle,
+  Check,
+  ChevronsUpDown,
+} from 'lucide-react';
 import { Concepto, TipoGasto, Usuario } from '@/types/catalogs';
+import { cn } from '@/lib/utils';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 
 import { PresupuestoReserva } from '@/types/backend';
 
@@ -54,7 +75,8 @@ export default function ReviewModal({
   conceptos,
   tiposGasto,
 }: ReviewModalProps) {
-  const { watch, control, handleSubmit } = useFormContext<FormData>();
+  const { watch, control, handleSubmit, setValue } = useFormContext<FormData>();
+  const [open, setOpen] = useState(false);
 
   const data = watch();
 
@@ -361,31 +383,69 @@ export default function ReviewModal({
                       </div>
                     </div>
 
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full truncate overflow-hidden">
-                          <SelectValue placeholder="Seleccionar responsable..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent
-                        position="popper"
-                        side="bottom"
-                        className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
-                      >
-                        {usuarios.map((usuario) => (
-                          <SelectItem
-                            key={usuario.id}
-                            value={String(usuario.id)}
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className={cn(
+                              'w-full justify-between font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}
                           >
-                            {usuario.nombreCompleto}{' '}
-                            {usuario.cargo ? `- ${usuario.cargo}` : ''}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                            {field.value
+                              ? usuarios.find(
+                                  (usuario) =>
+                                    String(usuario.id) === field.value
+                                )?.nombreCompleto ||
+                                'Seleccionar responsable...'
+                              : 'Seleccionar responsable...'}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-[var(--radix-popover-trigger-width)] p-0"
+                        align="start"
+                      >
+                        <Command>
+                          <CommandInput placeholder="Buscar destinatario..." />
+                          <CommandList>
+                            <CommandEmpty>
+                              No se encontró el usuario.
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {usuarios.map((usuario) => (
+                                <CommandItem
+                                  key={usuario.id}
+                                  value={usuario.nombreCompleto}
+                                  onSelect={() => {
+                                    setValue(
+                                      'destinatario',
+                                      String(usuario.id)
+                                    );
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      String(usuario.id) === field.value
+                                        ? 'opacity-100'
+                                        : 'opacity-0'
+                                    )}
+                                  />
+                                  {usuario.nombreCompleto}{' '}
+                                  {usuario.cargo ? `- ${usuario.cargo}` : ''}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
