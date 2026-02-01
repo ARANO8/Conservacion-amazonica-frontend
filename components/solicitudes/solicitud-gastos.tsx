@@ -76,7 +76,7 @@ export default function SolicitudGastos({
             solicitudPresupuestoId: 0,
             tipoDocumento: 'FACTURA',
             tipoGastoId: 0,
-            cantidad: 1,
+            cantidad: 0,
             costoUnitario: 0,
             montoNeto: 0,
             detalle: '',
@@ -84,7 +84,7 @@ export default function SolicitudGastos({
           })
         }
       >
-        + Agregar Otro Gasto
+        + Agregar Gasto
       </Button>
     </div>
   );

@@ -83,7 +83,7 @@ export default function SolicitudViaticos({
           })
         }
       >
-        + Agregar Otro Viático
+        + Agregar Viático
       </Button>
     </div>
   );
@@ -189,14 +189,13 @@ function ViaticoCard({
   }, [dias, personas, precioUnitario]);
 
   useEffect(() => {
-    // Impacto presupuestario (Bruto) = Neto / factor (Grossing Up)
-    // Institucional: / 0.87 (13% RC-IVA)
-    // Terceros: / 0.84 (13% RC-IVA + 3% IT)
     const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
     const brutoTotal = netoTotal / factor;
 
-    setValue(`viaticos.${index}.montoNeto`, Number(brutoTotal.toFixed(2)), {
-      shouldValidate: true,
+    const resultBruto = Number(brutoTotal.toFixed(2));
+    setValue(`viaticos.${index}.montoNeto`, resultBruto, {
+      shouldValidate: resultBruto > 0,
+      shouldDirty: true,
     });
   }, [netoTotal, watchTipoDestino, setValue, index]);
 
@@ -469,16 +468,31 @@ function ViaticoCard({
               className="bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0"
             />
           </div>
-          <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs font-bold uppercase">
-              TOTAL LÍQUIDO (A Recibir)
-            </Label>
-            <Input
-              value={formatMoney(netoTotal)}
-              readOnly
-              className="bg-muted font-bold"
-            />
-          </div>
+          <FormField
+            control={control}
+            name={`viaticos.${index}.montoNeto`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  TOTAL LÍQUIDO (A Recibir)
+                </Label>
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="w-full"
+                    value={formatMoney(netoTotal)}
+                    min={0}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    readOnly
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
 
