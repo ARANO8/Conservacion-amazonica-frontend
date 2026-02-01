@@ -76,7 +76,10 @@ export const formSchema = z.object({
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).optional(),
         tipoGastoId: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
-        cantidad: z.number().min(1).optional(),
+        cantidad: z
+          .number()
+          .min(1, 'La cantidad debe ser al menos 1')
+          .optional(),
         costoUnitario: z
           .number()
           .min(0.01, 'El costo debe ser mayor a 0')

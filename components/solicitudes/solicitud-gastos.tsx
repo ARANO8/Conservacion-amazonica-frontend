@@ -367,7 +367,10 @@ function GastoCard({
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       field.onChange(val);
-                      trigger(`items.${index}.cantidad`);
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val >= 1) {
+                        trigger(`items.${index}.cantidad`);
+                      }
                     }}
                   />
                 </FormControl>
@@ -396,7 +399,10 @@ function GastoCard({
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       field.onChange(val);
-                      trigger(`items.${index}.costoUnitario`);
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val > 0) {
+                        trigger(`items.${index}.costoUnitario`);
+                      }
                     }}
                   />
                 </FormControl>

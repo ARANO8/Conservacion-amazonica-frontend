@@ -398,7 +398,10 @@ function ViaticoCard({
                       } else {
                         field.onChange(val);
                       }
-                      trigger(`viaticos.${index}.dias`);
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val >= 1) {
+                        trigger(`viaticos.${index}.dias`);
+                      }
                     }}
                   />
                 </FormControl>
@@ -438,7 +441,10 @@ function ViaticoCard({
                       } else {
                         field.onChange(val);
                       }
-                      trigger(`viaticos.${index}.cantidadPersonas`);
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val >= 1) {
+                        trigger(`viaticos.${index}.cantidadPersonas`);
+                      }
                     }}
                   />
                 </FormControl>
