@@ -63,6 +63,12 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     accessorFn: (row) => row.usuarioEmisor?.nombreCompleto || 'Sin Asignar',
   },
   {
+    id: 'aprobador',
+    header: 'Aprobador',
+    accessorFn: (row) =>
+      row.aprobador?.nombreCompleto || row.aprobador?.nombre || '-',
+  },
+  {
     id: 'montoNeto',
     header: () => <div className="text-right">Monto Neto</div>,
     cell: ({ row }) => {

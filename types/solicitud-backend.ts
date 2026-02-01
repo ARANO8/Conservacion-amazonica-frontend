@@ -54,6 +54,10 @@ export interface SolicitudResponse {
     nombreCompleto: string;
     email: string;
   };
+  aprobador?: {
+    nombreCompleto: string;
+    nombre?: string;
+  };
   viaticos?: Array<{
     montoNeto: number | string;
     solicitudPresupuesto?: {
