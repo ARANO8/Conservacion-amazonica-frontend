@@ -29,7 +29,7 @@ import { formatMoney } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckCircle2, SendHorizonal, AlertTriangle } from 'lucide-react';
-import { Usuario } from '@/types/catalogs';
+import { Concepto, TipoGasto, Usuario } from '@/types/catalogs';
 
 import { PresupuestoReserva } from '@/types/backend';
 
@@ -40,6 +40,8 @@ interface ReviewModalProps {
   loading?: boolean;
   usuarios: Usuario[];
   misReservas: PresupuestoReserva[];
+  conceptos: Concepto[];
+  tiposGasto: TipoGasto[];
 }
 
 export default function ReviewModal({
@@ -49,6 +51,8 @@ export default function ReviewModal({
   loading = false,
   usuarios,
   misReservas,
+  conceptos,
+  tiposGasto,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit } = useFormContext<FormData>();
 
@@ -236,9 +240,16 @@ export default function ReviewModal({
                                   >
                                     <div className="flex flex-col">
                                       <span className="font-semibold uppercase">
-                                        {v.ciudad || 'N/A'}
+                                        {conceptos.find(
+                                          (c) => c.id === v.conceptoId
+                                        )?.nombre || 'N/A'}
                                       </span>
                                       <span className="text-muted-foreground text-[9px] uppercase">
+                                        {data.actividades?.[
+                                          v.planificacionIndex ?? -1
+                                        ]?.actividadProgramada || 'Sin Destino'}
+                                      </span>
+                                      <span className="text-muted-foreground text-[8px] italic">
                                         {v.tipoDestino === 'INSTITUCIONAL'
                                           ? 'Institucional'
                                           : v.tipoDestino === 'TERCEROS'
@@ -271,7 +282,11 @@ export default function ReviewModal({
                                 >
                                   <div className="flex flex-col pr-4">
                                     <span className="font-semibold uppercase">
-                                      {item.detalle || 'Sin detalle'}
+                                      {item.detalle ||
+                                        tiposGasto.find(
+                                          (t) => t.id === item.tipoGastoId
+                                        )?.nombre ||
+                                        'Sin detalle'}
                                     </span>
                                     <span className="text-muted-foreground text-[9px] uppercase">
                                       {item.tipoDocumento || 'S/D'}

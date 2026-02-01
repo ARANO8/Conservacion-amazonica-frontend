@@ -406,6 +406,8 @@ export default function SolicitudPage() {
           loading={loading}
           usuarios={usuarios}
           misReservas={misReservas}
+          conceptos={conceptos}
+          tiposGasto={tiposGasto}
         />
 
         <AlertDialog
