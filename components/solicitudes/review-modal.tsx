@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   Dialog,
@@ -56,6 +56,7 @@ interface ReviewModalProps {
   misReservas: PresupuestoReserva[];
   conceptos: Concepto[];
   tiposGasto: TipoGasto[];
+  currentUserId?: number;
 }
 
 export default function ReviewModal({
@@ -67,11 +68,17 @@ export default function ReviewModal({
   misReservas,
   conceptos,
   tiposGasto,
+  currentUserId,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit, setValue } = useFormContext<FormData>();
   const [open, setOpen] = useState(false);
 
   const data = watch();
+
+  const usuariosDisponibles = useMemo(() => {
+    if (!currentUserId) return usuarios;
+    return usuarios.filter((u) => u.id !== currentUserId);
+  }, [usuarios, currentUserId]);
 
   const totalViaticos = (data.viaticos || []).reduce(
     (acc: number, v) => acc + (Number(v.montoNeto) || 0),
@@ -389,7 +396,7 @@ export default function ReviewModal({
                             )}
                           >
                             {field.value
-                              ? usuarios.find(
+                              ? usuariosDisponibles.find(
                                   (usuario) =>
                                     String(usuario.id) === field.value
                                 )?.nombreCompleto ||
@@ -410,7 +417,7 @@ export default function ReviewModal({
                               No se encontró el usuario.
                             </CommandEmpty>
                             <CommandGroup>
-                              {usuarios.map((usuario) => (
+                              {usuariosDisponibles.map((usuario) => (
                                 <CommandItem
                                   key={usuario.id}
                                   value={usuario.nombreCompleto}

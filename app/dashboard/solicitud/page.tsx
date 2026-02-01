@@ -51,6 +51,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function SolicitudPage() {
   const router = useRouter();
@@ -62,6 +63,7 @@ export default function SolicitudPage() {
 
   const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
     useCatalogos();
+  const { user } = useAuthStore();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -408,6 +410,7 @@ export default function SolicitudPage() {
           misReservas={misReservas}
           conceptos={conceptos}
           tiposGasto={tiposGasto}
+          currentUserId={Number(user?.id)}
         />
 
         <AlertDialog
