@@ -36,9 +36,7 @@ export default function RequestsPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Bandeja de Solicitudes
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Mis Solicitudes</h1>
           <p className="text-muted-foreground">
             Gestiona y visualiza el estado de tus solicitudes.
           </p>
