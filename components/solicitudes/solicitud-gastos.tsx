@@ -76,7 +76,7 @@ export default function SolicitudGastos({
             solicitudPresupuestoId: 0,
             tipoDocumento: 'FACTURA',
             tipoGastoId: 0,
-            cantidad: 1,
+            cantidad: 0,
             costoUnitario: 0,
             montoNeto: 0,
             detalle: '',
@@ -84,7 +84,7 @@ export default function SolicitudGastos({
           })
         }
       >
-        + Agregar Otro Gasto
+        + Agregar Gasto
       </Button>
     </div>
   );
@@ -107,7 +107,7 @@ function GastoCard({
   tiposGasto,
   fuentesDisponibles,
 }: GastoCardProps) {
-  const { setValue } = useFormContext<FormData>();
+  const { setValue, trigger } = useFormContext<FormData>();
 
   const cantidad = useWatch({
     control,
@@ -171,8 +171,17 @@ function GastoCard({
   }, [netoTotal, watchDocumento, watchTipoGastoId, tiposGasto]);
 
   useEffect(() => {
-    setValue(`items.${index}.montoNeto`, Number(brutoTotal.toFixed(2)));
-    setValue(`items.${index}.liquidoPagable`, Number(netoTotal.toFixed(2)));
+    const resultBruto = Number(brutoTotal.toFixed(2));
+    const resultNeto = Number(netoTotal.toFixed(2));
+
+    setValue(`items.${index}.montoNeto`, resultBruto, {
+      shouldValidate: resultBruto > 0,
+      shouldDirty: true,
+    });
+    setValue(`items.${index}.liquidoPagable`, resultNeto, {
+      shouldValidate: resultNeto > 0,
+      shouldDirty: true,
+    });
   }, [brutoTotal, netoTotal, setValue, index]);
 
   // Los gastos ahora se vinculan directamente a una reserva de la canasta,
@@ -226,7 +235,7 @@ function GastoCard({
                   disabled={fuentesDisponibles.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full truncate overflow-hidden">
                       <SelectValue
                         placeholder={
                           fuentesDisponibles.length === 0
@@ -246,12 +255,22 @@ function GastoCard({
                       ...new Map(
                         fuentesDisponibles.map((f) => [f.id, f])
                       ).values(),
-                    ].map((fuente) => (
-                      <SelectItem key={fuente.id} value={fuente.id.toString()}>
-                        ID: {fuente.id} - {fuente.poa?.partida?.nombre} (
-                        {fuente.poa?.codigoPresupuestario?.codigoCompleto})
-                      </SelectItem>
-                    ))}
+                    ]
+                      .filter(
+                        (f) =>
+                          !(f.poa?.estructura?.partida?.nombre ?? '')
+                            .toUpperCase()
+                            .includes('VIATICOS')
+                      )
+                      .map((fuente) => (
+                        <SelectItem
+                          key={fuente.id}
+                          value={fuente.id.toString()}
+                        >
+                          ID: {fuente.id} -{' '}
+                          {fuente.poa?.estructura?.partida?.nombre}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -345,7 +364,14 @@ function GastoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      field.onChange(val);
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val >= 1) {
+                        trigger(`items.${index}.cantidad`);
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -370,7 +396,14 @@ function GastoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      field.onChange(val);
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val > 0) {
+                        trigger(`items.${index}.costoUnitario`);
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

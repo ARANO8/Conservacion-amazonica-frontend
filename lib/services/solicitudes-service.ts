@@ -26,9 +26,10 @@ export const solicitudesService = {
 
   /**
    * Fetches the list of solicitudes (for the requests table).
+   * @param params Optional query parameters for filtering.
    */
-  async getSolicitudes() {
-    const response = await api.get('/solicitudes');
+  async getSolicitudes(params?: { solicitanteId?: string | number }) {
+    const response = await api.get('/solicitudes', { params });
     return response.data;
   },
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -40,6 +40,7 @@ import {
   WizardStep,
 } from '@/components/solicitudes/solicitud-schema';
 import { useCatalogos } from '@/hooks/use-catalogos';
+import { usePreventNavigation } from '@/hooks/use-prevent-navigation';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
@@ -50,6 +51,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function SolicitudPage() {
   const router = useRouter();
@@ -61,30 +63,86 @@ export default function SolicitudPage() {
 
   const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
     useCatalogos();
+  const { user } = useAuthStore();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
+  const {
+    formState: { isDirty, isSubmitSuccessful, isSubmitting },
+  } = form;
+
+  // Dirty Form Protection: Prevent accidental reload/close ALWAYS until success.
+  // We want to protect the session even if the user hasn't typed in the current step (but has data from previous steps).
+  usePreventNavigation(!isSubmitSuccessful);
+
   // Carga inicial de reservas activas
+  // Carga inicial y HARD RESET del estado
   useEffect(() => {
-    const fetchReservas = async () => {
+    const hardResetAndFetch = async () => {
       try {
-        const data = await presupuestosService.getMisReservas();
-        setMisReservas(data);
-        if (data.length > 0) {
-          form.setValue(
-            'presupuestosIds',
-            data.map((r) => r.id)
+        // 1. Fetch active references ("zombies") from backend
+        // This is crucial to prevent "Zombie Data" from previous sessions.
+        // We consider "Page Reload" as "Start Fresh".
+        const activeReservations = await presupuestosService.getMisReservas();
+
+        // 2. Clear any existing reservation on backend to ensure a clean slate
+        if (activeReservations.length > 0) {
+          await Promise.all(
+            activeReservations.map((r) => presupuestosService.liberar(r.id))
           );
         }
+
+        // 3. Reset local state
+        setMisReservas([]);
+        form.setValue('presupuestosIds', []);
+
+        // 4. Force form reset (optional but recommended for safety)
+        // If there was any 'defaultValues' related to an ID, this clears it.
+        // Since we don't have a global `solicitudId` to reset (per analysis),
+        // clearing `misReservas` effectively clears the "context".
       } catch (error) {
-        toast.error('No se pudieron cargar tus reservas activas');
+        console.error('Error executing hard reset', error);
+        toast.error('Error al preparar una nueva solicitud');
       }
     };
-    fetchReservas();
+
+    hardResetAndFetch();
   }, [form]);
+
+  // Calculate initial form state based on active reservations
+  const initialFormState = useMemo(() => {
+    if (!misReservas || misReservas.length === 0) return undefined;
+
+    const firstReserva = misReservas[0];
+    const proyectoId =
+      firstReserva.poa?.estructura?.proyecto?.id ??
+      firstReserva.poa?.proyectoId;
+
+    const fuentesTransformadas = misReservas.map((r) => ({
+      grupoId: r.poa?.estructura?.grupo?.id ?? r.poa?.grupoId,
+      partidaId: r.poa?.estructura?.partida?.id ?? r.poa?.partidaId,
+      codigoPresupuestarioId: r.poa?.id,
+      reservaId: r.id,
+      montoReservado: r.montoPresupuestado,
+      saldoDisponible: Number(r.poa?.saldoDisponible ?? 0),
+      isLocked: true,
+    }));
+
+    // Cast explicitly to Partial<FormData> to satisfy TS if needed, mostly it matches shape
+    return {
+      proyecto: proyectoId,
+      fuentesSeleccionadas: fuentesTransformadas,
+      presupuestosIds: misReservas.map((r) => r.id),
+    };
+  }, [misReservas]);
+
+  const initialPoaCode = useMemo(
+    () => misReservas[0]?.poa?.codigoPoa,
+    [misReservas]
+  );
 
   const watchActividades = form.watch('actividades');
 
@@ -323,6 +381,8 @@ export default function SolicitudPage() {
                     poaCodes={poaCodes}
                     misReservas={misReservas}
                     setMisReservas={setMisReservas}
+                    initialData={initialFormState}
+                    initialPoaCode={initialPoaCode}
                   />
                 )}
 
@@ -348,6 +408,9 @@ export default function SolicitudPage() {
           loading={loading}
           usuarios={usuarios}
           misReservas={misReservas}
+          conceptos={conceptos}
+          tiposGasto={tiposGasto}
+          currentUserId={Number(user?.id)}
         />
 
         <AlertDialog

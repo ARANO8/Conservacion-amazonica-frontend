@@ -57,9 +57,12 @@ export const formSchema = z.object({
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
         dias: z.number().optional(),
         cantidadPersonas: z.number().optional(),
-        montoNeto: z.number().min(0, 'Monto inválido'),
+        montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
         solicitudPresupuestoId: z.number(),
-        liquidoPagable: z.number().optional(),
+        liquidoPagable: z
+          .number()
+          .min(0.01, 'El monto debe ser mayor a 0')
+          .optional(),
       })
     )
     .optional(),
@@ -72,11 +75,20 @@ export const formSchema = z.object({
         solicitudPresupuestoId: z.number(),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).optional(),
         tipoGastoId: z.number().optional(),
-        montoNeto: z.number().min(0, 'Monto inválido'),
-        cantidad: z.number().min(1).optional(),
-        costoUnitario: z.number().min(0).optional(),
+        montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
+        cantidad: z
+          .number()
+          .min(1, 'La cantidad debe ser al menos 1')
+          .optional(),
+        costoUnitario: z
+          .number()
+          .min(0.01, 'El costo debe ser mayor a 0')
+          .optional(),
         detalle: z.string().optional(),
-        liquidoPagable: z.number().optional(),
+        liquidoPagable: z
+          .number()
+          .min(0.01, 'El monto debe ser mayor a 0')
+          .optional(),
       })
     )
     .optional(),
@@ -88,8 +100,11 @@ export const formSchema = z.object({
         procedenciaInstitucion: z
           .string()
           .min(1, 'La procedencia/institución es requerida'),
-        montoNeto: z.number().min(0).optional(),
-        liquidoPagable: z.number().min(0).optional(),
+        montoNeto: z.number().min(0.01, 'Monto debe ser mayor a 0').optional(),
+        liquidoPagable: z
+          .number()
+          .min(0.01, 'Monto debe ser mayor a 0')
+          .optional(),
       })
     )
     .optional(),

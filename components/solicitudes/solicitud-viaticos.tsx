@@ -83,7 +83,7 @@ export default function SolicitudViaticos({
           })
         }
       >
-        + Agregar Otro Viático
+        + Agregar Viático
       </Button>
     </div>
   );
@@ -106,7 +106,7 @@ function ViaticoCard({
   conceptos,
   fuentesDisponibles,
 }: ViaticoCardProps) {
-  const { setValue } = useFormContext<FormData>();
+  const { setValue, trigger } = useFormContext<FormData>();
 
   const dias = useWatch({
     control,
@@ -189,14 +189,13 @@ function ViaticoCard({
   }, [dias, personas, precioUnitario]);
 
   useEffect(() => {
-    // Impacto presupuestario (Bruto) = Neto / factor (Grossing Up)
-    // Institucional: / 0.87 (13% RC-IVA)
-    // Terceros: / 0.84 (13% RC-IVA + 3% IT)
     const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
     const brutoTotal = netoTotal / factor;
 
-    setValue(`viaticos.${index}.montoNeto`, Number(brutoTotal.toFixed(2)), {
-      shouldValidate: true,
+    const resultBruto = Number(brutoTotal.toFixed(2));
+    setValue(`viaticos.${index}.montoNeto`, resultBruto, {
+      shouldValidate: resultBruto > 0,
+      shouldDirty: true,
     });
   }, [netoTotal, watchTipoDestino, setValue, index]);
 
@@ -224,7 +223,7 @@ function ViaticoCard({
                   disabled={fuentesDisponibles.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="border-primary/20 bg-primary/5 w-full">
+                    <SelectTrigger className="w-full truncate overflow-hidden">
                       <SelectValue
                         placeholder={
                           fuentesDisponibles.length === 0
@@ -237,19 +236,27 @@ function ViaticoCard({
                   <SelectContent
                     position="popper"
                     side="bottom"
-                    align="start"
                     className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
                   >
                     {[
                       ...new Map(
                         fuentesDisponibles.map((f) => [f.id, f])
                       ).values(),
-                    ].map((fuente) => (
-                      <SelectItem key={fuente.id} value={fuente.id.toString()}>
-                        ID: {fuente.id} - {fuente.poa?.partida?.nombre} (
-                        {fuente.poa?.codigoPresupuestario?.codigoCompleto})
-                      </SelectItem>
-                    ))}
+                    ]
+                      .filter((f) =>
+                        (f.poa?.estructura?.partida?.nombre ?? '')
+                          .toUpperCase()
+                          .includes('VIATICOS')
+                      )
+                      .map((fuente) => (
+                        <SelectItem
+                          key={fuente.id}
+                          value={fuente.id.toString()}
+                        >
+                          ID: {fuente.id} -{' '}
+                          {fuente.poa?.estructura?.partida?.nombre}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -384,7 +391,18 @@ function ViaticoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      if (maxDias > 0 && val > maxDias) {
+                        field.onChange(maxDias);
+                      } else {
+                        field.onChange(val);
+                      }
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val >= 1) {
+                        trigger(`viaticos.${index}.dias`);
+                      }
+                    }}
                   />
                 </FormControl>
                 {selectedPlanificacion && (
@@ -416,7 +434,18 @@ function ViaticoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      if (maxPersonas > 0 && val > maxPersonas) {
+                        field.onChange(maxPersonas);
+                      } else {
+                        field.onChange(val);
+                      }
+                      // Only trigger validation if value is valid to clear existing error
+                      if (val >= 1) {
+                        trigger(`viaticos.${index}.cantidadPersonas`);
+                      }
+                    }}
                   />
                 </FormControl>
                 {selectedPlanificacion && (
@@ -447,16 +476,31 @@ function ViaticoCard({
               className="bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0"
             />
           </div>
-          <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs font-bold uppercase">
-              TOTAL LÍQUIDO (A Recibir)
-            </Label>
-            <Input
-              value={formatMoney(netoTotal)}
-              readOnly
-              className="bg-muted font-bold"
-            />
-          </div>
+          <FormField
+            control={control}
+            name={`viaticos.${index}.montoNeto`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  TOTAL LÍQUIDO (A Recibir)
+                </Label>
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="w-full"
+                    value={formatMoney(netoTotal)}
+                    min={0}
+                    onKeyDown={(e) =>
+                      ['-', 'e'].includes(e.key) && e.preventDefault()
+                    }
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    readOnly
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
 

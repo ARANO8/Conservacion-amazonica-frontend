@@ -76,6 +76,8 @@ interface SolicitudEconomicaProps {
   poaCodes: PoaLookup[];
   misReservas: PresupuestoReserva[];
   setMisReservas: React.Dispatch<React.SetStateAction<PresupuestoReserva[]>>;
+  initialData?: Partial<FormData>;
+  initialPoaCode?: string;
 }
 
 export default function SolicitudEconomica({
@@ -86,15 +88,47 @@ export default function SolicitudEconomica({
   poaCodes,
   misReservas,
   setMisReservas,
+  initialData,
+  initialPoaCode,
 }: SolicitudEconomicaProps) {
-  const { setValue, watch } = useFormContext<FormData>();
+  const { setValue, watch, reset, getValues } = useFormContext<FormData>();
 
   // Estado "Tree-Walker": Estructura completa del POA seleccionado
   const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]); // Array de items del POA (Poa objects)
   const [isLoadingStructure, setIsLoadingStructure] = useState(false);
 
-  const [selectedPoa, setSelectedPoa] = useState('');
+  const [selectedPoa, setSelectedPoa] = useState(initialPoaCode || '');
   const [isPoaOpen, setIsPoaOpen] = useState(false);
+
+  // REHYDRATION LOGIC
+  useEffect(() => {
+    // Si tenemos datos iniciales y el formulario no tiene fuentes (está "vacío" o recién montado)
+    // OJO: Chequeamos si hay initialData para decidir
+    if (initialData && initialPoaCode) {
+      // 1. Resetear el formulario con los datos guardados
+      // MERGE with existing values to avoid wiping 'viaticos', 'nomina', etc.
+      reset({ ...getValues(), ...initialData });
+
+      // 2. Restaurar el Código POA visualmente
+      setSelectedPoa(initialPoaCode);
+
+      // 3. Cargar la estructura SIN borrar los datos del formulario (como hace handlePoaChange)
+      const fetchStructure = async () => {
+        try {
+          setIsLoadingStructure(true);
+          const structure =
+            await catalogosService.getEstructuraByPoa(initialPoaCode);
+          setPoaStructure(structure);
+        } catch (error) {
+          toast.error('Error al restaurar la estructura del POA');
+        } finally {
+          setIsLoadingStructure(false);
+        }
+      };
+
+      fetchStructure();
+    }
+  }, [initialData, initialPoaCode, reset, getValues]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -183,7 +217,7 @@ export default function SolicitudEconomica({
         <FieldSet className="bg-muted/20 rounded-xl border p-4 shadow-sm">
           <div className="grid gap-6 md:grid-cols-2">
             <Field>
-              <FieldLabel>Actividad / POA Macro</FieldLabel>
+              <FieldLabel>Codigo / POA</FieldLabel>
               <Popover open={isPoaOpen} onOpenChange={setIsPoaOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -248,7 +282,7 @@ export default function SolicitudEconomica({
               name="proyecto"
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Proyecto Destino</FieldLabel>
+                  <FieldLabel>Proyecto</FieldLabel>
                   <Select
                     disabled={!selectedPoa || isLoadingStructure}
                     onValueChange={(val) => {
@@ -682,7 +716,7 @@ function FuenteCard({
                   <SelectContent position="popper" side="bottom" sideOffset={5}>
                     {availablePartidas.map((p) => (
                       <SelectItem key={p.id} value={p.id.toString()}>
-                        {p.codigo} - {p.nombre}
+                        {p.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -785,7 +819,9 @@ function FuenteCard({
               Límite POA
             </span>
             <span className="text-muted-foreground text-sm font-medium">
-              {isLocked ? formatMoney(Number(montoReservado) || 0) : '---'}
+              {isLocked
+                ? formatMoney(Number(saldoDisponibleLocal) || 0)
+                : '---'}
             </span>
           </div>
 

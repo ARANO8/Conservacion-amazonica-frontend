@@ -5,21 +5,28 @@ import { useEffect, useState } from 'react';
 import { columns } from './columns';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { DataTable } from './data-table';
-import api from '@/lib/api';
+import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function RequestsPage() {
   const [data, setData] = useState<SolicitudResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const fetchRequests = async () => {
+      if (!user?.id) return;
+
       try {
-        const response = await api.get<SolicitudResponse[]>('/solicitudes');
-        setData(response.data);
+        setLoading(true);
+        const response = await solicitudesService.getSolicitudes({
+          solicitanteId: user.id,
+        });
+        setData(response);
       } catch (error) {
         toast.error(
           'No se pudieron cargar las solicitudes. Intente nuevamente.'
@@ -30,15 +37,13 @@ export default function RequestsPage() {
     };
 
     fetchRequests();
-  }, []);
+  }, [user?.id]);
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Bandeja de Solicitudes
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Mis Solicitudes</h1>
           <p className="text-muted-foreground">
             Gestiona y visualiza el estado de tus solicitudes.
           </p>
