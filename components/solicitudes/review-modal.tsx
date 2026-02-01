@@ -282,11 +282,11 @@ export default function ReviewModal({
                                 >
                                   <div className="flex flex-col pr-4">
                                     <span className="font-semibold uppercase">
-                                      {item.detalle ||
-                                        tiposGasto.find(
-                                          (t) => t.id === item.tipoGastoId
-                                        )?.nombre ||
-                                        'Sin detalle'}
+                                      {item.tipoGastoId
+                                        ? tiposGasto.find(
+                                            (t) => t.id === item.tipoGastoId
+                                          )?.nombre
+                                        : 'Sin detalle'}
                                     </span>
                                     <span className="text-muted-foreground text-[9px] uppercase">
                                       {item.tipoDocumento || 'S/D'}

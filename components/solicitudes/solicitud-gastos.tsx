@@ -335,27 +335,6 @@ function GastoCard({
           />
         </div>
 
-        {/* DETALLE / DESCRIPCIÓN */}
-        <FormField
-          control={control}
-          name={`items.${index}.detalle`}
-          render={({ field }) => (
-            <FormItem>
-              <Label className="text-muted-foreground text-xs font-bold uppercase">
-                Descripción / Detalle
-              </Label>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Especifique el detalle del gasto (opcional)..."
-                  className="h-9"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* FILA INFERIOR (ECONÓMICA) */}
         <div className="grid gap-4 md:grid-cols-3">
           <FormField
