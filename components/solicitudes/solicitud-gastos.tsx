@@ -107,7 +107,7 @@ function GastoCard({
   tiposGasto,
   fuentesDisponibles,
 }: GastoCardProps) {
-  const { setValue } = useFormContext<FormData>();
+  const { setValue, trigger } = useFormContext<FormData>();
 
   const cantidad = useWatch({
     control,
@@ -171,8 +171,17 @@ function GastoCard({
   }, [netoTotal, watchDocumento, watchTipoGastoId, tiposGasto]);
 
   useEffect(() => {
-    setValue(`items.${index}.montoNeto`, Number(brutoTotal.toFixed(2)));
-    setValue(`items.${index}.liquidoPagable`, Number(netoTotal.toFixed(2)));
+    const resultBruto = Number(brutoTotal.toFixed(2));
+    const resultNeto = Number(netoTotal.toFixed(2));
+
+    setValue(`items.${index}.montoNeto`, resultBruto, {
+      shouldValidate: resultBruto > 0,
+      shouldDirty: true,
+    });
+    setValue(`items.${index}.liquidoPagable`, resultNeto, {
+      shouldValidate: resultNeto > 0,
+      shouldDirty: true,
+    });
   }, [brutoTotal, netoTotal, setValue, index]);
 
   // Los gastos ahora se vinculan directamente a una reserva de la canasta,
@@ -355,7 +364,11 @@ function GastoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      field.onChange(val);
+                      trigger(`items.${index}.cantidad`);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -380,7 +393,11 @@ function GastoCard({
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      field.onChange(val);
+                      trigger(`items.${index}.costoUnitario`);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

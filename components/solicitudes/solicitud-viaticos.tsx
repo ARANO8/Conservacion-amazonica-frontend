@@ -106,7 +106,7 @@ function ViaticoCard({
   conceptos,
   fuentesDisponibles,
 }: ViaticoCardProps) {
-  const { setValue } = useFormContext<FormData>();
+  const { setValue, trigger } = useFormContext<FormData>();
 
   const dias = useWatch({
     control,
@@ -398,6 +398,7 @@ function ViaticoCard({
                       } else {
                         field.onChange(val);
                       }
+                      trigger(`viaticos.${index}.dias`);
                     }}
                   />
                 </FormControl>
@@ -437,6 +438,7 @@ function ViaticoCard({
                       } else {
                         field.onChange(val);
                       }
+                      trigger(`viaticos.${index}.cantidadPersonas`);
                     }}
                   />
                 </FormControl>
