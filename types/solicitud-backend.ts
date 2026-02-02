@@ -46,15 +46,21 @@ export interface SolicitudResponse {
   estado: string;
   montoTotalNeto: string;
   montoTotalPresupuestado: string;
+  usuarioEmisorId?: number | string;
+  usuarioId?: number | string;
+  aprobadorId?: number;
   usuarioEmisor?: {
+    id: number | string;
     nombreCompleto: string;
     email?: string;
   };
   usuario?: {
+    id: number | string;
     nombreCompleto: string;
     email: string;
   };
   aprobador?: {
+    id: number | string;
     nombreCompleto: string;
     nombre?: string;
   };

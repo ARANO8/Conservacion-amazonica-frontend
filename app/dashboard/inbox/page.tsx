@@ -4,15 +4,13 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { columns } from './columns';
 import { SolicitudResponse } from '@/types/solicitud-backend';
-import { DataTable } from './data-table';
+import { DataTable } from '../requests/data-table';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth-store';
 
-export default function RequestsPage() {
+export default function InboxPage() {
   const [data, setData] = useState<SolicitudResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuthStore();
@@ -23,21 +21,20 @@ export default function RequestsPage() {
 
       try {
         setLoading(true);
-        // Traemos las solicitudes y filtramos las creadas por el usuario
+        // Traemos todas para filtrar localmente según pedido (Bandeja de Entrada)
         const response = await solicitudesService.getSolicitudes();
 
-        // Filtrado: Mis creaciones (Salientes)
-        const outgoing = response.filter(
+        // Filtrado: Solo las que este usuario debe aprobar
+        const incoming = response.filter(
           (s: SolicitudResponse) =>
-            String(s.usuarioEmisorId) === String(user.id) ||
-            String(s.usuarioId) === String(user.id) ||
-            String(s.usuario?.id) === String(user.id)
+            String(s.aprobadorId) === String(user.id) ||
+            String(s.aprobador?.id) === String(user.id)
         );
 
-        setData(outgoing);
+        setData(incoming);
       } catch {
         toast.error(
-          'No se pudieron cargar las solicitudes. Intente nuevamente.'
+          'No se pudieron cargar las notificaciones. Intente nuevamente.'
         );
       } finally {
         setLoading(false);
@@ -49,16 +46,11 @@ export default function RequestsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Mis Solicitudes</h1>
-          <p className="text-muted-foreground">
-            Gestiona y visualiza el estado de tus solicitudes.
-          </p>
-        </div>
-        <Button asChild className="bg-primary hover:bg-primary/90">
-          <Link href="/dashboard/solicitud">Nueva Solicitud</Link>
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Notificaciones</h1>
+        <p className="text-muted-foreground">
+          Solicitudes pendientes que requieren tu revisión y aprobación.
+        </p>
       </div>
 
       {loading ? (
