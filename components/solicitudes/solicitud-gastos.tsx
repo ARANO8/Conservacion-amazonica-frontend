@@ -75,7 +75,7 @@ export default function SolicitudGastos({
           append({
             solicitudPresupuestoId: 0,
             tipoDocumento: 'FACTURA',
-            tipoGastoId: 0,
+            tipoGastoId: 1,
             cantidad: 0,
             costoUnitario: 0,
             montoNeto: 0,

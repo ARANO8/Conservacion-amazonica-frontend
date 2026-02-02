@@ -28,6 +28,7 @@ import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Concepto } from '@/types/catalogs';
 import { PresupuestoReserva } from '@/types/backend';
+import { toast } from 'sonner';
 
 interface SolicitudViaticosProps {
   control: Control<FormData>;
@@ -70,7 +71,21 @@ export default function SolicitudViaticos({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() =>
+        onClick={() => {
+          // Validar que existan partidas de viáticos antes de agregar
+          const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
+            f.poa?.estructura?.partida?.nombre
+              ?.toUpperCase()
+              .includes('VIATICOS')
+          );
+
+          if (!tienePresupuestoViaticos) {
+            toast.error(
+              'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
+            );
+            return;
+          }
+
           append({
             conceptoId: 0,
             planificacionIndex: 0,
@@ -80,8 +95,8 @@ export default function SolicitudViaticos({
             montoNeto: 0,
             solicitudPresupuestoId: 0,
             liquidoPagable: 0,
-          })
-        }
+          });
+        }}
       >
         + Agregar Viático
       </Button>

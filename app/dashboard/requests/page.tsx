@@ -23,9 +23,11 @@ export default function RequestsPage() {
 
       try {
         setLoading(true);
-        const response = await solicitudesService.getSolicitudes({
-          solicitanteId: user.id,
-        });
+        // Solo filtramos por solicitante si el rol es USUARIO
+        const filtros =
+          user?.rol === 'USUARIO' ? { solicitanteId: user.id } : {}; // ADMIN/TESORERO ven todas las solicitudes
+
+        const response = await solicitudesService.getSolicitudes(filtros);
         setData(response);
       } catch (error) {
         toast.error(
@@ -37,7 +39,7 @@ export default function RequestsPage() {
     };
 
     fetchRequests();
-  }, [user?.id]);
+  }, [user?.id, user?.rol]);
 
   return (
     <div className="space-y-6 p-6">
