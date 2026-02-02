@@ -42,6 +42,13 @@ export default function InboxPage() {
     };
 
     fetchRequests();
+
+    // Escuchar cambios desde los modales para recargar la tabla
+    window.addEventListener('solicitud-updated', fetchRequests);
+
+    return () => {
+      window.removeEventListener('solicitud-updated', fetchRequests);
+    };
   }, [user?.id]);
 
   return (

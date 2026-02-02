@@ -83,6 +83,7 @@ export function InboxActions({ request }: InboxActionsProps) {
         nuevoAprobadorId: Number(nuevoAprobadorId),
       });
       toast.success('Solicitud derivada correctamente');
+      window.dispatchEvent(new Event('solicitud-updated'));
       setIsApproveOpen(false);
       router.refresh();
     } catch {
@@ -104,6 +105,7 @@ export function InboxActions({ request }: InboxActionsProps) {
         observacion,
       });
       toast.success('Solicitud observada correctamente');
+      window.dispatchEvent(new Event('solicitud-updated'));
       setIsObserveOpen(false);
       router.refresh();
     } catch {
