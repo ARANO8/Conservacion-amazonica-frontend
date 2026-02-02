@@ -2,8 +2,11 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { InboxActions } from './inbox-actions';
+import { Eye } from 'lucide-react';
+import Link from 'next/link';
 
 export const columns: ColumnDef<SolicitudResponse>[] = [
   {
@@ -11,9 +14,14 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     header: 'Código',
     cell: ({ row }) => {
       return (
-        <Badge variant="outline" className="font-medium">
-          {row.original.codigoSolicitud}
-        </Badge>
+        <Link href={`/dashboard/inbox/${row.original.id}`}>
+          <Badge
+            variant="outline"
+            className="hover:bg-muted cursor-pointer font-medium"
+          >
+            {row.original.codigoSolicitud}
+          </Badge>
+        </Link>
       );
     },
   },
@@ -98,6 +106,18 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
         </Badge>
       );
     },
+  },
+  {
+    id: 'revisar',
+    header: '',
+    cell: ({ row }) => (
+      <Button asChild variant="ghost" size="sm">
+        <Link href={`/dashboard/inbox/${row.original.id}`}>
+          <Eye className="mr-2 h-4 w-4" />
+          Revisar
+        </Link>
+      </Button>
+    ),
   },
   {
     id: 'actions',

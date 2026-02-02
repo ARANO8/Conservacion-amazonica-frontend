@@ -53,6 +53,7 @@ export interface SolicitudResponse {
     id: number | string;
     nombreCompleto: string;
     email?: string;
+    cargo?: string;
   };
   usuario?: {
     id: number | string;
@@ -65,16 +66,69 @@ export interface SolicitudResponse {
     nombre?: string;
   };
   viaticos?: Array<{
+    id: number;
+    dias: number;
+    cantidadPersonas: number;
     montoNeto: number | string;
+    montoPresupuestado: number | string;
+    tipoDestino: string;
+    concepto?: {
+      id: number;
+      nombre: string;
+    };
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
   }>;
   gastos?: Array<{
+    id: number;
+    cantidad: number;
     montoNeto: number | string;
+    montoPresupuestado: number | string;
+    detalle: string;
+    tipoDocumento: string;
+    tipoGasto?: {
+      id: number;
+      nombre: string;
+    };
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
   }>;
+  planificaciones?: Array<{
+    id: number;
+    actividadProgramada: string;
+    fechaInicio: string;
+    fechaFin: string;
+    cantidadPersonasInstitucional: number;
+    cantidadPersonasTerceros: number;
+    diasCalculados?: number;
+  }>;
+  presupuestos?: Array<{
+    id: number;
+    poa?: {
+      id: number;
+      codigo: string;
+      nombre?: string;
+      proyecto?: {
+        nombre: string;
+      };
+    };
+  }>;
+  fechaInicio?: string;
+  fechaFin?: string;
+  lugarViaje?: string;
   codigoPoa?: string; // Fallback if direct
+  nominasTerceros?: Array<{
+    id?: number;
+    nombreCompleto: string;
+    procedenciaInstitucion?: string;
+    ci?: string;
+  }>;
+  personasExternas?: Array<{
+    id?: number;
+    nombreCompleto: string;
+    procedenciaInstitucion?: string;
+    ci?: string;
+  }>;
 }

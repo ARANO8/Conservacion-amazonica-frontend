@@ -51,9 +51,13 @@ import { useAuthStore } from '@/store/auth-store';
 
 interface InboxActionsProps {
   request: SolicitudResponse;
+  mode?: 'dropdown' | 'buttons';
 }
 
-export function InboxActions({ request }: InboxActionsProps) {
+export function InboxActions({
+  request,
+  mode = 'dropdown',
+}: InboxActionsProps) {
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
   const { usuarios, isLoading: loadingUsers } = useCatalogos();
@@ -85,7 +89,13 @@ export function InboxActions({ request }: InboxActionsProps) {
       toast.success('Solicitud derivada correctamente');
       window.dispatchEvent(new Event('solicitud-updated'));
       setIsApproveOpen(false);
-      router.refresh();
+      // In buttons mode (detail page), navigate back to inbox
+      // In dropdown mode (table), just refresh
+      if (mode === 'buttons') {
+        router.push('/dashboard/inbox');
+      } else {
+        router.refresh();
+      }
     } catch {
       toast.error('Error al derivar la solicitud');
     } finally {
@@ -107,7 +117,13 @@ export function InboxActions({ request }: InboxActionsProps) {
       toast.success('Solicitud observada correctamente');
       window.dispatchEvent(new Event('solicitud-updated'));
       setIsObserveOpen(false);
-      router.refresh();
+      // In buttons mode (detail page), navigate back to inbox
+      // In dropdown mode (table), just refresh
+      if (mode === 'buttons') {
+        router.push('/dashboard/inbox');
+      } else {
+        router.refresh();
+      }
     } catch {
       toast.error('Error al observar la solicitud');
     } finally {
@@ -115,37 +131,65 @@ export function InboxActions({ request }: InboxActionsProps) {
     }
   };
 
+  // Dropdown mode: icon with menu
+  const renderDropdown = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Abrir menú</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/dashboard/inbox/${request.id}`}
+            className="flex items-center"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Revisar Solicitud
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setIsApproveOpen(true)}>
+          <CheckCircle className="mr-2 h-4 w-4 text-emerald-500" />
+          Aprobar / Derivar
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setIsObserveOpen(true)}>
+          <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
+          Observar / Devolver
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  // Buttons mode: large action buttons for detail page
+  const renderButtons = () => (
+    <div className="flex w-full flex-col gap-3 sm:flex-row">
+      <Button
+        size="lg"
+        className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+        onClick={() => setIsApproveOpen(true)}
+      >
+        <CheckCircle className="mr-2 h-5 w-5" />
+        Aprobar / Derivar
+      </Button>
+      <Button
+        size="lg"
+        variant="outline"
+        className="flex-1 border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950"
+        onClick={() => setIsObserveOpen(true)}
+      >
+        <AlertCircle className="mr-2 h-5 w-5" />
+        Observar / Devolver
+      </Button>
+    </div>
+  );
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link
-              href={`/dashboard/requests/${request.id}`}
-              className="flex items-center"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Ver Detalle
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setIsApproveOpen(true)}>
-            <CheckCircle className="mr-2 h-4 w-4 text-emerald-500" />
-            Aprobar / Derivar
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setIsObserveOpen(true)}>
-            <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
-            Observar / Devolver
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {mode === 'dropdown' ? renderDropdown() : renderButtons()}
 
       {/* Modal Aprobar / Derivar */}
       <Dialog open={isApproveOpen} onOpenChange={setIsApproveOpen}>
