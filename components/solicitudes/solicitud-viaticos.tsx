@@ -121,7 +121,7 @@ function ViaticoCard({
   conceptos,
   fuentesDisponibles,
 }: ViaticoCardProps) {
-  const { setValue, trigger } = useFormContext<FormData>();
+  const { setValue } = useFormContext<FormData>();
 
   const dias = useWatch({
     control,
@@ -163,19 +163,20 @@ function ViaticoCard({
     return actividadesPlanificadas[Number(watchPlanificacionIndex)];
   }, [actividadesPlanificadas, watchPlanificacionIndex]);
 
-  const maxDias = selectedPlanificacion?.cantDias ?? 0;
-  const maxPersonas =
-    watchTipoDestino === 'INSTITUCIONAL'
-      ? (selectedPlanificacion?.cantInstitucion ?? 0)
-      : (selectedPlanificacion?.cantTerceros ?? 0);
-
-  const isZeroLimit = selectedPlanificacion ? maxPersonas === 0 : false;
-
+  // Auto-fill logic: Días and Personas based on selected planificación
   useEffect(() => {
-    if (selectedPlanificacion && maxPersonas === 0) {
+    if (selectedPlanificacion) {
+      const totalPersonas =
+        (selectedPlanificacion.cantInstitucion || 0) +
+        (selectedPlanificacion.cantTerceros || 0);
+
+      setValue(`viaticos.${index}.dias`, selectedPlanificacion.cantDias || 0);
+      setValue(`viaticos.${index}.cantidadPersonas`, totalPersonas);
+    } else {
+      setValue(`viaticos.${index}.dias`, 0);
       setValue(`viaticos.${index}.cantidadPersonas`, 0);
     }
-  }, [maxPersonas, selectedPlanificacion, setValue, index]);
+  }, [selectedPlanificacion, setValue, index]);
 
   // Get the unit price from the selected concept
   const precioUnitario = useMemo(() => {
@@ -399,32 +400,11 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
-                    className="w-full"
+                    className="bg-muted text-muted-foreground w-full cursor-not-allowed"
                     value={field.value ?? 0}
-                    min={0}
-                    max={maxDias > 0 ? maxDias : undefined}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      if (maxDias > 0 && val > maxDias) {
-                        field.onChange(maxDias);
-                      } else {
-                        field.onChange(val);
-                      }
-                      // Only trigger validation if value is valid to clear existing error
-                      if (val >= 1) {
-                        trigger(`viaticos.${index}.dias`);
-                      }
-                    }}
+                    readOnly
                   />
                 </FormControl>
-                {selectedPlanificacion && (
-                  <p className="text-muted-foreground mt-1 text-[10px] italic">
-                    Máximo permitido: {maxDias}
-                  </p>
-                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -441,41 +421,11 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
-                    className="w-full"
+                    className="bg-muted text-muted-foreground w-full cursor-not-allowed"
                     value={field.value ?? 0}
-                    min={0}
-                    max={maxPersonas > 0 ? maxPersonas : undefined}
-                    disabled={isZeroLimit}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      if (maxPersonas > 0 && val > maxPersonas) {
-                        field.onChange(maxPersonas);
-                      } else {
-                        field.onChange(val);
-                      }
-                      // Only trigger validation if value is valid to clear existing error
-                      if (val >= 1) {
-                        trigger(`viaticos.${index}.cantidadPersonas`);
-                      }
-                    }}
+                    readOnly
                   />
                 </FormControl>
-                {selectedPlanificacion && (
-                  <div className="mt-1">
-                    {isZeroLimit ? (
-                      <p className="text-destructive text-[10px] font-medium italic">
-                        Sin cupo en Planificación para este tipo
-                      </p>
-                    ) : (
-                      <p className="text-muted-foreground text-[10px] italic">
-                        Máximo permitido: {maxPersonas}
-                      </p>
-                    )}
-                  </div>
-                )}
                 <FormMessage />
               </FormItem>
             )}
