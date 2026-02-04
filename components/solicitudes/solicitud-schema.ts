@@ -50,12 +50,13 @@ export const formSchema = z.object({
   viaticos: z
     .array(
       z.object({
-        conceptoId: z.number().optional(),
+        id: z.number().optional(),
         planificacionIndex: z.number().optional(),
         ciudad: z.string().optional(),
         destino: z.string().optional(),
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
         dias: z.number().optional(),
+        conceptoId: z.number().optional(),
         cantidadPersonas: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
         solicitudPresupuestoId: z.number(),

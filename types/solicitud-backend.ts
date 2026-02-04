@@ -76,6 +76,7 @@ export interface SolicitudResponse {
       id: number;
       nombre: string;
     };
+    solicitudPresupuestoId: number;
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
@@ -91,6 +92,7 @@ export interface SolicitudResponse {
       id: number;
       nombre: string;
     };
+    solicitudPresupuestoId: number;
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
@@ -113,7 +115,40 @@ export interface SolicitudResponse {
       proyecto?: {
         nombre: string;
       };
+      estructura?: {
+        partida?: {
+          id: number;
+          nombre: string;
+        };
+      };
+      actividad?: {
+        detalleDescripcion: string;
+      };
     };
+    viaticos?: Array<{
+      id: number;
+      dias: number;
+      cantidadPersonas: number;
+      montoNeto: number | string;
+      montoPresupuestado: number | string;
+      tipoDestino: string;
+      concepto?: {
+        id: number;
+        nombre: string;
+      };
+    }>;
+    gastos?: Array<{
+      id: number;
+      cantidad: number;
+      montoNeto: number | string;
+      montoPresupuestado: number | string;
+      detalle: string;
+      tipoDocumento: string;
+      tipoGasto?: {
+        id: number;
+        nombre: string;
+      };
+    }>;
   }>;
   fechaInicio?: string;
   fechaFin?: string;

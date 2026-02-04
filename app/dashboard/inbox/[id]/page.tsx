@@ -38,12 +38,18 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
+import { mapResponseToBreakdown } from '@/lib/mappers/breakdown-mapper';
 
 export default function InboxDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [solicitud, setSolicitud] = useState<SolicitudResponse | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const breakdownPartidas = React.useMemo(() => {
+    return solicitud ? mapResponseToBreakdown(solicitud) : [];
+  }, [solicitud]);
 
   const id = params.id as string;
 
@@ -381,95 +387,22 @@ export default function InboxDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Viáticos */}
-      {solicitud.viaticos && solicitud.viaticos.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Viáticos</CardTitle>
-            <CardDescription>Detalle de viáticos solicitados</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Concepto</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead className="text-center">Días</TableHead>
-                  <TableHead className="text-center">Personas</TableHead>
-                  <TableHead className="text-right">Monto Neto</TableHead>
-                  <TableHead className="text-right">Presupuestado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {solicitud.viaticos.map((viatico, idx) => (
-                  <TableRow key={viatico.id || idx}>
-                    <TableCell className="font-medium">
-                      {viatico.concepto?.nombre || '-'}
-                    </TableCell>
-                    <TableCell>{viatico.tipoDestino}</TableCell>
-                    <TableCell className="text-center">
-                      {viatico.dias}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {viatico.cantidadPersonas}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(viatico.montoNeto)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(viatico.montoPresupuestado)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Gastos */}
-      {solicitud.gastos && solicitud.gastos.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Gastos</CardTitle>
-            <CardDescription>Detalle de gastos solicitados</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipo de Gasto</TableHead>
-                  <TableHead>Detalle</TableHead>
-                  <TableHead>Documento</TableHead>
-                  <TableHead className="text-center">Cantidad</TableHead>
-                  <TableHead className="text-right">Monto Neto</TableHead>
-                  <TableHead className="text-right">Presupuestado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {solicitud.gastos.map((gasto, idx) => (
-                  <TableRow key={gasto.id || idx}>
-                    <TableCell className="font-medium">
-                      {gasto.tipoGasto?.nombre || '-'}
-                    </TableCell>
-                    <TableCell>{gasto.detalle}</TableCell>
-                    <TableCell>{gasto.tipoDocumento}</TableCell>
-                    <TableCell className="text-center">
-                      {gasto.cantidad}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(gasto.montoNeto)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(gasto.montoPresupuestado)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+      {/* Desglose Financiero por Partida */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5" />
+            Desglose Financiero por Partida
+          </CardTitle>
+          <CardDescription>
+            Resumen detallado de viáticos y gastos agrupados por su respectiva
+            partida presupuestaria.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PresupuestoBreakdown partidas={breakdownPartidas} />
+        </CardContent>
+      </Card>
 
       {/* Totals Summary */}
       <Card className="bg-muted/50">
