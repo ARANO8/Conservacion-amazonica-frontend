@@ -35,8 +35,7 @@ export function mapFormToBreakdown(
         ? viaticosAsociados.map((v) => ({
             id: v.id || 0,
             nombre:
-              conceptos.find((c) => c.id === v.conceptoId)?.nombre ||
-              'Viático 333',
+              conceptos.find((c) => c.id === v.conceptoId)?.nombre || 'Viático',
             detalle:
               data.actividades?.[v.planificacionIndex ?? -1]
                 ?.actividadProgramada,
@@ -99,21 +98,29 @@ export function mapResponseToBreakdown(
     );
 
     const items: BreakdownItem[] = esViatico
-      ? viaticosAsociados.map((v) => ({
-          id: v.id,
-          nombre: v.concepto?.nombre || 'Viático 2',
-          detalle: v.tipoDestino,
-          tipoDestino: v.tipoDestino,
-          montoNeto: Number(v.montoPresupuestado) || 0,
-          montoLiquido: Number(v.montoNeto) || 0,
-        }))
-      : gastosAsociados.map((g) => ({
-          id: g.id,
-          nombre: g.tipoGasto?.nombre || 'Gasto',
-          detalle: g.detalle || g.tipoDocumento || 'Sin detalle',
-          montoNeto: Number(g.montoPresupuestado) || 0,
-          montoLiquido: Number(g.montoNeto) || 0,
-        }));
+      ? viaticosAsociados.map((v) => {
+          // Buscar la planificación asociada para obtener la actividad programada
+          const planificacion = solicitud.planificaciones?.find(
+            (p) => p.id === v.planificacionId
+          );
+          return {
+            id: v.id,
+            nombre: v.concepto?.nombre || 'Viático',
+            detalle: planificacion?.actividadProgramada,
+            tipoDestino: v.tipoDestino,
+            montoNeto: Number(v.montoPresupuestado) || 0,
+            montoLiquido: Number(v.montoNeto) || 0,
+          };
+        })
+      : gastosAsociados.map((g) => {
+          return {
+            id: g.id,
+            nombre: g.tipoGasto?.nombre || 'Gasto',
+            detalle: g.tipoDocumento || 'Sin detalle',
+            montoNeto: Number(g.montoPresupuestado) || 0,
+            montoLiquido: Number(g.montoNeto) || 0,
+          };
+        });
 
     const totalPresupuestado = items.reduce(
       (acc, item) => acc + item.montoNeto,

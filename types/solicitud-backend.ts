@@ -72,6 +72,7 @@ export interface SolicitudResponse {
     montoNeto: number | string;
     montoPresupuestado: number | string;
     tipoDestino: string;
+    planificacionId?: number;
     concepto?: {
       id: number;
       nombre: string;
@@ -88,6 +89,7 @@ export interface SolicitudResponse {
     montoPresupuestado: number | string;
     detalle: string;
     tipoDocumento: string;
+    planificacionId?: number;
     tipoGasto?: {
       id: number;
       nombre: string;
