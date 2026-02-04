@@ -34,7 +34,9 @@ export function mapFormToBreakdown(
       const items: BreakdownItem[] = esViatico
         ? viaticosAsociados.map((v) => ({
             id: v.id || 0,
-            nombre: v.concepto?.nombre || 'Viático 333',
+            nombre:
+              conceptos.find((c) => c.id === v.conceptoId)?.nombre ||
+              'Viático 333',
             detalle:
               data.actividades?.[v.planificacionIndex ?? -1]
                 ?.actividadProgramada,
