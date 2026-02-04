@@ -346,51 +346,36 @@ export default function InboxDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Nómina de Terceros - Siempre visible */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      {/* Sección de Participantes Externos */}
+      <Card className="mt-6 rounded-lg border p-4">
+        <CardHeader className="mb-4 p-0">
+          <CardTitle className="flex items-center gap-2 font-semibold">
             <Users className="h-5 w-5" />
-            Nómina de Terceros
+            Nómina de Personas Externas
           </CardTitle>
-          <CardDescription>
-            Participantes externos a la institución
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {(solicitud.nominasTerceros &&
-            solicitud.nominasTerceros.length > 0) ||
-          (solicitud.personasExternas &&
-            solicitud.personasExternas.length > 0) ? (
+        <CardContent className="p-0">
+          {solicitud.personasExternas &&
+          solicitud.personasExternas.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre Completo</TableHead>
-                  <TableHead>CI / Documento</TableHead>
                   <TableHead>Procedencia / Institución</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(
-                  solicitud.nominasTerceros ||
-                  solicitud.personasExternas ||
-                  []
-                ).map((persona, idx) => (
-                  <TableRow key={persona.id || idx}>
-                    <TableCell className="font-medium">
-                      {persona.nombreCompleto}
-                    </TableCell>
-                    <TableCell>{persona.ci || '-'}</TableCell>
-                    <TableCell>
-                      {persona.procedenciaInstitucion || '-'}
-                    </TableCell>
+                {solicitud.personasExternas.map((persona) => (
+                  <TableRow key={persona.id}>
+                    <TableCell>{persona.nombreCompleto}</TableCell>
+                    <TableCell>{persona.procedenciaInstitucion}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground py-4 text-center">
-              No se han agregado personas externas a esta solicitud.
+            <p className="text-muted-foreground py-2 text-sm italic">
+              No hay participantes externos registrados en esta solicitud.
             </p>
           )}
         </CardContent>

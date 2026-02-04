@@ -119,16 +119,9 @@ export interface SolicitudResponse {
   fechaFin?: string;
   lugarViaje?: string;
   codigoPoa?: string; // Fallback if direct
-  nominasTerceros?: Array<{
-    id?: number;
-    nombreCompleto: string;
-    procedenciaInstitucion?: string;
-    ci?: string;
-  }>;
   personasExternas?: Array<{
-    id?: number;
+    id: number;
     nombreCompleto: string;
-    procedenciaInstitucion?: string;
-    ci?: string;
+    procedenciaInstitucion: string;
   }>;
 }
