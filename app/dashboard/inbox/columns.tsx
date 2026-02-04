@@ -111,7 +111,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     header: 'Acciones',
     cell: ({ row }) => (
       <Button asChild variant="ghost" size="sm">
-        <Link href={`/dashboard/inbox/${row.original.id}`}>
+        <Link href={`/dashboard/solicitud/${row.original.id}?source=inbox`}>
           <Eye className="mr-2 h-4 w-4" />
           Revisar
         </Link>

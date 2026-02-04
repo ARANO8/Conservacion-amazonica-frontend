@@ -143,7 +143,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     header: 'Revisar',
     cell: ({ row }) => (
       <Button asChild variant="ghost" size="sm">
-        <Link href={`#`}>
+        <Link href={`/dashboard/solicitud/${row.original.id}?source=requests`}>
           <Eye className="mr-2 h-4 w-4" />
           Revisar
         </Link>
