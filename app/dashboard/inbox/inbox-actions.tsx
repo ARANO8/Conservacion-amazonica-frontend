@@ -37,6 +37,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   MoreHorizontal,
   Eye,
+  Download,
   CheckCircle,
   AlertCircle,
   Check,
@@ -148,17 +149,9 @@ export function InboxActions({
             href={`/dashboard/inbox/${request.id}`}
             className="flex items-center"
           >
-            <Eye className="mr-2 h-4 w-4" />
-            Revisar Solicitud
+            <Download className="mr-2 h-4 w-4" />
+            Descargar Solicitud
           </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setIsApproveOpen(true)}>
-          <CheckCircle className="mr-2 h-4 w-4 text-emerald-500" />
-          Aprobar / Derivar
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setIsObserveOpen(true)}>
-          <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
-          Observar / Devolver
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

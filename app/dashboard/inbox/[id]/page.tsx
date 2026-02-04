@@ -266,7 +266,7 @@ export default function InboxDetailPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
-            Planificación de Actividades
+            Planificación
           </CardTitle>
           <CardDescription>
             Cronograma de actividades programadas
@@ -355,7 +355,7 @@ export default function InboxDetailPage() {
         <CardHeader className="mb-4 p-0">
           <CardTitle className="flex items-center gap-2 font-semibold">
             <Users className="h-5 w-5" />
-            Nómina de Personas Externas
+            Nómina Externos
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -390,16 +390,14 @@ export default function InboxDetailPage() {
         <CardContent className="pt-6">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <p className="text-muted-foreground text-sm">
-                Monto Neto a Recibir
-              </p>
+              <p className="text-muted-foreground text-sm">Total liquido</p>
               <p className="text-2xl font-bold text-emerald-600">
                 {formatCurrency(solicitud.montoTotalNeto)}
               </p>
             </div>
             <div className="text-right">
               <p className="text-muted-foreground text-sm">
-                Impacto Presupuestario Total
+                Total Presupuestado (Incl. Impuestos)
               </p>
               <p className="text-2xl font-bold">
                 {formatCurrency(solicitud.montoTotalPresupuestado)}

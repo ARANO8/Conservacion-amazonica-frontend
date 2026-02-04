@@ -2,16 +2,8 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Eye } from 'lucide-react';
+import { Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 
@@ -147,33 +139,27 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     },
   },
   {
+    id: 'revisar',
+    header: 'Revisar',
+    cell: ({ row }) => (
+      <Button asChild variant="ghost" size="sm">
+        <Link href={`#`}>
+          <Eye className="mr-2 h-4 w-4" />
+          Revisar
+        </Link>
+      </Button>
+    ),
+  },
+  {
     id: 'actions',
-    cell: ({ row }) => {
-      const request = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/dashboard/requests/${request.id}`}
-                className="flex items-center"
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Ver Detalle
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    header: 'Descargar',
+    cell: ({ row }) => (
+      <Button asChild variant="ghost" size="sm">
+        <Link href={`#`}>
+          <Download className="mr-2 h-4 w-4" />
+          Descargar
+        </Link>
+      </Button>
+    ),
   },
 ];

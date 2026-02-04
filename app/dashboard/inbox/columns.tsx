@@ -4,8 +4,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SolicitudResponse } from '@/types/solicitud-backend';
-import { InboxActions } from './inbox-actions';
-import { Eye } from 'lucide-react';
+import { Eye, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export const columns: ColumnDef<SolicitudResponse>[] = [
@@ -109,7 +108,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
   },
   {
     id: 'revisar',
-    header: '',
+    header: 'Acciones',
     cell: ({ row }) => (
       <Button asChild variant="ghost" size="sm">
         <Link href={`/dashboard/inbox/${row.original.id}`}>
@@ -121,6 +120,14 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => <InboxActions request={row.original} />,
+    header: 'Descargar',
+    cell: ({ row }) => (
+      <Button asChild variant="ghost" size="sm">
+        <Link href={`#`}>
+          <Download className="mr-2 h-4 w-4" />
+          Descargar
+        </Link>
+      </Button>
+    ),
   },
 ];
