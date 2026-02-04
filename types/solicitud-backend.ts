@@ -112,12 +112,17 @@ export interface SolicitudResponse {
     id: number;
     poa?: {
       id: number;
-      codigo: string;
+      codigoPoa: string;
       nombre?: string;
-      proyecto?: {
-        nombre: string;
-      };
       estructura?: {
+        proyecto?: {
+          id: number;
+          nombre: string;
+        };
+        grupo?: {
+          id: number;
+          nombre: string;
+        };
         partida?: {
           id: number;
           nombre: string;

@@ -261,43 +261,6 @@ export default function InboxDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Fuentes de Financiamiento */}
-      {solicitud.presupuestos && solicitud.presupuestos.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="h-5 w-5" />
-              Fuentes de Financiamiento
-            </CardTitle>
-            <CardDescription>
-              POAs y proyectos que financian esta solicitud
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3">
-              {solicitud.presupuestos.map((pres) => (
-                <div
-                  key={pres.id}
-                  className="bg-muted/50 flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {pres.poa?.codigo || `Presupuesto #${pres.id}`}
-                    </p>
-                    {pres.poa?.proyecto?.nombre && (
-                      <p className="text-muted-foreground text-sm">
-                        {pres.poa.proyecto.nombre}
-                      </p>
-                    )}
-                  </div>
-                  <Badge variant="outline">POA</Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Planificaciones - Siempre visible */}
       <Card>
         <CardHeader>
@@ -352,6 +315,41 @@ export default function InboxDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Desglose Financiero por Partida */}
+      {solicitud.presupuestos && solicitud.presupuestos.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5" />
+              Desglose Financiero por Partida
+            </CardTitle>
+            <CardDescription>
+              Resumen detallado de viáticos y gastos agrupados por su respectiva
+              partida presupuestaria.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <p className="font-medium">
+                  {'Código POA: ' + solicitud.presupuestos[0]?.poa?.codigoPoa ||
+                    'Sin código POA'}
+                </p>
+                <p className="font-medium">
+                  {'Proyecto: ' +
+                    solicitud.presupuestos[0]?.poa?.estructura?.proyecto
+                      ?.nombre}
+                </p>
+              </div>
+              <Badge variant="outline">POA</Badge>
+            </div>
+          </CardContent>
+          <CardContent>
+            <PresupuestoBreakdown partidas={breakdownPartidas} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Sección de Participantes Externos */}
       <Card className="mt-6 rounded-lg border p-4">
         <CardHeader className="mb-4 p-0">
@@ -384,23 +382,6 @@ export default function InboxDetailPage() {
               No hay participantes externos registrados en esta solicitud.
             </p>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Desglose Financiero por Partida */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5" />
-            Desglose Financiero por Partida
-          </CardTitle>
-          <CardDescription>
-            Resumen detallado de viáticos y gastos agrupados por su respectiva
-            partida presupuestaria.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PresupuestoBreakdown partidas={breakdownPartidas} />
         </CardContent>
       </Card>
 
