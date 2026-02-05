@@ -43,6 +43,8 @@ import {
   Wallet,
   ChevronDown,
   Check,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Concepto, TipoGasto, PoaLookup } from '@/types/catalogs';
@@ -118,6 +120,71 @@ export default function SolicitudEconomica({
     type: 'POA' | 'PROYECTO';
     value: string;
   } | null>(null);
+
+  // ========== TEMPORIZADOR DE EXPIRACIÓN DE RESERVAS ==========
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+  const [isExpired, setIsExpired] = useState(false);
+
+  // Encontrar la expiración más próxima entre todas las reservas
+  const nearestExpiration = useMemo(() => {
+    if (!misReservas.length) return null;
+    const dates = misReservas
+      .map((r) => (r.expiresAt ? new Date(r.expiresAt).getTime() : null))
+      .filter((d): d is number => d !== null);
+    return dates.length ? Math.min(...dates) : null;
+  }, [misReservas]);
+
+  // Intervalo que actualiza el tiempo restante cada segundo
+  useEffect(() => {
+    if (!nearestExpiration) {
+      setTimeRemaining(null);
+      setIsExpired(false);
+      return;
+    }
+
+    const updateTimer = () => {
+      const diff = nearestExpiration - Date.now();
+      if (diff <= 0) {
+        setTimeRemaining('00:00');
+        setIsExpired(true);
+      } else {
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        setTimeRemaining(
+          `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+        );
+      }
+    };
+
+    updateTimer(); // Ejecutar inmediatamente
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [nearestExpiration]);
+
+  // Calcular nivel de urgencia para colores
+  const urgencyLevel = useMemo(() => {
+    if (!nearestExpiration) return null;
+    const diff = nearestExpiration - Date.now();
+    if (diff <= 0) return 'expired';
+    if (diff < 2 * 60 * 1000) return 'danger'; // < 2 min
+    if (diff < 5 * 60 * 1000) return 'warning'; // < 5 min
+    return 'normal';
+  }, [nearestExpiration, timeRemaining]); // timeRemaining para re-render
+
+  /**
+   * Limpieza total cuando expira la reserva (sin liberar en backend, ya expiró)
+   */
+  const handleExpirationCleanup = useCallback(() => {
+    setMisReservas([]);
+    setValue('presupuestosIds', []);
+    setValue('fuentesSeleccionadas', []);
+    setValue('viaticos', []);
+    setValue('items', []);
+    setIsExpired(false);
+    toast.warning(
+      'Las reservas han expirado. Debe volver a seleccionar las partidas.'
+    );
+  }, [setMisReservas, setValue]);
 
   // REHYDRATION LOGIC
   useEffect(() => {
@@ -387,7 +454,31 @@ export default function SolicitudEconomica({
       {/* CARDS DE FUENTES */}
       <FieldSet>
         <div className="mb-4 flex items-center justify-between">
-          <FieldLegend>Partida Presupuestaria</FieldLegend>
+          <div className="flex items-center gap-3">
+            <FieldLegend>Partida Presupuestaria</FieldLegend>
+            {/* Badge de Tiempo Restante */}
+            {timeRemaining && misReservas.length > 0 && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  'text-m flex items-center gap-1.5 font-bold transition-colors',
+                  urgencyLevel === 'normal' &&
+                    'border-emerald-300 bg-emerald-50 text-emerald-700',
+                  urgencyLevel === 'warning' &&
+                    'border-amber-300 bg-amber-50 text-amber-700',
+                  urgencyLevel === 'danger' &&
+                    'border-destructive bg-destructive/10 text-destructive animate-pulse'
+                )}
+              >
+                {urgencyLevel === 'danger' ? (
+                  <AlertTriangle className="h-3 w-3" />
+                ) : (
+                  <Clock className="h-3 w-3" />
+                )}
+                {timeRemaining}
+              </Badge>
+            )}
+          </div>
           <Button
             type="button"
             variant="outline"
@@ -521,6 +612,32 @@ export default function SolicitudEconomica({
               ) : (
                 'Sí, Limpiar y Cambiar'
               )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* AlertDialog de Expiración - No se puede cerrar haciendo clic afuera */}
+      <AlertDialog open={isExpired}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Sesión de Reserva Expirada
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              El tiempo de reserva de los fondos ha terminado. Por seguridad, se
+              han liberado las partidas seleccionadas.
+              <br />
+              <br />
+              <strong>
+                Debe volver a seleccionar las partidas presupuestarias.
+              </strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleExpirationCleanup}>
+              Entendido
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
