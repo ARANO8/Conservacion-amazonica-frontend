@@ -55,7 +55,7 @@ export const formSchema = z.object({
         ciudad: z.string().optional(),
         destino: z.string().optional(),
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
-        dias: z.number().optional(),
+        dias: z.number().min(0.1).optional(),
         conceptoId: z.number().optional(),
         cantidadPersonas: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),

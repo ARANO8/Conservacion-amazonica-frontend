@@ -10,6 +10,7 @@ export interface CreateSolicitudPayload {
     fechaFin: string; // ISO String
     cantInstitucional: number;
     cantTerceros: number;
+    dias?: number; // Valor decimal editado manualmente por el usuario
   }[];
   viaticos: {
     planificacionIndex: number;
