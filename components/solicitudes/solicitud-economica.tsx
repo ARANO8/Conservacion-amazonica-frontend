@@ -24,6 +24,14 @@ import SolicitudGastos from '@/components/solicitudes/solicitud-gastos';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { PresupuestoReserva, PoaStructureItem } from '@/types/backend';
 import { presupuestosService } from '@/services/presupuestos.service';
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -46,10 +54,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Command,
   CommandEmpty,
@@ -59,7 +72,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { formatMoney, cn } from '@/lib/utils';
-import { PoaCard } from '@/components/solicitudes/poa-card';
+import { PoaCard } from './poa-card';
 import { EntityBase } from '@/types/backend';
 
 // Helper para deduplicar arrays de objetos por ID
@@ -79,7 +92,6 @@ interface SolicitudEconomicaProps {
   initialData?: Partial<FormData>;
   initialPoaCode?: string;
 }
-
 export default function SolicitudEconomica({
   control,
   watchActividades,
@@ -96,9 +108,16 @@ export default function SolicitudEconomica({
   // Estado "Tree-Walker": Estructura completa del POA seleccionado
   const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]); // Array de items del POA (Poa objects)
   const [isLoadingStructure, setIsLoadingStructure] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false); // Nuevo estado para indicar limpieza en proceso
 
   const [selectedPoa, setSelectedPoa] = useState(initialPoaCode || '');
   const [isPoaOpen, setIsPoaOpen] = useState(false);
+
+  // Estado para controlar la confirmación de cambio destructivo
+  const [pendingChange, setPendingChange] = useState<{
+    type: 'POA' | 'PROYECTO';
+    value: string;
+  } | null>(null);
 
   // REHYDRATION LOGIC
   useEffect(() => {
@@ -165,48 +184,85 @@ export default function SolicitudEconomica({
     return uniqueItems(projects);
   }, [poaStructure]);
 
-  const handlePoaChange = useCallback(
-    async (codigo: string) => {
-      setSelectedPoa(codigo);
-      setValue('proyecto', '');
-      setValue('fuentesSeleccionadas', []);
-      setPoaStructure([]); // Limpiar estructura anterior
-
-      if (!codigo) return;
+  /**
+   * Ejecuta el cambio de contexto limpiando previamente todos los datos
+   * y liberando reservas en el backend.
+   */
+  const executeResetAndChange = useCallback(
+    async (type: 'POA' | 'PROYECTO', newValue: string) => {
+      setIsCleaning(true); // Bloquear UI
 
       try {
-        setIsLoadingStructure(true);
-        // TAREA 1: Cargar estructura completa usando el nuevo endpoint
-
-        const structure = await catalogosService.getEstructuraByPoa(codigo);
-
-        setPoaStructure(structure);
+        // 1. Liberar todas las reservas activas en paralelo
+        if (misReservas.length > 0) {
+          await Promise.all(
+            misReservas.map((r) => presupuestosService.liberar(r.id))
+          );
+        }
       } catch (error) {
-        toast.error('Error al cargar la estructura del POA');
-      } finally {
-        setIsLoadingStructure(false);
+        console.error('Error during cleanup:', error);
+        toast.warning(
+          'Algunas reservas podrían no haberse liberado correctamente en el servidor.'
+        );
       }
+
+      // 2. Limpiar Estado Local y de Formulario (Frontend)
+      setMisReservas([]);
+      setValue('presupuestosIds', []);
+      setValue('fuentesSeleccionadas', []);
+      setValue('viaticos', []); // Limpiar items hija
+      setValue('items', []); // Limpiar items hija (gastos)
+
+      // 3. Aplicar el Cambio de Contexto
+      if (type === 'POA') {
+        setSelectedPoa(newValue);
+        setValue('proyecto', ''); // Reset proyecto también al cambiar POA
+        setPoaStructure([]);
+
+        if (newValue) {
+          try {
+            setIsLoadingStructure(true);
+            const structure =
+              await catalogosService.getEstructuraByPoa(newValue);
+            setPoaStructure(structure);
+          } catch (error) {
+            toast.error('Error al cargar la estructura del POA');
+          } finally {
+            setIsLoadingStructure(false);
+          }
+        }
+      } else if (type === 'PROYECTO') {
+        setValue('proyecto', newValue ? Number(newValue) : '');
+      }
+
+      setPendingChange(null);
+      setIsCleaning(false);
+      toast.info('Formulario limpiado para el nuevo contexto.');
     },
-    [setValue]
+    [misReservas, setValue, setMisReservas]
   );
 
-  const handleClearPoa = useCallback(async () => {
-    setSelectedPoa('');
-    setValue('proyecto', '');
-    setValue('fuentesSeleccionadas', []);
-    setPoaStructure([]);
+  /**
+   * Intercepta la solicitud de cambio. Si hay datos sensibles, pide confirmación.
+   */
+  const requestChange = (type: 'POA' | 'PROYECTO', newValue: string) => {
+    const hasActiveData = misReservas.length > 0;
 
-    // Liberar todas las reservas
-    for (const r of misReservas) {
-      try {
-        await presupuestosService.liberar(r.id);
-      } catch {
-        // Silently ignore
-      }
+    // Si es el mismo valor, no hacer nada
+    if (type === 'POA' && newValue === selectedPoa) return;
+    if (type === 'PROYECTO' && Number(newValue) === Number(watchedProyecto))
+      return;
+
+    if (hasActiveData) {
+      setPendingChange({ type, value: newValue });
+    } else {
+      executeResetAndChange(type, newValue);
     }
-    setMisReservas([]);
-    setValue('presupuestosIds', []);
-  }, [misReservas, setMisReservas, setValue]);
+  };
+
+  const handleClearPoa = useCallback(() => {
+    requestChange('POA', '');
+  }, [requestChange]);
 
   return (
     <FieldGroup className="space-y-6">
@@ -217,7 +273,7 @@ export default function SolicitudEconomica({
         <FieldSet className="bg-muted/20 rounded-xl border p-4 shadow-sm">
           <div className="grid gap-6 md:grid-cols-2">
             <Field>
-              <FieldLabel>Codigo / POA</FieldLabel>
+              <FieldLabel>Código POA</FieldLabel>
               <Popover open={isPoaOpen} onOpenChange={setIsPoaOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -225,6 +281,7 @@ export default function SolicitudEconomica({
                     role="combobox"
                     aria-expanded={isPoaOpen}
                     className="w-full justify-between font-normal"
+                    disabled={isCleaning}
                   >
                     {selectedPoa || 'Seleccionar POA...'}
                     <div className="flex items-center gap-1">
@@ -237,7 +294,11 @@ export default function SolicitudEconomica({
                           }}
                         />
                       )}
-                      <ChevronDown className="h-4 w-4 opacity-50" />
+                      {isCleaning ? (
+                        <Loader2 className="h-4 w-4 animate-spin opacity-50" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      )}
                     </div>
                   </Button>
                 </PopoverTrigger>
@@ -255,7 +316,7 @@ export default function SolicitudEconomica({
                             key={item.codigo}
                             value={item.codigo}
                             onSelect={(val) => {
-                              handlePoaChange(val);
+                              requestChange('POA', val);
                               setIsPoaOpen(false);
                             }}
                           >
@@ -284,19 +345,20 @@ export default function SolicitudEconomica({
                 <Field>
                   <FieldLabel>Proyecto</FieldLabel>
                   <Select
-                    disabled={!selectedPoa || isLoadingStructure}
+                    disabled={!selectedPoa || isLoadingStructure || isCleaning}
                     onValueChange={(val) => {
-                      field.onChange(Number(val));
-                      setValue('fuentesSeleccionadas', []); // Reset cards on project change
+                      requestChange('PROYECTO', val);
                     }}
                     value={field.value?.toString()}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        {isLoadingStructure ? (
+                        {isLoadingStructure || isCleaning ? (
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Cargando Estructura...</span>
+                            <span>
+                              {isCleaning ? 'Limpiando...' : 'Cargando...'}
+                            </span>
                           </div>
                         ) : (
                           <SelectValue placeholder="Seleccionar Proyecto..." />
@@ -340,7 +402,7 @@ export default function SolicitudEconomica({
                 isLocked: false,
               })
             }
-            disabled={!watchedProyecto}
+            disabled={!watchedProyecto || isCleaning}
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -388,6 +450,7 @@ export default function SolicitudEconomica({
                 <Textarea
                   {...field}
                   placeholder="Describa el motivo o justificación..."
+                  disabled={isCleaning}
                 />
               </FormControl>
               <FormMessage />
@@ -409,6 +472,59 @@ export default function SolicitudEconomica({
         proyectoId={Number(watchedProyecto)}
         fuentesDisponibles={filteredFuentes} // USAMOS LA LISTA FILTRADA REACTIVA
       />
+
+      <AlertDialog
+        open={!!pendingChange}
+        onOpenChange={(open) => !open && setPendingChange(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Está seguro de cambiar el contexto?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Al cambiar el{' '}
+              {pendingChange?.type === 'POA' ? 'Código POA' : 'Proyecto'}, se
+              <span className="text-destructive font-bold">
+                {' '}
+                eliminarán permanentemente
+              </span>{' '}
+              todas las partidas presupuestarias reservadas y los
+              gastos/viáticos ingresados hasta el momento.
+              <br />
+              <br />
+              Esta acción liberará los fondos reservados y limpiará el
+              formulario.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCleaning}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={isCleaning}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent auto-close to handle async
+                if (pendingChange) {
+                  executeResetAndChange(
+                    pendingChange.type,
+                    pendingChange.value
+                  );
+                }
+              }}
+            >
+              {isCleaning ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading
+                </>
+              ) : (
+                'Sí, Limpiar y Cambiar'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </FieldGroup>
   );
 }
