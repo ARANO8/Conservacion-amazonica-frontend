@@ -163,20 +163,28 @@ function ViaticoCard({
     return actividadesPlanificadas[Number(watchPlanificacionIndex)];
   }, [actividadesPlanificadas, watchPlanificacionIndex]);
 
-  // Auto-fill logic: Días and Personas based on selected planificación
+  // Auto-fill logic: Días and Personas based on selected planificación and destination type
   useEffect(() => {
     if (selectedPlanificacion) {
-      const totalPersonas =
-        (selectedPlanificacion.cantInstitucion || 0) +
-        (selectedPlanificacion.cantTerceros || 0);
+      // Logic requirement:
+      // INSTITUCIONAL -> use cantInstitucion
+      // TERCEROS -> use cantTerceros
+      const personasCount =
+        watchTipoDestino === 'TERCEROS'
+          ? selectedPlanificacion.cantTerceros || 0
+          : selectedPlanificacion.cantInstitucion || 0;
 
-      setValue(`viaticos.${index}.dias`, selectedPlanificacion.cantDias || 0);
-      setValue(`viaticos.${index}.cantidadPersonas`, totalPersonas);
+      setValue(`viaticos.${index}.dias`, selectedPlanificacion.cantDias || 0, {
+        shouldDirty: true,
+      });
+      setValue(`viaticos.${index}.cantidadPersonas`, personasCount, {
+        shouldDirty: true,
+      });
     } else {
-      setValue(`viaticos.${index}.dias`, 0);
-      setValue(`viaticos.${index}.cantidadPersonas`, 0);
+      setValue(`viaticos.${index}.dias`, 0, { shouldDirty: true });
+      setValue(`viaticos.${index}.cantidadPersonas`, 0, { shouldDirty: true });
     }
-  }, [selectedPlanificacion, setValue, index]);
+  }, [selectedPlanificacion, watchTipoDestino, setValue, index]);
 
   // Get the unit price from the selected concept
   const precioUnitario = useMemo(() => {
