@@ -34,6 +34,7 @@ export const formSchema = z.object({
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
         poaId: z.number().nullable().optional(),
         montoReservado: z.number().optional(),
+        montoPresupuestado: z.number().optional(),
         saldoDisponible: z.number().optional(),
         isLocked: z.boolean().optional(),
       })
