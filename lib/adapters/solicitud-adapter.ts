@@ -76,15 +76,11 @@ export const adaptResponseToFormData = (
   // 1. Mapeo de Planificaciones
   const actividades = (response.planificaciones || []).map((p) => ({
     actividadProgramada: p.actividadProgramada,
-    fechaInicio: p.fechaInicio
-      ? new Date(p.fechaInicio).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
-    fechaFin: p.fechaFin
-      ? new Date(p.fechaFin).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
-    cantInstitucion: p.cantidadPersonasInstitucional || 0,
-    cantTerceros: p.cantidadPersonasTerceros || 0,
-    cantDias: p.diasCalculados || 0,
+    fechaInicio: p.fechaInicio ? new Date(p.fechaInicio) : new Date(),
+    fechaFin: p.fechaFin ? new Date(p.fechaFin) : new Date(),
+    cantInstitucion: Number(p.cantidadPersonasInstitucional) || 0,
+    cantTerceros: Number(p.cantidadPersonasTerceros) || 0,
+    cantDias: Number(p.diasCalculados) || 0,
   }));
 
   // 2. Mapeo de Presupuestos (Fuentes Seleccionadas)
@@ -128,19 +124,19 @@ export const adaptResponseToFormData = (
     conceptoId: v.concepto?.id,
     tipoDestino:
       (v.tipoDestino as 'INSTITUCIONAL' | 'TERCEROS') || 'INSTITUCIONAL',
-    dias: v.dias || 0,
-    cantidadPersonas: v.cantidadPersonas || 0,
+    dias: Number(v.dias) || 0,
+    cantidadPersonas: Number(v.cantidadPersonas) || 0,
     liquidoPagable: Number(v.montoNeto || 0),
     montoNeto: Number(v.montoPresupuestado || 0),
-    solicitudPresupuestoId: v.solicitudPresupuestoId || 0,
+    solicitudPresupuestoId: Number(v.solicitudPresupuestoId) || 0,
   }));
 
   // 4. Mapeo de Gastos (Items)
   const items = (response.gastos || []).map((g) => ({
-    solicitudPresupuestoId: g.solicitudPresupuestoId || 0,
+    solicitudPresupuestoId: Number(g.solicitudPresupuestoId) || 0,
     tipoGastoId: g.tipoGasto?.id,
     tipoDocumento: (g.tipoDocumento as 'FACTURA' | 'RECIBO') || 'FACTURA',
-    cantidad: g.cantidad || 1,
+    cantidad: Number(g.cantidad) || 1,
     liquidoPagable: Number(g.montoNeto || 0),
     montoNeto: Number(g.montoPresupuestado || 0),
     detalle: g.detalle || '',
@@ -161,6 +157,12 @@ export const adaptResponseToFormData = (
     nomina: (response.personasExternas || []).map((p) => ({
       nombreCompleto: p.nombreCompleto,
       procedenciaInstitucion: p.procedenciaInstitucion,
+      montoNeto: 0, // Placeholder if needed by schema
+      liquidoPagable: 0,
     })),
+    fechaInicio: response.fechaInicio
+      ? new Date(response.fechaInicio)
+      : undefined,
+    fechaFin: response.fechaFin ? new Date(response.fechaFin) : undefined,
   };
 };
