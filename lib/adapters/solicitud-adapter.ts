@@ -97,7 +97,7 @@ export const adaptResponseToFormData = (
     // o asumiremos que el usuario lo agregará.
     // MEJOR OPCION: Verificamos si existe en runtime o usamos 0.
 
-    const montoPresupuestado = 0; // Placeholder ya que no está en SolicitudResponse.presupuestos element
+    const montoPresupuestado = Number(p.poa?.montoPresupuestado || 0);
 
     return {
       id: p.id,
@@ -110,6 +110,7 @@ export const adaptResponseToFormData = (
       grupoId: p.poa?.estructura?.grupo?.id,
       partidaId: p.poa?.estructura?.partida?.id,
       codigoPresupuestarioId: p.poa?.id,
+      isLocked: true,
     };
   });
 
@@ -147,6 +148,7 @@ export const adaptResponseToFormData = (
     planificacionObjetivo: response.motivoViaje || '',
     motivo: response.descripcion || '',
     destinatario: '',
+    proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,
     presupuestosIds: fuentesSeleccionadas
       .map((f) => f.poaId)

@@ -33,6 +33,7 @@ export const formSchema = z.object({
         partidaId: z.union([z.string(), z.number()]).optional(),
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
         poaId: z.number().nullable().optional(),
+        poa: z.any().optional(), // Store the full POA for display/rehydration
         montoReservado: z.number().optional(),
         montoPresupuestado: z.number().optional(),
         saldoDisponible: z.number().optional(),

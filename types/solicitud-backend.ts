@@ -132,6 +132,7 @@ export interface SolicitudResponse {
       actividad?: {
         detalleDescripcion: string;
       };
+      montoPresupuestado?: number | string;
     };
     viaticos?: Array<{
       id: number;

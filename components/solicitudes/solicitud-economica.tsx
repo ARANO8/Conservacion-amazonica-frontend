@@ -90,7 +90,6 @@ interface SolicitudEconomicaProps {
   setMisSelecciones: React.Dispatch<
     React.SetStateAction<SeleccionPresupuesto[]>
   >;
-  initialData?: Partial<FormData>;
   initialPoaCode?: string;
 }
 export default function SolicitudEconomica({
@@ -101,10 +100,9 @@ export default function SolicitudEconomica({
   poaCodes,
   misSelecciones,
   setMisSelecciones,
-  initialData,
   initialPoaCode,
 }: SolicitudEconomicaProps) {
-  const { setValue, watch, reset, getValues } = useFormContext<FormData>();
+  const { setValue, watch } = useFormContext<FormData>();
 
   // Estado "Tree-Walker": Estructura completa del POA seleccionado
   const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]); // Array de items del POA (Poa objects)
@@ -120,24 +118,16 @@ export default function SolicitudEconomica({
     value: string;
   } | null>(null);
 
-  // REHYDRATION LOGIC
+  // REHYDRATION LOGIC: Cargar estructura si ya tenemos un POA (ej. en modo edición)
   useEffect(() => {
-    // Si tenemos datos iniciales y el formulario no tiene fuentes (está "vacío" o recién montado)
-    if (initialData && initialPoaCode) {
-      // 1. Resetear el formulario con los datos guardados
-      reset({ ...getValues(), ...initialData });
-
-      // 2. Restaurar el Código POA visualmente
-      setSelectedPoa(initialPoaCode);
-
-      // 3. Cargar la estructura SIN borrar los datos del formulario
+    if (initialPoaCode && poaStructure.length === 0 && !isLoadingStructure) {
       const fetchStructure = async () => {
         try {
           setIsLoadingStructure(true);
           const structure =
             await catalogosService.getEstructuraByPoa(initialPoaCode);
           setPoaStructure(structure);
-        } catch (error) {
+        } catch {
           toast.error('Error al restaurar la estructura del POA');
         } finally {
           setIsLoadingStructure(false);
@@ -146,7 +136,7 @@ export default function SolicitudEconomica({
 
       fetchStructure();
     }
-  }, [initialData, initialPoaCode, reset, getValues]);
+  }, [initialPoaCode, poaStructure.length, isLoadingStructure]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -206,7 +196,7 @@ export default function SolicitudEconomica({
             const structure =
               await catalogosService.getEstructuraByPoa(newValue);
             setPoaStructure(structure);
-          } catch (error) {
+          } catch {
             toast.error('Error al cargar la estructura del POA');
           } finally {
             setIsLoadingStructure(false);
@@ -226,20 +216,23 @@ export default function SolicitudEconomica({
   /**
    * Intercepta la solicitud de cambio. Si hay datos sensibles, pide confirmación.
    */
-  const requestChange = (type: 'POA' | 'PROYECTO', newValue: string) => {
-    const hasActiveData = misSelecciones.length > 0;
+  const requestChange = useCallback(
+    (type: 'POA' | 'PROYECTO', newValue: string) => {
+      const hasActiveData = misSelecciones.length > 0;
 
-    // Si es el mismo valor, no hacer nada
-    if (type === 'POA' && newValue === selectedPoa) return;
-    if (type === 'PROYECTO' && Number(newValue) === Number(watchedProyecto))
-      return;
+      // Si es el mismo valor, no hacer nada
+      if (type === 'POA' && newValue === selectedPoa) return;
+      if (type === 'PROYECTO' && Number(newValue) === Number(watchedProyecto))
+        return;
 
-    if (hasActiveData) {
-      setPendingChange({ type, value: newValue });
-    } else {
-      executeResetAndChange(type, newValue);
-    }
-  };
+      if (hasActiveData) {
+        setPendingChange({ type, value: newValue });
+      } else {
+        executeResetAndChange(type, newValue);
+      }
+    },
+    [misSelecciones.length, selectedPoa, watchedProyecto, executeResetAndChange]
+  );
 
   const handleClearPoa = useCallback(() => {
     requestChange('POA', '');

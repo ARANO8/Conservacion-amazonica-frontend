@@ -331,6 +331,9 @@ export default function SolicitudForm({
                     poaCodes={poaCodes}
                     misSelecciones={misSelecciones}
                     setMisSelecciones={setMisSelecciones}
+                    initialPoaCode={
+                      initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa
+                    }
                   />
                 )}
 
