@@ -110,11 +110,11 @@ export interface CreateViaticoDto {
   cantidadPersonas: number;
   montoNeto: number;
   montoPresupuestado: number;
-  solicitudPresupuestoId: number;
+  poaId: number;
 }
 
 export interface CreateGastoDto {
-  solicitudPresupuestoId: number;
+  poaId: number;
   tipoGastoId: number;
   tipoDocumento: 'FACTURA' | 'RECIBO';
   cantidad: number;
@@ -129,7 +129,7 @@ export interface CreateNominaDto {
 }
 
 export interface CreateSolicitudDto {
-  presupuestosIds: number[];
+  poaIds: number[];
   aprobadorId: number;
   lugarViaje: string;
   motivoViaje: string;

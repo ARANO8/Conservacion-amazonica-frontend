@@ -31,12 +31,12 @@ export const adaptFormToPayload = (
     cantidadPersonas: Number(v.cantidadPersonas) || 0,
     montoNeto: Number(v.liquidoPagable) || 0,
     montoPresupuestado: Number(v.montoNeto) || 0,
-    solicitudPresupuestoId: Number(v.solicitudPresupuestoId) || 0,
+    poaId: Number(v.solicitudPresupuestoId) || 0,
   }));
 
   // 3. Mapeo de Gastos (items)
   const gastos = (formData.items || []).map((item) => ({
-    solicitudPresupuestoId: Number(item.solicitudPresupuestoId) || 0,
+    poaId: Number(item.solicitudPresupuestoId) || 0,
     tipoGastoId: Number(item.tipoGastoId) || 0,
     tipoDocumento: item.tipoDocumento || 'FACTURA',
     cantidad: Number(item.cantidad) || 1,
@@ -52,7 +52,7 @@ export const adaptFormToPayload = (
   }));
 
   return {
-    presupuestosIds: formData.presupuestosIds || [],
+    poaIds: formData.presupuestosIds || [],
     aprobadorId: aprobadorId,
     lugarViaje: formData.planificacionLugares,
     motivoViaje: formData.planificacionObjetivo,

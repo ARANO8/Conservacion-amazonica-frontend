@@ -1,5 +1,5 @@
 export interface CreateSolicitudPayload {
-  presupuestosIds: number[];
+  poaIds: number[];
   aprobadorId: number;
   lugarViaje: string;
   motivoViaje: string;
@@ -20,10 +20,10 @@ export interface CreateSolicitudPayload {
     cantidadPersonas: number;
     montoNeto: number;
     montoPresupuestado: number;
-    solicitudPresupuestoId: number;
+    poaId: number;
   }[];
   gastos: {
-    solicitudPresupuestoId: number;
+    poaId: number;
     tipoGastoId: number;
     tipoDocumento: string;
     cantidad: number;
