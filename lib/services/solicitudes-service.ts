@@ -32,6 +32,15 @@ export const solicitudesService = {
     const response = await api.get('/solicitudes', { params });
     return response.data;
   },
+
+  /**
+   * Fetches a single solicitud by ID.
+   * @param id The ID of the solicitud to fetch.
+   */
+  async getSolicitudById(id: string | number) {
+    const response = await api.get(`/solicitudes/${id}`);
+    return response.data;
+  },
 };
 
 export default solicitudesService;

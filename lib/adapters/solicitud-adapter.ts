@@ -19,6 +19,7 @@ export const adaptFormToPayload = (
     fechaFin: new Date(act.fechaFin).toISOString(),
     cantInstitucional: Number(act.cantInstitucion) || 0,
     cantTerceros: Number(act.cantTerceros) || 0,
+    dias: Number(act.cantDias) || 0, // Enviar valor manual del input (permite decimales)
   }));
 
   // 2. Mapeo de Viáticos

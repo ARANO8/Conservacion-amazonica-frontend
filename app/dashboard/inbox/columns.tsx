@@ -3,9 +3,9 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, Eye } from 'lucide-react';
-import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
+import { Eye, Download } from 'lucide-react';
+import Link from 'next/link';
 
 export const columns: ColumnDef<SolicitudResponse>[] = [
   {
@@ -13,9 +13,14 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     header: 'Código',
     cell: ({ row }) => {
       return (
-        <Badge variant="outline" className="font-medium">
-          {row.original.codigoSolicitud}
-        </Badge>
+        <Link href={`/dashboard/inbox/${row.original.id}`}>
+          <Badge
+            variant="outline"
+            className="hover:bg-muted cursor-pointer font-medium"
+          >
+            {row.original.codigoSolicitud}
+          </Badge>
+        </Link>
       );
     },
   },
@@ -55,12 +60,6 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     accessorFn: (row) => row.usuarioEmisor?.nombreCompleto || 'Sin Asignar',
   },
   {
-    id: 'aprobador',
-    header: 'Aprobador',
-    accessorFn: (row) =>
-      row.aprobador?.nombreCompleto || row.aprobador?.nombre || '-',
-  },
-  {
     id: 'montoNeto',
     header: () => <div className="text-right">Monto Neto</div>,
     cell: ({ row }) => {
@@ -74,23 +73,6 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     },
   },
   {
-    id: 'presupuestado',
-    header: () => <div className="text-right">Presupuestado</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.montoTotalPresupuestado || 0);
-      const formatted = new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-      }).format(amount);
-
-      return (
-        <div className="text-muted-foreground text-right text-xs">
-          {formatted}
-        </div>
-      );
-    },
-  },
-  {
     accessorKey: 'estado',
     header: 'Estado',
     cell: ({ row }) => {
@@ -101,28 +83,14 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
           'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
         PENDING:
           'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        REVIEW_SUPERVISOR:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        REVIEW_DIRECTOR:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        REVIEW_FINANCE:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
         APPROVED:
           'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
         APROBADO:
           'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        DISBURSED:
-          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        COMPLETED:
-          'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-800',
         REJECTED:
           'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
         RECHAZADO:
           'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
-        DRAFT:
-          'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-zinc-200 dark:border-zinc-700',
-        BORRADOR:
-          'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-zinc-200 dark:border-zinc-700',
       };
 
       return (
@@ -140,10 +108,10 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
   },
   {
     id: 'revisar',
-    header: 'Revisar',
+    header: 'Acciones',
     cell: ({ row }) => (
       <Button asChild variant="ghost" size="sm">
-        <Link href={`/dashboard/solicitud/${row.original.id}?source=requests`}>
+        <Link href={`/dashboard/solicitud/${row.original.id}?source=inbox`}>
           <Eye className="mr-2 h-4 w-4" />
           Revisar
         </Link>

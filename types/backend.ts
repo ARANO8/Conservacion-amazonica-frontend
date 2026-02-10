@@ -82,6 +82,7 @@ export interface PresupuestoReserva {
   montoPresupuestado: number;
   montoNeto: number;
   estado: 'TEMPORAL' | 'CONFIRMADO' | 'CANCELADO';
+  expiresAt?: string; // ISO date string - TTL de 30 minutos
 }
 
 export type UpdatePoaDto = Partial<CreatePoaDto>;

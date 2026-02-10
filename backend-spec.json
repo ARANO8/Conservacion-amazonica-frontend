@@ -336,6 +336,43 @@
         "tags": ["POA"]
       }
     },
+    "/poa/structure": {
+      "get": {
+        "operationId": "PoaController_getStructureFiltered",
+        "parameters": [
+          {
+            "name": "codigoPoa",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener estructura completa de un POA filtrado por código",
+        "tags": ["POA"]
+      }
+    },
     "/poa/proyectos": {
       "get": {
         "operationId": "PoaController_getProyectos",
@@ -1544,6 +1581,12 @@
             "example": 200,
             "description": "Monto neto a recibir (Opcional, sobreescribe catálogo)"
           },
+          "montoPresupuestado": {
+            "type": "number",
+            "minimum": 0,
+            "example": 232,
+            "description": "Monto presupuestado total (incl. impuestos)"
+          },
           "solicitudPresupuestoId": {
             "type": "number",
             "minimum": 1,
@@ -1589,6 +1632,12 @@
             "example": 50.5,
             "description": "Monto neto unitario a recibir"
           },
+          "montoPresupuestado": {
+            "type": "number",
+            "minimum": 0,
+            "example": 58.58,
+            "description": "Monto presupuestado unitario (incl. impuestos)"
+          },
           "detalle": {
             "type": "string",
             "example": "Compra de herramientas"
@@ -1599,7 +1648,8 @@
           "tipoGastoId",
           "tipoDocumento",
           "cantidad",
-          "montoNeto"
+          "montoNeto",
+          "montoPresupuestado"
         ]
       },
       "CreateNominaDto": {
@@ -1609,12 +1659,12 @@
             "type": "string",
             "example": "Juan Pérez"
           },
-          "ci": {
+          "procedenciaInstitucion": {
             "type": "string",
-            "example": "1234567 LP"
+            "example": "Institución X"
           }
         },
-        "required": ["nombreCompleto", "ci"]
+        "required": ["nombreCompleto", "procedenciaInstitucion"]
       },
       "CreateSolicitudDto": {
         "type": "object",

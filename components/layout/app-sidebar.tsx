@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { ClipboardPlus, FileText, LifeBuoy, Send } from 'lucide-react';
+import { Bell, ClipboardPlus, FileText, LifeBuoy, Send } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
 import { NavSecondary } from '@/components/ui/nav-secondary';
@@ -38,9 +38,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const navMain = [
     {
-      title: 'Solicitudes',
+      title: 'Mis Solicitudes',
       url: '/dashboard/requests',
       icon: FileText,
+    },
+    {
+      title: 'Notificaciones',
+      url: '/dashboard/inbox',
+      icon: Bell,
     },
     {
       title: 'Formularios',

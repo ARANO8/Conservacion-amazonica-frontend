@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -114,10 +114,21 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     return diffDays > 0 ? diffDays : 1;
   }, []);
 
+  // Use a ref to track previous dates to prevent overwriting manual edits on mount
+  const prevDates = useRef({ start: fechaInicio, end: fechaFin });
+
   useEffect(() => {
-    if (fechaInicio && fechaFin) {
+    // Only recalculate if the dates have actually changed (string comparison)
+    const hasChanged =
+      fechaInicio !== prevDates.current.start ||
+      fechaFin !== prevDates.current.end;
+
+    if (hasChanged && fechaInicio && fechaFin) {
       const days = calculateDays(fechaInicio, fechaFin);
       setValue(`actividades.${idx}.cantDias`, days);
+
+      // Update the ref with new values
+      prevDates.current = { start: fechaInicio, end: fechaFin };
     }
   }, [fechaInicio, fechaFin, idx, setValue, calculateDays]);
 
@@ -181,7 +192,7 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
         />
       </div>
 
-      {/* Días (ReadOnly) */}
+      {/* Días (Editable con decimales) */}
       <div className="md:col-span-1">
         <LabelMobile label="Días" />
         <FormField
@@ -191,10 +202,12 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
             <FormItem>
               <FormControl>
                 <Input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
                   {...field}
-                  readOnly
-                  disabled
                   className="bg-muted h-9 text-center text-xs font-bold"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
             </FormItem>
