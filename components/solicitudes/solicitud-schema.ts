@@ -32,7 +32,7 @@ export const formSchema = z.object({
         grupoId: z.union([z.string(), z.number()]).optional(),
         partidaId: z.union([z.string(), z.number()]).optional(),
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
-        reservaId: z.number().nullable().optional(),
+        poaId: z.number().nullable().optional(),
         montoReservado: z.number().optional(),
         saldoDisponible: z.number().optional(),
         isLocked: z.boolean().optional(),

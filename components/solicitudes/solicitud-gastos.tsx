@@ -27,14 +27,14 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Grupo, TipoGasto } from '@/types/catalogs';
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
 
 interface SolicitudGastosProps {
   control: Control<FormData>;
   grupos: Grupo[];
   tiposGasto: TipoGasto[];
   proyectoId?: number;
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 export default function SolicitudGastos({
@@ -97,7 +97,7 @@ interface GastoCardProps {
   grupos: Grupo[];
   tiposGasto: TipoGasto[];
   isDisabled?: boolean;
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 function GastoCard({
@@ -253,7 +253,7 @@ function GastoCard({
                   >
                     {[
                       ...new Map(
-                        fuentesDisponibles.map((f) => [f.id, f])
+                        fuentesDisponibles.map((f) => [f.poaId, f])
                       ).values(),
                     ]
                       .filter(
@@ -264,10 +264,10 @@ function GastoCard({
                       )
                       .map((fuente) => (
                         <SelectItem
-                          key={fuente.id}
-                          value={fuente.id.toString()}
+                          key={fuente.poaId}
+                          value={fuente.poaId.toString()}
                         >
-                          ID: {fuente.id} -{' '}
+                          POA: {fuente.poaId} -{' '}
                           {fuente.poa?.estructura?.partida?.nombre}
                         </SelectItem>
                       ))}

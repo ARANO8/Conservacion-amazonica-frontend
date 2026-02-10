@@ -27,14 +27,14 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Concepto } from '@/types/catalogs';
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
 import { toast } from 'sonner';
 
 interface SolicitudViaticosProps {
   control: Control<FormData>;
   actividadesPlanificadas: FormData['actividades'];
   conceptos: Concepto[];
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 export default function SolicitudViaticos({
@@ -110,7 +110,7 @@ interface ViaticoCardProps {
   remove: (index: number) => void;
   actividadesPlanificadas: FormData['actividades'];
   conceptos: Concepto[];
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 function ViaticoCard({
@@ -264,7 +264,7 @@ function ViaticoCard({
                   >
                     {[
                       ...new Map(
-                        fuentesDisponibles.map((f) => [f.id, f])
+                        fuentesDisponibles.map((f) => [f.poaId, f])
                       ).values(),
                     ]
                       .filter((f) =>
@@ -274,10 +274,10 @@ function ViaticoCard({
                       )
                       .map((fuente) => (
                         <SelectItem
-                          key={fuente.id}
-                          value={fuente.id.toString()}
+                          key={fuente.poaId}
+                          value={fuente.poaId.toString()}
                         >
-                          ID: {fuente.id} -{' '}
+                          POA: {fuente.poaId} -{' '}
                           {fuente.poa?.estructura?.partida?.nombre}
                         </SelectItem>
                       ))}

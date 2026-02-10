@@ -74,6 +74,7 @@ export interface Poa extends CreatePoaDto {
   };
 }
 
+/** Datos de un SolicitudPresupuesto tal como vienen del Backend (GET /solicitudes/:id) */
 export interface PresupuestoReserva {
   id: number;
   solicitudId?: number;
@@ -81,8 +82,15 @@ export interface PresupuestoReserva {
   poa?: Poa;
   montoPresupuestado: number;
   montoNeto: number;
-  estado: 'TEMPORAL' | 'CONFIRMADO' | 'CANCELADO';
-  expiresAt?: string; // ISO date string - TTL de 30 minutos
+}
+
+/** Selección local de una partida POA — vive solo en React State hasta el onSubmit */
+export interface SeleccionPresupuesto {
+  id?: number; // ID de SolicitudPresupuesto si estamos editando, undefined si es nueva
+  poaId: number;
+  poa?: Poa; // Para display (nombre partida, proyecto, estructura)
+  montoPresupuestado: number; // costoTotal del POA
+  saldoDisponible: number; // saldoDisponible del POA
 }
 
 export type UpdatePoaDto = Partial<CreatePoaDto>;

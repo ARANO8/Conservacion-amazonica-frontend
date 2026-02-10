@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -31,8 +31,7 @@ import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
-import { presupuestosService } from '@/services/presupuestos.service';
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
 import {
   formSchema,
   defaultValues,
@@ -58,7 +57,9 @@ export default function SolicitudPage() {
   const [step, setStep] = useState<WizardStep>('PLANIFICACION');
   const [loading, setLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [misReservas, setMisReservas] = useState<PresupuestoReserva[]>([]);
+  const [misSelecciones, setMisSelecciones] = useState<SeleccionPresupuesto[]>(
+    []
+  );
   const [showBudgetWarning, setShowBudgetWarning] = useState(false);
 
   const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
@@ -75,74 +76,7 @@ export default function SolicitudPage() {
   } = form;
 
   // Dirty Form Protection: Prevent accidental reload/close ALWAYS until success.
-  // We want to protect the session even if the user hasn't typed in the current step (but has data from previous steps).
   usePreventNavigation(!isSubmitSuccessful);
-
-  // Carga inicial de reservas activas
-  // Carga inicial y HARD RESET del estado
-  useEffect(() => {
-    const hardResetAndFetch = async () => {
-      try {
-        // 1. Fetch active references ("zombies") from backend
-        // This is crucial to prevent "Zombie Data" from previous sessions.
-        // We consider "Page Reload" as "Start Fresh".
-        const activeReservations = await presupuestosService.getMisReservas();
-
-        // 2. Clear any existing reservation on backend to ensure a clean slate
-        if (activeReservations.length > 0) {
-          await Promise.all(
-            activeReservations.map((r) => presupuestosService.liberar(r.id))
-          );
-        }
-
-        // 3. Reset local state
-        setMisReservas([]);
-        form.setValue('presupuestosIds', []);
-
-        // 4. Force form reset (optional but recommended for safety)
-        // If there was any 'defaultValues' related to an ID, this clears it.
-        // Since we don't have a global `solicitudId` to reset (per analysis),
-        // clearing `misReservas` effectively clears the "context".
-      } catch (error) {
-        console.error('Error executing hard reset', error);
-        toast.error('Error al preparar una nueva solicitud');
-      }
-    };
-
-    hardResetAndFetch();
-  }, [form]);
-
-  // Calculate initial form state based on active reservations
-  const initialFormState = useMemo(() => {
-    if (!misReservas || misReservas.length === 0) return undefined;
-
-    const firstReserva = misReservas[0];
-    const proyectoId =
-      firstReserva.poa?.estructura?.proyecto?.id ??
-      firstReserva.poa?.proyectoId;
-
-    const fuentesTransformadas = misReservas.map((r) => ({
-      grupoId: r.poa?.estructura?.grupo?.id ?? r.poa?.grupoId,
-      partidaId: r.poa?.estructura?.partida?.id ?? r.poa?.partidaId,
-      codigoPresupuestarioId: r.poa?.id,
-      reservaId: r.id,
-      montoReservado: r.montoPresupuestado,
-      saldoDisponible: Number(r.poa?.saldoDisponible ?? 0),
-      isLocked: true,
-    }));
-
-    // Cast explicitly to Partial<FormData> to satisfy TS if needed, mostly it matches shape
-    return {
-      proyecto: proyectoId,
-      fuentesSeleccionadas: fuentesTransformadas,
-      presupuestosIds: misReservas.map((r) => r.id),
-    };
-  }, [misReservas]);
-
-  const initialPoaCode = useMemo(
-    () => misReservas[0]?.poa?.codigoPoa,
-    [misReservas]
-  );
 
   const watchActividades = form.watch('actividades');
 
@@ -165,18 +99,18 @@ export default function SolicitudPage() {
     if (step === 'SOLICITUD') {
       const isValid = await form.trigger(['motivo', 'items', 'viaticos']);
       if (isValid) {
-        // Validación de Presupuestos: Verificar que todos los viáticos/gastos tengan reserva
+        // Validación de Presupuestos: Verificar que todos los viáticos/gastos tengan fuente
         const watchViaticos = form.getValues('viaticos') || [];
         const watchGastos = form.getValues('items') || [];
 
-        const tieneViaticosSinReserva = watchViaticos.some(
+        const tieneViaticosSinFuente = watchViaticos.some(
           (v) => !v.solicitudPresupuestoId
         );
-        const tieneGastosSinReserva = watchGastos.some(
+        const tieneGastosSinFuente = watchGastos.some(
           (g) => !g.solicitudPresupuestoId
         );
 
-        if (tieneViaticosSinReserva || tieneGastosSinReserva) {
+        if (tieneViaticosSinFuente || tieneGastosSinFuente) {
           toast.error(
             'Todos los ítems deben estar vinculados a una fuente de financiamiento'
           );
@@ -184,23 +118,21 @@ export default function SolicitudPage() {
         }
 
         // Budget Balance Validation
-        for (const reserva of misReservas) {
+        for (const seleccion of misSelecciones) {
           const totalSolicitado =
             watchViaticos
-              .filter((v) => v.solicitudPresupuestoId === reserva.id)
+              .filter((v) => v.solicitudPresupuestoId === seleccion.poaId)
               .reduce((sum, v) => sum + (Number(v.montoNeto) || 0), 0) +
             watchGastos
-              .filter((g) => g.solicitudPresupuestoId === reserva.id)
+              .filter((g) => g.solicitudPresupuestoId === seleccion.poaId)
               .reduce((sum, g) => sum + (Number(g.montoNeto) || 0), 0);
 
-          const saldoDisponibleReal = Number(
-            reserva.poa?.saldoDisponible ?? reserva.poa?.costoTotal ?? 0
-          );
+          const saldoDisponibleReal = seleccion.saldoDisponible;
 
           if (totalSolicitado > saldoDisponibleReal + 0.01) {
             const exceso = totalSolicitado - saldoDisponibleReal;
             toast.error(
-              `Saldo Insuficiente en ${reserva.poa?.codigoPoa}:
+              `Saldo Insuficiente en ${seleccion.poa?.codigoPoa}:
               Disponible: Bs ${saldoDisponibleReal.toFixed(2)}
               Solicitado: Bs ${totalSolicitado.toFixed(2)}
               Exceso: Bs ${exceso.toFixed(2)}`,
@@ -211,19 +143,19 @@ export default function SolicitudPage() {
         }
 
         // Orphaned Budget Lines Validation: Every selected source must have at least one use
-        for (const reserva of misReservas) {
+        for (const seleccion of misSelecciones) {
           const tieneUso =
             watchViaticos.some(
-              (v) => Number(v.solicitudPresupuestoId) === reserva.id
+              (v) => Number(v.solicitudPresupuestoId) === seleccion.poaId
             ) ||
             watchGastos.some(
-              (g) => Number(g.solicitudPresupuestoId) === reserva.id
+              (g) => Number(g.solicitudPresupuestoId) === seleccion.poaId
             );
 
           if (!tieneUso) {
             toast.warning(
               `La partida ${
-                reserva.id
+                seleccion.poaId
               } fue seleccionada pero no tiene montos asignados. Úsala o elimínala de la selección.`
             );
             return;
@@ -379,10 +311,8 @@ export default function SolicitudPage() {
                     conceptos={conceptos}
                     tiposGasto={tiposGasto}
                     poaCodes={poaCodes}
-                    misReservas={misReservas}
-                    setMisReservas={setMisReservas}
-                    initialData={initialFormState}
-                    initialPoaCode={initialPoaCode}
+                    misSelecciones={misSelecciones}
+                    setMisSelecciones={setMisSelecciones}
                   />
                 )}
 
@@ -407,7 +337,7 @@ export default function SolicitudPage() {
           onSubmit={onSubmit}
           loading={loading}
           usuarios={usuarios}
-          misReservas={misReservas}
+          misSelecciones={misSelecciones}
           conceptos={conceptos}
           tiposGasto={tiposGasto}
           currentUserId={Number(user?.id)}

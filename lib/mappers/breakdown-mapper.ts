@@ -1,7 +1,7 @@
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { Concepto, TipoGasto } from '@/types/catalogs';
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
 import { PartidaGroup, BreakdownItem } from '@/types/breakdown';
 
 /**
@@ -9,7 +9,7 @@ import { PartidaGroup, BreakdownItem } from '@/types/breakdown';
  */
 export function mapFormToBreakdown(
   data: FormData,
-  reservas: PresupuestoReserva[],
+  selecciones: SeleccionPresupuesto[],
   conceptos: Concepto[],
   tiposGasto: TipoGasto[]
 ): PartidaGroup[] {
@@ -17,18 +17,18 @@ export function mapFormToBreakdown(
 
   return data.fuentesSeleccionadas
     .map((fuente): PartidaGroup | null => {
-      const reserva = reservas.find((r) => r.id === fuente.reservaId);
-      if (!reserva) return null;
+      const seleccion = selecciones.find((s) => s.poaId === fuente.poaId);
+      if (!seleccion) return null;
 
       const nombrePartida =
-        reserva.poa?.estructura?.partida?.nombre || 'Sin Nombre';
+        seleccion.poa?.estructura?.partida?.nombre || 'Sin Nombre';
       const esViatico = nombrePartida.toUpperCase().includes('VIATICOS');
 
       const viaticosAsociados = (data.viaticos || []).filter(
-        (v) => v.solicitudPresupuestoId === reserva.id
+        (v) => v.solicitudPresupuestoId === seleccion.poaId
       );
       const gastosAsociados = (data.items || []).filter(
-        (i) => i.solicitudPresupuestoId === reserva.id
+        (i) => i.solicitudPresupuestoId === seleccion.poaId
       );
 
       const items: BreakdownItem[] = esViatico
@@ -63,9 +63,9 @@ export function mapFormToBreakdown(
       );
 
       return {
-        reservaId: reserva.id,
+        reservaId: seleccion.poaId,
         partidaNombre: nombrePartida,
-        actividadDescripcion: reserva.poa?.actividad?.detalleDescripcion,
+        actividadDescripcion: seleccion.poa?.actividad?.detalleDescripcion,
         esViatico,
         items,
         totalLiquido,

@@ -22,14 +22,14 @@ import { Textarea } from '@/components/ui/textarea';
 import SolicitudViaticos from '@/components/solicitudes/solicitud-viaticos';
 import SolicitudGastos from '@/components/solicitudes/solicitud-gastos';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
-import { PresupuestoReserva, PoaStructureItem } from '@/types/backend';
-import { presupuestosService } from '@/services/presupuestos.service';
+import {
+  SeleccionPresupuesto,
+  PoaStructureItem,
+  Actividad,
+} from '@/types/backend';
 import {
   Popover,
   PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -39,12 +39,9 @@ import {
   Plus,
   Loader2,
   X,
-  Lock,
   Wallet,
   ChevronDown,
   Check,
-  AlertTriangle,
-  Clock,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Concepto, TipoGasto, PoaLookup } from '@/types/catalogs';
@@ -89,8 +86,10 @@ interface SolicitudEconomicaProps {
   conceptos: Concepto[];
   tiposGasto: TipoGasto[];
   poaCodes: PoaLookup[];
-  misReservas: PresupuestoReserva[];
-  setMisReservas: React.Dispatch<React.SetStateAction<PresupuestoReserva[]>>;
+  misSelecciones: SeleccionPresupuesto[];
+  setMisSelecciones: React.Dispatch<
+    React.SetStateAction<SeleccionPresupuesto[]>
+  >;
   initialData?: Partial<FormData>;
   initialPoaCode?: string;
 }
@@ -100,8 +99,8 @@ export default function SolicitudEconomica({
   conceptos,
   tiposGasto,
   poaCodes,
-  misReservas,
-  setMisReservas,
+  misSelecciones,
+  setMisSelecciones,
   initialData,
   initialPoaCode,
 }: SolicitudEconomicaProps) {
@@ -110,7 +109,7 @@ export default function SolicitudEconomica({
   // Estado "Tree-Walker": Estructura completa del POA seleccionado
   const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]); // Array de items del POA (Poa objects)
   const [isLoadingStructure, setIsLoadingStructure] = useState(false);
-  const [isCleaning, setIsCleaning] = useState(false); // Nuevo estado para indicar limpieza en proceso
+  const [isCleaning, setIsCleaning] = useState(false);
 
   const [selectedPoa, setSelectedPoa] = useState(initialPoaCode || '');
   const [isPoaOpen, setIsPoaOpen] = useState(false);
@@ -121,84 +120,17 @@ export default function SolicitudEconomica({
     value: string;
   } | null>(null);
 
-  // ========== TEMPORIZADOR DE EXPIRACIÓN DE RESERVAS ==========
-  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
-  const [isExpired, setIsExpired] = useState(false);
-
-  // Encontrar la expiración más próxima entre todas las reservas
-  const nearestExpiration = useMemo(() => {
-    if (!misReservas.length) return null;
-    const dates = misReservas
-      .map((r) => (r.expiresAt ? new Date(r.expiresAt).getTime() : null))
-      .filter((d): d is number => d !== null);
-    return dates.length ? Math.min(...dates) : null;
-  }, [misReservas]);
-
-  // Intervalo que actualiza el tiempo restante cada segundo
-  useEffect(() => {
-    if (!nearestExpiration) {
-      setTimeRemaining(null);
-      setIsExpired(false);
-      return;
-    }
-
-    const updateTimer = () => {
-      const diff = nearestExpiration - Date.now();
-      if (diff <= 0) {
-        setTimeRemaining('00:00');
-        setIsExpired(true);
-      } else {
-        const mins = Math.floor(diff / 60000);
-        const secs = Math.floor((diff % 60000) / 1000);
-        setTimeRemaining(
-          `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-        );
-      }
-    };
-
-    updateTimer(); // Ejecutar inmediatamente
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, [nearestExpiration]);
-
-  // Calcular nivel de urgencia para colores
-  const urgencyLevel = useMemo(() => {
-    if (!nearestExpiration) return null;
-    const diff = nearestExpiration - Date.now();
-    if (diff <= 0) return 'expired';
-    if (diff < 2 * 60 * 1000) return 'danger'; // < 2 min
-    if (diff < 5 * 60 * 1000) return 'warning'; // < 5 min
-    return 'normal';
-  }, [nearestExpiration, timeRemaining]); // timeRemaining para re-render
-
-  /**
-   * Limpieza total cuando expira la reserva (sin liberar en backend, ya expiró)
-   */
-  const handleExpirationCleanup = useCallback(() => {
-    setMisReservas([]);
-    setValue('presupuestosIds', []);
-    setValue('fuentesSeleccionadas', []);
-    setValue('viaticos', []);
-    setValue('items', []);
-    setIsExpired(false);
-    toast.warning(
-      'Las reservas han expirado. Debe volver a seleccionar las partidas.'
-    );
-  }, [setMisReservas, setValue]);
-
   // REHYDRATION LOGIC
   useEffect(() => {
     // Si tenemos datos iniciales y el formulario no tiene fuentes (está "vacío" o recién montado)
-    // OJO: Chequeamos si hay initialData para decidir
     if (initialData && initialPoaCode) {
       // 1. Resetear el formulario con los datos guardados
-      // MERGE with existing values to avoid wiping 'viaticos', 'nomina', etc.
       reset({ ...getValues(), ...initialData });
 
       // 2. Restaurar el Código POA visualmente
       setSelectedPoa(initialPoaCode);
 
-      // 3. Cargar la estructura SIN borrar los datos del formulario (como hace handlePoaChange)
+      // 3. Cargar la estructura SIN borrar los datos del formulario
       const fetchStructure = async () => {
         try {
           setIsLoadingStructure(true);
@@ -231,18 +163,15 @@ export default function SolicitudEconomica({
     [watchFuentesRaw]
   );
 
-  // TAREA 1: Sincronización de Fuentes (Eliminar IDs Fantasmas)
-  // Calculamos las fuentes disponibles basándonos exclusivamente en lo que está en las Cards actuales
+  // Sincronización de Fuentes: Calcular fuentes disponibles basándonos en las Cards actuales
   const filteredFuentes = useMemo(() => {
-    const activeIds = new Set(
-      watchedFuentes.map((f) => f.reservaId).filter(Boolean)
+    const activePoaIds = new Set(
+      watchedFuentes.map((f) => f.poaId).filter(Boolean)
     );
-    return misReservas.filter((r) => activeIds.has(r.id));
-  }, [misReservas, watchedFuentes]);
+    return misSelecciones.filter((s) => activePoaIds.has(s.poaId));
+  }, [misSelecciones, watchedFuentes]);
 
   // A. Selector de Proyecto (Derivado)
-  // Input: poaStructure (cargado al seleccionar POA)
-  // Output: Lista única de proyectos disponibles en este POA
   const availableProjects = useMemo(() => {
     if (!poaStructure.length) return [];
     const projects = poaStructure
@@ -252,38 +181,23 @@ export default function SolicitudEconomica({
   }, [poaStructure]);
 
   /**
-   * Ejecuta el cambio de contexto limpiando previamente todos los datos
-   * y liberando reservas en el backend.
+   * Ejecuta el cambio de contexto limpiando previamente todos los datos locales.
    */
   const executeResetAndChange = useCallback(
     async (type: 'POA' | 'PROYECTO', newValue: string) => {
-      setIsCleaning(true); // Bloquear UI
+      setIsCleaning(true);
 
-      try {
-        // 1. Liberar todas las reservas activas en paralelo
-        if (misReservas.length > 0) {
-          await Promise.all(
-            misReservas.map((r) => presupuestosService.liberar(r.id))
-          );
-        }
-      } catch (error) {
-        console.error('Error during cleanup:', error);
-        toast.warning(
-          'Algunas reservas podrían no haberse liberado correctamente en el servidor.'
-        );
-      }
-
-      // 2. Limpiar Estado Local y de Formulario (Frontend)
-      setMisReservas([]);
+      // Limpiar Estado Local y de Formulario
+      setMisSelecciones([]);
       setValue('presupuestosIds', []);
       setValue('fuentesSeleccionadas', []);
-      setValue('viaticos', []); // Limpiar items hija
-      setValue('items', []); // Limpiar items hija (gastos)
+      setValue('viaticos', []);
+      setValue('items', []);
 
-      // 3. Aplicar el Cambio de Contexto
+      // Aplicar el Cambio de Contexto
       if (type === 'POA') {
         setSelectedPoa(newValue);
-        setValue('proyecto', ''); // Reset proyecto también al cambiar POA
+        setValue('proyecto', '');
         setPoaStructure([]);
 
         if (newValue) {
@@ -306,14 +220,14 @@ export default function SolicitudEconomica({
       setIsCleaning(false);
       toast.info('Formulario limpiado para el nuevo contexto.');
     },
-    [misReservas, setValue, setMisReservas]
+    [setValue, setMisSelecciones]
   );
 
   /**
    * Intercepta la solicitud de cambio. Si hay datos sensibles, pide confirmación.
    */
   const requestChange = (type: 'POA' | 'PROYECTO', newValue: string) => {
-    const hasActiveData = misReservas.length > 0;
+    const hasActiveData = misSelecciones.length > 0;
 
     // Si es el mismo valor, no hacer nada
     if (type === 'POA' && newValue === selectedPoa) return;
@@ -456,28 +370,6 @@ export default function SolicitudEconomica({
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FieldLegend>Partida Presupuestaria</FieldLegend>
-            {/* Badge de Tiempo Restante */}
-            {timeRemaining && misReservas.length > 0 && (
-              <Badge
-                variant="outline"
-                className={cn(
-                  'text-m flex items-center gap-1.5 font-bold transition-colors',
-                  urgencyLevel === 'normal' &&
-                    'border-emerald-300 bg-emerald-50 text-emerald-700',
-                  urgencyLevel === 'warning' &&
-                    'border-amber-300 bg-amber-50 text-amber-700',
-                  urgencyLevel === 'danger' &&
-                    'border-destructive bg-destructive/10 text-destructive animate-pulse'
-                )}
-              >
-                {urgencyLevel === 'danger' ? (
-                  <AlertTriangle className="h-3 w-3" />
-                ) : (
-                  <Clock className="h-3 w-3" />
-                )}
-                {timeRemaining}
-              </Badge>
-            )}
           </div>
           <Button
             type="button"
@@ -488,7 +380,7 @@ export default function SolicitudEconomica({
                 grupoId: '',
                 partidaId: '',
                 codigoPresupuestarioId: '',
-                reservaId: null,
+                poaId: null,
                 montoReservado: 0,
                 isLocked: false,
               })
@@ -508,11 +400,11 @@ export default function SolicitudEconomica({
               index={index}
               control={control}
               remove={remove}
-              poaStructure={poaStructure} // PASAMOS LA ESTRUCTURA COMPLETA
+              poaStructure={poaStructure}
               proyectoId={Number(watchedProyecto)}
               codigoPoa={selectedPoa}
-              misReservas={misReservas}
-              setMisReservas={setMisReservas}
+              misSelecciones={misSelecciones}
+              setMisSelecciones={setMisSelecciones}
             />
           ))}
           {fields.length === 0 && (
@@ -554,14 +446,14 @@ export default function SolicitudEconomica({
         control={control}
         actividadesPlanificadas={watchActividades || []}
         conceptos={conceptos}
-        fuentesDisponibles={filteredFuentes} // USAMOS LA LISTA FILTRADA REACTIVA
+        fuentesDisponibles={filteredFuentes}
       />
       <SolicitudGastos
         control={control}
         grupos={[]}
         tiposGasto={tiposGasto}
         proyectoId={Number(watchedProyecto)}
-        fuentesDisponibles={filteredFuentes} // USAMOS LA LISTA FILTRADA REACTIVA
+        fuentesDisponibles={filteredFuentes}
       />
 
       <AlertDialog
@@ -580,12 +472,8 @@ export default function SolicitudEconomica({
                 {' '}
                 eliminarán permanentemente
               </span>{' '}
-              todas las partidas presupuestarias reservadas y los
+              todas las partidas presupuestarias seleccionadas y los
               gastos/viáticos ingresados hasta el momento.
-              <br />
-              <br />
-              Esta acción liberará los fondos reservados y limpiará el
-              formulario.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -596,7 +484,7 @@ export default function SolicitudEconomica({
               className="bg-destructive hover:bg-destructive/90"
               disabled={isCleaning}
               onClick={(e) => {
-                e.preventDefault(); // Prevent auto-close to handle async
+                e.preventDefault();
                 if (pendingChange) {
                   executeResetAndChange(
                     pendingChange.type,
@@ -616,48 +504,22 @@ export default function SolicitudEconomica({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* AlertDialog de Expiración - No se puede cerrar haciendo clic afuera */}
-      <AlertDialog open={isExpired}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-destructive flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Sesión de Reserva Expirada
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              El tiempo de reserva de los fondos ha terminado. Por seguridad, se
-              han liberado las partidas seleccionadas.
-              <br />
-              <br />
-              <strong>
-                Debe volver a seleccionar las partidas presupuestarias.
-              </strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleExpirationCleanup}>
-              Entendido
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </FieldGroup>
   );
 }
 
 /**
- * FuenteCard: Utiliza lógica de derivación (Tree-Walker) en lugar de fetch individual
+ * FuenteCard: Selección puramente client-side (sin llamadas a API de reserva)
  */
 function FuenteCard({
   index,
   control,
   remove,
-  poaStructure, // Estructura completa recibida del padre
+  poaStructure,
   proyectoId,
   codigoPoa,
-  misReservas,
-  setMisReservas,
+  misSelecciones,
+  setMisSelecciones,
 }: {
   index: number;
   control: Control<FormData>;
@@ -665,16 +527,15 @@ function FuenteCard({
   poaStructure: PoaStructureItem[];
   proyectoId: number;
   codigoPoa: string;
-  misReservas: PresupuestoReserva[];
-  setMisReservas: React.Dispatch<React.SetStateAction<PresupuestoReserva[]>>;
+  misSelecciones: SeleccionPresupuesto[];
+  setMisSelecciones: React.Dispatch<
+    React.SetStateAction<SeleccionPresupuesto[]>
+  >;
 }) {
   const { setValue, watch } = useFormContext<FormData>();
-  const [isReserving, setIsReserving] = useState(false);
 
   // Campos del formulario
-  const reservaId = watch(`fuentesSeleccionadas.${index}.reservaId`) as
-    | number
-    | null;
+  const poaId = watch(`fuentesSeleccionadas.${index}.poaId`) as number | null;
   const montoReservado = watch(
     `fuentesSeleccionadas.${index}.montoReservado`
   ) as number;
@@ -692,11 +553,9 @@ function FuenteCard({
   // B. Selector de Grupo (Derivado)
   const availableGrupos = useMemo(() => {
     if (!proyectoId || !poaStructure.length) return [];
-    // Filtrar ítems del proyecto seleccionado
     const itemsOfProject = poaStructure.filter(
       (i) => i.estructura?.proyecto?.id === proyectoId
     );
-    // Extraer grupos únicos
     return uniqueItems(
       itemsOfProject.map((i) => i.estructura?.grupo).filter(Boolean)
     );
@@ -705,7 +564,6 @@ function FuenteCard({
   // C. Selector de Partida (Derivado)
   const availablePartidas = useMemo(() => {
     if (!selectedGrupoId || !poaStructure.length) return [];
-    // Filtrar ítems del grupo seleccionado (y proyecto)
     const itemsOfGrupo = poaStructure.filter(
       (i) =>
         i.estructura?.proyecto?.id === proyectoId &&
@@ -719,7 +577,6 @@ function FuenteCard({
   // D. Selector de Ítem (Derivado)
   const availableItems = useMemo(() => {
     if (!selectedPartidaId || !poaStructure.length) return [];
-    // Filtrar ítems finales
     return poaStructure
       .filter(
         (i) =>
@@ -734,7 +591,6 @@ function FuenteCard({
           i.codigoPresupuestario?.codigoCompleto ||
           i.codigoPresupuestario?.descripcion ||
           `Item ${i.id}`,
-        // Preservar objeto original para reserva
         original: i,
       }));
   }, [poaStructure, proyectoId, selectedGrupoId, selectedPartidaId]);
@@ -745,119 +601,114 @@ function FuenteCard({
   const viaticos = useMemo(() => viaticosRaw || [], [viaticosRaw]);
   const gastos = useMemo(() => gastosRaw || [], [gastosRaw]);
 
-  // TAREA 1: Lógica de Suma (Gross-Up)
-  // Calculamos por separado el Neto (informativo) y el Bruto (impacto real)
+  // Lógica de Suma (Gross-Up)
   const resumenFinanciero = useMemo(() => {
-    if (!reservaId) return { neto: 0, bruto: 0 };
+    if (!poaId) return { neto: 0, bruto: 0 };
 
     const sumaViaticosNeto = viaticos
-      .filter((v) => Number(v.solicitudPresupuestoId) === reservaId)
+      .filter((v) => Number(v.solicitudPresupuestoId) === poaId)
       .reduce((acc: number, v) => acc + (Number(v.liquidoPagable) || 0), 0);
 
     const sumaViaticosBruto = viaticos
-      .filter((v) => Number(v.solicitudPresupuestoId) === reservaId)
+      .filter((v) => Number(v.solicitudPresupuestoId) === poaId)
       .reduce((acc: number, v) => acc + (Number(v.montoNeto) || 0), 0);
 
     const sumaGastosNeto = gastos
-      .filter((g) => Number(g.solicitudPresupuestoId) === reservaId)
+      .filter((g) => Number(g.solicitudPresupuestoId) === poaId)
       .reduce((acc: number, g) => acc + (Number(g.liquidoPagable) || 0), 0);
 
     const sumaGastosBruto = gastos
-      .filter((g) => Number(g.solicitudPresupuestoId) === reservaId)
+      .filter((g) => Number(g.solicitudPresupuestoId) === poaId)
       .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
 
     return {
       neto: sumaViaticosNeto + sumaGastosNeto,
       bruto: sumaViaticosBruto + sumaGastosBruto,
     };
-  }, [viaticos, gastos, reservaId]);
+  }, [viaticos, gastos, poaId]);
 
   const limit = watchedSaldoBackend || Number(montoReservado || 0);
   const saldoDisponibleLocal = limit - resumenFinanciero.bruto;
 
-  // Reserva automática
+  // Selección automática: al elegir un ítem, registrar la selección localmente
   useEffect(() => {
-    if (!selectedItemId || isReserving || isLocked) return;
+    if (!selectedItemId || isLocked) return;
 
-    const performReserve = async () => {
-      setIsReserving(true);
-      try {
-        // Encontrar el objeto completo en la estructura local (evita llamar al backend para detalles)
-        const selectedItemObj = availableItems.find(
-          (i) => i.id.toString() === selectedItemId.toString()
-        );
+    const selectedItemObj = availableItems.find(
+      (i) => i.id.toString() === selectedItemId.toString()
+    );
 
-        if (!selectedItemObj) {
-          throw new Error('Ítem no encontrado en la estructura cargada');
-        }
+    if (!selectedItemObj) return;
 
-        const poaItem = selectedItemObj.original;
+    const poaItem = selectedItemObj.original;
 
-        // Validación de integridad YA está garantizada por la derivación, pero doble check:
-        const poaDevuelto = poaItem.codigoPoa || codigoPoa;
-        if (poaDevuelto !== codigoPoa) {
-          throw new Error(
-            `Integrity Error: Item belongs to ${poaDevuelto}, expected ${codigoPoa}`
-          );
-        }
+    // Validación de integridad
+    const poaDevuelto = poaItem.codigoPoa || codigoPoa;
+    if (poaDevuelto !== codigoPoa) {
+      toast.error(
+        `Error de integridad: El ítem pertenece a ${poaDevuelto}, se esperaba ${codigoPoa}`
+      );
+      setValue(`fuentesSeleccionadas.${index}.codigoPresupuestarioId`, '');
+      return;
+    }
 
-        // Reservar usando el ID del item del POA (presupuesto)
-        const reserva = await presupuestosService.reservar(poaItem.id);
+    const rawMonto = poaItem.costoTotal ?? 0;
+    const monto =
+      typeof rawMonto === 'string' ? parseFloat(rawMonto) : Number(rawMonto);
 
-        const rawMonto = poaItem.costoTotal ?? 0;
+    const rawSaldo = poaItem.saldoDisponible ?? rawMonto;
+    const saldo =
+      typeof rawSaldo === 'string' ? parseFloat(rawSaldo) : Number(rawSaldo);
 
-        const monto =
-          typeof rawMonto === 'string'
-            ? parseFloat(rawMonto)
-            : Number(rawMonto);
+    // Registrar en el formulario
+    setValue(`fuentesSeleccionadas.${index}.poaId`, poaItem.id);
+    setValue(`fuentesSeleccionadas.${index}.montoReservado`, monto);
+    setValue(`fuentesSeleccionadas.${index}.saldoDisponible`, saldo);
+    setValue(`fuentesSeleccionadas.${index}.isLocked`, true);
 
-        const rawSaldo = poaItem.saldoDisponible ?? rawMonto;
-        const saldo =
-          typeof rawSaldo === 'string'
-            ? parseFloat(rawSaldo)
-            : Number(rawSaldo);
-
-        setValue(`fuentesSeleccionadas.${index}.reservaId`, reserva.id);
-        setValue(`fuentesSeleccionadas.${index}.montoReservado`, monto);
-        setValue(`fuentesSeleccionadas.${index}.saldoDisponible`, saldo);
-        setValue(`fuentesSeleccionadas.${index}.isLocked`, true);
-
-        const nuevas = [...misReservas, reserva];
-        setMisReservas(nuevas);
-        setValue(
-          'presupuestosIds',
-          nuevas.map((n) => n.id)
-        );
-
-        toast.success(`Reserva exitosa: ${formatMoney(monto)}`);
-      } catch (error: unknown) {
-        const message =
-          error instanceof Error ? error.message : 'Error al reservar saldo';
-        toast.error(message);
-        setValue(`fuentesSeleccionadas.${index}.codigoPresupuestarioId`, '');
-      } finally {
-        setIsReserving(false);
-      }
+    // Crear la selección local
+    const nuevaSeleccion: SeleccionPresupuesto = {
+      poaId: poaItem.id,
+      poa: {
+        id: poaItem.id,
+        codigoPoa: poaItem.codigoPoa,
+        cantidad: poaItem.cantidad,
+        costoUnitario: Number(poaItem.costoUnitario),
+        costoTotal: Number(poaItem.costoTotal),
+        saldoDisponible: saldo,
+        proyectoId: poaItem.estructura?.proyecto?.id ?? 0,
+        grupoId: poaItem.estructura?.grupo?.id ?? 0,
+        partidaId: poaItem.estructura?.partida?.id ?? 0,
+        actividadId: poaItem.actividad?.id ?? 0,
+        codigoPresupuestarioId: poaItem.codigoPresupuestario?.id ?? 0,
+        actividad: poaItem.actividad as Actividad | undefined,
+        codigoPresupuestario: poaItem.codigoPresupuestario,
+        estructura: poaItem.estructura,
+      },
+      montoPresupuestado: monto,
+      saldoDisponible: saldo,
     };
 
-    performReserve();
+    const nuevas = [...misSelecciones, nuevaSeleccion];
+    setMisSelecciones(nuevas);
+    setValue(
+      'presupuestosIds',
+      nuevas.map((n) => n.poaId)
+    );
+
+    toast.success(`Partida seleccionada: ${formatMoney(monto)}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItemId]);
 
-  const handleRemoveCard = async () => {
-    if (reservaId) {
-      try {
-        await presupuestosService.liberar(reservaId);
-        const nuevas = misReservas.filter((r) => r.id !== reservaId);
-        setMisReservas(nuevas);
-        setValue(
-          'presupuestosIds',
-          nuevas.map((n) => n.id)
-        );
-        toast.info('Fuente liberada');
-      } catch {
-        // ignore
-      }
+  const handleRemoveCard = () => {
+    if (poaId) {
+      const nuevas = misSelecciones.filter((s) => s.poaId !== poaId);
+      setMisSelecciones(nuevas);
+      setValue(
+        'presupuestosIds',
+        nuevas.map((n) => n.poaId)
+      );
+      toast.info('Partida eliminada');
     }
     remove(index);
   };
@@ -872,11 +723,11 @@ function FuenteCard({
       {isLocked && (
         <div className="bg-primary/5 flex items-center justify-between rounded-t-xl border-b px-4 py-2">
           <div className="text-primary flex items-center gap-2">
-            <Lock className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">Partida Reservada</span>
+            <Check className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">Partida Seleccionada</span>
           </div>
           <Badge variant="secondary" className="font-mono text-xs">
-            ID: {reservaId}
+            POA: {poaId}
           </Badge>
         </div>
       )}
@@ -958,14 +809,14 @@ function FuenteCard({
             )}
           />
 
-          {/* ÍTEM / ACTIVIDAD (NUEVA VISUALIZACIÓN CON POACARD) */}
+          {/* ÍTEM / ACTIVIDAD (VISUALIZACIÓN CON POACARD) */}
           <div className="col-span-full space-y-3">
             <FieldLabel className="text-[10px] font-bold tracking-wider uppercase">
               Seleccionar Ítem / Actividad de Presupuesto
             </FieldLabel>
 
             {isLocked ? (
-              // Vista cuando ya está bloqueado (Seleccionado)
+              // Vista cuando ya está seleccionado
               <div className="grid grid-cols-1">
                 {poaStructure
                   .filter((i) => i.id === Number(selectedItemId))
@@ -1043,7 +894,7 @@ function FuenteCard({
         </div>
       </div>
 
-      {/* TAREA 2: ACTUALIZAR VISUALIZACIÓN (Smart Footer Mejorado) */}
+      {/* Smart Footer */}
       <div className="bg-muted/40 flex flex-wrap items-center justify-between gap-4 rounded-b-xl border-t px-4 py-3">
         <div className="flex flex-wrap items-center gap-6">
           {/* 1. Límite POA */}
@@ -1072,7 +923,7 @@ function FuenteCard({
 
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
 
-          {/* 3. Solicitado (Bruto) - Costo Real */}
+          {/* 3. Solicitado (Bruto) */}
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
               Subtotal Presupuestado (Incl. Impuestos)
@@ -1084,7 +935,7 @@ function FuenteCard({
 
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
 
-          {/* 4. Saldo Disponible (Límite - Bruto) */}
+          {/* 4. Saldo Disponible */}
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
               Saldo Disponible
@@ -1111,17 +962,9 @@ function FuenteCard({
           className="text-destructive hover:text-destructive hover:bg-destructive/10"
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          {isLocked ? 'Liberar y Eliminar' : 'Eliminar'}
+          Eliminar
         </Button>
       </div>
-      {isReserving && (
-        <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center rounded-xl backdrop-blur-[1px]">
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="text-primary h-6 w-6 animate-spin" />
-            <span className="text-sm font-medium">Reservando fondos...</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
