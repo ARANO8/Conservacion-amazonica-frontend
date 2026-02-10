@@ -83,6 +83,16 @@ export const adaptResponseToFormData = (
     cantDias: Number(p.diasCalculados) || 0,
   }));
 
+  // 0. Pre-calculo: Mapa de ID de SolicitudPresupuesto a ID de POA (Catálogo)
+  // Esto es necesario porque los viáticos/gastos apuntan al ID de la relación (SolicitudPresupuesto),
+  // pero el frontend usa el ID del POA (Catálogo) para agrupar y filtrar.
+  const spIdToPoaIdMap = new Map<number, number>();
+  (response.presupuestos || []).forEach((p) => {
+    if (p.poa?.id) {
+      spIdToPoaIdMap.set(p.id, p.poa.id);
+    }
+  });
+
   // 2. Mapeo de Presupuestos (Fuentes Seleccionadas)
   const fuentesSeleccionadas = (response.presupuestos || []).map((p) => {
     // Nota: El tipo SolicitudResponse actual no define montoPresupuestado en el nivel de presupuesto.
@@ -98,6 +108,12 @@ export const adaptResponseToFormData = (
     // MEJOR OPCION: Verificamos si existe en runtime o usamos 0.
 
     const montoPresupuestado = Number(p.poa?.montoPresupuestado || 0);
+    // SINTOMA 1: Doble Contabilidad.
+    // El saldoDisponible del backend ya tiene restado el monto de esta solicitud si está activa.
+    // Para editar, necesitamos "devolver" virtualmente ese monto al saldo para que el usuario
+    // pueda volver a usarlo en el formulario sin que parezca que excede el límite.
+    const saldoBackend = Number(p.poa?.saldoDisponible || 0);
+    const saldoVirtual = saldoBackend + montoPresupuestado;
 
     return {
       id: p.id,
@@ -105,7 +121,7 @@ export const adaptResponseToFormData = (
       poa: p.poa,
       montoPresupuestado: montoPresupuestado,
       // Estrategia de autosuficiencia para validación inicial
-      saldoDisponible: montoPresupuestado,
+      saldoDisponible: saldoVirtual,
       // Mapeo adicional para el formulario
       grupoId: p.poa?.estructura?.grupo?.id,
       partidaId: p.poa?.estructura?.partida?.id,
@@ -115,33 +131,48 @@ export const adaptResponseToFormData = (
   });
 
   // 3. Mapeo de Viáticos
-  const viaticos = (response.viaticos || []).map((v) => ({
-    id: v.id,
-    planificacionIndex: v.planificacionId
-      ? (response.planificaciones?.findIndex(
-          (p) => p.id === v.planificacionId
-        ) ?? 0)
-      : 0,
-    conceptoId: v.concepto?.id,
-    tipoDestino:
-      (v.tipoDestino as 'INSTITUCIONAL' | 'TERCEROS') || 'INSTITUCIONAL',
-    dias: Number(v.dias) || 0,
-    cantidadPersonas: Number(v.cantidadPersonas) || 0,
-    liquidoPagable: Number(v.montoNeto || 0),
-    montoNeto: Number(v.montoPresupuestado || 0),
-    solicitudPresupuestoId: Number(v.solicitudPresupuestoId) || 0,
-  }));
+  const viaticos = (response.viaticos || []).map((v) => {
+    const spId = Number(v.solicitudPresupuestoId);
+    // SINTOMA 2: Links Rotos.
+    // Usamos el mapa para obtener el ID del POA (Catálogo) que corresponde a esta fuente.
+    const realPoaId = spIdToPoaIdMap.get(spId) || 0;
+
+    return {
+      id: v.id,
+      planificacionIndex: v.planificacionId
+        ? (response.planificaciones?.findIndex(
+            (p) => p.id === v.planificacionId
+          ) ?? 0)
+        : 0,
+      conceptoId: v.concepto?.id,
+      tipoDestino:
+        (v.tipoDestino as 'INSTITUCIONAL' | 'TERCEROS') || 'INSTITUCIONAL',
+      dias: Number(v.dias) || 0,
+      cantidadPersonas: Number(v.cantidadPersonas) || 0,
+      liquidoPagable: Number(v.montoNeto || 0),
+      montoNeto: Number(v.montoPresupuestado || 0),
+      solicitudPresupuestoId: realPoaId, // Usamos el ID del POA, no de la relación
+    };
+  });
 
   // 4. Mapeo de Gastos (Items)
-  const items = (response.gastos || []).map((g) => ({
-    solicitudPresupuestoId: Number(g.solicitudPresupuestoId) || 0,
-    tipoGastoId: g.tipoGasto?.id,
-    tipoDocumento: (g.tipoDocumento as 'FACTURA' | 'RECIBO') || 'FACTURA',
-    cantidad: Number(g.cantidad) || 1,
-    liquidoPagable: Number(g.montoNeto || 0),
-    montoNeto: Number(g.montoPresupuestado || 0),
-    detalle: g.detalle || '',
-  }));
+  const items = (response.gastos || []).map((g) => {
+    const spId = Number(g.solicitudPresupuestoId);
+    // SINTOMA 2: Links Rotos.
+    const realPoaId = spIdToPoaIdMap.get(spId) || 0;
+
+    return {
+      solicitudPresupuestoId: realPoaId, // Usamos el ID del POA
+      tipoGastoId: g.tipoGasto?.id,
+      tipoDocumento: (g.tipoDocumento as 'FACTURA' | 'RECIBO') || 'FACTURA',
+      cantidad: Number(g.cantidad) || 1,
+      liquidoPagable: Number(g.montoNeto || 0),
+      montoNeto: Number(g.montoPresupuestado || 0),
+      // SINTOMA 3: Gastos Incompletos (Costo Unitario)
+      costoUnitario: Number(g.costoUnitario) || 0,
+      detalle: g.detalle || '',
+    };
+  });
 
   return {
     planificacionLugares: response.lugarViaje || '',

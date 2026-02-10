@@ -99,6 +99,7 @@ export interface SolicitudResponse {
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
+    costoUnitario?: number | string;
   }>;
   planificaciones?: Array<{
     id: number;
@@ -133,6 +134,7 @@ export interface SolicitudResponse {
         detalleDescripcion: string;
       };
       montoPresupuestado?: number | string;
+      saldoDisponible?: number | string;
     };
     viaticos?: Array<{
       id: number;
