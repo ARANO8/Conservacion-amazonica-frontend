@@ -620,7 +620,26 @@ function FuenteCard({
     };
   }, [viaticos, gastos, poaId]);
 
-  const limit = watchedSaldoBackend || Number(montoReservado || 0);
+  // E. Integración con Catálogo (Fresh Data)
+  // Buscamos el ítem fresco en la estructura cargada del catálogo para obtener el saldo real
+  const freshCatalogItem = useMemo(() => {
+    return poaStructure.find((item) => item.id === poaId);
+  }, [poaStructure, poaId]);
+
+  // El Límite (la bolsa de dinero disponible para esta partida) se calcula:
+  // Saldo fresco del catálogo (lo que queda en DB) + Lo que esta solicitud ya tiene reservado.
+  const limit = useMemo(() => {
+    if (!freshCatalogItem)
+      return watchedSaldoBackend || Number(montoReservado || 0);
+
+    const catalogAvailable = Number(
+      freshCatalogItem.saldoDisponible ?? freshCatalogItem.costoTotal
+    );
+    // IMPORTANTE: Si estamos en edición, el monto ya está descontado del saldo disponible reportado por el catálogo
+    // por lo que sumamos nuestro 'montoReservado' para "restaurar" virtualmente nuestra parte.
+    return catalogAvailable + Number(montoReservado || 0);
+  }, [freshCatalogItem, watchedSaldoBackend, montoReservado]);
+
   const saldoDisponibleLocal = limit - resumenFinanciero.bruto;
 
   // Selección automática: al elegir un ítem, registrar la selección localmente
@@ -811,20 +830,39 @@ function FuenteCard({
             {isLocked ? (
               // Vista cuando ya está seleccionado
               <div className="grid grid-cols-1">
-                {poaStructure
-                  .filter((i) => i.id === Number(selectedItemId))
-                  .map((item) => (
+                {(() => {
+                  // Priorizar el objeto POA que viene guardado en el formulario
+                  const poaFromForm = watch(
+                    `fuentesSeleccionadas.${index}.poa`
+                  );
+                  // freshCatalogItem viene del useMemo arriba, usando poaStructure
+                  const itemRaw = freshCatalogItem || poaFromForm;
+
+                  if (!itemRaw) return null;
+
+                  // PASO CRITICO: Inyectamos el 'limit' (que ya tiene el saldo restaurado con datos frescos)
+                  // dentro del objeto que pasamos a PoaCard para que la tarjeta muestre el saldo correcto.
+                  const itemWithVirtualBalance = {
+                    ...itemRaw,
+                    saldoDisponible: limit,
+                    // Recalculamos si tiene compromisos de TERCEROS
+                    tieneCompromisos: limit < Number(itemRaw.costoTotal) - 0.05,
+                  };
+
+                  return (
                     <PoaCard
-                      key={item.id}
-                      item={item}
+                      key={itemWithVirtualBalance.id}
+                      item={itemWithVirtualBalance as PoaStructureItem}
                       isSelected={true}
                       codigoActividad={
-                        item.codigoPresupuestario?.codigoCompleto
+                        itemWithVirtualBalance.codigoPresupuestario
+                          ?.codigoCompleto
                       }
                       onSelect={() => {}}
                       isDisabled={true}
                     />
-                  ))}
+                  );
+                })()}
               </div>
             ) : (
               // Selector cuando no hay nada seleccionado
@@ -896,9 +934,7 @@ function FuenteCard({
               Límite POA
             </span>
             <span className="text-muted-foreground text-sm font-medium">
-              {isLocked
-                ? formatMoney(Number(saldoDisponibleLocal) || 0)
-                : '---'}
+              {isLocked ? formatMoney(Number(limit) || 0) : '---'}
             </span>
           </div>
 

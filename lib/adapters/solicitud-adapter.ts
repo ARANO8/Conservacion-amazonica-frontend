@@ -108,20 +108,36 @@ export const adaptResponseToFormData = (
     // MEJOR OPCION: Verificamos si existe en runtime o usamos 0.
 
     const montoPresupuestado = Number(p.poa?.montoPresupuestado || 0);
-    // SINTOMA 1: Doble Contabilidad.
-    // El saldoDisponible del backend ya tiene restado el monto de esta solicitud si está activa.
-    // Para editar, necesitamos "devolver" virtualmente ese monto al saldo para que el usuario
-    // pueda volver a usarlo en el formulario sin que parezca que excede el límite.
-    const saldoBackend = Number(p.poa?.saldoDisponible || 0);
-    const saldoVirtual = saldoBackend + montoPresupuestado;
+
+    // CORRECCION CRITICA:
+    // El saldoDisponible del backend ya tiene restado el monto de esta solicitud.
+    // Para editar, debemos "devolver" virtualmente el monto QUE ESTA SOLICITUD ESTA USANDO.
+    const montoUsadoPorSolicitud = Number(p.subtotalPresupuestado || 0);
+    const saldoActualBackend = Number(p.poa?.saldoDisponible || 0);
+    const limiteTotalPOA = Number(p.poa?.costoTotal || 0);
+
+    // Saldo Virtual = Saldo Real en DB + Monto ya reservado por esta solicitud
+    const saldoVirtual = saldoActualBackend + montoUsadoPorSolicitud;
+    const saldoVirtualFixed = Math.round(saldoVirtual * 100) / 100;
+
+    // Inyectamos el saldo virtual en el objeto POA para que los componentes de UI (PoaCard)
+    // lo visualicen correctamente y validen el "Saldo Comprometido" con el valor restaurado.
+    const poaConSaldoVirtual = p.poa
+      ? {
+          ...p.poa,
+          saldoDisponible: saldoVirtualFixed,
+          // Recalculamos si hay compromisos de TERCEROS
+          tieneCompromisos: saldoVirtualFixed < limiteTotalPOA - 0.05,
+        }
+      : undefined;
 
     return {
       id: p.id,
       poaId: p.poa?.id,
-      poa: p.poa,
-      montoPresupuestado: montoPresupuestado,
-      // Estrategia de autosuficiencia para validación inicial
-      saldoDisponible: saldoVirtual,
+      poa: poaConSaldoVirtual,
+      montoPresupuestado: montoUsadoPorSolicitud,
+      montoReservado: montoUsadoPorSolicitud,
+      saldoDisponible: saldoVirtualFixed,
       // Mapeo adicional para el formulario
       grupoId: p.poa?.estructura?.grupo?.id,
       partidaId: p.poa?.estructura?.partida?.id,

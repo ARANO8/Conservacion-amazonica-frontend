@@ -135,6 +135,7 @@ export interface SolicitudResponse {
       };
       montoPresupuestado?: number | string;
       saldoDisponible?: number | string;
+      costoTotal?: number | string;
     };
     viaticos?: Array<{
       id: number;
@@ -160,6 +161,7 @@ export interface SolicitudResponse {
         nombre: string;
       };
     }>;
+    subtotalPresupuestado?: number | string;
   }>;
   fechaInicio?: string;
   fechaFin?: string;
