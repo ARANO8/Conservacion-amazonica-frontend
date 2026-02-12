@@ -59,6 +59,25 @@ export const solicitudesService = {
     });
     return response.data;
   },
+
+  /**
+   * Desembolsa una solicitud (solo TESORERO).
+   * @param id The ID of the solicitud to disburse.
+   * @param codigoDesembolso Código de transferencia / comprobante.
+   */
+  async desembolsar(id: number | string, codigoDesembolso: string) {
+    const token = Cookies.get('token');
+    const response = await api.patch(
+      `/solicitudes/${id}/desembolsar`,
+      { codigoDesembolso },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  },
 };
 
 export default solicitudesService;

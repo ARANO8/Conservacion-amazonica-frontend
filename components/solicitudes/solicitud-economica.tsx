@@ -138,12 +138,37 @@ export default function SolicitudEconomica({
           const patched = structure.map((item) => {
             const seleccion = misSelecciones.find((s) => s.poaId === item.id);
             if (seleccion) {
-              // Lógica de reembolso
-              const reembolso = Number(seleccion.montoPresupuestado || 0);
-              const saldoBase = Number(item.saldoDisponible ?? item.costoTotal);
+              const montoReembolso = Number(seleccion.montoPresupuestado || 0);
+              const saldoBackend = Number(
+                item.saldoDisponible ?? item.costoTotal
+              );
+              const costoTotal = Number(item.costoTotal);
+              const saldoVirtualTotal = saldoBackend + montoReembolso;
+
+              // 2. Determinamos si recuperamos todo el dinero (para ocultar warning)
+              // Usamos epsilon pequeña para flotantes
+              const recupereTodo =
+                Math.abs(saldoVirtualTotal - costoTotal) < 0.01;
+
+              console.log(
+                `✅ [FIXED BALANCE] Item: ${item.codigoPresupuestario?.codigoCompleto}`,
+                {
+                  '1_SaldoBackend': saldoBackend,
+                  '2_MontoSelect': montoReembolso,
+                  '3_VirtualTotal': saldoVirtualTotal,
+                  '4_CostoTotal': costoTotal,
+                  '5_HideWarning': recupereTodo,
+                }
+              );
+
               return {
                 ...item,
-                saldoDisponible: saldoBase + reembolso,
+                // CRÍTICO: NO SOBRESCRIBIR saldoDisponible CON LA SUMA VIRTUAL.
+                // Dejar el saldo del backend para que la tarjeta haga su suma visual natural.
+                saldoDisponible: saldoBackend,
+
+                // Solo manipulamos el flag de compromisos para ocultar el badge si aplica
+                tieneCompromisos: !recupereTodo,
               };
             }
             return item;
