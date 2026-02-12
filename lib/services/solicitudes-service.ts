@@ -41,6 +41,24 @@ export const solicitudesService = {
     const response = await api.get(`/solicitudes/${id}`);
     return response.data;
   },
+
+  /**
+   * Updates an existing Solicitud.
+   * @param id The ID of the solicitud to update.
+   * @param payload The adapted form data for the backend.
+   */
+  async updateSolicitud(
+    id: number | string,
+    payload: Partial<CreateSolicitudPayload>
+  ) {
+    const token = Cookies.get('token');
+    const response = await api.patch(`/solicitudes/${id}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
 };
 
 export default solicitudesService;

@@ -1,5 +1,5 @@
 export interface CreateSolicitudPayload {
-  presupuestosIds: number[];
+  poaIds: number[];
   aprobadorId: number;
   lugarViaje: string;
   motivoViaje: string;
@@ -20,10 +20,10 @@ export interface CreateSolicitudPayload {
     cantidadPersonas: number;
     montoNeto: number;
     montoPresupuestado: number;
-    solicitudPresupuestoId: number;
+    poaId: number;
   }[];
   gastos: {
-    solicitudPresupuestoId: number;
+    poaId: number;
     tipoGastoId: number;
     tipoDocumento: string;
     cantidad: number;
@@ -99,6 +99,7 @@ export interface SolicitudResponse {
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
+    costoUnitario?: number | string;
   }>;
   planificaciones?: Array<{
     id: number;
@@ -132,6 +133,9 @@ export interface SolicitudResponse {
       actividad?: {
         detalleDescripcion: string;
       };
+      montoPresupuestado?: number | string;
+      saldoDisponible?: number | string;
+      costoTotal?: number | string;
     };
     viaticos?: Array<{
       id: number;
@@ -157,6 +161,7 @@ export interface SolicitudResponse {
         nombre: string;
       };
     }>;
+    subtotalPresupuestado?: number | string;
   }>;
   fechaInicio?: string;
   fechaFin?: string;

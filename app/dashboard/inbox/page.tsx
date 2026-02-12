@@ -24,11 +24,12 @@ export default function InboxPage() {
         // Traemos todas para filtrar localmente según pedido (Bandeja de Entrada)
         const response = await solicitudesService.getSolicitudes();
 
-        // Filtrado: Solo las que este usuario debe aprobar
+        // Filtrado: Solo las que este usuario debe aprobar y NO están observadas
         const incoming = response.filter(
           (s: SolicitudResponse) =>
-            String(s.aprobadorId) === String(user.id) ||
-            String(s.aprobador?.id) === String(user.id)
+            (String(s.aprobadorId) === String(user.id) ||
+              String(s.aprobador?.id) === String(user.id)) &&
+            s.estado !== 'OBSERVADO'
         );
 
         setData(incoming);

@@ -10,8 +10,8 @@ export const formSchema = z.object({
   actividades: z
     .array(
       z.object({
-        fechaInicio: z.string().min(1, 'Fecha inicio requerida'),
-        fechaFin: z.string().min(1, 'Fecha fin requerida'),
+        fechaInicio: z.union([z.string(), z.date()]),
+        fechaFin: z.union([z.string(), z.date()]),
         cantDias: z.number().optional(),
         actividadProgramada: z.string().min(1, 'Actividad requerida'),
         cantInstitucion: z.number().min(0),
@@ -32,8 +32,10 @@ export const formSchema = z.object({
         grupoId: z.union([z.string(), z.number()]).optional(),
         partidaId: z.union([z.string(), z.number()]).optional(),
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
-        reservaId: z.number().nullable().optional(),
+        poaId: z.number().nullable().optional(),
+        poa: z.any().optional(), // Store the full POA for display/rehydration
         montoReservado: z.number().optional(),
+        montoPresupuestado: z.number().optional(),
         saldoDisponible: z.number().optional(),
         isLocked: z.boolean().optional(),
       })
@@ -43,8 +45,8 @@ export const formSchema = z.object({
   partida: z.union([z.string(), z.number()]).optional(),
   codigoProyecto: z.union([z.string(), z.number()]).optional(),
   solicitante: z.string().optional(),
-  fechaInicio: z.string().optional(),
-  fechaFin: z.string().optional(),
+  fechaInicio: z.union([z.string(), z.date()]).optional(),
+  fechaFin: z.union([z.string(), z.date()]).optional(),
 
   // Tabla 1: Viáticos / Pasajes
   viaticos: z

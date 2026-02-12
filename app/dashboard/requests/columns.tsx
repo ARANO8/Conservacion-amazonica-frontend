@@ -141,14 +141,38 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
   {
     id: 'revisar',
     header: 'Revisar',
-    cell: ({ row }) => (
-      <Button asChild variant="ghost" size="sm">
-        <Link href={`/dashboard/solicitud/${row.original.id}?source=requests`}>
-          <Eye className="mr-2 h-4 w-4" />
-          Revisar
-        </Link>
-      </Button>
-    ),
+    cell: ({ row }) => {
+      const isObserved = row.original.estado === 'OBSERVADO';
+
+      if (isObserved) {
+        return (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:border-amber-500 dark:text-amber-500 dark:hover:bg-amber-950/30"
+          >
+            <Link
+              href={`/dashboard/solicitud/${row.original.id}/edit?source=requests`}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Corregir
+            </Link>
+          </Button>
+        );
+      }
+
+      return (
+        <Button asChild variant="ghost" size="sm">
+          <Link
+            href={`/dashboard/solicitud/${row.original.id}?source=requests`}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Revisar
+          </Link>
+        </Button>
+      );
+    },
   },
   {
     id: 'actions',

@@ -45,7 +45,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapFormToBreakdown } from '@/lib/mappers/breakdown-mapper';
 
@@ -55,7 +55,7 @@ interface ReviewModalProps {
   onSubmit: (data: FormData) => void;
   loading?: boolean;
   usuarios: Usuario[];
-  misReservas: PresupuestoReserva[];
+  misSelecciones: SeleccionPresupuesto[];
   conceptos: Concepto[];
   tiposGasto: TipoGasto[];
   currentUserId?: number;
@@ -67,7 +67,7 @@ export default function ReviewModal({
   onSubmit,
   loading = false,
   usuarios,
-  misReservas,
+  misSelecciones,
   conceptos,
   tiposGasto,
   currentUserId,
@@ -114,8 +114,8 @@ export default function ReviewModal({
     totalLiquidoViaticos + totalLiquidoGastos + totalLiquidoNomina;
 
   const partidasMapped = useMemo(() => {
-    return mapFormToBreakdown(data, misReservas, conceptos, tiposGasto);
-  }, [data, misReservas, conceptos, tiposGasto]);
+    return mapFormToBreakdown(data, misSelecciones, conceptos, tiposGasto);
+  }, [data, misSelecciones, conceptos, tiposGasto]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -162,8 +162,8 @@ export default function ReviewModal({
                     CODIGO / POA:
                   </span>{' '}
                   <span className="font-bold">
-                    {misReservas.find(
-                      (r) => r.id === data.fuentesSeleccionadas?.[0]?.reservaId
+                    {misSelecciones.find(
+                      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
                     )?.poa?.codigoPoa || 'S/N'}
                   </span>
                 </p>
@@ -172,8 +172,8 @@ export default function ReviewModal({
                     PROYECTO:
                   </span>{' '}
                   <span className="font-bold">
-                    {misReservas.find(
-                      (r) => r.id === data.fuentesSeleccionadas?.[0]?.reservaId
+                    {misSelecciones.find(
+                      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
                     )?.poa?.estructura?.proyecto?.nombre || 'S/N'}
                   </span>
                 </p>

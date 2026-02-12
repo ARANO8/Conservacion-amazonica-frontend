@@ -99,20 +99,23 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     name: `actividades.${idx}.fechaFin`,
   });
 
-  const calculateDays = useCallback((start: string, end: string) => {
-    if (!start || !end) return 1;
-    const s = new Date(start);
-    const e = new Date(end);
-    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
+  const calculateDays = useCallback(
+    (start: string | Date, end: string | Date) => {
+      if (!start || !end) return 1;
+      const s = new Date(start);
+      const e = new Date(end);
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
 
-    // Reset hours to avoid DST issues
-    s.setHours(0, 0, 0, 0);
-    e.setHours(0, 0, 0, 0);
+      // Reset hours to avoid DST issues
+      s.setHours(0, 0, 0, 0);
+      e.setHours(0, 0, 0, 0);
 
-    const diffTime = e.getTime() - s.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays > 0 ? diffDays : 1;
-  }, []);
+      const diffTime = e.getTime() - s.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      return diffDays > 0 ? diffDays : 1;
+    },
+    []
+  );
 
   // Use a ref to track previous dates to prevent overwriting manual edits on mount
   const prevDates = useRef({ start: fechaInicio, end: fechaFin });
@@ -148,6 +151,11 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                 <Input
                   type="date"
                   {...field}
+                  value={
+                    field.value instanceof Date
+                      ? field.value.toISOString().split('T')[0]
+                      : field.value || ''
+                  }
                   min={today}
                   className="h-9 text-xs"
                   onChange={(e) => {
@@ -155,7 +163,13 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                     field.onChange(newValue);
 
                     // Date Push Logic: If new start date > current end date, push end date
-                    if (fechaFin && newValue > fechaFin) {
+                    if (
+                      fechaFin &&
+                      newValue >
+                        (fechaFin instanceof Date
+                          ? fechaFin.toISOString().split('T')[0]
+                          : fechaFin)
+                    ) {
                       setValue(`actividades.${idx}.fechaFin`, newValue, {
                         shouldValidate: true,
                         shouldDirty: true,
@@ -182,7 +196,16 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                 <Input
                   type="date"
                   {...field}
-                  min={fechaInicio || today}
+                  value={
+                    field.value instanceof Date
+                      ? field.value.toISOString().split('T')[0]
+                      : field.value || ''
+                  }
+                  min={
+                    fechaInicio instanceof Date
+                      ? fechaInicio.toISOString().split('T')[0]
+                      : fechaInicio || today
+                  }
                   className="h-9 text-xs"
                 />
               </FormControl>
