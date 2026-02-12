@@ -91,6 +91,7 @@ interface SolicitudEconomicaProps {
     React.SetStateAction<SeleccionPresupuesto[]>
   >;
   initialPoaCode?: string;
+  isEditMode?: boolean;
 }
 export default function SolicitudEconomica({
   control,
@@ -101,6 +102,7 @@ export default function SolicitudEconomica({
   misSelecciones,
   setMisSelecciones,
   initialPoaCode,
+  isEditMode = false,
 }: SolicitudEconomicaProps) {
   const { setValue, watch } = useFormContext<FormData>();
 
@@ -120,23 +122,49 @@ export default function SolicitudEconomica({
 
   // REHYDRATION LOGIC: Cargar estructura si ya tenemos un POA (ej. en modo edición)
   useEffect(() => {
-    if (initialPoaCode && poaStructure.length === 0 && !isLoadingStructure) {
-      const fetchStructure = async () => {
-        try {
-          setIsLoadingStructure(true);
-          const structure =
-            await catalogosService.getEstructuraByPoa(initialPoaCode);
-          setPoaStructure(structure);
-        } catch {
-          toast.error('Error al restaurar la estructura del POA');
-        } finally {
-          setIsLoadingStructure(false);
-        }
-      };
+    // Si no hay código inicial y no estamos cargando, no hacer nada.
+    if (!initialPoaCode || isLoadingStructure) return;
 
-      fetchStructure();
-    }
-  }, [initialPoaCode, poaStructure.length, isLoadingStructure]);
+    const fetchStructure = async () => {
+      try {
+        setIsLoadingStructure(true);
+        // 1. Obtener datos puros siempre
+        const structure =
+          await catalogosService.getEstructuraByPoa(initialPoaCode);
+
+        // 2. Solo si es EDICIÓN, aplicamos el parche
+        // Nota: Usamos el valor actual de misSelecciones (del prop), pero NO lo ponemos en dependencias para evitar re-loops.
+        if (isEditMode && misSelecciones.length > 0) {
+          const patched = structure.map((item) => {
+            const seleccion = misSelecciones.find((s) => s.poaId === item.id);
+            if (seleccion) {
+              // Lógica de reembolso
+              const reembolso = Number(seleccion.montoPresupuestado || 0);
+              const saldoBase = Number(item.saldoDisponible ?? item.costoTotal);
+              return {
+                ...item,
+                saldoDisponible: saldoBase + reembolso,
+              };
+            }
+            return item;
+          });
+          setPoaStructure(patched);
+        } else {
+          // 3. Si es CREACIÓN, usamos datos puros
+          setPoaStructure(structure);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error('Error al cargar POA');
+      } finally {
+        setIsLoadingStructure(false);
+      }
+    };
+
+    fetchStructure();
+    // DEPENDENCIAS CRÍTICAS: Solo el código y el modo. NO misSelecciones.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPoaCode, isEditMode]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -398,6 +426,7 @@ export default function SolicitudEconomica({
               codigoPoa={selectedPoa}
               misSelecciones={misSelecciones}
               setMisSelecciones={setMisSelecciones}
+              isEditMode={isEditMode}
             />
           ))}
           {fields.length === 0 && (
@@ -513,6 +542,7 @@ function FuenteCard({
   codigoPoa,
   misSelecciones,
   setMisSelecciones,
+  isEditMode = false,
 }: {
   index: number;
   control: Control<FormData>;
@@ -524,6 +554,7 @@ function FuenteCard({
   setMisSelecciones: React.Dispatch<
     React.SetStateAction<SeleccionPresupuesto[]>
   >;
+  isEditMode?: boolean;
 }) {
   const { setValue, watch } = useFormContext<FormData>();
 
@@ -674,7 +705,10 @@ function FuenteCard({
 
     // Registrar en el formulario
     setValue(`fuentesSeleccionadas.${index}.poaId`, poaItem.id);
-    setValue(`fuentesSeleccionadas.${index}.montoReservado`, monto);
+    setValue(
+      `fuentesSeleccionadas.${index}.montoReservado`,
+      isEditMode ? monto : 0
+    );
     setValue(`fuentesSeleccionadas.${index}.saldoDisponible`, saldo);
     setValue(`fuentesSeleccionadas.${index}.isLocked`, true);
 
@@ -697,7 +731,7 @@ function FuenteCard({
         codigoPresupuestario: poaItem.codigoPresupuestario,
         estructura: poaItem.estructura,
       },
-      montoPresupuestado: monto,
+      montoPresupuestado: isEditMode ? monto : 0,
       saldoDisponible: saldo,
     };
 

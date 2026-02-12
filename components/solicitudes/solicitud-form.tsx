@@ -334,6 +334,7 @@ export default function SolicitudForm({
                     initialPoaCode={
                       initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa
                     }
+                    isEditMode={isEditMode}
                   />
                 )}
 
