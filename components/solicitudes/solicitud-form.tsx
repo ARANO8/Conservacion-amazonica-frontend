@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Field,
@@ -187,7 +187,24 @@ export default function SolicitudForm({
       if (isValid) {
         setIsReviewModalOpen(true);
       } else {
-        toast.error('Corrige los errores en la nómina');
+        const errors = form.formState.errors;
+        if (errors.nomina) {
+          console.error('🚨 ERRORES REALES EN NÓMINA:', errors.nomina);
+          // Obtener el primer mensaje de error para mostrarlo
+          const primerError = Array.isArray(errors.nomina)
+            ? errors.nomina.find((e) => e !== undefined)
+            : errors.nomina;
+
+          const mensajeDetallado = primerError
+            ? JSON.stringify(primerError)
+            : 'Error desconocido';
+
+          toast.error(
+            `Corrige los errores en la nómina. Detalle: ${mensajeDetallado}`
+          );
+        } else {
+          toast.error('Corrige los errores en la nómina');
+        }
       }
       return;
     }
@@ -209,6 +226,7 @@ export default function SolicitudForm({
     setLoading(true);
     try {
       const payload = adaptFormToPayload(data, aprobadorId);
+      console.log('🚀 [PAYLOAD A ENVIAR]:', JSON.stringify(payload, null, 2));
 
       if (isEditMode && solicitudId) {
         // Enviar actualización (PATCH)
@@ -236,6 +254,17 @@ export default function SolicitudForm({
       setLoading(false);
       setIsReviewModalOpen(false);
     }
+  };
+
+  const onError = (errors: FieldErrors<FormData>) => {
+    console.error('🚨 ERRORES REALES DE VALIDACIÓN:', errors);
+    // Imprime el estado actual del formulario (Payload)
+    console.log(
+      '📦 [PAYLOAD DEL FRONTEND]:',
+      JSON.stringify(form.getValues(), null, 2)
+    );
+
+    toast.error('Corrige los errores marcados en rojo.');
   };
 
   if (isLoading) {
@@ -364,6 +393,7 @@ export default function SolicitudForm({
           conceptos={conceptos}
           tiposGasto={tiposGasto}
           currentUserId={Number(user?.id)}
+          onError={onError}
         />
 
         <AlertDialog

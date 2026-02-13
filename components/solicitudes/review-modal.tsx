@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, FieldErrors } from 'react-hook-form';
 import {
   Dialog,
   DialogContent,
@@ -59,6 +59,7 @@ interface ReviewModalProps {
   conceptos: Concepto[];
   tiposGasto: TipoGasto[];
   currentUserId?: number;
+  onError?: (errors: FieldErrors<FormData>) => void;
 }
 
 export default function ReviewModal({
@@ -71,6 +72,7 @@ export default function ReviewModal({
   conceptos,
   tiposGasto,
   currentUserId,
+  onError,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit, setValue } = useFormContext<FormData>();
   const [open, setOpen] = useState(false);
@@ -318,7 +320,7 @@ export default function ReviewModal({
           </Button>
           <Button
             className="min-w-[150px] shadow-lg"
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onSubmit, onError)}
             disabled={loading}
           >
             {loading ? (

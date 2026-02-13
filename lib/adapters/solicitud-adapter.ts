@@ -107,8 +107,6 @@ export const adaptResponseToFormData = (
     // o asumiremos que el usuario lo agregará.
     // MEJOR OPCION: Verificamos si existe en runtime o usamos 0.
 
-    const montoPresupuestado = Number(p.poa?.montoPresupuestado || 0);
-
     // CORRECCION CRITICA:
     // El saldoDisponible del backend ya tiene restado el monto de esta solicitud.
     // Para editar, debemos "devolver" virtualmente el monto QUE ESTA SOLICITUD ESTA USANDO.
@@ -184,8 +182,9 @@ export const adaptResponseToFormData = (
       cantidad: Number(g.cantidad) || 1,
       liquidoPagable: Number(g.montoNeto || 0),
       montoNeto: Number(g.montoPresupuestado || 0),
-      // SINTOMA 3: Gastos Incompletos (Costo Unitario)
-      costoUnitario: Number(g.costoUnitario) || 0,
+      // CORRECCIÓN: Asegurar que el costo unitario venga del campo correcto del backend
+      // para evitar duplicación al multiplicar por cantidad en el formulario.
+      costoUnitario: Number(g.costoUnitario || 0),
       detalle: g.detalle || '',
     };
   });
