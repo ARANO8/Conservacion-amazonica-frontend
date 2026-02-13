@@ -6,6 +6,7 @@ import {
   useFieldArray,
   useWatch,
   useFormContext,
+  useFormState,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -133,11 +134,6 @@ function ViaticoCard({
     name: `viaticos.${index}.cantidadPersonas`,
   }) as number;
 
-  const liquidoPagable = useWatch({
-    control,
-    name: `viaticos.${index}.liquidoPagable`,
-  }) as number;
-
   const watchConceptoId = useWatch({
     control,
     name: `viaticos.${index}.conceptoId`,
@@ -164,8 +160,16 @@ function ViaticoCard({
   }, [actividadesPlanificadas, watchPlanificacionIndex]);
 
   // Auto-fill logic: Días and Personas based on selected planificación and destination type
+  // Use form state to check if the user is interacting with the dropdowns
+  const { dirtyFields } = useFormState({ control });
+
   useEffect(() => {
-    if (selectedPlanificacion) {
+    const isPlanificacionDirty =
+      dirtyFields.viaticos?.[index]?.planificacionIndex;
+    const isTipoDestinoDirty = dirtyFields.viaticos?.[index]?.tipoDestino;
+
+    // Only update if the user explicitly changed the source of truth
+    if ((isPlanificacionDirty || isTipoDestinoDirty) && selectedPlanificacion) {
       // Logic requirement:
       // INSTITUCIONAL -> use cantInstitucion
       // TERCEROS -> use cantTerceros
@@ -180,11 +184,12 @@ function ViaticoCard({
       setValue(`viaticos.${index}.cantidadPersonas`, personasCount, {
         shouldDirty: true,
       });
-    } else {
+    } else if (isPlanificacionDirty && !selectedPlanificacion) {
+      // User cleared selection
       setValue(`viaticos.${index}.dias`, 0, { shouldDirty: true });
       setValue(`viaticos.${index}.cantidadPersonas`, 0, { shouldDirty: true });
     }
-  }, [selectedPlanificacion, watchTipoDestino, setValue, index]);
+  }, [selectedPlanificacion, watchTipoDestino, setValue, index, dirtyFields]);
 
   // Get the unit price from the selected concept
   const precioUnitario = useMemo(() => {
@@ -407,6 +412,7 @@ function ViaticoCard({
                 <FormControl>
                   <Input
                     type="number"
+                    step="0.5"
                     {...field}
                     className="bg-muted text-muted-foreground w-full cursor-not-allowed"
                     value={field.value ?? 0}

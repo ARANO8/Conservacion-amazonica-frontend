@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,6 +8,7 @@ import {
   useFieldArray,
   useWatch,
   UseFormSetValue,
+  useFormState,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -46,15 +47,17 @@ export default function PlanificacionActividades({
       </div>
 
       <div className="space-y-2">
-        {fields.map((field, idx) => (
-          <ActividadRow
-            key={field.id}
-            idx={idx}
-            control={control}
-            setValue={setValue}
-            remove={remove}
-          />
-        ))}
+        {fields.map((field, idx) => {
+          return (
+            <ActividadRow
+              key={field.id}
+              idx={idx}
+              control={control}
+              setValue={setValue}
+              remove={remove}
+            />
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between pt-2">
@@ -98,6 +101,13 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     control,
     name: `actividades.${idx}.fechaFin`,
   });
+  const cantDias = useWatch({
+    control,
+    name: `actividades.${idx}.cantDias`,
+  });
+
+  // Log 1: Estado actual en cada render
+  console.log(`⏱️ [DEBUG RENDER ${idx}] cantDias:`, cantDias, typeof cantDias);
 
   const calculateDays = useCallback(
     (start: string | Date, end: string | Date) => {
@@ -117,23 +127,26 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     []
   );
 
-  // Use a ref to track previous dates to prevent overwriting manual edits on mount
-  const prevDates = useRef({ start: fechaInicio, end: fechaFin });
+  // Access form state to check for dirty fields
+  const { dirtyFields } = useFormState({ control });
 
   useEffect(() => {
-    // Only recalculate if the dates have actually changed (string comparison)
-    const hasChanged =
-      fechaInicio !== prevDates.current.start ||
-      fechaFin !== prevDates.current.end;
+    // Check if the specific date fields for this row are dirty
+    const isFechaInicioDirty = dirtyFields.actividades?.[idx]?.fechaInicio;
+    const isFechaFinDirty = dirtyFields.actividades?.[idx]?.fechaFin;
 
-    if (hasChanged && fechaInicio && fechaFin) {
+    // Only recalculate if the user has manually changed the dates
+    if ((isFechaInicioDirty || isFechaFinDirty) && fechaInicio && fechaFin) {
+      console.log(
+        `⚠️ [DEBUG EFFECT ${idx}] El usuario cambió las fechas manualmente. Recalculando...`
+      );
       const days = calculateDays(fechaInicio, fechaFin);
-      setValue(`actividades.${idx}.cantDias`, days);
-
-      // Update the ref with new values
-      prevDates.current = { start: fechaInicio, end: fechaFin };
+      setValue(`actividades.${idx}.cantDias`, days, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
-  }, [fechaInicio, fechaFin, idx, setValue, calculateDays]);
+  }, [fechaInicio, fechaFin, idx, setValue, calculateDays, dirtyFields]);
 
   const today = new Date().toISOString().split('T')[0];
 

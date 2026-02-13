@@ -109,6 +109,7 @@ export interface SolicitudResponse {
     cantidadPersonasInstitucional: number;
     cantidadPersonasTerceros: number;
     diasCalculados?: number;
+    dias?: number; // Propiedad que el backend envía con el valor decimal real
   }>;
   presupuestos?: Array<{
     id: number;
