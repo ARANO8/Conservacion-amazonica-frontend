@@ -35,13 +35,6 @@ Thumbs.db
 # Documentation and config
 README.md
 backend-spec.json
-.prettierrc
-.lintstagedrc
-eslint.config.mjs
-commitlint.config.js
-tailwind.config.ts
-postcss.config.mjs
-components.json
 
 # Tests
 cypress
