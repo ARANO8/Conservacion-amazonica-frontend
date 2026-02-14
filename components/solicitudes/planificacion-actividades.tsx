@@ -8,6 +8,7 @@ import {
   useFieldArray,
   useWatch,
   UseFormSetValue,
+  useFormState,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -46,15 +47,17 @@ export default function PlanificacionActividades({
       </div>
 
       <div className="space-y-2">
-        {fields.map((field, idx) => (
-          <ActividadRow
-            key={field.id}
-            idx={idx}
-            control={control}
-            setValue={setValue}
-            remove={remove}
-          />
-        ))}
+        {fields.map((field, idx) => {
+          return (
+            <ActividadRow
+              key={field.id}
+              idx={idx}
+              control={control}
+              setValue={setValue}
+              remove={remove}
+            />
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between pt-2">
@@ -99,27 +102,41 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     name: `actividades.${idx}.fechaFin`,
   });
 
-  const calculateDays = useCallback((start: string, end: string) => {
-    if (!start || !end) return 1;
-    const s = new Date(start);
-    const e = new Date(end);
-    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
+  const calculateDays = useCallback(
+    (start: string | Date, end: string | Date) => {
+      if (!start || !end) return 1;
+      const s = new Date(start);
+      const e = new Date(end);
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
 
-    // Reset hours to avoid DST issues
-    s.setHours(0, 0, 0, 0);
-    e.setHours(0, 0, 0, 0);
+      // Reset hours to avoid DST issues
+      s.setHours(0, 0, 0, 0);
+      e.setHours(0, 0, 0, 0);
 
-    const diffTime = e.getTime() - s.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays > 0 ? diffDays : 1;
-  }, []);
+      const diffTime = e.getTime() - s.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      return diffDays > 0 ? diffDays : 1;
+    },
+    []
+  );
+
+  // Access form state to check for dirty fields
+  const { dirtyFields } = useFormState({ control });
 
   useEffect(() => {
-    if (fechaInicio && fechaFin) {
+    // Check if the specific date fields for this row are dirty
+    const isFechaInicioDirty = dirtyFields.actividades?.[idx]?.fechaInicio;
+    const isFechaFinDirty = dirtyFields.actividades?.[idx]?.fechaFin;
+
+    // Only recalculate if the user has manually changed the dates
+    if ((isFechaInicioDirty || isFechaFinDirty) && fechaInicio && fechaFin) {
       const days = calculateDays(fechaInicio, fechaFin);
-      setValue(`actividades.${idx}.cantDias`, days);
+      setValue(`actividades.${idx}.cantDias`, days, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
-  }, [fechaInicio, fechaFin, idx, setValue, calculateDays]);
+  }, [fechaInicio, fechaFin, idx, setValue, calculateDays, dirtyFields]);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -137,6 +154,11 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                 <Input
                   type="date"
                   {...field}
+                  value={
+                    field.value instanceof Date
+                      ? field.value.toISOString().split('T')[0]
+                      : field.value || ''
+                  }
                   min={today}
                   className="h-9 text-xs"
                   onChange={(e) => {
@@ -144,7 +166,13 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                     field.onChange(newValue);
 
                     // Date Push Logic: If new start date > current end date, push end date
-                    if (fechaFin && newValue > fechaFin) {
+                    if (
+                      fechaFin &&
+                      newValue >
+                        (fechaFin instanceof Date
+                          ? fechaFin.toISOString().split('T')[0]
+                          : fechaFin)
+                    ) {
                       setValue(`actividades.${idx}.fechaFin`, newValue, {
                         shouldValidate: true,
                         shouldDirty: true,
@@ -171,7 +199,16 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                 <Input
                   type="date"
                   {...field}
-                  min={fechaInicio || today}
+                  value={
+                    field.value instanceof Date
+                      ? field.value.toISOString().split('T')[0]
+                      : field.value || ''
+                  }
+                  min={
+                    fechaInicio instanceof Date
+                      ? fechaInicio.toISOString().split('T')[0]
+                      : fechaInicio || today
+                  }
                   className="h-9 text-xs"
                 />
               </FormControl>
@@ -181,7 +218,7 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
         />
       </div>
 
-      {/* Días (ReadOnly) */}
+      {/* Días (Editable con decimales) */}
       <div className="md:col-span-1">
         <LabelMobile label="Días" />
         <FormField
@@ -191,10 +228,12 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
             <FormItem>
               <FormControl>
                 <Input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
                   {...field}
-                  readOnly
-                  disabled
                   className="bg-muted h-9 text-center text-xs font-bold"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
             </FormItem>

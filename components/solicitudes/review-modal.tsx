@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, FieldErrors } from 'react-hook-form';
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,9 @@ import {
   CommandList,
 } from '@/components/ui/command';
 
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
+import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
+import { mapFormToBreakdown } from '@/lib/mappers/breakdown-mapper';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -53,10 +55,11 @@ interface ReviewModalProps {
   onSubmit: (data: FormData) => void;
   loading?: boolean;
   usuarios: Usuario[];
-  misReservas: PresupuestoReserva[];
+  misSelecciones: SeleccionPresupuesto[];
   conceptos: Concepto[];
   tiposGasto: TipoGasto[];
   currentUserId?: number;
+  onError?: (errors: FieldErrors<FormData>) => void;
 }
 
 export default function ReviewModal({
@@ -65,10 +68,11 @@ export default function ReviewModal({
   onSubmit,
   loading = false,
   usuarios,
-  misReservas,
+  misSelecciones,
   conceptos,
   tiposGasto,
   currentUserId,
+  onError,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit, setValue } = useFormContext<FormData>();
   const [open, setOpen] = useState(false);
@@ -110,6 +114,10 @@ export default function ReviewModal({
   const totalGeneral = totalViaticos + totalGastos + totalNomina;
   const totalLiquidoGeneral =
     totalLiquidoViaticos + totalLiquidoGastos + totalLiquidoNomina;
+
+  const partidasMapped = useMemo(() => {
+    return mapFormToBreakdown(data, misSelecciones, conceptos, tiposGasto);
+  }, [data, misSelecciones, conceptos, tiposGasto]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -156,8 +164,8 @@ export default function ReviewModal({
                     CODIGO / POA:
                   </span>{' '}
                   <span className="font-bold">
-                    {misReservas.find(
-                      (r) => r.id === data.fuentesSeleccionadas?.[0]?.reservaId
+                    {misSelecciones.find(
+                      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
                     )?.poa?.codigoPoa || 'S/N'}
                   </span>
                 </p>
@@ -166,197 +174,20 @@ export default function ReviewModal({
                     PROYECTO:
                   </span>{' '}
                   <span className="font-bold">
-                    {misReservas.find(
-                      (r) => r.id === data.fuentesSeleccionadas?.[0]?.reservaId
+                    {misSelecciones.find(
+                      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
                     )?.poa?.estructura?.proyecto?.nombre || 'S/N'}
                   </span>
                 </p>
               </div>
             </section>
 
-            {/* 2. TAREA 1: DESGLOSE POR PARTIDA (Refinado) */}
+            {/* 2. DESGLOSE POR PARTIDA (DRY Refactored) */}
             <section className="space-y-4">
               <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
                 Presupuesto por Partida
               </h3>
-              {(data.fuentesSeleccionadas || []).map((fuente, idx) => {
-                const reserva = misReservas.find(
-                  (r) => r.id === fuente.reservaId
-                );
-                if (!reserva) return null;
-
-                const nombrePartida =
-                  reserva.poa?.estructura?.partida?.nombre || '';
-                const esViatico = nombrePartida
-                  .toUpperCase()
-                  .includes('VIATICOS');
-
-                const viaticosAsociados = (data.viaticos || []).filter(
-                  (v) => v.solicitudPresupuestoId === reserva.id
-                );
-                const gastosAsociados = (data.items || []).filter(
-                  (i) => i.solicitudPresupuestoId === reserva.id
-                );
-
-                const totalPresupuestado = esViatico
-                  ? viaticosAsociados.reduce(
-                      (acc, v) => acc + (Number(v.montoNeto) || 0),
-                      0
-                    )
-                  : gastosAsociados.reduce(
-                      (acc, i) => acc + (Number(i.montoNeto) || 0),
-                      0
-                    );
-
-                const totalLiquido = esViatico
-                  ? viaticosAsociados.reduce(
-                      (acc, v) =>
-                        acc + (Number(v.liquidoPagable ?? v.montoNeto) || 0),
-                      0
-                    )
-                  : gastosAsociados.reduce(
-                      (acc, i) =>
-                        acc + (Number(i.liquidoPagable ?? i.montoNeto) || 0),
-                      0
-                    );
-
-                return (
-                  <div
-                    key={fuente.reservaId || idx}
-                    className="bg-card overflow-hidden rounded-xl border shadow-sm"
-                  >
-                    <div className="bg-muted/30 border-b p-3">
-                      <p className="text-primary text-base leading-tight font-black uppercase">
-                        {nombrePartida || 'Sin Nombre Partida'}
-                      </p>
-                      <p className="text-muted-foreground mt-1 text-xs font-medium uppercase">
-                        {reserva.poa?.actividad?.detalleDescripcion ||
-                          'Sin Descripción'}
-                      </p>
-                    </div>
-
-                    <div className="p-3">
-                      <div className="space-y-3">
-                        <div className="bg-muted/10 rounded-lg border px-3 py-2">
-                          <div className="mb-2 flex items-center justify-between border-b pb-1">
-                            <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                              {esViatico ? 'Detalle Viático' : 'Detalle Gasto'}
-                            </span>
-                            <div className="flex gap-8">
-                              <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                                Líquido
-                              </span>
-                              <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                                Presup.
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            {esViatico ? (
-                              viaticosAsociados.length > 0 ? (
-                                viaticosAsociados.map((v, vIdx) => (
-                                  <div
-                                    key={vIdx}
-                                    className="flex items-start justify-between text-xs"
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className="font-semibold uppercase">
-                                        {conceptos.find(
-                                          (c) => c.id === v.conceptoId
-                                        )?.nombre || 'N/A'}
-                                      </span>
-                                      <span className="text-muted-foreground text-[9px] uppercase">
-                                        {data.actividades?.[
-                                          v.planificacionIndex ?? -1
-                                        ]?.actividadProgramada || 'Sin Destino'}
-                                      </span>
-                                      <span className="text-muted-foreground text-[8px] italic">
-                                        {v.tipoDestino === 'INSTITUCIONAL'
-                                          ? 'Institucional'
-                                          : v.tipoDestino === 'TERCEROS'
-                                            ? 'Tercero'
-                                            : v.tipoDestino}
-                                      </span>
-                                    </div>
-                                    <div className="flex gap-4">
-                                      <span className="font-medium tabular-nums">
-                                        {formatMoney(
-                                          v.liquidoPagable ?? v.montoNeto
-                                        )}
-                                      </span>
-                                      <span className="font-bold tabular-nums">
-                                        {formatMoney(v.montoNeto)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))
-                              ) : (
-                                <p className="text-muted-foreground py-1 text-center text-[10px] italic">
-                                  Sin viáticos cargados
-                                </p>
-                              )
-                            ) : gastosAsociados.length > 0 ? (
-                              gastosAsociados.map((item, iIdx) => (
-                                <div
-                                  key={iIdx}
-                                  className="flex items-start justify-between text-xs"
-                                >
-                                  <div className="flex flex-col pr-4">
-                                    <span className="font-semibold uppercase">
-                                      {item.tipoGastoId
-                                        ? tiposGasto.find(
-                                            (t) => t.id === item.tipoGastoId
-                                          )?.nombre
-                                        : 'Sin detalle'}
-                                    </span>
-                                    <span className="text-muted-foreground text-[9px] uppercase">
-                                      {item.tipoDocumento || 'S/D'}
-                                    </span>
-                                  </div>
-                                  <div className="flex gap-4">
-                                    <span className="font-medium tabular-nums">
-                                      {formatMoney(
-                                        item.liquidoPagable ?? item.montoNeto
-                                      )}
-                                    </span>
-                                    <span className="font-bold tabular-nums">
-                                      {formatMoney(item.montoNeto)}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-muted-foreground py-1 text-center text-[10px] italic">
-                                Sin ítems cargados
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-end gap-6 border-t pt-3">
-                        <div className="text-right">
-                          <p className="text-muted-foreground text-[10px] font-bold uppercase">
-                            Subtotal Líquido
-                          </p>
-                          <p className="text-muted-foreground text-sm font-semibold">
-                            {formatMoney(totalLiquido)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-primary text-[10px] font-bold uppercase">
-                            Subtotal Presupuestado
-                          </p>
-                          <p className="text-primary text-sm font-black">
-                            {formatMoney(totalPresupuestado)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              <PresupuestoBreakdown partidas={partidasMapped} />
             </section>
 
             {/* 4. Selección de Destinatario con Alerta Reubicada */}
@@ -489,7 +320,7 @@ export default function ReviewModal({
           </Button>
           <Button
             className="min-w-[150px] shadow-lg"
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onSubmit, onError)}
             disabled={loading}
           >
             {loading ? (

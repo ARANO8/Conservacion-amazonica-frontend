@@ -27,14 +27,15 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Grupo, TipoGasto } from '@/types/catalogs';
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
+import { toast } from 'sonner';
 
 interface SolicitudGastosProps {
   control: Control<FormData>;
   grupos: Grupo[];
   tiposGasto: TipoGasto[];
   proyectoId?: number;
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 export default function SolicitudGastos({
@@ -71,18 +72,32 @@ export default function SolicitudGastos({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() =>
+        onClick={() => {
+          // 1. Validar que exista al menos una partida que NO sea de Viáticos
+          const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
+            const nombrePartida =
+              f.poa?.estructura?.partida?.nombre?.toUpperCase() || '';
+            return !nombrePartida.includes('VIATICOS');
+          });
+
+          if (!tienePresupuestoGastos) {
+            toast.error(
+              'Las fuentes seleccionadas son exclusivas para VIÁTICOS. No puede agregar gastos.'
+            );
+            return;
+          }
+
           append({
             solicitudPresupuestoId: 0,
             tipoDocumento: 'FACTURA',
-            tipoGastoId: 0,
+            tipoGastoId: 1,
             cantidad: 0,
             costoUnitario: 0,
             montoNeto: 0,
             detalle: '',
             liquidoPagable: 0,
-          })
-        }
+          });
+        }}
       >
         + Agregar Gasto
       </Button>
@@ -97,7 +112,7 @@ interface GastoCardProps {
   grupos: Grupo[];
   tiposGasto: TipoGasto[];
   isDisabled?: boolean;
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 function GastoCard({
@@ -117,11 +132,6 @@ function GastoCard({
   const costoUnitario = useWatch({
     control,
     name: `items.${index}.costoUnitario`,
-  }) as number;
-
-  const liquidoPagable = useWatch({
-    control,
-    name: `items.${index}.liquidoPagable`,
   }) as number;
 
   const watchDocumento = useWatch({
@@ -253,7 +263,7 @@ function GastoCard({
                   >
                     {[
                       ...new Map(
-                        fuentesDisponibles.map((f) => [f.id, f])
+                        fuentesDisponibles.map((f) => [f.poaId, f])
                       ).values(),
                     ]
                       .filter(
@@ -264,10 +274,10 @@ function GastoCard({
                       )
                       .map((fuente) => (
                         <SelectItem
-                          key={fuente.id}
-                          value={fuente.id.toString()}
+                          key={fuente.poaId}
+                          value={fuente.poaId.toString()}
                         >
-                          ID: {fuente.id} -{' '}
+                          POA: {fuente.poaId} -{' '}
                           {fuente.poa?.estructura?.partida?.nombre}
                         </SelectItem>
                       ))}

@@ -10,8 +10,8 @@ export const formSchema = z.object({
   actividades: z
     .array(
       z.object({
-        fechaInicio: z.string().min(1, 'Fecha inicio requerida'),
-        fechaFin: z.string().min(1, 'Fecha fin requerida'),
+        fechaInicio: z.union([z.string(), z.date()]),
+        fechaFin: z.union([z.string(), z.date()]),
         cantDias: z.number().optional(),
         actividadProgramada: z.string().min(1, 'Actividad requerida'),
         cantInstitucion: z.number().min(0),
@@ -32,8 +32,10 @@ export const formSchema = z.object({
         grupoId: z.union([z.string(), z.number()]).optional(),
         partidaId: z.union([z.string(), z.number()]).optional(),
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
-        reservaId: z.number().nullable().optional(),
+        poaId: z.number().nullable().optional(),
+        poa: z.any().optional(), // Store the full POA for display/rehydration
         montoReservado: z.number().optional(),
+        montoPresupuestado: z.number().optional(),
         saldoDisponible: z.number().optional(),
         isLocked: z.boolean().optional(),
       })
@@ -43,19 +45,21 @@ export const formSchema = z.object({
   partida: z.union([z.string(), z.number()]).optional(),
   codigoProyecto: z.union([z.string(), z.number()]).optional(),
   solicitante: z.string().optional(),
-  fechaInicio: z.string().optional(),
-  fechaFin: z.string().optional(),
+  fechaInicio: z.union([z.string(), z.date()]).optional(),
+  fechaFin: z.union([z.string(), z.date()]).optional(),
 
   // Tabla 1: Viáticos / Pasajes
   viaticos: z
     .array(
       z.object({
-        conceptoId: z.number().optional(),
+        id: z.number().optional(),
         planificacionIndex: z.number().optional(),
         ciudad: z.string().optional(),
         destino: z.string().optional(),
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
-        dias: z.number().optional(),
+        dias: z.number().min(0.1).optional(),
+        conceptoId: z.number().optional(),
+        costoUnitario: z.number().optional(),
         cantidadPersonas: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
         solicitudPresupuestoId: z.number(),
@@ -100,10 +104,13 @@ export const formSchema = z.object({
         procedenciaInstitucion: z
           .string()
           .min(1, 'La procedencia/institución es requerida'),
-        montoNeto: z.number().min(0.01, 'Monto debe ser mayor a 0').optional(),
+        montoNeto: z
+          .number()
+          .min(0, 'Monto debe ser mayor o igual a 0')
+          .optional(),
         liquidoPagable: z
           .number()
-          .min(0.01, 'Monto debe ser mayor a 0')
+          .min(0, 'Monto debe ser mayor o igual a 0')
           .optional(),
       })
     )

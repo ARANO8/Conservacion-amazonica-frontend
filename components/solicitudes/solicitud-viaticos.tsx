@@ -6,6 +6,7 @@ import {
   useFieldArray,
   useWatch,
   useFormContext,
+  useFormState,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -27,13 +28,14 @@ import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Concepto } from '@/types/catalogs';
-import { PresupuestoReserva } from '@/types/backend';
+import { SeleccionPresupuesto } from '@/types/backend';
+import { toast } from 'sonner';
 
 interface SolicitudViaticosProps {
   control: Control<FormData>;
   actividadesPlanificadas: FormData['actividades'];
   conceptos: Concepto[];
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 export default function SolicitudViaticos({
@@ -70,7 +72,21 @@ export default function SolicitudViaticos({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() =>
+        onClick={() => {
+          // Validar que existan partidas de viáticos antes de agregar
+          const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
+            f.poa?.estructura?.partida?.nombre
+              ?.toUpperCase()
+              .includes('VIATICOS')
+          );
+
+          if (!tienePresupuestoViaticos) {
+            toast.error(
+              'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
+            );
+            return;
+          }
+
           append({
             conceptoId: 0,
             planificacionIndex: 0,
@@ -80,8 +96,8 @@ export default function SolicitudViaticos({
             montoNeto: 0,
             solicitudPresupuestoId: 0,
             liquidoPagable: 0,
-          })
-        }
+          });
+        }}
       >
         + Agregar Viático
       </Button>
@@ -95,7 +111,7 @@ interface ViaticoCardProps {
   remove: (index: number) => void;
   actividadesPlanificadas: FormData['actividades'];
   conceptos: Concepto[];
-  fuentesDisponibles: PresupuestoReserva[];
+  fuentesDisponibles: SeleccionPresupuesto[];
 }
 
 function ViaticoCard({
@@ -106,7 +122,12 @@ function ViaticoCard({
   conceptos,
   fuentesDisponibles,
 }: ViaticoCardProps) {
-  const { setValue, trigger } = useFormContext<FormData>();
+  const { setValue } = useFormContext<FormData>();
+
+  const watchCostoUnitario = useWatch({
+    control,
+    name: `viaticos.${index}.costoUnitario`,
+  });
 
   const dias = useWatch({
     control,
@@ -116,11 +137,6 @@ function ViaticoCard({
   const personas = useWatch({
     control,
     name: `viaticos.${index}.cantidadPersonas`,
-  }) as number;
-
-  const liquidoPagable = useWatch({
-    control,
-    name: `viaticos.${index}.liquidoPagable`,
   }) as number;
 
   const watchConceptoId = useWatch({
@@ -148,22 +164,50 @@ function ViaticoCard({
     return actividadesPlanificadas[Number(watchPlanificacionIndex)];
   }, [actividadesPlanificadas, watchPlanificacionIndex]);
 
-  const maxDias = selectedPlanificacion?.cantDias ?? 0;
-  const maxPersonas =
-    watchTipoDestino === 'INSTITUCIONAL'
-      ? (selectedPlanificacion?.cantInstitucion ?? 0)
-      : (selectedPlanificacion?.cantTerceros ?? 0);
+  // Determine if it is and "Exterior" concept
+  const isExterior = useMemo(() => {
+    const conceptoSeleccionado = conceptos.find(
+      (c) => String(c.id) === String(watchConceptoId)
+    );
+    return (
+      conceptoSeleccionado?.nombre.toLowerCase().includes('exterior') || false
+    );
+  }, [watchConceptoId, conceptos]);
 
-  const isZeroLimit = selectedPlanificacion ? maxPersonas === 0 : false;
+  // Auto-fill logic: Días and Personas based on selected planificación and destination type
+  // Use form state to check if the user is interacting with the dropdowns
+  const { dirtyFields } = useFormState({ control });
 
   useEffect(() => {
-    if (selectedPlanificacion && maxPersonas === 0) {
-      setValue(`viaticos.${index}.cantidadPersonas`, 0);
+    const isPlanificacionDirty =
+      dirtyFields.viaticos?.[index]?.planificacionIndex;
+    const isTipoDestinoDirty = dirtyFields.viaticos?.[index]?.tipoDestino;
+
+    // Only update if the user explicitly changed the source of truth
+    if ((isPlanificacionDirty || isTipoDestinoDirty) && selectedPlanificacion) {
+      // Logic requirement:
+      // INSTITUCIONAL -> use cantInstitucion
+      // TERCEROS -> use cantTerceros
+      const personasCount =
+        watchTipoDestino === 'TERCEROS'
+          ? selectedPlanificacion.cantTerceros || 0
+          : selectedPlanificacion.cantInstitucion || 0;
+
+      setValue(`viaticos.${index}.dias`, selectedPlanificacion.cantDias || 0, {
+        shouldDirty: true,
+      });
+      setValue(`viaticos.${index}.cantidadPersonas`, personasCount, {
+        shouldDirty: true,
+      });
+    } else if (isPlanificacionDirty && !selectedPlanificacion) {
+      // User cleared selection
+      setValue(`viaticos.${index}.dias`, 0, { shouldDirty: true });
+      setValue(`viaticos.${index}.cantidadPersonas`, 0, { shouldDirty: true });
     }
-  }, [maxPersonas, selectedPlanificacion, setValue, index]);
+  }, [selectedPlanificacion, watchTipoDestino, setValue, index, dirtyFields]);
 
   // Get the unit price from the selected concept
-  const precioUnitario = useMemo(() => {
+  const precioUnitarioLista = useMemo(() => {
     if (!watchConceptoId || !watchTipoDestino) return 0;
 
     const conceptoObj = conceptos.find(
@@ -180,13 +224,23 @@ function ViaticoCard({
     return priceStr ? parseFloat(priceStr) : 0;
   }, [watchConceptoId, watchTipoDestino, conceptos]);
 
-  // Calculate total: días × personas × precio unitario
+  // Sync costoUnitario for non-exterior concepts
+  useEffect(() => {
+    if (!isExterior && precioUnitarioLista > 0) {
+      setValue(`viaticos.${index}.costoUnitario`, precioUnitarioLista, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [isExterior, precioUnitarioLista, index, setValue]);
+
+  // Calculate total: días × personas × costo unitario (manual or fixed)
   const netoTotal = useMemo(() => {
     const d = Number(dias) || 0;
     const p = Number(personas) || 0;
-    const precio = Number(precioUnitario) || 0;
+    const precio = Number(watchCostoUnitario) || 0;
     return d * p * precio;
-  }, [dias, personas, precioUnitario]);
+  }, [dias, personas, watchCostoUnitario]);
 
   useEffect(() => {
     const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
@@ -240,7 +294,7 @@ function ViaticoCard({
                   >
                     {[
                       ...new Map(
-                        fuentesDisponibles.map((f) => [f.id, f])
+                        fuentesDisponibles.map((f) => [f.poaId, f])
                       ).values(),
                     ]
                       .filter((f) =>
@@ -250,10 +304,10 @@ function ViaticoCard({
                       )
                       .map((fuente) => (
                         <SelectItem
-                          key={fuente.id}
-                          value={fuente.id.toString()}
+                          key={fuente.poaId}
+                          value={fuente.poaId.toString()}
                         >
-                          ID: {fuente.id} -{' '}
+                          POA: {fuente.poaId} -{' '}
                           {fuente.poa?.estructura?.partida?.nombre}
                         </SelectItem>
                       ))}
@@ -383,33 +437,13 @@ function ViaticoCard({
                 <FormControl>
                   <Input
                     type="number"
+                    step="0.5"
                     {...field}
-                    className="w-full"
+                    className="bg-muted text-muted-foreground w-full cursor-not-allowed"
                     value={field.value ?? 0}
-                    min={0}
-                    max={maxDias > 0 ? maxDias : undefined}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      if (maxDias > 0 && val > maxDias) {
-                        field.onChange(maxDias);
-                      } else {
-                        field.onChange(val);
-                      }
-                      // Only trigger validation if value is valid to clear existing error
-                      if (val >= 1) {
-                        trigger(`viaticos.${index}.dias`);
-                      }
-                    }}
+                    readOnly
                   />
                 </FormControl>
-                {selectedPlanificacion && (
-                  <p className="text-muted-foreground mt-1 text-[10px] italic">
-                    Máximo permitido: {maxDias}
-                  </p>
-                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -426,56 +460,51 @@ function ViaticoCard({
                   <Input
                     type="number"
                     {...field}
-                    className="w-full"
+                    className="bg-muted text-muted-foreground w-full cursor-not-allowed"
                     value={field.value ?? 0}
-                    min={0}
-                    max={maxPersonas > 0 ? maxPersonas : undefined}
-                    disabled={isZeroLimit}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      if (maxPersonas > 0 && val > maxPersonas) {
-                        field.onChange(maxPersonas);
-                      } else {
-                        field.onChange(val);
-                      }
-                      // Only trigger validation if value is valid to clear existing error
-                      if (val >= 1) {
-                        trigger(`viaticos.${index}.cantidadPersonas`);
-                      }
-                    }}
+                    readOnly
                   />
                 </FormControl>
-                {selectedPlanificacion && (
-                  <div className="mt-1">
-                    {isZeroLimit ? (
-                      <p className="text-destructive text-[10px] font-medium italic">
-                        Sin cupo en Planificación para este tipo
-                      </p>
-                    ) : (
-                      <p className="text-muted-foreground text-[10px] italic">
-                        Máximo permitido: {maxPersonas}
-                      </p>
-                    )}
-                  </div>
-                )}
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Costo Unitario (Bs)
-            </Label>
-            <Input
-              type="number"
-              value={precioUnitario.toFixed(2)}
-              readOnly
-              className="bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0"
-            />
-          </div>
+          <FormField
+            control={control}
+            name={`viaticos.${index}.costoUnitario`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Costo Unitario (Bs)
+                </Label>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    {...field}
+                    // Si no es exterior y no tiene valor, podemos caer en precioUnitarioLista
+                    value={
+                      field.value !== undefined
+                        ? field.value
+                        : precioUnitarioLista
+                    }
+                    onChange={(e) => {
+                      const val =
+                        e.target.value === '' ? 0 : parseFloat(e.target.value);
+                      field.onChange(val);
+                    }}
+                    readOnly={!isExterior}
+                    className={
+                      !isExterior
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0'
+                        : ''
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={control}
             name={`viaticos.${index}.montoNeto`}
