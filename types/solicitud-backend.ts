@@ -82,6 +82,7 @@ export interface SolicitudResponse {
     solicitudPresupuesto?: {
       poa?: { codigo: string };
     };
+    costoUnitario?: number | string;
   }>;
   gastos?: Array<{
     id: number;
@@ -109,6 +110,7 @@ export interface SolicitudResponse {
     cantidadPersonasInstitucional: number;
     cantidadPersonasTerceros: number;
     diasCalculados?: number;
+    dias?: number; // Propiedad que el backend envía con el valor decimal real
   }>;
   presupuestos?: Array<{
     id: number;
@@ -143,6 +145,7 @@ export interface SolicitudResponse {
       cantidadPersonas: number;
       montoNeto: number | string;
       montoPresupuestado: number | string;
+      costoUnitario?: number | string;
       tipoDestino: string;
       concepto?: {
         id: number;

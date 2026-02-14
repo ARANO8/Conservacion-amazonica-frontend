@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
-import { DownloadPdfButton } from '@/components/solicitudes/download-pdf-button';
 
-export const columns: ColumnDef<SolicitudResponse>[] = [
+/**
+ * Columnas para el Monitor de Solicitudes (solo lectura).
+ * Sin acciones de editar/corregir/eliminar — solo "Ver Detalle".
+ */
+export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
   {
     accessorKey: 'codigoSolicitud',
     header: 'Código',
@@ -21,12 +24,22 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     },
   },
   {
+    id: 'solicitante',
+    header: 'Solicitante',
+    accessorFn: (row) => row.usuarioEmisor?.nombreCompleto || 'Sin Asignar',
+    cell: ({ row }) => {
+      const nombre =
+        row.original.usuarioEmisor?.nombreCompleto || 'Sin Asignar';
+      return <span className="font-medium">{nombre}</span>;
+    },
+  },
+  {
     accessorKey: 'motivoViaje',
     header: 'Motivo',
     cell: ({ row }) => {
       const motivo = row.original.motivoViaje || '-';
       return (
-        <div className="max-w-[300px] truncate" title={motivo}>
+        <div className="max-w-[250px] truncate" title={motivo}>
           {motivo}
         </div>
       );
@@ -34,7 +47,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
   },
   {
     id: 'fecha',
-    header: 'Fecha Solicitud',
+    header: 'Fecha',
     accessorFn: (row) => row.fechaSolicitud,
     cell: ({ row }) => {
       const value = row.original.fechaSolicitud;
@@ -49,11 +62,6 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
         year: 'numeric',
       }).format(date);
     },
-  },
-  {
-    id: 'solicitante',
-    header: 'Solicitante',
-    accessorFn: (row) => row.usuarioEmisor?.nombreCompleto || 'Sin Asignar',
   },
   {
     id: 'aprobador',
@@ -120,6 +128,8 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
           'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
         RECHAZADO:
           'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
+        OBSERVADO:
+          'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/40 border-amber-200 dark:border-amber-800',
         DRAFT:
           'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-zinc-200 dark:border-zinc-700',
         BORRADOR:
@@ -140,49 +150,17 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     },
   },
   {
-    id: 'revisar',
-    header: 'Revisar',
+    id: 'verDetalle',
+    header: '',
     cell: ({ row }) => {
-      const isObserved = row.original.estado === 'OBSERVADO';
-
-      if (isObserved) {
-        return (
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:border-amber-500 dark:text-amber-500 dark:hover:bg-amber-950/30"
-          >
-            <Link
-              href={`/dashboard/solicitud/${row.original.id}/edit?source=requests`}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Corregir
-            </Link>
-          </Button>
-        );
-      }
-
       return (
         <Button asChild variant="ghost" size="sm">
-          <Link
-            href={`/dashboard/solicitud/${row.original.id}?source=requests`}
-          >
+          <Link href={`/dashboard/solicitud/${row.original.id}?source=monitor`}>
             <Eye className="mr-2 h-4 w-4" />
-            Revisar
+            Ver Detalle
           </Link>
         </Button>
       );
     },
-  },
-  {
-    id: 'actions',
-    header: 'Descargar',
-    cell: ({ row }) => (
-      <DownloadPdfButton
-        solicitudId={row.original.id}
-        codigoSolicitud={row.original.codigoSolicitud}
-      />
-    ),
   },
 ];

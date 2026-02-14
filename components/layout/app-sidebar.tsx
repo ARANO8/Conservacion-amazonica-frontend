@@ -2,7 +2,14 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { Bell, ClipboardPlus, FileText, LifeBuoy, Send } from 'lucide-react';
+import {
+  Activity,
+  Bell,
+  ClipboardPlus,
+  FileText,
+  LifeBuoy,
+  Send,
+} from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
 import { NavSecondary } from '@/components/ui/nav-secondary';
@@ -15,6 +22,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/auth-store';
 import { ModeToggle } from '@/components/mode-toggle';
+import { Role } from '@/types/backend';
 
 // Menu items estáticos (se pueden mover a config si crecen)
 const navSecondary = [
@@ -30,11 +38,43 @@ const navSecondary = [
   },
 ];
 
+/**
+ * Construye los sub-ítems del menú "Formularios" según el rol del usuario.
+ */
+function buildFormularioItems(rol?: Role) {
+  const items: { title: string; url: string }[] = [];
+
+  // Solicitud: USUARIO, TESORERO y ADMIN pueden crear solicitudes
+  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
+    items.push({ title: 'Solicitud', url: '/dashboard/solicitud' });
+  }
+
+  // Revisión: ADMIN y TESORERO son aprobadores
+  if (rol === 'ADMIN' || rol === 'TESORERO') {
+    items.push({
+      title: 'Revisión',
+      url: '/dashboard/revision?role=approver',
+    });
+  }
+
+  // Monitor Solicitudes: Vista global solo para TESORERO y ADMIN
+  if (rol === 'TESORERO' || rol === 'ADMIN') {
+    items.push({
+      title: 'Monitor Solicitudes',
+      url: '/dashboard/monitor-solicitudes',
+    });
+  }
+
+  // Rendición: Solo USUARIO
+  if (rol === 'USUARIO') {
+    items.push({ title: 'Rendicion', url: '/dashboard/rendicion' });
+  }
+
+  return items;
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore();
-
-  // Lógica de roles real
-  const isApprover = user?.rol === 'ADMIN' || user?.rol === 'TESORERO';
 
   const navMain = [
     {
@@ -51,12 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: 'Formularios',
       url: '#',
       icon: ClipboardPlus,
-      items: isApprover
-        ? [{ title: 'Revisión', url: '/dashboard/revision?role=approver' }]
-        : [
-            { title: 'Solicitud', url: '/dashboard/solicitud' },
-            { title: 'Rendicion', url: '/dashboard/rendicion' },
-          ],
+      items: buildFormularioItems(user?.rol as Role | undefined),
     },
   ];
 

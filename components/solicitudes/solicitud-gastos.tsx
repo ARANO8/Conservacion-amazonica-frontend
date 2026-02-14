@@ -28,6 +28,7 @@ import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Grupo, TipoGasto } from '@/types/catalogs';
 import { SeleccionPresupuesto } from '@/types/backend';
+import { toast } from 'sonner';
 
 interface SolicitudGastosProps {
   control: Control<FormData>;
@@ -71,7 +72,21 @@ export default function SolicitudGastos({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() =>
+        onClick={() => {
+          // 1. Validar que exista al menos una partida que NO sea de Viáticos
+          const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
+            const nombrePartida =
+              f.poa?.estructura?.partida?.nombre?.toUpperCase() || '';
+            return !nombrePartida.includes('VIATICOS');
+          });
+
+          if (!tienePresupuestoGastos) {
+            toast.error(
+              'Las fuentes seleccionadas son exclusivas para VIÁTICOS. No puede agregar gastos.'
+            );
+            return;
+          }
+
           append({
             solicitudPresupuestoId: 0,
             tipoDocumento: 'FACTURA',
@@ -81,8 +96,8 @@ export default function SolicitudGastos({
             montoNeto: 0,
             detalle: '',
             liquidoPagable: 0,
-          })
-        }
+          });
+        }}
       >
         + Agregar Gasto
       </Button>
@@ -117,11 +132,6 @@ function GastoCard({
   const costoUnitario = useWatch({
     control,
     name: `items.${index}.costoUnitario`,
-  }) as number;
-
-  const liquidoPagable = useWatch({
-    control,
-    name: `items.${index}.liquidoPagable`,
   }) as number;
 
   const watchDocumento = useWatch({

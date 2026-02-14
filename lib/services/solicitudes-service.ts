@@ -59,6 +59,36 @@ export const solicitudesService = {
     });
     return response.data;
   },
+
+  /**
+   * Desembolsa una solicitud (solo TESORERO).
+   * @param id The ID of the solicitud to disburse.
+   * @param codigoDesembolso Código de transferencia / comprobante.
+   */
+  async desembolsar(id: number | string, codigoDesembolso: string) {
+    const token = Cookies.get('token');
+    const response = await api.patch(
+      `/solicitudes/${id}/desembolsar`,
+      { codigoDesembolso },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /**
+   * Downloads a PDF for a specific solicitud.
+   * @param id The ID of the solicitud.
+   */
+  async downloadPdf(id: number | string) {
+    const response = await api.get(`/solicitudes/${id}/pdf`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
 
 export default solicitudesService;

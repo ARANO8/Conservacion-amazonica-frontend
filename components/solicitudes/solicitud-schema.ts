@@ -59,6 +59,7 @@ export const formSchema = z.object({
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
         dias: z.number().min(0.1).optional(),
         conceptoId: z.number().optional(),
+        costoUnitario: z.number().optional(),
         cantidadPersonas: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
         solicitudPresupuestoId: z.number(),
@@ -103,10 +104,13 @@ export const formSchema = z.object({
         procedenciaInstitucion: z
           .string()
           .min(1, 'La procedencia/institución es requerida'),
-        montoNeto: z.number().min(0.01, 'Monto debe ser mayor a 0').optional(),
+        montoNeto: z
+          .number()
+          .min(0, 'Monto debe ser mayor o igual a 0')
+          .optional(),
         liquidoPagable: z
           .number()
-          .min(0.01, 'Monto debe ser mayor a 0')
+          .min(0, 'Monto debe ser mayor o igual a 0')
           .optional(),
       })
     )
