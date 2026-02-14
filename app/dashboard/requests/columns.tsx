@@ -3,9 +3,10 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
+import { DownloadPdfButton } from '@/components/solicitudes/download-pdf-button';
 
 export const columns: ColumnDef<SolicitudResponse>[] = [
   {
@@ -178,12 +179,10 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     id: 'actions',
     header: 'Descargar',
     cell: ({ row }) => (
-      <Button asChild variant="ghost" size="sm">
-        <Link href={`#`}>
-          <Download className="mr-2 h-4 w-4" />
-          Descargar
-        </Link>
-      </Button>
+      <DownloadPdfButton
+        solicitudId={row.original.id}
+        codigoSolicitud={row.original.codigoSolicitud}
+      />
     ),
   },
 ];

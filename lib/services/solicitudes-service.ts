@@ -78,6 +78,17 @@ export const solicitudesService = {
     );
     return response.data;
   },
+
+  /**
+   * Downloads a PDF for a specific solicitud.
+   * @param id The ID of the solicitud.
+   */
+  async downloadPdf(id: number | string) {
+    const response = await api.get(`/solicitudes/${id}/pdf`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
 
 export default solicitudesService;
