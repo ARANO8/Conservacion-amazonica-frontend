@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 @plugin 'tailwindcss-animate';
 
+@source '../app';
+@source '../components';
+@source '../lib';
+
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
