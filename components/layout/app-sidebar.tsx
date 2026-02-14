@@ -44,8 +44,8 @@ const navSecondary = [
 function buildFormularioItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
-  // Solicitud: USUARIO y TESORERO pueden crear solicitudes
-  if (rol === 'USUARIO' || rol === 'TESORERO') {
+  // Solicitud: USUARIO, TESORERO y ADMIN pueden crear solicitudes
+  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
     items.push({ title: 'Solicitud', url: '/dashboard/solicitud' });
   }
 
