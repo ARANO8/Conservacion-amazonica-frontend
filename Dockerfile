@@ -11,7 +11,7 @@ COPY package.json pnpm-lock.yaml ./
 # Instalar dependencias
 RUN pnpm install
 
-RUN npm install -D tw-animate-css
+# RUN npm install -D tw-animate-css
 
 # Copiar el código fuente
 COPY . .
