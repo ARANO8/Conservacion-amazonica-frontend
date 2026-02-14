@@ -8,20 +8,23 @@ WORKDIR /app
 # Copiar archivos de dependencias
 COPY package.json pnpm-lock.yaml ./
 
-# Instalar dependencias
-RUN pnpm install
+# ✨ EL FIX MÁGICO: Obligar a pnpm a usar estructura plana (sin symlinks)
+RUN pnpm config set node-linker hoisted
+
+# Instalar dependencias (usando frozen-lockfile por seguridad en CI/CD)
+RUN pnpm install --frozen-lockfile
 
 # Copiar el código fuente
 COPY . .
 
-# Argumento para la URL de la API (se pasa al construir)
+# Argumento para la URL de la API
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Construir el proyecto
 RUN pnpm build
 
-# Exponer el puerto 3001 (que usas en tus scripts)
+# Exponer el puerto
 EXPOSE 3001
 
 # Iniciar la app
