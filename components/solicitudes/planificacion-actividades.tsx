@@ -101,10 +101,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     control,
     name: `actividades.${idx}.fechaFin`,
   });
-  const cantDias = useWatch({
-    control,
-    name: `actividades.${idx}.cantDias`,
-  });
 
   const calculateDays = useCallback(
     (start: string | Date, end: string | Date) => {

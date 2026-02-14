@@ -124,6 +124,11 @@ function ViaticoCard({
 }: ViaticoCardProps) {
   const { setValue } = useFormContext<FormData>();
 
+  const watchCostoUnitario = useWatch({
+    control,
+    name: `viaticos.${index}.costoUnitario`,
+  });
+
   const dias = useWatch({
     control,
     name: `viaticos.${index}.dias`,
@@ -159,6 +164,16 @@ function ViaticoCard({
     return actividadesPlanificadas[Number(watchPlanificacionIndex)];
   }, [actividadesPlanificadas, watchPlanificacionIndex]);
 
+  // Determine if it is and "Exterior" concept
+  const isExterior = useMemo(() => {
+    const conceptoSeleccionado = conceptos.find(
+      (c) => String(c.id) === String(watchConceptoId)
+    );
+    return (
+      conceptoSeleccionado?.nombre.toLowerCase().includes('exterior') || false
+    );
+  }, [watchConceptoId, conceptos]);
+
   // Auto-fill logic: Días and Personas based on selected planificación and destination type
   // Use form state to check if the user is interacting with the dropdowns
   const { dirtyFields } = useFormState({ control });
@@ -192,7 +207,7 @@ function ViaticoCard({
   }, [selectedPlanificacion, watchTipoDestino, setValue, index, dirtyFields]);
 
   // Get the unit price from the selected concept
-  const precioUnitario = useMemo(() => {
+  const precioUnitarioLista = useMemo(() => {
     if (!watchConceptoId || !watchTipoDestino) return 0;
 
     const conceptoObj = conceptos.find(
@@ -209,13 +224,23 @@ function ViaticoCard({
     return priceStr ? parseFloat(priceStr) : 0;
   }, [watchConceptoId, watchTipoDestino, conceptos]);
 
-  // Calculate total: días × personas × precio unitario
+  // Sync costoUnitario for non-exterior concepts
+  useEffect(() => {
+    if (!isExterior && precioUnitarioLista > 0) {
+      setValue(`viaticos.${index}.costoUnitario`, precioUnitarioLista, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [isExterior, precioUnitarioLista, index, setValue]);
+
+  // Calculate total: días × personas × costo unitario (manual or fixed)
   const netoTotal = useMemo(() => {
     const d = Number(dias) || 0;
     const p = Number(personas) || 0;
-    const precio = Number(precioUnitario) || 0;
+    const precio = Number(watchCostoUnitario) || 0;
     return d * p * precio;
-  }, [dias, personas, precioUnitario]);
+  }, [dias, personas, watchCostoUnitario]);
 
   useEffect(() => {
     const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
@@ -444,17 +469,42 @@ function ViaticoCard({
               </FormItem>
             )}
           />
-          <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs font-bold uppercase">
-              Costo Unitario (Bs)
-            </Label>
-            <Input
-              type="number"
-              value={precioUnitario.toFixed(2)}
-              readOnly
-              className="bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0"
-            />
-          </div>
+          <FormField
+            control={control}
+            name={`viaticos.${index}.costoUnitario`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Costo Unitario (Bs)
+                </Label>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    {...field}
+                    // Si no es exterior y no tiene valor, podemos caer en precioUnitarioLista
+                    value={
+                      field.value !== undefined
+                        ? field.value
+                        : precioUnitarioLista
+                    }
+                    onChange={(e) => {
+                      const val =
+                        e.target.value === '' ? 0 : parseFloat(e.target.value);
+                      field.onChange(val);
+                    }}
+                    readOnly={!isExterior}
+                    className={
+                      !isExterior
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed focus-visible:ring-0'
+                        : ''
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={control}
             name={`viaticos.${index}.montoNeto`}

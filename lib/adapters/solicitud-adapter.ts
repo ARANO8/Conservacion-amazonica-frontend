@@ -162,6 +162,7 @@ export const adaptResponseToFormData = (
       tipoDestino:
         (v.tipoDestino as 'INSTITUCIONAL' | 'TERCEROS') || 'INSTITUCIONAL',
       dias: Number(v.dias) || 0,
+      costoUnitario: Number(v.costoUnitario) || 0,
       cantidadPersonas: Number(v.cantidadPersonas) || 0,
       liquidoPagable: Number(v.montoNeto || 0),
       montoNeto: Number(v.montoPresupuestado || 0),
