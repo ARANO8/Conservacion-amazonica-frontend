@@ -12,8 +12,8 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm config set node-linker hoisted
 
 # Instalar dependencias (usando frozen-lockfile por seguridad en CI/CD)
-RUN pnpm install --frozen-lockfile
-
+# Cambia tu línea de pnpm install por esta:
+RUN pnpm install --prod=false --frozen-lockfile
 # Copiar el código fuente
 COPY . .
 
