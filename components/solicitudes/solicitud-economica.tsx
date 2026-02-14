@@ -150,17 +150,6 @@ export default function SolicitudEconomica({
               const recupereTodo =
                 Math.abs(saldoVirtualTotal - costoTotal) < 0.01;
 
-              console.log(
-                `✅ [FIXED BALANCE] Item: ${item.codigoPresupuestario?.codigoCompleto}`,
-                {
-                  '1_SaldoBackend': saldoBackend,
-                  '2_MontoSelect': montoReembolso,
-                  '3_VirtualTotal': saldoVirtualTotal,
-                  '4_CostoTotal': costoTotal,
-                  '5_HideWarning': recupereTodo,
-                }
-              );
-
               return {
                 ...item,
                 // CRÍTICO: NO SOBRESCRIBIR saldoDisponible CON LA SUMA VIRTUAL.
@@ -179,7 +168,6 @@ export default function SolicitudEconomica({
           setPoaStructure(structure);
         }
       } catch (error) {
-        console.error(error);
         toast.error('Error al cargar POA');
       } finally {
         setIsLoadingStructure(false);

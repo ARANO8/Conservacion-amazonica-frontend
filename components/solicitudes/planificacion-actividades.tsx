@@ -106,9 +106,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
     name: `actividades.${idx}.cantDias`,
   });
 
-  // Log 1: Estado actual en cada render
-  console.log(`⏱️ [DEBUG RENDER ${idx}] cantDias:`, cantDias, typeof cantDias);
-
   const calculateDays = useCallback(
     (start: string | Date, end: string | Date) => {
       if (!start || !end) return 1;
@@ -137,9 +134,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
 
     // Only recalculate if the user has manually changed the dates
     if ((isFechaInicioDirty || isFechaFinDirty) && fechaInicio && fechaFin) {
-      console.log(
-        `⚠️ [DEBUG EFFECT ${idx}] El usuario cambió las fechas manualmente. Recalculando...`
-      );
       const days = calculateDays(fechaInicio, fechaFin);
       setValue(`actividades.${idx}.cantDias`, days, {
         shouldDirty: true,
