@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import SolicitudViaticos from '@/components/solicitudes/solicitud-viaticos';
 import SolicitudGastos from '@/components/solicitudes/solicitud-gastos';
+import SolicitudHospedajes from '@/components/solicitudes/solicitud-hospedajes';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import {
   SeleccionPresupuesto,
@@ -167,7 +168,7 @@ export default function SolicitudEconomica({
           // 3. Si es CREACIÓN, usamos datos puros
           setPoaStructure(structure);
         }
-      } catch (error) {
+      } catch (_error) {
         toast.error('Error al cargar POA');
       } finally {
         setIsLoadingStructure(false);
@@ -476,6 +477,8 @@ export default function SolicitudEconomica({
           )}
         />
       </FieldSet>
+
+      <SolicitudHospedajes fuentesDisponibles={filteredFuentes} />
 
       <SolicitudViaticos
         control={control}
