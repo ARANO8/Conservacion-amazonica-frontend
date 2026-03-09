@@ -54,5 +54,8 @@
     "tailwindcss": "^4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
-  }
+  },
+  "workspaces": [
+    "."
+  ]
 }
