@@ -36,10 +36,12 @@ import {
   ClipboardList,
   Wallet,
   Users,
+  Landmark,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapResponseToBreakdown } from '@/lib/mappers/breakdown-mapper';
+import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
 
 export default function SolicitudDetailPage() {
   const params = useParams();
@@ -356,6 +358,26 @@ export default function SolicitudDetailPage() {
           </CardContent>
           <CardContent>
             <PresupuestoBreakdown partidas={breakdownPartidas} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Cuenta Bancaria - Solo visible si hay solicitud con cuenta*/}
+      {solicitud.presupuestos && solicitud.presupuestos.length > 0 && (
+        <Card className="mt-6 rounded-lg border p-4">
+          <CardHeader className="mb-4 p-0">
+            <CardTitle className="flex items-center gap-2 font-semibold">
+              <Landmark className="h-5 w-5" />
+              Información Bancaria del Proyecto
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <CuentaBancariaCard
+              cuentaBancaria={
+                solicitud.presupuestos[0]?.poa?.estructura?.proyecto
+                  ?.cuentaBancaria
+              }
+            />
           </CardContent>
         </Card>
       )}

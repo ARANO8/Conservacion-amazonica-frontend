@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   Check,
   ChevronsUpDown,
+  Landmark,
 } from 'lucide-react';
 import { Concepto, TipoGasto, Usuario } from '@/types/catalogs';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,7 @@ import {
 import { SeleccionPresupuesto } from '@/types/backend';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapFormToBreakdown } from '@/lib/mappers/breakdown-mapper';
+import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -119,6 +121,18 @@ export default function ReviewModal({
     return mapFormToBreakdown(data, misSelecciones, conceptos, tiposGasto);
   }, [data, misSelecciones, conceptos, tiposGasto]);
 
+  // FIXME: DEBUGGING
+  console.log('DATA EN STEP 3:', {
+    fuentesSeleccionadas: data.fuentesSeleccionadas,
+    misSelecciones,
+  });
+  console.log(
+    'PROYECTO SELECCIONADO:',
+    misSelecciones.find(
+      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
+    )?.poa?.estructura?.proyecto
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-full sm:max-w-[550px]">
@@ -180,6 +194,21 @@ export default function ReviewModal({
                   </span>
                 </p>
               </div>
+            </section>
+
+            {/* 1.5 Información Bancaria del Proyecto */}
+            <section className="space-y-3 pt-2">
+              <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                Información Bancaria
+              </h3>
+              {(() => {
+                const proyectoSeleccionado = misSelecciones.find(
+                  (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
+                )?.poa?.estructura?.proyecto;
+                const cuentaBancaria = proyectoSeleccionado?.cuentaBancaria;
+
+                return <CuentaBancariaCard cuentaBancaria={cuentaBancaria} />;
+              })()}
             </section>
 
             {/* 2. DESGLOSE POR PARTIDA (DRY Refactored) */}

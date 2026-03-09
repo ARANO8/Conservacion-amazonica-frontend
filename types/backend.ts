@@ -183,7 +183,16 @@ export interface EntityBase {
   codigo?: string;
 }
 
-export type Proyecto = EntityBase;
+export interface CuentaBancaria extends EntityBase {
+  numeroCuenta: string;
+  banco: string;
+  moneda?: string;
+  tipoCuenta?: string;
+}
+
+export interface Proyecto extends EntityBase {
+  cuentaBancaria?: CuentaBancaria;
+}
 export type GrupoContable = EntityBase;
 export type PartidaPresupuestaria = EntityBase;
 export type ConceptoViatico = EntityBase;
