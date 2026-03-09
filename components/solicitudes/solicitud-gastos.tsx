@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Receipt, Plus } from 'lucide-react';
+import { FieldLegend, FieldSet } from '@/components/ui/field';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -51,8 +52,50 @@ export default function SolicitudGastos({
   });
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-foreground mb-2 font-semibold">Detalle de Gastos</h3>
+    <FieldSet>
+      <div className="mb-4 flex items-center justify-between">
+        <FieldLegend className="flex items-center gap-2">
+          <Receipt className="h-5 w-5" />
+          Detalle de Gastos
+        </FieldLegend>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            // 1. Validar que exista al menos una partida que NO sea de Viáticos
+            const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
+              const nombrePartida =
+                f.poa?.estructura?.partida?.nombre?.toUpperCase() || '';
+              return !nombrePartida.includes('VIATICOS');
+            });
+
+            if (!tienePresupuestoGastos) {
+              toast.error(
+                'Las fuentes seleccionadas son exclusivas para VIÁTICOS. No puede agregar gastos.'
+              );
+              return;
+            }
+
+            append({
+              solicitudPresupuestoId: 0,
+              tipoDocumento: 'FACTURA',
+              tipoGastoId: 1,
+              cantidad: 0,
+              costoUnitario: 0,
+              montoNeto: 0,
+              detalle: '',
+              liquidoPagable: 0,
+            });
+          }}
+          disabled={!proyectoId}
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Agregar Gasto
+        </Button>
+      </div>
+
       <div className="space-y-4">
         {fields.map((field, index) => (
           <GastoCard
@@ -66,42 +109,17 @@ export default function SolicitudGastos({
             fuentesDisponibles={fuentesDisponibles}
           />
         ))}
+
+        {fields.length === 0 && (
+          <div className="border-muted-foreground/25 flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed">
+            <Receipt className="text-muted-foreground/50 mb-2 h-8 w-8" />
+            <p className="text-muted-foreground text-sm italic">
+              No hay gastos registrados.
+            </p>
+          </div>
+        )}
       </div>
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          // 1. Validar que exista al menos una partida que NO sea de Viáticos
-          const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
-            const nombrePartida =
-              f.poa?.estructura?.partida?.nombre?.toUpperCase() || '';
-            return !nombrePartida.includes('VIATICOS');
-          });
-
-          if (!tienePresupuestoGastos) {
-            toast.error(
-              'Las fuentes seleccionadas son exclusivas para VIÁTICOS. No puede agregar gastos.'
-            );
-            return;
-          }
-
-          append({
-            solicitudPresupuestoId: 0,
-            tipoDocumento: 'FACTURA',
-            tipoGastoId: 1,
-            cantidad: 0,
-            costoUnitario: 0,
-            montoNeto: 0,
-            detalle: '',
-            liquidoPagable: 0,
-          });
-        }}
-      >
-        + Agregar Gasto
-      </Button>
-    </div>
+    </FieldSet>
   );
 }
 
