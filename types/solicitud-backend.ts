@@ -122,6 +122,7 @@ export interface SolicitudResponse {
         proyecto?: {
           id: number;
           nombre: string;
+          cuentaBancaria?: import('@/types/backend').CuentaBancaria;
         };
         grupo?: {
           id: number;
