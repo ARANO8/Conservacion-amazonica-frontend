@@ -13,7 +13,7 @@ export interface CreateSolicitudPayload {
     dias?: number; // Valor decimal editado manualmente por el usuario
   }[];
   viaticos: {
-    planificacionIndex: number;
+    planificacionIndexes: number[];
     conceptoId: number;
     tipoDestino: string;
     dias: number;
