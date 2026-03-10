@@ -108,11 +108,17 @@ export default function SolicitudForm({
     }
 
     if (step === 'SOLICITUD') {
-      const isValid = await form.trigger(['motivo', 'items', 'viaticos']);
+      const isValid = await form.trigger([
+        'motivo',
+        'items',
+        'viaticos',
+        'hospedajes',
+      ]);
       if (isValid) {
-        // Validación de Presupuestos: Verificar que todos los viáticos/gastos tengan fuente
+        // Validación de Presupuestos: Verificar que todos los viáticos/gastos/hospedajes tengan fuente
         const watchViaticos = form.getValues('viaticos') || [];
         const watchGastos = form.getValues('items') || [];
+        const watchHospedajes = form.getValues('hospedajes') || [];
 
         const tieneViaticosSinFuente = watchViaticos.some(
           (v) => !v.solicitudPresupuestoId
@@ -120,10 +126,15 @@ export default function SolicitudForm({
         const tieneGastosSinFuente = watchGastos.some(
           (g) => !g.solicitudPresupuestoId
         );
+        const tieneHospedajesSinFuente = watchHospedajes.some((h) => !h.poaId);
 
-        if (tieneViaticosSinFuente || tieneGastosSinFuente) {
+        if (
+          tieneViaticosSinFuente ||
+          tieneGastosSinFuente ||
+          tieneHospedajesSinFuente
+        ) {
           toast.error(
-            'Todos los ítems deben estar vinculados a una fuente de financiamiento'
+            'Todos los ítems (viáticos, gastos y hospedajes) deben estar vinculados a una fuente de financiamiento'
           );
           return;
         }
@@ -136,7 +147,17 @@ export default function SolicitudForm({
               .reduce((sum, v) => sum + (Number(v.montoNeto) || 0), 0) +
             watchGastos
               .filter((g) => g.solicitudPresupuestoId === seleccion.poaId)
-              .reduce((sum, g) => sum + (Number(g.montoNeto) || 0), 0);
+              .reduce((sum, g) => sum + (Number(g.montoNeto) || 0), 0) +
+            watchHospedajes
+              .filter((h) => h.poaId === seleccion.poaId)
+              .reduce(
+                (sum, h) =>
+                  sum +
+                  (Number(h.costoTotal) || 0) +
+                  (Number(h.iva) || 0) +
+                  (Number(h.it) || 0),
+                0
+              );
 
           const saldoDisponibleReal = seleccion.saldoDisponible;
 
@@ -162,7 +183,8 @@ export default function SolicitudForm({
             ) ||
             watchGastos.some(
               (g) => Number(g.solicitudPresupuestoId) === seleccion.poaId
-            );
+            ) ||
+            watchHospedajes.some((h) => Number(h.poaId) === seleccion.poaId);
 
           if (!tieneUso) {
             toast.warning(
