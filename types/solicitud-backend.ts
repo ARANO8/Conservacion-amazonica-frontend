@@ -46,13 +46,6 @@ export interface CreateSolicitudPayload {
     iva: number;
     it: number;
   }[];
-  presupuestos: {
-    poaId: number;
-    subtotalNeto: number;
-    subtotalPresupuestado: number;
-  }[];
-  montoTotalNeto: number;
-  montoTotalPresupuestado: number;
 }
 
 export interface SolicitudResponse {
