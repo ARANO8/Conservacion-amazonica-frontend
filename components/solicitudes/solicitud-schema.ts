@@ -53,7 +53,7 @@ export const formSchema = z.object({
     .array(
       z.object({
         id: z.number().optional(),
-        planificacionIndex: z.number().optional(),
+        planificacionIndexes: z.array(z.number()).default([]).optional(),
         ciudad: z.string().optional(),
         destino: z.string().optional(),
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
