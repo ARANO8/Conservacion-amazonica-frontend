@@ -67,12 +67,15 @@ export default function SolicitudGastos({
             const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
               const nombrePartida =
                 f.poa?.estructura?.partida?.nombre?.toUpperCase() || '';
-              return !nombrePartida.includes('VIATICOS');
+              return (
+                !nombrePartida.includes('VIATICO') &&
+                !nombrePartida.includes('HOSPEDAJE')
+              );
             });
 
             if (!tienePresupuestoGastos) {
               toast.error(
-                'Las fuentes seleccionadas son exclusivas para VIÁTICOS. No puede agregar gastos.'
+                'Las fuentes seleccionadas son exclusivas para VIÁTICOS u HOSPEDAJE. No puede agregar gastos generales.'
               );
               return;
             }
@@ -284,12 +287,15 @@ function GastoCard({
                         fuentesDisponibles.map((f) => [f.poaId, f])
                       ).values(),
                     ]
-                      .filter(
-                        (f) =>
-                          !(f.poa?.estructura?.partida?.nombre ?? '')
-                            .toUpperCase()
-                            .includes('VIATICOS')
-                      )
+                      .filter((f) => {
+                        const nombre = (
+                          f.poa?.estructura?.partida?.nombre ?? ''
+                        ).toUpperCase();
+                        return (
+                          !nombre.includes('VIATICO') &&
+                          !nombre.includes('HOSPEDAJE')
+                        );
+                      })
                       .map((fuente) => (
                         <SelectItem
                           key={fuente.poaId}
