@@ -30,28 +30,41 @@ export function mapFormToBreakdown(
       const gastosAsociados = (data.items || []).filter(
         (i) => i.solicitudPresupuestoId === seleccion.poaId
       );
+      const hospedajesAsociados = (data.hospedajes || []).filter(
+        (h) => h.poaId === seleccion.poaId
+      );
 
-      const items: BreakdownItem[] = esViatico
-        ? viaticosAsociados.map((v) => ({
-            id: v.id || 0,
-            nombre:
-              conceptos.find((c) => c.id === v.conceptoId)?.nombre || 'Viático',
-            detalle:
-              data.actividades?.[v.planificacionIndex ?? -1]
-                ?.actividadProgramada,
-            tipoDestino: v.tipoDestino,
-            montoNeto: Number(v.montoNeto) || 0,
-            montoLiquido: Number(v.liquidoPagable ?? v.montoNeto) || 0,
-          }))
-        : gastosAsociados.map((item) => ({
-            id: item.tipoGastoId || 0,
-            nombre:
-              tiposGasto.find((t) => t.id === item.tipoGastoId)?.nombre ||
-              'Gasto',
-            detalle: item.detalle || item.tipoDocumento || 'Sin detalle',
-            montoNeto: Number(item.montoNeto) || 0,
-            montoLiquido: Number(item.liquidoPagable ?? item.montoNeto) || 0,
-          }));
+      const items: BreakdownItem[] = [
+        ...viaticosAsociados.map((v) => ({
+          id: v.id || 0,
+          nombre:
+            conceptos.find((c) => c.id === v.conceptoId)?.nombre || 'Viático',
+          detalle:
+            data.actividades?.[v.planificacionIndex ?? -1]?.actividadProgramada,
+          tipoDestino: v.tipoDestino,
+          montoNeto: Number(v.montoNeto) || 0,
+          montoLiquido: Number(v.liquidoPagable ?? v.montoNeto) || 0,
+        })),
+        ...gastosAsociados.map((item) => ({
+          id: item.tipoGastoId || 0,
+          nombre:
+            tiposGasto.find((t) => t.id === item.tipoGastoId)?.nombre ||
+            'Gasto',
+          detalle: item.detalle || item.tipoDocumento || 'Sin detalle',
+          montoNeto: Number(item.montoNeto) || 0,
+          montoLiquido: Number(item.liquidoPagable ?? item.montoNeto) || 0,
+        })),
+        ...hospedajesAsociados.map((h) => ({
+          id: h.id || 0,
+          nombre: 'Hospedaje',
+          detalle: `${h.destino} (${h.noches} noches x ${h.personas} pax)`,
+          montoNeto:
+            (Number(h.costoTotal) || 0) +
+            (Number(h.iva) || 0) +
+            (Number(h.it) || 0),
+          montoLiquido: Number(h.costoTotal) || 0,
+        })),
+      ];
 
       const totalPresupuestado = items.reduce(
         (acc, item) => acc + item.montoNeto,
@@ -97,30 +110,38 @@ export function mapResponseToBreakdown(
       (g) => g.solicitudPresupuestoId === pres.id
     );
 
-    const items: BreakdownItem[] = esViatico
-      ? viaticosAsociados.map((v) => {
-          // Buscar la planificación asociada para obtener la actividad programada
-          const planificacion = solicitud.planificaciones?.find(
-            (p) => p.id === v.planificacionId
-          );
-          return {
-            id: v.id,
-            nombre: v.concepto?.nombre || 'Viático',
-            detalle: planificacion?.actividadProgramada,
-            tipoDestino: v.tipoDestino,
-            montoNeto: Number(v.montoPresupuestado) || 0,
-            montoLiquido: Number(v.montoNeto) || 0,
-          };
-        })
-      : gastosAsociados.map((g) => {
-          return {
-            id: g.id,
-            nombre: g.tipoGasto?.nombre || 'Gasto',
-            detalle: g.tipoDocumento || 'Sin detalle',
-            montoNeto: Number(g.montoPresupuestado) || 0,
-            montoLiquido: Number(g.montoNeto) || 0,
-          };
-        });
+    const hospedajesAsociados = (pres.hospedajes || []).map((h) => ({
+      id: h.id,
+      nombre: 'Hospedaje',
+      detalle: `${h.destino} (${h.noches} noches x ${h.personas} pax)`,
+      montoNeto:
+        Number(h.costoTotal || 0) + Number(h.iva || 0) + Number(h.it || 0),
+      montoLiquido: Number(h.costoTotal || 0),
+    }));
+
+    const items: BreakdownItem[] = [
+      ...viaticosAsociados.map((v) => {
+        const planificacion = solicitud.planificaciones?.find(
+          (p) => p.id === v.planificacionId
+        );
+        return {
+          id: v.id,
+          nombre: v.concepto?.nombre || 'Viático',
+          detalle: planificacion?.actividadProgramada,
+          tipoDestino: v.tipoDestino,
+          montoNeto: Number(v.montoPresupuestado) || 0,
+          montoLiquido: Number(v.montoNeto) || 0,
+        };
+      }),
+      ...gastosAsociados.map((g) => ({
+        id: g.id,
+        nombre: g.tipoGasto?.nombre || 'Gasto',
+        detalle: g.tipoDocumento || 'Sin detalle',
+        montoNeto: Number(g.montoPresupuestado) || 0,
+        montoLiquido: Number(g.montoNeto) || 0,
+      })),
+      ...hospedajesAsociados,
+    ];
 
     const totalPresupuestado = items.reduce(
       (acc, item) => acc + item.montoNeto,

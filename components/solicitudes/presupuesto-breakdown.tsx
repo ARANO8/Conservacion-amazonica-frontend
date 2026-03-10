@@ -42,7 +42,9 @@ export function PresupuestoBreakdown({ partidas }: PresupuestoBreakdownProps) {
                 {/* Header Columnas */}
                 <div className="mb-2 flex items-center justify-between border-b pb-1">
                   <span className="text-muted-foreground text-[10px] font-bold uppercase">
-                    {partida.esViatico ? 'Detalle Viático' : 'Detalle Gasto'}
+                    {partida.esViatico
+                      ? 'Detalle Viático'
+                      : 'Detalle Gasto / Hospedaje'}
                   </span>
                   <div className="flex gap-8">
                     <span className="text-muted-foreground text-[10px] font-bold uppercase">
@@ -95,7 +97,7 @@ export function PresupuestoBreakdown({ partidas }: PresupuestoBreakdownProps) {
                     <p className="text-muted-foreground py-1 text-center text-[10px] italic">
                       {partida.esViatico
                         ? 'Sin viáticos cargados'
-                        : 'Sin ítems cargados'}
+                        : 'Sin gastos u hospedajes cargados'}
                     </p>
                   )}
                 </div>
