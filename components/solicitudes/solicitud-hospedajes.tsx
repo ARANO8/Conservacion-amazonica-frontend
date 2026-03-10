@@ -244,12 +244,8 @@ function HospedajeCard({
                         key={fuente.poaId}
                         value={fuente.poaId.toString()}
                       >
-                        {fuente.poa?.codigoPresupuestario?.codigoCompleto} -{' '}
-                        {fuente.poa?.actividad?.detalleDescripcion?.substring(
-                          0,
-                          40
-                        )}
-                        ...
+                        POA: {fuente.poaId} -{' '}
+                        {fuente.poa?.estructura?.partida?.nombre}
                       </SelectItem>
                     ))}
                 </SelectContent>
