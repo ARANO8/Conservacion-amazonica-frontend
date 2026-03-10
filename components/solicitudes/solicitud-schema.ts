@@ -96,6 +96,25 @@ export const formSchema = z.object({
       })
     )
     .optional(),
+
+  // Tabla Hospedajes
+  hospedajes: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        poaId: z.number().min(1, 'Debes seleccionar una partida'),
+        region: z.string().min(1, 'La región es requerida'),
+        destino: z.string().min(1, 'El destino es requerido'),
+        personas: z.number().min(1, 'Mínimo 1 persona'),
+        noches: z.number().min(1, 'Mínimo 1 noche'),
+        cantidadUnitaria: z.number().min(0.01, 'La tarifa debe ser mayor a 0'),
+        costoTotal: z.number().min(0, 'El costo total debe ser válido'),
+        iva: z.number().optional(),
+        it: z.number().optional(),
+      })
+    )
+    .optional(),
+
   // Nómina de Terceros (Paso 3)
   nomina: z
     .array(
@@ -140,6 +159,7 @@ export const defaultValues: FormData = {
   interino: false,
   items: [],
   viaticos: [],
+  hospedajes: [],
   proyecto: 'aaf',
   presupuestosIds: [],
   fuentesSeleccionadas: [],

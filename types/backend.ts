@@ -123,6 +123,18 @@ export interface CreateGastoDto {
   detalle?: string;
 }
 
+export interface CreateHospedajeDto {
+  poaId: number;
+  region: string;
+  destino: string;
+  personas: number;
+  noches: number;
+  cantidadUnitaria: number;
+  costoTotal: number;
+  iva: number;
+  it: number;
+}
+
 export interface CreateNominaDto {
   nombreCompleto: string;
   procedenciaInstitucion: string;
@@ -137,6 +149,7 @@ export interface CreateSolicitudDto {
   planificaciones?: CreatePlanificacionDto[];
   viaticos?: CreateViaticoDto[];
   gastos?: CreateGastoDto[];
+  hospedajes?: CreateHospedajeDto[];
   nominasTerceros?: CreateNominaDto[];
 }
 
@@ -161,6 +174,7 @@ export interface Solicitud {
   planificaciones?: Record<string, unknown>[]; // Detailed schemas can be added later
   viaticos?: Record<string, unknown>[];
   gastos?: Record<string, unknown>[];
+  hospedajes?: Record<string, unknown>[];
   nominasTerceros?: Record<string, unknown>[];
 }
 

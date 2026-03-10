@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import SolicitudViaticos from '@/components/solicitudes/solicitud-viaticos';
 import SolicitudGastos from '@/components/solicitudes/solicitud-gastos';
+import SolicitudHospedajes from '@/components/solicitudes/solicitud-hospedajes';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import {
   SeleccionPresupuesto,
@@ -167,7 +168,7 @@ export default function SolicitudEconomica({
           // 3. Si es CREACIÓN, usamos datos puros
           setPoaStructure(structure);
         }
-      } catch (error) {
+      } catch (_error) {
         toast.error('Error al cargar POA');
       } finally {
         setIsLoadingStructure(false);
@@ -477,6 +478,8 @@ export default function SolicitudEconomica({
         />
       </FieldSet>
 
+      <SolicitudHospedajes fuentesDisponibles={filteredFuentes} />
+
       <SolicitudViaticos
         control={control}
         actividadesPlanificadas={watchActividades || []}
@@ -634,9 +637,11 @@ function FuenteCard({
 
   const viaticosRaw = useWatch({ control, name: 'viaticos' });
   const gastosRaw = useWatch({ control, name: 'items' });
+  const hospedajesRaw = useWatch({ control, name: 'hospedajes' });
 
   const viaticos = useMemo(() => viaticosRaw || [], [viaticosRaw]);
   const gastos = useMemo(() => gastosRaw || [], [gastosRaw]);
+  const hospedajes = useMemo(() => hospedajesRaw || [], [hospedajesRaw]);
 
   // Lógica de Suma (Gross-Up)
   const resumenFinanciero = useMemo(() => {
@@ -658,11 +663,26 @@ function FuenteCard({
       .filter((g) => Number(g.solicitudPresupuestoId) === poaId)
       .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
 
+    const sumaHospedajesNeto = hospedajes
+      .filter((h) => Number(h.poaId) === poaId)
+      .reduce((acc: number, h) => acc + (Number(h.costoTotal) || 0), 0);
+
+    const sumaHospedajesBruto = hospedajes
+      .filter((h) => Number(h.poaId) === poaId)
+      .reduce(
+        (acc: number, h) =>
+          acc +
+          (Number(h.costoTotal) || 0) +
+          (Number(h.iva) || 0) +
+          (Number(h.it) || 0),
+        0
+      );
+
     return {
-      neto: sumaViaticosNeto + sumaGastosNeto,
-      bruto: sumaViaticosBruto + sumaGastosBruto,
+      neto: sumaViaticosNeto + sumaGastosNeto + sumaHospedajesNeto,
+      bruto: sumaViaticosBruto + sumaGastosBruto + sumaHospedajesBruto,
     };
-  }, [viaticos, gastos, poaId]);
+  }, [viaticos, gastos, hospedajes, poaId]);
 
   // E. Integración con Catálogo (Fresh Data)
   // Buscamos el ítem fresco en la estructura cargada del catálogo para obtener el saldo real

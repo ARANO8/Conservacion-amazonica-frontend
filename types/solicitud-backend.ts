@@ -35,6 +35,17 @@ export interface CreateSolicitudPayload {
     nombreCompleto: string;
     procedenciaInstitucion: string;
   }[];
+  hospedajes: {
+    poaId: number;
+    region: string;
+    destino: string;
+    personas: number;
+    noches: number;
+    cantidadUnitaria: number;
+    costoTotal: number;
+    iva: number;
+    it: number;
+  }[];
 }
 
 export interface SolicitudResponse {
@@ -165,12 +176,35 @@ export interface SolicitudResponse {
         nombre: string;
       };
     }>;
+    hospedajes?: Array<{
+      id: number;
+      region: string;
+      destino: string;
+      personas: number;
+      noches: number;
+      cantidadUnitaria: number | string;
+      costoTotal: number | string;
+      iva: number | string;
+      it: number | string;
+    }>;
     subtotalPresupuestado?: number | string;
   }>;
   fechaInicio?: string;
   fechaFin?: string;
   lugarViaje?: string;
   codigoPoa?: string; // Fallback if direct
+  hospedajes?: Array<{
+    id: number;
+    region: string;
+    destino: string;
+    personas: number;
+    noches: number;
+    cantidadUnitaria: number | string;
+    costoTotal: number | string;
+    iva: number | string;
+    it: number | string;
+    poaId?: number;
+  }>;
   personasExternas?: Array<{
     id: number;
     nombreCompleto: string;

@@ -23,7 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Briefcase, Plus } from 'lucide-react';
+import { FieldLegend, FieldSet } from '@/components/ui/field';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -50,10 +51,49 @@ export default function SolicitudViaticos({
   });
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-foreground mb-2 font-semibold">
-        Detalle de Viáticos
-      </h3>
+    <FieldSet>
+      <div className="mb-4 flex items-center justify-between">
+        <FieldLegend className="flex items-center gap-2">
+          <Briefcase className="h-5 w-5" />
+          Detalle de Viáticos
+        </FieldLegend>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            // Validar que existan partidas de viáticos antes de agregar
+            const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
+              f.poa?.estructura?.partida?.nombre
+                ?.toUpperCase()
+                .includes('VIATICOS')
+            );
+
+            if (!tienePresupuestoViaticos) {
+              toast.error(
+                'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
+              );
+              return;
+            }
+
+            append({
+              conceptoId: 0,
+              planificacionIndex: 0,
+              tipoDestino: 'INSTITUCIONAL',
+              dias: 0,
+              cantidadPersonas: 0,
+              montoNeto: 0,
+              solicitudPresupuestoId: 0,
+              liquidoPagable: 0,
+            });
+          }}
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Agregar Viático
+        </Button>
+      </div>
+
       <div className="space-y-4">
         {fields.map((field, index) => (
           <ViaticoCard
@@ -66,42 +106,17 @@ export default function SolicitudViaticos({
             fuentesDisponibles={fuentesDisponibles}
           />
         ))}
+
+        {fields.length === 0 && (
+          <div className="border-muted-foreground/25 flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed">
+            <Briefcase className="text-muted-foreground/50 mb-2 h-8 w-8" />
+            <p className="text-muted-foreground text-sm italic">
+              No hay viáticos registrados.
+            </p>
+          </div>
+        )}
       </div>
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          // Validar que existan partidas de viáticos antes de agregar
-          const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
-            f.poa?.estructura?.partida?.nombre
-              ?.toUpperCase()
-              .includes('VIATICOS')
-          );
-
-          if (!tienePresupuestoViaticos) {
-            toast.error(
-              'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
-            );
-            return;
-          }
-
-          append({
-            conceptoId: 0,
-            planificacionIndex: 0,
-            tipoDestino: 'INSTITUCIONAL',
-            dias: 0,
-            cantidadPersonas: 0,
-            montoNeto: 0,
-            solicitudPresupuestoId: 0,
-            liquidoPagable: 0,
-          });
-        }}
-      >
-        + Agregar Viático
-      </Button>
-    </div>
+    </FieldSet>
   );
 }
 
