@@ -101,7 +101,7 @@ export default function SolicitudHospedajes({
             }
 
             append({
-              poaId: fuentesDisponibles[0]?.poaId || 0,
+              poaId: 0,
               region: '',
               destino: '',
               personas: 1,
@@ -223,19 +223,35 @@ function HospedajeCard({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {fuentesDisponibles.map((fuente) => (
-                    <SelectItem
-                      key={fuente.poaId}
-                      value={fuente.poaId.toString()}
-                    >
-                      {fuente.poa?.codigoPresupuestario?.codigoCompleto} -{' '}
-                      {fuente.poa?.actividad?.detalleDescripcion?.substring(
-                        0,
-                        40
-                      )}
-                      ...
-                    </SelectItem>
-                  ))}
+                  {fuentesDisponibles
+                    .filter((f) => {
+                      const p = f.poa;
+                      if (!p) return false;
+                      const searchStr = [
+                        p.actividad?.detalleDescripcion,
+                        p.estructura?.partida?.nombre,
+                        (p as { partida?: { nombre?: string } }).partida
+                          ?.nombre,
+                        p.codigoPresupuestario?.descripcion,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                        .toUpperCase();
+                      return searchStr.includes('HOSPEDAJE');
+                    })
+                    .map((fuente) => (
+                      <SelectItem
+                        key={fuente.poaId}
+                        value={fuente.poaId.toString()}
+                      >
+                        {fuente.poa?.codigoPresupuestario?.codigoCompleto} -{' '}
+                        {fuente.poa?.actividad?.detalleDescripcion?.substring(
+                          0,
+                          40
+                        )}
+                        ...
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               <FormMessage />
