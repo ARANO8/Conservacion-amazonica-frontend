@@ -35,6 +35,24 @@ export interface CreateSolicitudPayload {
     nombreCompleto: string;
     procedenciaInstitucion: string;
   }[];
+  hospedajes: {
+    poaId: number;
+    region: string;
+    destino: string;
+    personas: number;
+    noches: number;
+    cantidadUnitaria: number;
+    costoTotal: number;
+    iva: number;
+    it: number;
+  }[];
+  presupuestos: {
+    poaId: number;
+    subtotalNeto: number;
+    subtotalPresupuestado: number;
+  }[];
+  montoTotalNeto: number;
+  montoTotalPresupuestado: number;
 }
 
 export interface SolicitudResponse {

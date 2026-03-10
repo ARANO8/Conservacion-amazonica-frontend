@@ -51,6 +51,68 @@ export const adaptFormToPayload = (
     procedenciaInstitucion: n.procedenciaInstitucion,
   }));
 
+  // 5. Mapeo de Hospedajes
+  const hospedajes = (formData.hospedajes || []).map((h) => ({
+    poaId: Number(h.poaId) || 0,
+    region: h.region || '',
+    destino: h.destino || '',
+    personas: Number(h.personas) || 1,
+    noches: Number(h.noches) || 1,
+    cantidadUnitaria: Number(h.cantidadUnitaria) || 0,
+    costoTotal: Number(h.costoTotal) || 0,
+    iva: Number(h.iva) || 0,
+    it: Number(h.it) || 0,
+  }));
+
+  // 6. Mapeo de Presupuestos (Agrupación por POA)
+  const poaIdsUnicos = Array.from(
+    new Set([
+      ...viaticos.map((v) => v.poaId),
+      ...gastos.map((g) => g.poaId),
+      ...hospedajes.map((h) => h.poaId),
+    ])
+  ).filter((id) => id > 0);
+
+  const presupuestos = poaIdsUnicos.map((poaId) => {
+    const viaticosNeto = viaticos
+      .filter((v) => v.poaId === poaId)
+      .reduce((sum, v) => sum + v.montoNeto, 0);
+    const viaticosPresupuestado = viaticos
+      .filter((v) => v.poaId === poaId)
+      .reduce((sum, v) => sum + v.montoPresupuestado, 0);
+
+    const gastosNeto = gastos
+      .filter((g) => g.poaId === poaId)
+      .reduce((sum, g) => sum + g.montoNeto, 0);
+    const gastosPresupuestado = gastos
+      .filter((g) => g.poaId === poaId)
+      .reduce((sum, g) => sum + g.montoPresupuestado, 0);
+
+    const hospedajesNeto = hospedajes
+      .filter((h) => h.poaId === poaId)
+      .reduce((sum, h) => sum + h.costoTotal, 0);
+    const hospedajesPresupuestado = hospedajes
+      .filter((h) => h.poaId === poaId)
+      .reduce((sum, h) => sum + h.costoTotal + h.iva + h.it, 0);
+
+    return {
+      poaId,
+      subtotalNeto: viaticosNeto + gastosNeto + hospedajesNeto,
+      subtotalPresupuestado:
+        viaticosPresupuestado + gastosPresupuestado + hospedajesPresupuestado,
+    };
+  });
+
+  // 7. Totales Globales
+  const montoTotalNeto = presupuestos.reduce(
+    (sum, p) => sum + p.subtotalNeto,
+    0
+  );
+  const montoTotalPresupuestado = presupuestos.reduce(
+    (sum, p) => sum + p.subtotalPresupuestado,
+    0
+  );
+
   return {
     poaIds: formData.presupuestosIds || [],
     aprobadorId: aprobadorId,
@@ -60,7 +122,11 @@ export const adaptFormToPayload = (
     planificaciones,
     viaticos,
     gastos,
+    hospedajes,
     nominasTerceros,
+    presupuestos,
+    montoTotalNeto,
+    montoTotalPresupuestado,
   };
 };
 
