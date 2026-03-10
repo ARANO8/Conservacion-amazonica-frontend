@@ -407,7 +407,7 @@ function HospedajeCard({
               },
             }}
             render={({ field, fieldState }) => (
-              <Field className="relative flex min-h-[72px] flex-col justify-center">
+              <Field className="flex flex-col justify-center">
                 <div className="mb-2 flex items-center justify-between">
                   <FieldLabel className="mb-0">
                     Tarifa Unitaria (Bs.)
@@ -441,7 +441,7 @@ function HospedajeCard({
                   )}
                 </div>
                 <FormControl>
-                  <div className="py-1">
+                  <div className="flex flex-col gap-2">
                     <Slider
                       disabled={!selectedRegion}
                       min={rangoMin || 0}
@@ -454,15 +454,15 @@ function HospedajeCard({
                       }}
                       className="w-full disabled:cursor-not-allowed disabled:opacity-50"
                     />
+                    {selectedRegion && !fieldState.error && (
+                      <div className="text-muted-foreground flex w-full justify-between text-[15px]">
+                        <span>Mín: {rangoMin}</span>
+                        <span>Máx: {rangoMax}</span>
+                      </div>
+                    )}
                   </div>
                 </FormControl>
-                {selectedRegion && !fieldState.error && (
-                  <div className="text-muted-foreground absolute top-[calc(100%+0.25rem)] left-0 mt-1 flex w-full justify-between text-[10px]">
-                    <span>Mín: {rangoMin}</span>
-                    <span>Máx: {rangoMax}</span>
-                  </div>
-                )}
-                <FormMessage className="absolute top-[calc(100%+0.25rem)] left-0 text-[10px] leading-tight" />
+                <FormMessage className="mt-1 text-[10px] leading-tight" />
               </Field>
             )}
           />
