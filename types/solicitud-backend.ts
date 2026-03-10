@@ -193,6 +193,18 @@ export interface SolicitudResponse {
   fechaFin?: string;
   lugarViaje?: string;
   codigoPoa?: string; // Fallback if direct
+  hospedajes?: Array<{
+    id: number;
+    region: string;
+    destino: string;
+    personas: number;
+    noches: number;
+    cantidadUnitaria: number | string;
+    costoTotal: number | string;
+    iva: number | string;
+    it: number | string;
+    poaId?: number;
+  }>;
   personasExternas?: Array<{
     id: number;
     nombreCompleto: string;

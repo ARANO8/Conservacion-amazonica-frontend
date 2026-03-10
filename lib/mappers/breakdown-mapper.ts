@@ -57,7 +57,7 @@ export function mapFormToBreakdown(
         ...hospedajesAsociados.map((h) => ({
           id: h.id || 0,
           nombre: 'Hospedaje',
-          detalle: `${h.destino} (${h.noches} noches x ${h.personas} pax)`,
+          detalle: `Hospedaje en ${h.destino} - ${h.region} (${h.noches} noches x ${h.personas} pax)`,
           montoNeto:
             (Number(h.costoTotal) || 0) +
             (Number(h.iva) || 0) +
@@ -110,14 +110,16 @@ export function mapResponseToBreakdown(
       (g) => g.solicitudPresupuestoId === pres.id
     );
 
-    const hospedajesAsociados = (pres.hospedajes || []).map((h) => ({
-      id: h.id,
-      nombre: 'Hospedaje',
-      detalle: `${h.destino} (${h.noches} noches x ${h.personas} pax)`,
-      montoNeto:
-        Number(h.costoTotal || 0) + Number(h.iva || 0) + Number(h.it || 0),
-      montoLiquido: Number(h.costoTotal || 0),
-    }));
+    const hospedajesAsociados = (solicitud.hospedajes || [])
+      .filter((h) => h.poaId === pres.poa?.id)
+      .map((h) => ({
+        id: h.id,
+        nombre: 'Hospedaje',
+        detalle: `Hospedaje en ${h.destino} - ${h.region} (${h.noches} noches x ${h.personas} pax)`,
+        montoNeto:
+          Number(h.costoTotal || 0) + Number(h.iva || 0) + Number(h.it || 0),
+        montoLiquido: Number(h.costoTotal || 0),
+      }));
 
     const items: BreakdownItem[] = [
       ...viaticosAsociados.map((v) => {
