@@ -637,9 +637,11 @@ function FuenteCard({
 
   const viaticosRaw = useWatch({ control, name: 'viaticos' });
   const gastosRaw = useWatch({ control, name: 'items' });
+  const hospedajesRaw = useWatch({ control, name: 'hospedajes' });
 
   const viaticos = useMemo(() => viaticosRaw || [], [viaticosRaw]);
   const gastos = useMemo(() => gastosRaw || [], [gastosRaw]);
+  const hospedajes = useMemo(() => hospedajesRaw || [], [hospedajesRaw]);
 
   // Lógica de Suma (Gross-Up)
   const resumenFinanciero = useMemo(() => {
@@ -661,11 +663,26 @@ function FuenteCard({
       .filter((g) => Number(g.solicitudPresupuestoId) === poaId)
       .reduce((acc: number, g) => acc + (Number(g.montoNeto) || 0), 0);
 
+    const sumaHospedajesNeto = hospedajes
+      .filter((h) => Number(h.poaId) === poaId)
+      .reduce((acc: number, h) => acc + (Number(h.costoTotal) || 0), 0);
+
+    const sumaHospedajesBruto = hospedajes
+      .filter((h) => Number(h.poaId) === poaId)
+      .reduce(
+        (acc: number, h) =>
+          acc +
+          (Number(h.costoTotal) || 0) +
+          (Number(h.iva) || 0) +
+          (Number(h.it) || 0),
+        0
+      );
+
     return {
-      neto: sumaViaticosNeto + sumaGastosNeto,
-      bruto: sumaViaticosBruto + sumaGastosBruto,
+      neto: sumaViaticosNeto + sumaGastosNeto + sumaHospedajesNeto,
+      bruto: sumaViaticosBruto + sumaGastosBruto + sumaHospedajesBruto,
     };
-  }, [viaticos, gastos, poaId]);
+  }, [viaticos, gastos, hospedajes, poaId]);
 
   // E. Integración con Catálogo (Fresh Data)
   // Buscamos el ítem fresco en la estructura cargada del catálogo para obtener el saldo real
