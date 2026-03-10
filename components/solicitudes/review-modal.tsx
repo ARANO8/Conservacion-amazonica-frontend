@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   Check,
   ChevronsUpDown,
+  Landmark,
 } from 'lucide-react';
 import { Concepto, TipoGasto, Usuario } from '@/types/catalogs';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,7 @@ import {
 import { SeleccionPresupuesto } from '@/types/backend';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapFormToBreakdown } from '@/lib/mappers/breakdown-mapper';
+import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -111,13 +113,42 @@ export default function ReviewModal({
     0
   );
 
-  const totalGeneral = totalViaticos + totalGastos + totalNomina;
+  const totalHospedajes = (data.hospedajes || []).reduce(
+    (acc: number, h) =>
+      acc +
+      (Number(h.costoTotal) || 0) +
+      (Number(h.iva) || 0) +
+      (Number(h.it) || 0),
+    0
+  );
+  const totalLiquidoHospedajes = (data.hospedajes || []).reduce(
+    (acc: number, h) => acc + (Number(h.costoTotal) || 0),
+    0
+  );
+
+  const totalGeneral =
+    totalViaticos + totalGastos + totalNomina + totalHospedajes;
   const totalLiquidoGeneral =
-    totalLiquidoViaticos + totalLiquidoGastos + totalLiquidoNomina;
+    totalLiquidoViaticos +
+    totalLiquidoGastos +
+    totalLiquidoNomina +
+    totalLiquidoHospedajes;
 
   const partidasMapped = useMemo(() => {
     return mapFormToBreakdown(data, misSelecciones, conceptos, tiposGasto);
   }, [data, misSelecciones, conceptos, tiposGasto]);
+
+  // FIXME: DEBUGGING
+  console.log('DATA EN STEP 3:', {
+    fuentesSeleccionadas: data.fuentesSeleccionadas,
+    misSelecciones,
+  });
+  console.log(
+    'PROYECTO SELECCIONADO:',
+    misSelecciones.find(
+      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
+    )?.poa?.estructura?.proyecto
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -180,6 +211,21 @@ export default function ReviewModal({
                   </span>
                 </p>
               </div>
+            </section>
+
+            {/* 1.5 Información Bancaria del Proyecto */}
+            <section className="space-y-3 pt-2">
+              <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                Información Bancaria
+              </h3>
+              {(() => {
+                const proyectoSeleccionado = misSelecciones.find(
+                  (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
+                )?.poa?.estructura?.proyecto;
+                const cuentaBancaria = proyectoSeleccionado?.cuentaBancaria;
+
+                return <CuentaBancariaCard cuentaBancaria={cuentaBancaria} />;
+              })()}
             </section>
 
             {/* 2. DESGLOSE POR PARTIDA (DRY Refactored) */}

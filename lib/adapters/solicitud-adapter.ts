@@ -51,6 +51,19 @@ export const adaptFormToPayload = (
     procedenciaInstitucion: n.procedenciaInstitucion,
   }));
 
+  // 5. Mapeo de Hospedajes
+  const hospedajes = (formData.hospedajes || []).map((h) => ({
+    poaId: Number(h.poaId) || 0,
+    region: h.region || '',
+    destino: h.destino || '',
+    personas: Number(h.personas) || 1,
+    noches: Number(h.noches) || 1,
+    cantidadUnitaria: Number(h.cantidadUnitaria) || 0,
+    costoTotal: Number(h.costoTotal) || 0,
+    iva: Number(h.iva) || 0,
+    it: Number(h.it) || 0,
+  }));
+
   return {
     poaIds: formData.presupuestosIds || [],
     aprobadorId: aprobadorId,
@@ -60,6 +73,7 @@ export const adaptFormToPayload = (
     planificaciones,
     viaticos,
     gastos,
+    hospedajes,
     nominasTerceros,
   };
 };

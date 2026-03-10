@@ -25,12 +25,14 @@ export default function SolicitudFooter({
   const watchViaticos = useWatch({ control, name: 'viaticos' });
   const watchItems = useWatch({ control, name: 'items' });
   const watchNomina = useWatch({ control, name: 'nomina' });
+  const watchHospedajes = useWatch({ control, name: 'hospedajes' });
 
   const totales = useMemo(() => {
     const fuentes = watchFuentes || [];
     const viaticos = watchViaticos || [];
     const items = watchItems || [];
     const nomina = watchNomina || [];
+    const hospedajes = watchHospedajes || [];
 
     // 1. PRESUPUESTO TOTAL (Suma de montos reservados en las fuentes)
     const totalFuentes = fuentes.reduce(
@@ -39,22 +41,36 @@ export default function SolicitudFooter({
     );
 
     // 2. TOTAL NETO (Presupuestado - Incluye Impuestos/Impacto)
-    const totalNeto = [...viaticos, ...items, ...nomina].reduce(
-      (acc: number, item) => acc + (Number(item?.montoNeto) || 0),
-      0
-    );
+    const totalNeto =
+      [...viaticos, ...items, ...nomina].reduce(
+        (acc: number, item) => acc + (Number(item?.montoNeto) || 0),
+        0
+      ) +
+      hospedajes.reduce(
+        (acc: number, h) =>
+          acc +
+          (Number(h?.costoTotal) || 0) +
+          (Number(h?.iva) || 0) +
+          (Number(h?.it) || 0),
+        0
+      );
 
     // 3. TOTAL EJECUTADO (BRUTO) (Líquido a recibir)
-    const totalBruto = [...viaticos, ...items, ...nomina].reduce(
-      (acc: number, item) => acc + (Number(item?.liquidoPagable) || 0),
-      0
-    );
+    const totalBruto =
+      [...viaticos, ...items, ...nomina].reduce(
+        (acc: number, item) => acc + (Number(item?.liquidoPagable) || 0),
+        0
+      ) +
+      hospedajes.reduce(
+        (acc: number, h) => acc + (Number(h?.costoTotal) || 0),
+        0
+      );
 
     // 4. SALDO RESTANTE
     const saldoGlobal = totalFuentes - totalNeto;
 
     return { totalFuentes, totalNeto, totalBruto, saldoGlobal };
-  }, [watchFuentes, watchViaticos, watchItems, watchNomina]);
+  }, [watchFuentes, watchViaticos, watchItems, watchNomina, watchHospedajes]);
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">
