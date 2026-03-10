@@ -413,9 +413,31 @@ function HospedajeCard({
                     Tarifa Unitaria (Bs.)
                   </FieldLabel>
                   {selectedRegion && (
-                    <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:border-emerald-900 dark:bg-emerald-950/50">
-                      Bs. {Number(field.value || 0).toFixed(2)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        step="0.01"
+                        className="h-7 w-24 px-2 py-0 text-right text-xs font-semibold"
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val === '' ? '' : Number(val));
+                        }}
+                        onBlur={(e) => {
+                          const val = Number(e.target.value);
+                          if (
+                            !e.target.value ||
+                            isNaN(val) ||
+                            val < (rangoMin ?? 0)
+                          ) {
+                            field.onChange(rangoMin);
+                          } else if (val > (rangoMax ?? Infinity)) {
+                            field.onChange(rangoMax);
+                          }
+                          trigger(`hospedajes.${index}.cantidadUnitaria`);
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
                 <FormControl>
@@ -426,7 +448,10 @@ function HospedajeCard({
                       max={rangoMax || 100}
                       step={0.5}
                       value={[Number(field.value) || rangoMin || 0]}
-                      onValueChange={(vals) => field.onChange(vals[0])}
+                      onValueChange={(vals) => {
+                        field.onChange(vals[0]);
+                        trigger(`hospedajes.${index}.cantidadUnitaria`);
+                      }}
                       className="w-full disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
