@@ -13,3 +13,12 @@ export function formatMoney(n: number) {
     currency: 'BOB',
   }).format(isFinite(n) ? n : 0);
 }
+
+export function normalizeString(text?: string | null): string {
+  if (!text) return '';
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase();
+}

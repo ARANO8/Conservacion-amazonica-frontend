@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Receipt, Plus } from 'lucide-react';
 import { FieldLegend, FieldSet } from '@/components/ui/field';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
-import { formatMoney } from '@/lib/utils';
+import { formatMoney, normalizeString } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Grupo, TipoGasto } from '@/types/catalogs';
 import { SeleccionPresupuesto } from '@/types/backend';
@@ -65,8 +65,9 @@ export default function SolicitudGastos({
           onClick={() => {
             // 1. Validar que exista al menos una partida que NO sea de Viáticos
             const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
-              const nombrePartida =
-                f.poa?.estructura?.partida?.nombre?.toUpperCase() || '';
+              const nombrePartida = normalizeString(
+                f.poa?.estructura?.partida?.nombre
+              );
               return (
                 !nombrePartida.includes('VIATICO') &&
                 !nombrePartida.includes('HOSPEDAJE')
@@ -183,7 +184,7 @@ function GastoCard({
     const tipoObj = tiposGasto.find(
       (t) => Number(t.id) === Number(watchTipoGastoId)
     );
-    const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
+    const tipoNombre = normalizeString(tipoObj?.nombre);
 
     let factor = 1.0;
     if (tipoNombre === 'COMPRA') {
@@ -223,7 +224,7 @@ function GastoCard({
   const tipoObj = tiposGasto.find(
     (t) => Number(t.id) === Number(watchTipoGastoId)
   );
-  const tipoNombre = (tipoObj?.nombre || '').toUpperCase().trim();
+  const tipoNombre = normalizeString(tipoObj?.nombre);
   const currentBruto = Number(montoNeto) || 0;
 
   let iva = 0;
@@ -288,9 +289,9 @@ function GastoCard({
                       ).values(),
                     ]
                       .filter((f) => {
-                        const nombre = (
-                          f.poa?.estructura?.partida?.nombre ?? ''
-                        ).toUpperCase();
+                        const nombre = normalizeString(
+                          f.poa?.estructura?.partida?.nombre
+                        );
                         return (
                           !nombre.includes('VIATICO') &&
                           !nombre.includes('HOSPEDAJE')

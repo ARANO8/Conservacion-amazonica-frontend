@@ -24,12 +24,9 @@ export const adaptFormToPayload = (
 
   // 2. Mapeo de Viáticos
   const viaticos = (formData.viaticos || []).map((v) => ({
-    planificacionIndexes:
-      v.planificacionIndex !== undefined &&
-      v.planificacionIndex !== null &&
-      (v.planificacionIndex as string | number) !== ''
-        ? [Number(v.planificacionIndex)]
-        : [],
+    planificacionIndexes: Array.isArray(v.planificacionIndexes)
+      ? v.planificacionIndexes.map(Number)
+      : [],
     conceptoId: Number(v.conceptoId) || 0,
     tipoDestino: v.tipoDestino || 'INSTITUCIONAL',
     dias: Number(v.dias) || 0,
