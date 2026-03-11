@@ -407,23 +407,35 @@ function ViaticoCard({
                         <Button
                           variant="outline"
                           role="combobox"
-                          className={`w-full justify-between font-normal ${
+                          className={`h-auto min-h-10 w-full flex-wrap justify-start text-left font-normal ${
                             selectedValues.length === 0
                               ? 'text-muted-foreground'
                               : ''
                           }`}
                         >
-                          {selectedValues.length > 0
-                            ? `${selectedValues.length} seleccionadas`
-                            : 'Seleccionar...'}
+                          <div className="flex flex-1 flex-wrap items-center gap-1">
+                            {selectedValues.length > 0 ? (
+                              selectedValues.map((val) => (
+                                <Badge
+                                  key={val}
+                                  variant="secondary"
+                                  className="max-w-[150px] truncate text-[10px] font-normal"
+                                >
+                                  {
+                                    actividadesPlanificadas[val]
+                                      ?.actividadProgramada
+                                  }
+                                </Badge>
+                              ))
+                            ) : (
+                              <span>Seleccionar actividades...</span>
+                            )}
+                          </div>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
+                    <PopoverContent className="w-[300px] p-0" align="start">
                       <Command>
                         <CommandList>
                           <CommandEmpty>No hay actividades.</CommandEmpty>
@@ -465,17 +477,6 @@ function ViaticoCard({
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {selectedValues.map((val) => (
-                      <Badge
-                        key={val}
-                        variant="secondary"
-                        className="max-w-full truncate text-[10px] font-normal"
-                      >
-                        {actividadesPlanificadas[val]?.actividadProgramada}
-                      </Badge>
-                    ))}
-                  </div>
                   <FormMessage />
                 </FormItem>
               );
@@ -595,31 +596,6 @@ function ViaticoCard({
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.montoNeto`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  TOTAL LÍQUIDO (A Recibir)
-                </Label>
-                <FormControl>
-                  <Input
-                    {...field}
-                    className="w-full"
-                    value={formatMoney(netoTotal)}
-                    min={0}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    readOnly
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
       </div>
 
@@ -628,9 +604,18 @@ function ViaticoCard({
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
             <span className="text-muted-foreground text-xs font-bold uppercase">
-              TOTAL PRESUPUESTADO (Incl. Impuestos)
+              TOTAL LÍQUIDO (A Recibir)
             </span>
-            <span className="text-primary text-sm font-bold">
+            <span className="text-primary text-lg font-semibold">
+              {formatMoney(netoTotal || 0)}
+            </span>
+          </div>
+          <div className="bg-border hidden h-10 w-[1px] sm:block" />
+          <div className="flex flex-col">
+            <span className="text-muted-foreground text-xs font-bold uppercase">
+              TOTAL PRESUPUESTADO
+            </span>
+            <span className="text-sm font-bold">
               {formatMoney(montoNeto || 0)}
             </span>
           </div>
