@@ -103,7 +103,7 @@ export interface CreatePlanificacionDto {
 }
 
 export interface CreateViaticoDto {
-  planificacionIndex: number;
+  planificacionIndexes: number[];
   conceptoId: number;
   tipoDestino: 'INSTITUCIONAL' | 'TERCEROS';
   dias: number;

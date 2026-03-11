@@ -40,7 +40,10 @@ export function mapFormToBreakdown(
           nombre:
             conceptos.find((c) => c.id === v.conceptoId)?.nombre || 'Viático',
           detalle:
-            data.actividades?.[v.planificacionIndex ?? -1]?.actividadProgramada,
+            (v.planificacionIndexes || [])
+              .map((idx) => data.actividades?.[idx]?.actividadProgramada)
+              .filter(Boolean)
+              .join(', ') || 'Sin actividad',
           tipoDestino: v.tipoDestino,
           montoNeto: Number(v.montoNeto) || 0,
           montoLiquido: Number(v.liquidoPagable ?? v.montoNeto) || 0,
