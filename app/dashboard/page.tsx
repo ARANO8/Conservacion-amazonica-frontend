@@ -65,18 +65,14 @@ export default function Page() {
               <CardHeader>
                 <CardTitle>Rendición de Gastos</CardTitle>
                 <CardDescription>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Próximamente.
+                  Carga la rendición de gastos para tus solicitudes.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-muted-foreground text-sm">
-                  En desarrollo
-                </div>
-              </CardContent>
               <CardFooter>
-                <Button variant="outline" disabled>
-                  Ver reportes
+                <Button asChild>
+                  <Link href="/dashboard/rendiciones/nueva">
+                    Cargar rendición
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>

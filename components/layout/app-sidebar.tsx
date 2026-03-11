@@ -53,7 +53,7 @@ function buildFormularioItems(rol?: Role) {
   if (rol === 'ADMIN' || rol === 'TESORERO') {
     items.push({
       title: 'Revisión',
-      url: '/dashboard/revision?role=approver',
+      url: '/dashboard/rendiciones/nueva',
     });
   }
 
