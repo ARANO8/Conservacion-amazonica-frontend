@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/field';
 import { SeleccionPresupuesto } from '@/types/backend';
 import { useEffect, useCallback } from 'react';
-import { formatMoney } from '@/lib/utils';
+import { formatMoney, normalizeString } from '@/lib/utils';
 import { toast } from 'sonner';
 
 // --- Diccionario de Hospedajes ---
@@ -80,15 +80,16 @@ export default function SolicitudHospedajes({
               const p = f.poa;
               if (!p) return false;
 
-              const searchStr = [
-                p.actividad?.detalleDescripcion,
-                p.estructura?.partida?.nombre,
-                (p as { partida?: { nombre?: string } }).partida?.nombre,
-                p.codigoPresupuestario?.descripcion,
-              ]
-                .filter(Boolean)
-                .join(' ')
-                .toUpperCase();
+              const searchStr = normalizeString(
+                [
+                  p.actividad?.detalleDescripcion,
+                  p.estructura?.partida?.nombre,
+                  (p as { partida?: { nombre?: string } }).partida?.nombre,
+                  p.codigoPresupuestario?.descripcion,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              );
 
               return searchStr.includes('HOSPEDAJE');
             });
@@ -239,16 +240,17 @@ function HospedajeCard({
                       .filter((f) => {
                         const p = f.poa;
                         if (!p) return false;
-                        const searchStr = [
-                          p.actividad?.detalleDescripcion,
-                          p.estructura?.partida?.nombre,
-                          (p as { partida?: { nombre?: string } }).partida
-                            ?.nombre,
-                          p.codigoPresupuestario?.descripcion,
-                        ]
-                          .filter(Boolean)
-                          .join(' ')
-                          .toUpperCase();
+                        const searchStr = normalizeString(
+                          [
+                            p.actividad?.detalleDescripcion,
+                            p.estructura?.partida?.nombre,
+                            (p as { partida?: { nombre?: string } }).partida
+                              ?.nombre,
+                            p.codigoPresupuestario?.descripcion,
+                          ]
+                            .filter(Boolean)
+                            .join(' ')
+                        );
                         return searchStr.includes('HOSPEDAJE');
                       })
                       .map((fuente) => (

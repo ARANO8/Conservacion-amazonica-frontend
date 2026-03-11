@@ -40,7 +40,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Briefcase, Plus, Check, ChevronsUpDown } from 'lucide-react';
 import { FieldLegend, FieldSet } from '@/components/ui/field';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
-import { formatMoney } from '@/lib/utils';
+import { formatMoney, normalizeString } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Concepto } from '@/types/catalogs';
 import { SeleccionPresupuesto } from '@/types/backend';
@@ -78,9 +78,9 @@ export default function SolicitudViaticos({
           onClick={() => {
             // Validar que existan partidas de viáticos antes de agregar
             const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
-              f.poa?.estructura?.partida?.nombre
-                ?.toUpperCase()
-                .includes('VIATICOS')
+              normalizeString(f.poa?.estructura?.partida?.nombre).includes(
+                'VIATICO'
+              )
             );
 
             if (!tienePresupuestoViaticos) {
@@ -336,9 +336,9 @@ function ViaticoCard({
                       ).values(),
                     ]
                       .filter((f) =>
-                        (f.poa?.estructura?.partida?.nombre ?? '')
-                          .toUpperCase()
-                          .includes('VIATICOS')
+                        normalizeString(
+                          f.poa?.estructura?.partida?.nombre
+                        ).includes('VIATICO')
                       )
                       .map((fuente) => (
                         <SelectItem
