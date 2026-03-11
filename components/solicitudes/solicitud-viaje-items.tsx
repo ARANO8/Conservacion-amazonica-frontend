@@ -251,7 +251,7 @@ export default function SolicitudViajeItems({
           onClick={() =>
             append({
               conceptoId: 0,
-              planificacionIndex: 0,
+              planificacionIndexes: [],
               ciudad: '',
               destino: '',
               tipoDestino: 'INSTITUCIONAL',
