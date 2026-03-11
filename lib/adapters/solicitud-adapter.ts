@@ -169,11 +169,13 @@ export const adaptResponseToFormData = (
 
     return {
       id: v.id,
-      planificacionIndex: v.planificacionId
-        ? (response.planificaciones?.findIndex(
-            (p) => p.id === v.planificacionId
-          ) ?? 0)
-        : 0,
+      planificacionIndexes: v.planificacionId
+        ? [
+            response.planificaciones?.findIndex(
+              (p) => p.id === v.planificacionId
+            ) ?? 0,
+          ]
+        : [],
       conceptoId: v.concepto?.id,
       tipoDestino:
         (v.tipoDestino as 'INSTITUCIONAL' | 'TERCEROS') || 'INSTITUCIONAL',
