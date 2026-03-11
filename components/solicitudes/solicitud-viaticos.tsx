@@ -23,7 +23,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Trash2, Briefcase, Plus } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Briefcase, Plus, Check, ChevronsUpDown } from 'lucide-react';
 import { FieldLegend, FieldSet } from '@/components/ui/field';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney } from '@/lib/utils';
@@ -78,7 +92,7 @@ export default function SolicitudViaticos({
 
             append({
               conceptoId: 0,
-              planificacionIndex: 0,
+              planificacionIndexes: [],
               tipoDestino: 'INSTITUCIONAL',
               dias: 0,
               cantidadPersonas: 0,
@@ -164,20 +178,22 @@ function ViaticoCard({
     name: `viaticos.${index}.tipoDestino`,
   });
 
-  const watchPlanificacionIndex = useWatch({
+  const watchPlanificacionIndexes = useWatch({
     control,
-    name: `viaticos.${index}.planificacionIndex`,
-  });
+    name: `viaticos.${index}.planificacionIndexes`,
+  }) as number[] | undefined;
 
   const montoNeto = useWatch({
     control,
     name: `viaticos.${index}.montoNeto`,
   });
 
-  const selectedPlanificacion = useMemo(() => {
-    // Assuming planificacionIndex corresponds to the array index of actividadesPlanificadas
-    return actividadesPlanificadas[Number(watchPlanificacionIndex)];
-  }, [actividadesPlanificadas, watchPlanificacionIndex]);
+  const selectedPlanificaciones = useMemo(() => {
+    if (!Array.isArray(watchPlanificacionIndexes)) return [];
+    return watchPlanificacionIndexes
+      .map((idx) => actividadesPlanificadas[idx])
+      .filter(Boolean);
+  }, [actividadesPlanificadas, watchPlanificacionIndexes]);
 
   // Determine if it is and "Exterior" concept
   const isExterior = useMemo(() => {
@@ -195,31 +211,38 @@ function ViaticoCard({
 
   useEffect(() => {
     const isPlanificacionDirty =
-      dirtyFields.viaticos?.[index]?.planificacionIndex;
+      dirtyFields.viaticos?.[index]?.planificacionIndexes;
     const isTipoDestinoDirty = dirtyFields.viaticos?.[index]?.tipoDestino;
 
     // Only update if the user explicitly changed the source of truth
-    if ((isPlanificacionDirty || isTipoDestinoDirty) && selectedPlanificacion) {
-      // Logic requirement:
-      // INSTITUCIONAL -> use cantInstitucion
-      // TERCEROS -> use cantTerceros
-      const personasCount =
-        watchTipoDestino === 'TERCEROS'
-          ? selectedPlanificacion.cantTerceros || 0
-          : selectedPlanificacion.cantInstitucion || 0;
+    if (
+      (isPlanificacionDirty || isTipoDestinoDirty) &&
+      selectedPlanificaciones.length > 0
+    ) {
+      // Sum logic:
+      let sumDias = 0;
+      let sumPersonas = 0;
 
-      setValue(`viaticos.${index}.dias`, selectedPlanificacion.cantDias || 0, {
+      selectedPlanificaciones.forEach((plan) => {
+        sumDias += plan.cantDias || 0;
+        sumPersonas +=
+          watchTipoDestino === 'TERCEROS'
+            ? plan.cantTerceros || 0
+            : plan.cantInstitucion || 0;
+      });
+
+      setValue(`viaticos.${index}.dias`, sumDias, {
         shouldDirty: true,
       });
-      setValue(`viaticos.${index}.cantidadPersonas`, personasCount, {
+      setValue(`viaticos.${index}.cantidadPersonas`, sumPersonas, {
         shouldDirty: true,
       });
-    } else if (isPlanificacionDirty && !selectedPlanificacion) {
-      // User cleared selection
+    } else if (isPlanificacionDirty && selectedPlanificaciones.length === 0) {
+      // User cleared selection completely
       setValue(`viaticos.${index}.dias`, 0, { shouldDirty: true });
       setValue(`viaticos.${index}.cantidadPersonas`, 0, { shouldDirty: true });
     }
-  }, [selectedPlanificacion, watchTipoDestino, setValue, index, dirtyFields]);
+  }, [selectedPlanificaciones, watchTipoDestino, setValue, index, dirtyFields]);
 
   // Get the unit price from the selected concept
   const precioUnitarioLista = useMemo(() => {
@@ -368,43 +391,96 @@ function ViaticoCard({
           />
           <FormField
             control={control}
-            name={`viaticos.${index}.planificacionIndex`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Planificación
-                </Label>
-                <Select
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  value={field.value?.toString() || ''}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar actividad..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent
-                    position="popper"
-                    side="bottom"
-                    align="start"
-                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
-                  >
-                    {actividadesPlanificadas.length > 0 ? (
-                      actividadesPlanificadas.map((act, idx) => (
-                        <SelectItem key={idx} value={String(idx)}>
-                          {act.actividadProgramada}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-actividades" disabled>
-                        No hay actividades
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            name={`viaticos.${index}.planificacionIndexes`}
+            render={({ field }) => {
+              const selectedValues = Array.isArray(field.value)
+                ? field.value
+                : [];
+              return (
+                <FormItem className="flex flex-col">
+                  <Label className="text-muted-foreground mb-[2px] text-xs font-bold uppercase">
+                    Planificaciones
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={`h-auto min-h-10 w-full flex-wrap justify-start text-left font-normal ${
+                            selectedValues.length === 0
+                              ? 'text-muted-foreground'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex flex-1 flex-wrap items-center gap-1">
+                            {selectedValues.length > 0 ? (
+                              selectedValues.map((val) => (
+                                <Badge
+                                  key={val}
+                                  variant="secondary"
+                                  className="max-w-[150px] truncate text-[10px] font-normal"
+                                >
+                                  {
+                                    actividadesPlanificadas[val]
+                                      ?.actividadProgramada
+                                  }
+                                </Badge>
+                              ))
+                            ) : (
+                              <span>Seleccionar actividades...</span>
+                            )}
+                          </div>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                      <Command>
+                        <CommandList>
+                          <CommandEmpty>No hay actividades.</CommandEmpty>
+                          <CommandGroup>
+                            {actividadesPlanificadas.length > 0 ? (
+                              actividadesPlanificadas.map((act, idx) => {
+                                const isSelected = selectedValues.includes(idx);
+                                return (
+                                  <CommandItem
+                                    key={idx}
+                                    value={act.actividadProgramada}
+                                    onSelect={() => {
+                                      const updated = isSelected
+                                        ? selectedValues.filter(
+                                            (v) => v !== idx
+                                          )
+                                        : [...selectedValues, idx];
+                                      field.onChange(updated);
+                                    }}
+                                  >
+                                    <Checkbox
+                                      checked={isSelected}
+                                      className="mr-2"
+                                      tabIndex={-1}
+                                    />
+                                    <span className="truncate">
+                                      {act.actividadProgramada}
+                                    </span>
+                                  </CommandItem>
+                                );
+                              })
+                            ) : (
+                              <CommandItem disabled>
+                                No hay actividades planificadas
+                              </CommandItem>
+                            )}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={control}
@@ -520,31 +596,6 @@ function ViaticoCard({
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.montoNeto`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  TOTAL LÍQUIDO (A Recibir)
-                </Label>
-                <FormControl>
-                  <Input
-                    {...field}
-                    className="w-full"
-                    value={formatMoney(netoTotal)}
-                    min={0}
-                    onKeyDown={(e) =>
-                      ['-', 'e'].includes(e.key) && e.preventDefault()
-                    }
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    readOnly
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
       </div>
 
@@ -553,9 +604,18 @@ function ViaticoCard({
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
             <span className="text-muted-foreground text-xs font-bold uppercase">
-              TOTAL PRESUPUESTADO (Incl. Impuestos)
+              TOTAL LÍQUIDO (A Recibir)
             </span>
-            <span className="text-primary text-sm font-bold">
+            <span className="text-primary text-lg font-semibold">
+              {formatMoney(netoTotal || 0)}
+            </span>
+          </div>
+          <div className="bg-border hidden h-10 w-[1px] sm:block" />
+          <div className="flex flex-col">
+            <span className="text-muted-foreground text-xs font-bold uppercase">
+              TOTAL PRESUPUESTADO
+            </span>
+            <span className="text-sm font-bold">
               {formatMoney(montoNeto || 0)}
             </span>
           </div>
