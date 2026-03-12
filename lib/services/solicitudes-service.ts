@@ -83,10 +83,28 @@ export const solicitudesService = {
    * Downloads a PDF for a specific solicitud.
    * @param id The ID of the solicitud.
    */
-  async downloadPdf(id: number | string) {
+  async downloadPdf(id: string | number) {
     const response = await api.get(`/solicitudes/${id}/pdf`, {
       responseType: 'blob',
     });
+    return response.data;
+  },
+
+  /**
+   * Marca una solicitud como EJECUTADA después de una rendición exitosa.
+   * @param id The ID of the solicitud to mark as executed.
+   */
+  async marcarEjecutada(id: string | number) {
+    const token = Cookies.get('token');
+    const response = await api.patch(
+      `/solicitudes/${id}/ejecutar`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   },
 };

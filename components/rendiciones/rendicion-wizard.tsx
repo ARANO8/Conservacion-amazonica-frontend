@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm, FormProvider, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -12,6 +13,8 @@ import {
   WizardStepRendicion,
 } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
+import { rendicionesService } from '@/lib/services/rendiciones-service';
+import { solicitudesService } from '@/lib/services/solicitudes-service';
 
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
@@ -25,6 +28,7 @@ interface RendicionWizardProps {
 }
 
 export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
+  const router = useRouter();
   const [step, setStep] = useState<WizardStepRendicion>('SELECCION');
   const [loading, setLoading] = useState(false);
 
@@ -115,13 +119,39 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
     setLoading(true);
     try {
       const data = form.getValues();
-      // TODO: llamar a rendicionesService.createRendicion(data) cuando el
-      // endpoint del backend esté disponible.
-      console.log('Payload rendición:', data);
+      const solicitudId = data.solicitudId;
+
+      // Paso 1: Crear la rendición en el backend
+      const rendicionResponse = await rendicionesService.createRendicion(data);
+      console.log('Rendición creada:', rendicionResponse);
+
+      // Paso 2: Marcar la solicitud como EJECUTADA
+      await solicitudesService.marcarEjecutada(solicitudId);
+      console.log('Solicitud marcada como EJECUTADA');
+
       toast.success('Rendición enviada correctamente');
+
+      // Paso 3: Redirigir al dashboard
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Error al enviar la rendición';
+      let message = 'Error al enviar la rendición';
+
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error
+      ) {
+        const axiosError = error as {
+          response?: { data?: { message?: string } };
+        };
+        message = axiosError.response?.data?.message || message;
+      }
+
+      console.error('Error en handleSubmit:', error);
       toast.error(message);
     } finally {
       setLoading(false);
