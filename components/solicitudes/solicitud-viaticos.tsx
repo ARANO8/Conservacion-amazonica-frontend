@@ -425,6 +425,37 @@ function ViaticoCard({
           />
           <FormField
             control={control}
+            name={`viaticos.${index}.tipoDestino`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Tipo
+                </Label>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? 'INSTITUCIONAL'}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    <SelectItem value="INSTITUCIONAL">Institucional</SelectItem>
+                    <SelectItem value="TERCEROS">Tercero</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
             name={`viaticos.${index}.planificacionIndexes`}
             render={({ field }) => {
               const selectedValues = Array.isArray(field.value)
@@ -538,37 +569,6 @@ function ViaticoCard({
                 </FormItem>
               );
             }}
-          />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.tipoDestino`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Tipo
-                </Label>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? 'INSTITUCIONAL'}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent
-                    position="popper"
-                    side="bottom"
-                    align="start"
-                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
-                  >
-                    <SelectItem value="INSTITUCIONAL">Institucional</SelectItem>
-                    <SelectItem value="TERCEROS">Tercero</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
           />
         </div>
 
