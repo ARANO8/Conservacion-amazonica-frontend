@@ -1,5 +1,6 @@
 import api from '@/lib/api';
 import { CreateRendicionInput } from '@/types/rendicion-schema';
+import { adaptCreateRendicionPayload } from '@/lib/adapters/rendicion-adapter';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
@@ -14,8 +15,12 @@ export const rendicionesService = {
   async createRendicion(payload: CreateRendicionInput) {
     const token = Cookies.get('token');
 
+    // Adaptar el payload al formato exacto que espera el backend
+    const adaptedPayload = adaptCreateRendicionPayload(payload);
+    console.log('Payload adaptado:', JSON.stringify(adaptedPayload, null, 2));
+
     try {
-      const response = await api.post('/rendiciones', payload, {
+      const response = await api.post('/rendiciones', adaptedPayload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -33,7 +38,7 @@ export const rendicionesService = {
           // Intentar con ruta alternativa: POST a /solicitudes/:id/rendiciones
           const response = await api.post(
             `/solicitudes/${payload.solicitudId}/rendiciones`,
-            payload,
+            adaptedPayload,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

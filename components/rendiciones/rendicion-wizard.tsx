@@ -121,6 +121,8 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
       const data = form.getValues();
       const solicitudId = data.solicitudId;
 
+      console.log('Payload que se envía:', JSON.stringify(data, null, 2));
+
       // Paso 1: Crear la rendición en el backend
       const rendicionResponse = await rendicionesService.createRendicion(data);
       console.log('Rendición creada:', rendicionResponse);
