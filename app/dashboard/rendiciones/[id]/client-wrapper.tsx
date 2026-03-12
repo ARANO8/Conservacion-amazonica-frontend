@@ -91,20 +91,17 @@ export function RendicionDetailClient({
       <RendicionSolicitudSection solicitud={rendicion.solicitud} />
 
       {/* Gastos Section */}
-      {(rendicion.gastos.length > 0 ||
-        rendicion.gastosSinRespaldo.length > 0) && (
-        <RendicionGastosSection
-          gastos={rendicion.gastos}
-          gastosSinRespaldo={rendicion.gastosSinRespaldo}
-        />
+      {rendicion.gastosRendicion && rendicion.gastosRendicion.length > 0 && (
+        <RendicionGastosSection gastos={rendicion.gastosRendicion} />
       )}
 
       {/* Declaración Jurada Section */}
-      {rendicion.declaracionesJuradas.length > 0 && (
-        <RendicionDeclaracionSection
-          declaraciones={rendicion.declaracionesJuradas}
-        />
-      )}
+      {rendicion.declaracionesJuradas &&
+        rendicion.declaracionesJuradas.length > 0 && (
+          <RendicionDeclaracionSection
+            declaraciones={rendicion.declaracionesJuradas}
+          />
+        )}
 
       {/* Observaciones */}
       {rendicion.observaciones && (

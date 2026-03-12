@@ -44,22 +44,10 @@ export interface GastoRendicionResponse {
   montoTotal: string; // Decimal as string from backend
   montoNeto: string; // Decimal as string
   estado: EstadoGastoRendicion;
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
-}
-
-// ---------------------------------------------------------------------------
-// Gasto Sin Respaldo (Expense Without Supporting Document)
-// ---------------------------------------------------------------------------
-
-export interface GastoSinRespaldoResponse {
-  id: number;
-  rendicionId: number;
-  detalle: string;
-  fechaGasto?: string; // ISO date
-  monto: string; // Decimal as string
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
+  createdAt?: string; // ISO timestamp
+  updatedAt?: string; // ISO timestamp
+  // Backend names (from Prisma model)
+  nroDocumento?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -74,8 +62,8 @@ export interface DeclaracionJuradaResponse {
   aceptaPoliticaDevolucion: boolean;
   montoADevolver?: string; // Decimal as string
   observaciones?: string;
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
+  createdAt?: string; // ISO timestamp
+  updatedAt?: string; // ISO timestamp
 }
 
 // ---------------------------------------------------------------------------
@@ -85,19 +73,22 @@ export interface DeclaracionJuradaResponse {
 export interface RendicionResponse {
   id: number;
   solicitudId: number;
-  fechaRendicion: string; // ISO date YYYY-MM-DD
+  fechaRendicion: string; // ISO date or DateTime
   montoRespaldado: string; // Decimal as string (sum of gastos montoTotal)
   saldoLiquido: string; // Decimal as string (desembolso - montoRespaldado)
   estado: EstadoRendicion;
   observaciones?: string;
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
+  createdAt?: string; // ISO timestamp
+  updatedAt?: string; // ISO timestamp
 
   // Relations
   solicitud: SolicitudResponse;
-  gastos: GastoRendicionResponse[];
-  gastosSinRespaldo: GastoSinRespaldoResponse[];
+  gastosRendicion: GastoRendicionResponse[];
   declaracionesJuradas: DeclaracionJuradaResponse[];
+
+  // Legacy aliases for convenience (not from backend, added by frontend)
+  gastos?: GastoRendicionResponse[];
+  gastosSinRespaldo?: never;
 }
 
 // ---------------------------------------------------------------------------

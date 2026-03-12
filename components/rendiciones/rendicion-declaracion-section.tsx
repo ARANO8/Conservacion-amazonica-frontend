@@ -90,7 +90,9 @@ export function RendicionDeclaracionSection({
         )}
 
         <div className="text-muted-foreground text-xs">
-          Registrada el {formatDate(declaracion.createdAt)}
+          {declaracion.createdAt ? (
+            <>Registrada el {formatDate(declaracion.createdAt)}</>
+          ) : null}
         </div>
       </CardContent>
     </Card>
