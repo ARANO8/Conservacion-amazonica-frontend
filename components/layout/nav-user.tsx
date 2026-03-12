@@ -34,12 +34,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, logout } = useAuthStore();
-  const { notificaciones, noLeidas } = useNotificacionesStore();
+  const { notificaciones, noLeidas, markAsRead } = useNotificacionesStore();
   const router = useRouter();
 
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const handleNotificationClick = async (
+    notification: (typeof notificaciones)[0]
+  ) => {
+    // Marcar como leída de forma asíncrona
+    if (!notification.leida && user?.id) {
+      const usuarioId =
+        typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
+      await markAsRead(usuarioId, notification.id);
+    }
+    // Navegar a la URL de destino
+    router.push(notification.urlDestino || '/dashboard/inbox');
   };
 
   // Últimas 3 notificaciones no leídas
@@ -117,11 +130,7 @@ export function NavUser() {
                     <DropdownMenuItem
                       key={notification.id}
                       className="cursor-pointer flex-col items-start gap-1 px-2 py-2"
-                      onClick={() => {
-                        router.push(
-                          notification.urlDestino || '/dashboard/inbox'
-                        );
-                      }}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <div className="flex w-full items-start gap-2">
                         <Bell className="text-muted-foreground mt-0.5 size-3 shrink-0" />
