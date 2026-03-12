@@ -231,10 +231,16 @@ function ViaticoCard({
             : plan.cantInstitucion || 0;
       });
 
+      // Divide personas by number of selected planificaciones to avoid duplication
+      const personasPromedio =
+        selectedPlanificaciones.length > 0
+          ? sumPersonas / selectedPlanificaciones.length
+          : 0;
+
       setValue(`viaticos.${index}.dias`, sumDias, {
         shouldDirty: true,
       });
-      setValue(`viaticos.${index}.cantidadPersonas`, sumPersonas, {
+      setValue(`viaticos.${index}.cantidadPersonas`, personasPromedio, {
         shouldDirty: true,
       });
     } else if (isPlanificacionDirty && selectedPlanificaciones.length === 0) {
