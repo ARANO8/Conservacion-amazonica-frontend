@@ -191,7 +191,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
       if (tienneRendicion) {
         return (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/rendiciones/${row.original.rendicion!.id}`}>
+            <Link href={`/dashboard/rendiciones/${row.original.rendicion!.id}`}>
               <FileText className="mr-2 h-4 w-4" />
               Ver Rendición
             </Link>
