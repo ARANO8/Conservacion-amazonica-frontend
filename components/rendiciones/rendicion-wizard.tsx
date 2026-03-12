@@ -17,6 +17,7 @@ import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
 import Paso2Gastos from './paso2-gastos';
+import Paso3Declaracion from './paso3-declaracion';
 
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
@@ -119,13 +120,7 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
 
           {step === 'GASTOS_RESPALDO' && <Paso2Gastos />}
 
-          {step === 'DECLARACION_JURADA' && (
-            <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed">
-              <p className="text-muted-foreground text-sm italic">
-                Paso 3: Declaración Jurada (próximamente)
-              </p>
-            </div>
-          )}
+          {step === 'DECLARACION_JURADA' && <Paso3Declaracion />}
         </div>
 
         {/* Footer con navegación */}

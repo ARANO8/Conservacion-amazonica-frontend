@@ -67,6 +67,18 @@ export const DeclaracionJuradaSchema = z.object({
 
 export type DeclaracionJurada = z.infer<typeof DeclaracionJuradaSchema>;
 
+/**
+ * Un gasto sin respaldo oficial (pasaje de taxi, compra en mercado, etc.)
+ * que se registra directamente en la declaración jurada.
+ */
+export const GastoSinRespaldoSchema = z.object({
+  fechaGasto: z.union([z.string(), z.date()]).optional(),
+  detalle: z.string().min(1, 'El detalle es requerido'),
+  monto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
+});
+
+export type GastoSinRespaldo = z.infer<typeof GastoSinRespaldoSchema>;
+
 // ---------------------------------------------------------------------------
 // Schema principal del formulario de rendición
 // ---------------------------------------------------------------------------
@@ -85,6 +97,9 @@ export const CreateRendicionSchema = z.object({
   gastos: z.array(GastoRendicionSchema).optional(),
 
   // --- Paso 3: DECLARACION_JURADA ---
+  /** Gastos sin respaldo oficial (taxi, compras, etc.) */
+  gastosSinRespaldo: z.array(GastoSinRespaldoSchema).optional(),
+  /** Declaración jurada final con términos y condiciones */
   declaracionJurada: DeclaracionJuradaSchema.optional(),
 
   /** Observaciones generales de la rendición */
@@ -101,6 +116,7 @@ export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
   fechaRendicion: new Date().toISOString().split('T')[0],
   gastos: [],
+  gastosSinRespaldo: [],
   observaciones: '',
   declaracionJurada: undefined,
 };
