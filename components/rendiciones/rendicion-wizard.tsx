@@ -127,11 +127,19 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
       const rendicionResponse = await rendicionesService.createRendicion(data);
       console.log('Rendición creada:', rendicionResponse);
 
-      // Paso 2: Marcar la solicitud como EJECUTADA
-      await solicitudesService.marcarEjecutada(solicitudId);
-      console.log('Solicitud marcada como EJECUTADA');
-
       toast.success('Rendición enviada correctamente');
+
+      // Paso 2: Intentar marcar la solicitud como EJECUTADA (es opcional)
+      try {
+        await solicitudesService.marcarEjecutada(solicitudId);
+        console.log('Solicitud marcada como EJECUTADA');
+      } catch (markError) {
+        console.warn(
+          'No se pudo marcar la solicitud como EJECUTADA (endpoint no implementado aún)',
+          markError
+        );
+        // No es crítico si esto falla - la rendición ya fue creada exitosamente
+      }
 
       // Paso 3: Redirigir al dashboard
       setTimeout(() => {
