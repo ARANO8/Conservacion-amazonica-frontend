@@ -24,10 +24,8 @@ export function useNotificacionesPolling(interval: number = 60000) {
 
   useEffect(() => {
     if (user?.id) {
-      // Convertir string a number si es necesario
-      const usuarioId =
-        typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
-      startPolling(usuarioId, interval);
+      // El servicio REST obtiene el usuario del JWT, no necesita pasar usuarioId
+      startPolling(interval);
     }
 
     return () => {

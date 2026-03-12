@@ -17,8 +17,8 @@ export interface NotificacionBackend {
   tipo: TipoNotificacion;
   leida: boolean;
   urlDestino?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   usuarioId: number;
   solicitudId?: number | null;
   // Relación opcional
@@ -36,12 +36,12 @@ export interface NotificacionesState {
   isLoading: boolean;
   error: string | null;
 
-  // Acciones
-  fetchNotificaciones: (usuarioId: number) => Promise<void>;
-  fetchCountNoLeidas: (usuarioId: number) => Promise<void>;
-  markAsRead: (usuarioId: number, notificacionId: number) => Promise<void>;
-  markAllAsRead: (usuarioId: number) => Promise<void>;
-  startPolling: (usuarioId: number, interval?: number) => void;
+  // Acciones (ahora sin usuarioId - se obtiene del JWT en el servidor)
+  fetchNotificaciones: () => Promise<void>;
+  fetchCountNoLeidas: () => Promise<void>;
+  markAsRead: (notificacionId: number) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  startPolling: (interval?: number) => void;
   stopPolling: () => void;
   setError: (error: string | null) => void;
 }

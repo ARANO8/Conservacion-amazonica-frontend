@@ -1,24 +1,18 @@
 import { create } from 'zustand';
-import {
-  getMisNotificaciones,
-  getCountNotificacionesNoLeidas,
-  marcarComoLeida,
-  marcarTodasComoLeidas,
-} from '@/lib/actions/notificaciones.actions';
+import { notificacionesService } from '@/lib/services/notificaciones-service';
 import { NotificacionesState } from '@/types/notificacion-backend';
 import { toast } from 'sonner';
 
 /**
  * Zustand store para manejar el estado global de notificaciones.
  * Incluye:
- * - Fetch de notificaciones (directo a Prisma via Server Actions)
+ * - Fetch de notificaciones (via REST API)
  * - Marcado como leído
  * - Polling automático cada 60 segundos (configurable)
  */
 export const useNotificacionesStore = create<NotificacionesState>(
   (set, get) => {
     let pollingInterval: NodeJS.Timeout | null = null;
-    let currentUsuarioId: number | null = null;
 
     return {
       notificaciones: [],
@@ -29,12 +23,11 @@ export const useNotificacionesStore = create<NotificacionesState>(
       /**
        * Obtiene todas las notificaciones del usuario.
        */
-      fetchNotificaciones: async (usuarioId: number) => {
-        if (!usuarioId) return;
-
+      fetchNotificaciones: async () => {
         set({ isLoading: true, error: null });
         try {
-          const notificaciones = await getMisNotificaciones(usuarioId);
+          const notificaciones =
+            await notificacionesService.getMisNotificaciones();
           set({ notificaciones, isLoading: false });
         } catch (error) {
           const errorMsg =
@@ -47,11 +40,10 @@ export const useNotificacionesStore = create<NotificacionesState>(
       /**
        * Obtiene el conteo de notificaciones no leídas.
        */
-      fetchCountNoLeidas: async (usuarioId: number) => {
-        if (!usuarioId) return;
-
+      fetchCountNoLeidas: async () => {
         try {
-          const count = await getCountNotificacionesNoLeidas(usuarioId);
+          const count =
+            await notificacionesService.getCountNotificacionesNoLeidas();
           set({ noLeidas: count });
         } catch (error) {
           console.error('Error fetching unread count:', error);
@@ -61,9 +53,9 @@ export const useNotificacionesStore = create<NotificacionesState>(
       /**
        * Marca una notificación como leída.
        */
-      markAsRead: async (usuarioId: number, notificacionId: number) => {
+      markAsRead: async (notificacionId: number) => {
         try {
-          await marcarComoLeida(usuarioId, notificacionId);
+          await notificacionesService.marcarComoLeida(notificacionId);
 
           // Actualizar estado local
           set((state) => ({
@@ -81,9 +73,9 @@ export const useNotificacionesStore = create<NotificacionesState>(
       /**
        * Marca todas las notificaciones como leídas.
        */
-      markAllAsRead: async (usuarioId: number) => {
+      markAllAsRead: async () => {
         try {
-          await marcarTodasComoLeidas(usuarioId);
+          await notificacionesService.marcarTodasComoLeidas();
 
           // Actualizar estado local
           set((state) => ({
@@ -103,27 +95,20 @@ export const useNotificacionesStore = create<NotificacionesState>(
 
       /**
        * Inicia el polling automático de notificaciones.
-       * @param usuarioId ID del usuario
        * @param interval Intervalo en milisegundos (default: 60000 = 60 segundos)
        */
-      startPolling: (usuarioId: number, interval: number = 60000) => {
-        if (!usuarioId) return;
-
+      startPolling: (interval: number = 60000) => {
         // Evitar múltiples pollings
         if (pollingInterval) {
           return;
         }
 
-        currentUsuarioId = usuarioId;
-
         // Fetch inicial
-        get().fetchCountNoLeidas(usuarioId);
+        get().fetchCountNoLeidas();
 
         // Configurar polling
         pollingInterval = setInterval(() => {
-          if (currentUsuarioId) {
-            get().fetchCountNoLeidas(currentUsuarioId);
-          }
+          get().fetchCountNoLeidas();
         }, interval);
       },
 
@@ -134,7 +119,6 @@ export const useNotificacionesStore = create<NotificacionesState>(
         if (pollingInterval) {
           clearInterval(pollingInterval);
           pollingInterval = null;
-          currentUsuarioId = null;
         }
       },
 

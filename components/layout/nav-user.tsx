@@ -47,9 +47,7 @@ export function NavUser() {
   ) => {
     // Marcar como leída de forma asíncrona
     if (!notification.leida && user?.id) {
-      const usuarioId =
-        typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
-      await markAsRead(usuarioId, notification.id);
+      await markAsRead(notification.id);
     }
     // Navegar a la URL de destino
     router.push(notification.urlDestino || '/dashboard/inbox');

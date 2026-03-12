@@ -26,10 +26,7 @@ export default function InboxPage() {
 
       try {
         setLoading(true);
-        // Convertir id a number si es string
-        const usuarioId =
-          typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
-        await fetchNotificaciones(usuarioId);
+        await fetchNotificaciones();
       } catch (error) {
         toast.error('No se pudieron cargar las notificaciones.');
         console.error(error);
@@ -44,9 +41,7 @@ export default function InboxPage() {
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
 
-    const usuarioId =
-      typeof user.id === 'string' ? parseInt(user.id, 10) : user.id;
-    await markAllAsRead(usuarioId);
+    await markAllAsRead();
   };
 
   const unreadNotifications = notificaciones.filter((n) => !n.leida);
