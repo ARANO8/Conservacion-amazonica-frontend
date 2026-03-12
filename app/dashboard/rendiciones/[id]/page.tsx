@@ -1,28 +1,65 @@
-import { notFound } from 'next/navigation';
-import { RendicionDetailClient } from './client-wrapper';
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { RendicionResponse } from '@/types/rendicion-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
+import { RendicionDetailClient } from './client-wrapper';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { toast } from 'sonner';
 
-interface RendicionDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+export default function RendicionDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [rendicion, setRendicion] = useState<RendicionResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function RendicionDetailPage({
-  params,
-}: RendicionDetailPageProps) {
-  const { id } = await params;
+  const id = params.id as string;
 
-  let rendicion;
-  try {
-    rendicion = await rendicionesService.getRendicionById(id);
-  } catch (error) {
-    console.error('Error fetching rendición:', error);
-    notFound();
+  useEffect(() => {
+    const fetchRendicion = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        const data = await rendicionesService.getRendicionById(id);
+        setRendicion(data);
+      } catch (error) {
+        console.error('Error fetching rendición:', error);
+        toast.error('No se pudo cargar la rendición.');
+        router.push('/dashboard/requests');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRendicion();
+  }, [id, router]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-[200px] w-full" />
+        <Skeleton className="h-[300px] w-full" />
+        <Skeleton className="h-[100px] w-full" />
+      </div>
+    );
   }
 
   if (!rendicion) {
-    notFound();
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <p className="text-muted-foreground">
+          No se encontró la rendición solicitada.
+        </p>
+        <Button asChild variant="link" className="mt-4">
+          <Link href="/dashboard/requests">Volver</Link>
+        </Button>
+      </div>
+    );
   }
 
   return <RendicionDetailClient rendicion={rendicion} />;
