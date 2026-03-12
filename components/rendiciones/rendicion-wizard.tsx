@@ -137,21 +137,34 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
       }, 1000);
     } catch (error: unknown) {
       let message = 'Error al enviar la rendición';
+      let statusCode: number | undefined;
 
-      if (error instanceof Error) {
-        message = error.message;
-      } else if (
-        typeof error === 'object' &&
-        error !== null &&
-        'response' in error
-      ) {
+      // Intentar extraer información del error Axios
+      if (typeof error === 'object' && error !== null) {
         const axiosError = error as {
-          response?: { data?: { message?: string } };
+          response?: { status?: number; data?: { message?: string } };
+          message?: string;
         };
-        message = axiosError.response?.data?.message || message;
+
+        statusCode = axiosError.response?.status;
+        message =
+          axiosError.response?.data?.message || axiosError.message || message;
+
+        // Mensajes específicos para status codes comunes
+        if (statusCode === 404) {
+          message = `Endpoint no encontrado (404). Verifica que el backend tiene implementado el endpoint para rendiciones. ${message}`;
+        } else if (statusCode === 401) {
+          message = 'No autorizado. Tu sesión puede haber expirado.';
+        } else if (statusCode === 422) {
+          message = `Datos inválidos: ${message}`;
+        } else if (statusCode === 500) {
+          message = `Error del servidor. Intenta nuevamente más tarde. ${message}`;
+        }
+      } else if (error instanceof Error) {
+        message = error.message;
       }
 
-      console.error('Error en handleSubmit:', error);
+      console.error('Error en handleSubmit:', { error, statusCode });
       toast.error(message);
     } finally {
       setLoading(false);
