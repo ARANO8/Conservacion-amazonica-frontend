@@ -212,112 +212,124 @@ export default function Paso1Seleccion({
         solicitudes en estado <strong>Desembolsado</strong>.
       </p>
 
-      <FieldGroup>
-        {/* ---- Combobox filtrable de solicitudes ---- */}
-        <FormField
-          control={form.control}
-          name="solicitudId"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <span className="text-sm font-medium">Solicitud</span>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className={cn(
-                        'w-full justify-between font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? (solicitudes.find((s) => s.id === field.value)
-                            ?.codigoSolicitud ?? 'Solicitud no encontrada')
-                        : 'Buscar solicitud...'}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
+      {solicitudes.length === 0 ? (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+          <p className="text-sm text-amber-900 dark:text-amber-100">
+            No hay solicitudes desembolsadas disponibles para rendir.
+          </p>
+          <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">
+            Asegúrate de que existe al menos una solicitud creada y en estado
+            &quot;Desembolsado&quot; antes de proceder con una rendición.
+          </p>
+        </div>
+      ) : (
+        <FieldGroup>
+          {/* ---- Combobox filtrable de solicitudes ---- */}
+          <FormField
+            control={form.control}
+            name="solicitudId"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <span className="text-sm font-medium">Solicitud</span>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className={cn(
+                          'w-full justify-between font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value
+                          ? (solicitudes.find((s) => s.id === field.value)
+                              ?.codigoSolicitud ?? 'Solicitud no encontrada')
+                          : 'Buscar solicitud...'}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
 
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                  <Command>
-                    <CommandInput placeholder="Buscar por código o motivo..." />
-                    <CommandList>
-                      <CommandEmpty>
-                        No se encontraron solicitudes.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {solicitudes.map((s) => (
-                          <CommandItem
-                            key={s.id}
-                            value={`${s.codigoSolicitud} ${s.motivoViaje} ${s.lugarViaje ?? ''}`}
-                            onSelect={() => {
-                              field.onChange(s.id);
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                field.value === s.id
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            <div className="flex min-w-0 flex-col">
-                              <span className="text-sm font-semibold">
-                                {s.codigoSolicitud}
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                      <CommandInput placeholder="Buscar por código o motivo..." />
+                      <CommandList>
+                        <CommandEmpty>
+                          No se encontraron solicitudes.
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {solicitudes.map((s) => (
+                            <CommandItem
+                              key={s.id}
+                              value={`${s.codigoSolicitud} ${s.motivoViaje} ${s.lugarViaje ?? ''}`}
+                              onSelect={() => {
+                                field.onChange(s.id);
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  field.value === s.id
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                )}
+                              />
+                              <div className="flex min-w-0 flex-col">
+                                <span className="text-sm font-semibold">
+                                  {s.codigoSolicitud}
+                                </span>
+                                <span className="text-muted-foreground truncate text-xs">
+                                  {s.motivoViaje}
+                                </span>
+                              </div>
+                              <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                                {formatMoney(Number(s.montoTotalNeto ?? 0))}
                               </span>
-                              <span className="text-muted-foreground truncate text-xs">
-                                {s.motivoViaje}
-                              </span>
-                            </div>
-                            <span className="text-muted-foreground ml-auto shrink-0 text-xs">
-                              {formatMoney(Number(s.montoTotalNeto ?? 0))}
-                            </span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* ---- Card de Resumen (aparece al seleccionar) ---- */}
-        {solicitudSeleccionada && (
-          <SolicitudResumenCard solicitud={solicitudSeleccionada} />
-        )}
-
-        {/* ---- Fecha de Rendición ---- */}
-        <FormField
-          control={form.control}
-          name="fechaRendicion"
-          render={({ field }) => (
-            <FormItem>
-              <span className="text-sm font-medium">Fecha de Rendición</span>
-              <FormControl>
-                <input
-                  type="date"
-                  className={cn(
-                    'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                    'focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2',
-                    'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                    'disabled:cursor-not-allowed disabled:opacity-50'
-                  )}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          {/* ---- Card de Resumen (aparece al seleccionar) ---- */}
+          {solicitudSeleccionada && (
+            <SolicitudResumenCard solicitud={solicitudSeleccionada} />
           )}
-        />
-      </FieldGroup>
+
+          {/* ---- Fecha de Rendición ---- */}
+          <FormField
+            control={form.control}
+            name="fechaRendicion"
+            render={({ field }) => (
+              <FormItem>
+                <span className="text-sm font-medium">Fecha de Rendición</span>
+                <FormControl>
+                  <input
+                    type="date"
+                    className={cn(
+                      'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
+                      'focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2',
+                      'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                      'disabled:cursor-not-allowed disabled:opacity-50'
+                    )}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </FieldGroup>
+      )}
     </FieldSet>
   );
 }

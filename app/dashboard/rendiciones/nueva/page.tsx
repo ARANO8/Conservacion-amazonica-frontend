@@ -29,23 +29,59 @@ export default function NuevaRendicionPage() {
 
       try {
         setLoading(true);
+        // Obtener todas las solicitudes sin filtro inicial
         const todas: SolicitudResponse[] =
           await solicitudesService.getSolicitudes();
 
+        console.log('Total solicitudes del backend:', todas.length);
+        console.log('ID del usuario autenticado:', user.id);
+
         // Filtrar: solo las del usuario autenticado que ya fueron desembolsadas
-        const desembolsadas = todas.filter(
-          (s) =>
-            s.estado === 'DESEMBOLSADO' &&
-            (String(s.usuarioEmisorId) === String(user.id) ||
-              String(s.usuarioId) === String(user.id) ||
-              String(s.usuario?.id) === String(user.id))
+        const desembolsadas = todas.filter((s) => {
+          const esDesembolsado = s.estado === 'DESEMBOLSADO';
+          const esDelUsuario =
+            String(s.usuarioEmisorId) === String(user.id) ||
+            String(s.usuarioId) === String(user.id) ||
+            String(s.usuario?.id) === String(user.id) ||
+            String(s.usuarioEmisor?.id) === String(user.id);
+
+          // Log para debugging
+          if (esDesembolsado || esDelUsuario) {
+            console.log('Solicitud evaluada:', {
+              id: s.id,
+              codigo: s.codigoSolicitud,
+              estado: s.estado,
+              usuarioEmisorId: s.usuarioEmisorId,
+              usuarioId: s.usuarioId,
+              usuarioEmisornombre: s.usuarioEmisor?.nombreCompleto,
+              usuarioNombre: s.usuario?.nombreCompleto,
+              cumpleEstado: esDesembolsado,
+              cumpleUsuario: esDelUsuario,
+            });
+          }
+
+          return esDesembolsado && esDelUsuario;
+        });
+
+        console.log(
+          'Solicitudes desembolsadas filtradas:',
+          desembolsadas.length
         );
 
         setSolicitudes(desembolsadas);
-      } catch {
-        toast.error(
-          'No se pudieron cargar las solicitudes desembolsadas. Intente nuevamente.'
-        );
+
+        if (desembolsadas.length === 0) {
+          toast.info(
+            'No hay solicitudes desembolsadas para rendir. Verifica que exista una solicitud en estado "Desembolsado".'
+          );
+        }
+      } catch (error: unknown) {
+        console.error('Error al cargar solicitudes:', error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'No se pudieron cargar las solicitudes desembolsadas. Intente nuevamente.';
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
