@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { DownloadPdfButton } from '@/components/solicitudes/download-pdf-button';
@@ -114,7 +114,11 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
           'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
         DISBURSED:
           'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
+        DESEMBOLSADO:
+          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
         COMPLETED:
+          'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-800',
+        EJECUTADO:
           'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-800',
         REJECTED:
           'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
@@ -173,6 +177,51 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
           </Link>
         </Button>
       );
+    },
+  },
+  {
+    id: 'rendicion',
+    header: 'Rendición',
+    cell: ({ row }) => {
+      const tienneRendicion = !!row.original.rendicion;
+      const esDesembolsado = row.original.estado === 'DESEMBOLSADO';
+      const esEjecutado = row.original.estado === 'EJECUTADO';
+
+      // Si ya tiene rendición, mostrar botón "Ver Rendición"
+      if (tienneRendicion) {
+        return (
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/rendiciones/${row.original.rendicion!.id}`}>
+              <FileText className="mr-2 h-4 w-4" />
+              Ver Rendición
+            </Link>
+          </Button>
+        );
+      }
+
+      // Si está DESEMBOLSADO pero NO tiene rendición, mostrar botón "Crear Rendición"
+      if (esDesembolsado) {
+        return (
+          <Button asChild variant="outline" size="sm">
+            <Link
+              href={`/dashboard/rendiciones/nueva?solicitudId=${row.original.id}`}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Crear
+            </Link>
+          </Button>
+        );
+      }
+
+      // Si está EJECUTADO pero no tiene rendición (caso raro), mostrar mensaje
+      if (esEjecutado) {
+        return (
+          <span className="text-muted-foreground text-xs">Sin rendición</span>
+        );
+      }
+
+      // Para otros estados, no mostrar nada
+      return null;
     },
   },
   {

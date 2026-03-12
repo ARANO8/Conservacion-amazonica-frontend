@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, FormProvider, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,9 +25,14 @@ import Paso3Declaracion from './paso3-declaracion';
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
   solicitudes: SolicitudResponse[];
+  /** ID de solicitud pre-seleccionada (desde query params) */
+  preSelectedSolicitudId?: number | null;
 }
 
-export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
+export default function RendicionWizard({
+  solicitudes,
+  preSelectedSolicitudId,
+}: RendicionWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState<WizardStepRendicion>('SELECCION');
   const [loading, setLoading] = useState(false);
@@ -36,6 +41,30 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
     resolver: zodResolver(CreateRendicionSchema),
     defaultValues: defaultRendicionValues,
   });
+
+  // Efecto para pre-seleccionar una solicitud si se proporciona el ID
+  useEffect(() => {
+    if (preSelectedSolicitudId && solicitudes.length > 0) {
+      const solicitudExiste = solicitudes.some(
+        (s) => s.id === preSelectedSolicitudId
+      );
+
+      if (solicitudExiste) {
+        // Pre-llenar el formulario con la solicitud seleccionada
+        form.setValue('solicitudId', preSelectedSolicitudId);
+
+        // También set la fecha de rendición a hoy (o dejar el default)
+        const today = new Date().toISOString().split('T')[0];
+        form.setValue('fechaRendicion', today);
+
+        // Opcional: saltar directamente al paso de gastos
+        setStep('GASTOS_RESPALDO');
+        console.log(
+          `Solicitud pre-seleccionada y wizard saltó al paso GASTOS_RESPALDO`
+        );
+      }
+    }
+  }, [preSelectedSolicitudId, solicitudes, form]);
 
   // ------------------------------------------------------------------
   // Navegación entre pasos con validación por campo

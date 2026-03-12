@@ -210,4 +210,8 @@ export interface SolicitudResponse {
     nombreCompleto: string;
     procedenciaInstitucion: string;
   }>;
+  rendicion?: {
+    id: number;
+    estado: string;
+  };
 }
