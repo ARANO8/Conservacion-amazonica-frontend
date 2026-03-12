@@ -1,15 +1,17 @@
 import { create } from 'zustand';
-import { notificacionesService } from '@/lib/services/notificaciones-service';
 import {
-  NotificacionesState,
-  NotificacionBackend,
-} from '@/types/notificacion-backend';
+  getMisNotificaciones,
+  getCountNotificacionesNoLeidas,
+  marcarComoLeida,
+  marcarTodasComoLeidas,
+} from '@/lib/actions/notificaciones.actions';
+import { NotificacionesState } from '@/types/notificacion-backend';
 import { toast } from 'sonner';
 
 /**
  * Zustand store para manejar el estado global de notificaciones.
  * Incluye:
- * - Fetch de notificaciones
+ * - Fetch de notificaciones (directo a Prisma via Server Actions)
  * - Marcado como leído
  * - Polling automático cada 60 segundos (configurable)
  */
@@ -32,8 +34,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
 
         set({ isLoading: true, error: null });
         try {
-          const notificaciones =
-            await notificacionesService.getNotificaciones(usuarioId);
+          const notificaciones = await getMisNotificaciones(usuarioId);
           set({ notificaciones, isLoading: false });
         } catch (error) {
           const errorMsg =
@@ -50,7 +51,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
         if (!usuarioId) return;
 
         try {
-          const count = await notificacionesService.getCountNoLeidas(usuarioId);
+          const count = await getCountNotificacionesNoLeidas(usuarioId);
           set({ noLeidas: count });
         } catch (error) {
           console.error('Error fetching unread count:', error);
@@ -62,10 +63,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
        */
       markAsRead: async (usuarioId: number, notificacionId: number) => {
         try {
-          await notificacionesService.marcarComoLeida(
-            usuarioId,
-            notificacionId
-          );
+          await marcarComoLeida(usuarioId, notificacionId);
 
           // Actualizar estado local
           set((state) => ({
@@ -85,7 +83,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
        */
       markAllAsRead: async (usuarioId: number) => {
         try {
-          await notificacionesService.marcarTodasComoLeidas(usuarioId);
+          await marcarTodasComoLeidas(usuarioId);
 
           // Actualizar estado local
           set((state) => ({

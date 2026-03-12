@@ -17,15 +17,15 @@ export interface NotificacionBackend {
   tipo: TipoNotificacion;
   leida: boolean;
   urlDestino?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   usuarioId: number;
   solicitudId?: number | null;
   // Relación opcional
   solicitud?: {
     id: number;
     codigoSolicitud: string;
-    descripcion?: string;
+    descripcion?: string | null;
     estado?: string;
   } | null;
 }
