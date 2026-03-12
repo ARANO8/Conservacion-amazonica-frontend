@@ -1,7 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from 'lucide-react';
+import {
+  BadgeCheck,
+  Bell,
+  ChevronsUpDown,
+  LogOut,
+  ArrowRight,
+} from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -20,16 +27,25 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/auth-store';
+import { useNotificacionesStore } from '@/store/useNotificacionesStore';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, logout } = useAuthStore();
+  const { notificaciones, noLeidas } = useNotificacionesStore();
   const router = useRouter();
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
+
+  // Últimas 3 notificaciones no leídas
+  const recentNotifications = notificaciones
+    .filter((n) => !n.leida)
+    .slice(0, 3);
 
   if (!user) return null; // O mostrar un placeholder/skeleton
 
@@ -87,13 +103,61 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold">
+                Notificaciones Recientes
+                {noLeidas > 0 && (
+                  <Badge variant="destructive" className="ml-2">
+                    {noLeidas}
+                  </Badge>
+                )}
+              </DropdownMenuLabel>
+              {recentNotifications.length > 0 ? (
+                <ScrollArea className="h-auto max-h-64">
+                  {recentNotifications.map((notification) => (
+                    <DropdownMenuItem
+                      key={notification.id}
+                      className="cursor-pointer flex-col items-start gap-1 px-2 py-2"
+                      onClick={() => {
+                        router.push(
+                          notification.urlDestino || '/dashboard/inbox'
+                        );
+                      }}
+                    >
+                      <div className="flex w-full items-start gap-2">
+                        <Bell className="text-muted-foreground mt-0.5 size-3 shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs leading-tight font-medium">
+                            {notification.titulo}
+                          </p>
+                          <p className="text-muted-foreground line-clamp-2 text-xs">
+                            {notification.mensaje}
+                          </p>
+                        </div>
+                        <ArrowRight className="text-muted-foreground size-3 shrink-0" />
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </ScrollArea>
+              ) : (
+                <DropdownMenuItem
+                  disabled
+                  className="text-muted-foreground text-xs"
+                >
+                  Sin notificaciones nuevas
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/inbox" className="cursor-pointer">
+                  Ver todas las notificaciones
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
                 Cuenta: {user.rol}
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notificaciones
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

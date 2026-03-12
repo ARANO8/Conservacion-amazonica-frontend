@@ -18,6 +18,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
+import { useNotificacionesStore } from '@/store/useNotificacionesStore';
 
 export function NavMain({
   items,
@@ -33,6 +35,7 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { noLeidas } = useNotificacionesStore();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Formularios</SidebarGroupLabel>
@@ -44,6 +47,11 @@ export function NavMain({
                 <a href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
+                  {item.title === 'Notificaciones' && noLeidas > 0 && (
+                    <Badge variant="destructive" className="ml-auto">
+                      {noLeidas}
+                    </Badge>
+                  )}
                 </a>
               </SidebarMenuButton>
               {item.items?.length ? (
