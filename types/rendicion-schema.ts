@@ -47,7 +47,7 @@ export type GastoRendicion = z.infer<typeof GastoRendicionSchema>;
  * Declaración jurada que el usuario firma al finalizar la rendición.
  */
 export const DeclaracionJuradaSchema = z.object({
-  tipoDeclaracion: TipoDeclaracionEnum,
+  tipoDeclaracion: TipoDeclaracionEnum.optional(),
   /** El usuario confirma que los gastos declarados son reales */
   confirmaDatosVeridicos: z.literal(true, {
     errorMap: () => ({
@@ -118,5 +118,11 @@ export const defaultRendicionValues: CreateRendicionInput = {
   gastos: [],
   gastosSinRespaldo: [],
   observaciones: '',
-  declaracionJurada: undefined,
+  declaracionJurada: {
+    tipoDeclaracion: undefined,
+    confirmaDatosVeridicos: false as unknown as true,
+    aceptaPoliticaDevolucion: false as unknown as true,
+    montoADevolver: undefined,
+    observaciones: '',
+  },
 };

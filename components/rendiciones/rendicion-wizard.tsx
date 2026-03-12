@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 
@@ -82,7 +82,33 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
   const handleSubmit = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Completa todos los campos requeridos');
+      const errors = form.formState.errors;
+      console.error('Errores de validación:', errors);
+
+      // Mostrar el primer error encontrado al usuario
+      const firstErrorField = Object.keys(errors)[0];
+      let errorMessage = 'Completa todos los campos requeridos';
+
+      if (firstErrorField === 'declaracionJurada') {
+        const declaracionErrors = errors.declaracionJurada as FieldError & {
+          confirmaDatosVeridicos?: FieldError;
+          aceptaPoliticaDevolucion?: FieldError;
+        };
+        if (declaracionErrors?.confirmaDatosVeridicos?.message) {
+          errorMessage = declaracionErrors.confirmaDatosVeridicos.message;
+        } else if (declaracionErrors?.aceptaPoliticaDevolucion?.message) {
+          errorMessage = declaracionErrors.aceptaPoliticaDevolucion.message;
+        } else {
+          errorMessage = 'Revisa los términos y condiciones antes de continuar';
+        }
+      } else if (firstErrorField) {
+        const fieldError = errors[firstErrorField as keyof typeof errors] as
+          | FieldError
+          | undefined;
+        errorMessage = fieldError?.message || errorMessage;
+      }
+
+      toast.error(errorMessage);
       return;
     }
 
