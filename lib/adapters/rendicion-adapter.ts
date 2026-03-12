@@ -4,8 +4,9 @@ import { CreateRendicionInput } from '@/types/rendicion-schema';
  * Adapter que transforma el payload del formulario frontend
  * al formato exacto que espera el backend.
  *
- * NOTA: El backend usa un schema .strict() que rechaza propiedades adicionales.
- * Es muy estricto en la estructura esperada.
+ * NOTA: El backend usa un schema .strict() que rechaza cualquier propiedad
+ * que no esté explícitamente definida. No espera confirmaDatosVeridicos
+ * ni aceptaPoliticaDevolucion como campos (son solo para validación del formulario).
  */
 export function adaptCreateRendicionPayload(
   data: CreateRendicionInput
@@ -92,12 +93,6 @@ export function adaptCreateRendicionPayload(
     ...(Object.keys(declaracionJurada).length > 0 && {
       declaracionJurada,
     }),
-
-    // Campos booleanos de la declaración: FUERA del objeto declaracionJurada
-    confirmaDatosVeridicos:
-      data.declaracionJurada?.confirmaDatosVeridicos ?? false,
-    aceptaPoliticaDevolucion:
-      data.declaracionJurada?.aceptaPoliticaDevolucion ?? false,
 
     // Solo incluir observaciones generales si no está vacío
     ...(data.observaciones && { observaciones: data.observaciones }),
