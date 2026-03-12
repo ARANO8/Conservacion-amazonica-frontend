@@ -46,6 +46,25 @@ import { Concepto } from '@/types/catalogs';
 import { SeleccionPresupuesto } from '@/types/backend';
 import { toast } from 'sonner';
 
+// Helper function to validate that all selected planificaciones have the same person count
+const validatePersonCountMatch = (
+  selectedPlanificaciones: FormData['actividades'],
+  tipoDestino: string | undefined
+): boolean => {
+  if (selectedPlanificaciones.length <= 1) return true;
+
+  const personField =
+    tipoDestino === 'TERCEROS' ? 'cantTerceros' : 'cantInstitucion';
+  const firstValue =
+    selectedPlanificaciones[0]?.[
+      personField as keyof (typeof selectedPlanificaciones)[0]
+    ];
+
+  return selectedPlanificaciones.every(
+    (plan) => plan[personField as keyof typeof plan] === firstValue
+  );
+};
+
 interface SolicitudViaticosProps {
   control: Control<FormData>;
   actividadesPlanificadas: FormData['actividades'];
@@ -219,28 +238,37 @@ function ViaticoCard({
       (isPlanificacionDirty || isTipoDestinoDirty) &&
       selectedPlanificaciones.length > 0
     ) {
+      // Validate that all selected planificaciones have the same person count
+      if (
+        !validatePersonCountMatch(selectedPlanificaciones, watchTipoDestino)
+      ) {
+        toast.error(
+          'La cantidad de personas difiere entre las actividades. Debe crear un viático separado para cada actividad.'
+        );
+        // Revert selection to previous state
+        setValue(`viaticos.${index}.planificacionIndexes`, [], {
+          shouldDirty: true,
+        });
+        return;
+      }
+
       // Sum logic:
       let sumDias = 0;
-      let sumPersonas = 0;
+      const personField =
+        watchTipoDestino === 'TERCEROS' ? 'cantTerceros' : 'cantInstitucion';
+      const personasValue =
+        (selectedPlanificaciones[0]?.[
+          personField as keyof (typeof selectedPlanificaciones)[0]
+        ] as number) || 0;
 
       selectedPlanificaciones.forEach((plan) => {
         sumDias += plan.cantDias || 0;
-        sumPersonas +=
-          watchTipoDestino === 'TERCEROS'
-            ? plan.cantTerceros || 0
-            : plan.cantInstitucion || 0;
       });
-
-      // Divide personas by number of selected planificaciones to avoid duplication
-      const personasPromedio =
-        selectedPlanificaciones.length > 0
-          ? sumPersonas / selectedPlanificaciones.length
-          : 0;
 
       setValue(`viaticos.${index}.dias`, sumDias, {
         shouldDirty: true,
       });
-      setValue(`viaticos.${index}.cantidadPersonas`, personasPromedio, {
+      setValue(`viaticos.${index}.cantidadPersonas`, personasValue, {
         shouldDirty: true,
       });
     } else if (isPlanificacionDirty && selectedPlanificaciones.length === 0) {
@@ -459,6 +487,29 @@ function ViaticoCard({
                                             (v) => v !== idx
                                           )
                                         : [...selectedValues, idx];
+
+                                      // If adding a new item, validate person count match
+                                      if (!isSelected && updated.length > 1) {
+                                        const planificacionesToValidate =
+                                          updated
+                                            .map(
+                                              (i) => actividadesPlanificadas[i]
+                                            )
+                                            .filter(Boolean);
+
+                                        if (
+                                          !validatePersonCountMatch(
+                                            planificacionesToValidate,
+                                            watchTipoDestino
+                                          )
+                                        ) {
+                                          toast.error(
+                                            'La cantidad de personas difiere entre las actividades. Debe crear un viático separado para cada actividad.'
+                                          );
+                                          return;
+                                        }
+                                      }
+
                                       field.onChange(updated);
                                     }}
                                   >
