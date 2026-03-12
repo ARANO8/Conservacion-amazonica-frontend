@@ -248,7 +248,9 @@ export default function Paso3Declaracion() {
                     <FormControl>
                       <Checkbox
                         checked={field.value === true}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked === true);
+                        }}
                         className="mt-1"
                       />
                     </FormControl>
@@ -278,7 +280,9 @@ export default function Paso3Declaracion() {
                     <FormControl>
                       <Checkbox
                         checked={field.value === true}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked === true);
+                        }}
                         className="mt-1"
                       />
                     </FormControl>
