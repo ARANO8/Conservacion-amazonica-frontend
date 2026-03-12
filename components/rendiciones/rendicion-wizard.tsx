@@ -16,6 +16,7 @@ import { SolicitudResponse } from '@/types/solicitud-backend';
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
+import Paso2Gastos from './paso2-gastos';
 
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
@@ -116,14 +117,7 @@ export default function RendicionWizard({ solicitudes }: RendicionWizardProps) {
             <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
 
-          {/* Paso 2 y 3 se implementan en fases futuras */}
-          {step === 'GASTOS_RESPALDO' && (
-            <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed">
-              <p className="text-muted-foreground text-sm italic">
-                Paso 2: Detalle de Gastos y Respaldo Documental (próximamente)
-              </p>
-            </div>
-          )}
+          {step === 'GASTOS_RESPALDO' && <Paso2Gastos />}
 
           {step === 'DECLARACION_JURADA' && (
             <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed">
