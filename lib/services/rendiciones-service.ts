@@ -28,6 +28,16 @@ export const rendicionesService = {
 
       return response.data;
     } catch (error) {
+      // Log completo del error para debugging
+      if (axios.isAxiosError(error)) {
+        console.error('Error de Axios en createRendicion:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+        });
+      }
+
       // Si el error es 404 en /rendiciones, intentar con ruta alternativa
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         console.warn(
