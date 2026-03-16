@@ -31,7 +31,7 @@ import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
-import { SeleccionPresupuesto } from '@/types/backend';
+import { SeleccionPresupuesto, PoaStructureItem } from '@/types/backend';
 import {
   formSchema,
   defaultValues,
@@ -71,6 +71,10 @@ export default function SolicitudForm({
     (initialValues?.fuentesSeleccionadas as unknown as SeleccionPresupuesto[]) ||
       []
   );
+  const [selectedPoa, setSelectedPoa] = useState<string>(
+    initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa || ''
+  );
+  const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]);
   const [showBudgetWarning, setShowBudgetWarning] = useState(false);
 
   const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
@@ -377,6 +381,10 @@ export default function SolicitudForm({
                       initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa
                     }
                     isEditMode={isEditMode}
+                    selectedPoa={selectedPoa}
+                    setSelectedPoa={setSelectedPoa}
+                    poaStructure={poaStructure}
+                    setPoaStructure={setPoaStructure}
                   />
                 )}
 

@@ -91,6 +91,11 @@ interface SolicitudEconomicaProps {
   setMisSelecciones: React.Dispatch<
     React.SetStateAction<SeleccionPresupuesto[]>
   >;
+  // Estado del POA levantado al padre para persistir entre pasos del wizard
+  selectedPoa: string;
+  setSelectedPoa: React.Dispatch<React.SetStateAction<string>>;
+  poaStructure: PoaStructureItem[];
+  setPoaStructure: React.Dispatch<React.SetStateAction<PoaStructureItem[]>>;
   initialPoaCode?: string;
   isEditMode?: boolean;
 }
@@ -102,17 +107,20 @@ export default function SolicitudEconomica({
   poaCodes,
   misSelecciones,
   setMisSelecciones,
+  selectedPoa,
+  setSelectedPoa,
+  poaStructure,
+  setPoaStructure,
   initialPoaCode,
   isEditMode = false,
 }: SolicitudEconomicaProps) {
   const { setValue, watch } = useFormContext<FormData>();
 
   // Estado "Tree-Walker": Estructura completa del POA seleccionado
-  const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]); // Array de items del POA (Poa objects)
   const [isLoadingStructure, setIsLoadingStructure] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
 
-  const [selectedPoa, setSelectedPoa] = useState(initialPoaCode || '');
+  // selectedPoa y poaStructure ahora vienen del padre (persisten entre pasos del wizard)
   const [isPoaOpen, setIsPoaOpen] = useState(false);
 
   // Estado para controlar la confirmación de cambio destructivo
@@ -122,9 +130,11 @@ export default function SolicitudEconomica({
   } | null>(null);
 
   // REHYDRATION LOGIC: Cargar estructura si ya tenemos un POA (ej. en modo edición)
+  // Si poaStructure.length > 0 significa que ya está cargado (ej. al volver desde paso 3).
   useEffect(() => {
-    // Si no hay código inicial y no estamos cargando, no hacer nada.
-    if (!initialPoaCode || isLoadingStructure) return;
+    // Si no hay código inicial, ya hay estructura cargada, o estamos cargando → no hacer nada.
+    if (!initialPoaCode || isLoadingStructure || poaStructure.length > 0)
+      return;
 
     const fetchStructure = async () => {
       try {
