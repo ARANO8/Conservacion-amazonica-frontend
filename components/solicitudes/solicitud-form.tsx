@@ -250,17 +250,7 @@ export default function SolicitudForm({
 
     setLoading(true);
     try {
-      console.log(
-        '[onSubmit] Datos del formulario (raw):',
-        JSON.stringify(data, null, 2)
-      );
-
       const payload = adaptFormToPayload(data, aprobadorId);
-
-      console.log(
-        '[onSubmit] Payload a enviar al backend:',
-        JSON.stringify(payload, null, 2)
-      );
 
       if (isEditMode && solicitudId) {
         // Enviar actualización (PATCH)
@@ -274,28 +264,12 @@ export default function SolicitudForm({
 
       router.push('/dashboard/requests');
     } catch (error: unknown) {
-      console.error('[onSubmit] Error capturado:', error);
-
       toast.error('Error al enviar la solicitud');
       let errorMessage = 'Ocurrió un error al procesar la solicitud';
 
       if (axios.isAxiosError(error)) {
-        console.error(
-          '[onSubmit] Axios error — status:',
-          error.response?.status,
-          'data:',
-          JSON.stringify(error.response?.data)
-        );
         errorMessage = error.response?.data?.message || errorMessage;
       } else if (error instanceof Error) {
-        console.error(
-          '[onSubmit] JS error — name:',
-          error.name,
-          'message:',
-          error.message,
-          'stack:',
-          error.stack
-        );
         errorMessage = error.message;
       }
 
