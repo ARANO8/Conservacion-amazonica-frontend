@@ -62,16 +62,6 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center gap-2 py-4">
         <Input
-          placeholder="Filtrar por motivo..."
-          value={
-            (table.getColumn('motivoViaje')?.getFilterValue() as string) ?? ''
-          }
-          onChange={(event) =>
-            table.getColumn('motivoViaje')?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <Input
           placeholder="Filtrar por Código..."
           value={
             (table.getColumn('codigoSolicitud')?.getFilterValue() as string) ??

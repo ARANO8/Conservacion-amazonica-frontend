@@ -24,6 +24,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
        * Obtiene todas las notificaciones del usuario.
        */
       fetchNotificaciones: async () => {
+        if (get().isLoading) return;
         set({ isLoading: true, error: null });
         try {
           const notificaciones =

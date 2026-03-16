@@ -54,18 +54,22 @@ export default function InboxDetailPage() {
   const id = params.id as string;
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchSolicitud = async () => {
       if (!id) return;
 
       try {
         setLoading(true);
         const data = await solicitudesService.getSolicitudById(id);
+        if (!mounted) return;
         setSolicitud(data);
       } catch {
+        if (!mounted) return;
         toast.error('No se pudo cargar la solicitud.');
         router.push('/dashboard/inbox');
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
@@ -79,6 +83,7 @@ export default function InboxDetailPage() {
     window.addEventListener('solicitud-updated', handleSolicitudUpdated);
 
     return () => {
+      mounted = false;
       window.removeEventListener('solicitud-updated', handleSolicitudUpdated);
     };
   }, [id, router]);

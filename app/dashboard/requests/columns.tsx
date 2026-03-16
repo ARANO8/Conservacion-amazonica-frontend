@@ -21,18 +21,6 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     },
   },
   {
-    accessorKey: 'motivoViaje',
-    header: 'Motivo',
-    cell: ({ row }) => {
-      const motivo = row.original.motivoViaje || '-';
-      return (
-        <div className="max-w-[300px] truncate" title={motivo}>
-          {motivo}
-        </div>
-      );
-    },
-  },
-  {
     id: 'fecha',
     header: 'Fecha Solicitud',
     accessorFn: (row) => row.fechaSolicitud,
@@ -51,45 +39,10 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     },
   },
   {
-    id: 'solicitante',
-    header: 'Solicitante',
-    accessorFn: (row) => row.usuarioEmisor?.nombreCompleto || 'Sin Asignar',
-  },
-  {
     id: 'aprobador',
     header: 'Aprobador',
     accessorFn: (row) =>
       row.aprobador?.nombreCompleto || row.aprobador?.nombre || '-',
-  },
-  {
-    id: 'montoNeto',
-    header: () => <div className="text-right">Monto Neto</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.montoTotalNeto || 0);
-      const formatted = new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
-  },
-  {
-    id: 'presupuestado',
-    header: () => <div className="text-right">Presupuestado</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.montoTotalPresupuestado || 0);
-      const formatted = new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-      }).format(amount);
-
-      return (
-        <div className="text-muted-foreground text-right text-xs">
-          {formatted}
-        </div>
-      );
-    },
   },
   {
     accessorKey: 'estado',

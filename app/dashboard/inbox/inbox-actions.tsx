@@ -95,7 +95,6 @@ export function InboxActions({
         nuevoAprobadorId: Number(nuevoAprobadorId),
       });
       toast.success('Solicitud derivada correctamente');
-      window.dispatchEvent(new Event('solicitud-updated'));
       setIsApproveOpen(false);
       setNuevoAprobadorId('');
       if (mode === 'buttons') {
@@ -125,7 +124,6 @@ export function InboxActions({
         urlComprobante.trim() || undefined
       );
       toast.success('Solicitud desembolsada correctamente');
-      window.dispatchEvent(new Event('solicitud-updated'));
       setIsApproveOpen(false);
       setCodigoDesembolso('');
       setUrlComprobante('');
@@ -154,7 +152,6 @@ export function InboxActions({
         observacion,
       });
       toast.success('Solicitud observada correctamente');
-      window.dispatchEvent(new Event('solicitud-updated'));
       setIsObserveOpen(false);
       setObservacion('');
       if (mode === 'buttons') {

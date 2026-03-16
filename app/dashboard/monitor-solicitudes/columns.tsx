@@ -70,36 +70,6 @@ export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
       row.aprobador?.nombreCompleto || row.aprobador?.nombre || '-',
   },
   {
-    id: 'montoNeto',
-    header: () => <div className="text-right">Monto Neto</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.montoTotalNeto || 0);
-      const formatted = new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
-  },
-  {
-    id: 'presupuestado',
-    header: () => <div className="text-right">Presupuestado</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.montoTotalPresupuestado || 0);
-      const formatted = new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-      }).format(amount);
-
-      return (
-        <div className="text-muted-foreground text-right text-xs">
-          {formatted}
-        </div>
-      );
-    },
-  },
-  {
     accessorKey: 'estado',
     header: 'Estado',
     cell: ({ row }) => {
