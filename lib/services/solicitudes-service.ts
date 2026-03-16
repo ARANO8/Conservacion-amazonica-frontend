@@ -65,11 +65,15 @@ export const solicitudesService = {
    * @param id The ID of the solicitud to disburse.
    * @param codigoDesembolso Código de transferencia / comprobante.
    */
-  async desembolsar(id: number | string, codigoDesembolso: string) {
+  async desembolsar(
+    id: number | string,
+    codigoDesembolso: string,
+    urlComprobante?: string
+  ) {
     const token = Cookies.get('token');
     const response = await api.patch(
       `/solicitudes/${id}/desembolsar`,
-      { codigoDesembolso },
+      { codigoDesembolso, ...(urlComprobante ? { urlComprobante } : {}) },
       {
         headers: {
           Authorization: `Bearer ${token}`,

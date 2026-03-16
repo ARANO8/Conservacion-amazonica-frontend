@@ -76,6 +76,7 @@ export function InboxActions({
   const [nuevoAprobadorId, setNuevoAprobadorId] = React.useState<string>('');
   const [observacion, setObservacion] = React.useState<string>('');
   const [codigoDesembolso, setCodigoDesembolso] = React.useState<string>('');
+  const [urlComprobante, setUrlComprobante] = React.useState<string>('');
 
   const filteredUsers = React.useMemo(() => {
     return usuarios.filter((u) => String(u.id) !== String(currentUser?.id));
@@ -118,11 +119,16 @@ export function InboxActions({
 
     try {
       setSubmitting(true);
-      await solicitudesService.desembolsar(request.id, codigoDesembolso.trim());
+      await solicitudesService.desembolsar(
+        request.id,
+        codigoDesembolso.trim(),
+        urlComprobante.trim() || undefined
+      );
       toast.success('Solicitud desembolsada correctamente');
       window.dispatchEvent(new Event('solicitud-updated'));
       setIsApproveOpen(false);
       setCodigoDesembolso('');
+      setUrlComprobante('');
       if (mode === 'buttons') {
         router.push('/dashboard/inbox');
       } else {
@@ -238,20 +244,44 @@ export function InboxActions({
               desembolso de esta solicitud.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 py-4">
-            <label
-              htmlFor="codigoDesembolso"
-              className="text-sm leading-none font-medium"
-            >
-              Código de Transferencia / Comprobante
-            </label>
-            <Input
-              id="codigoDesembolso"
-              placeholder="Ej. TRF-2026-00123"
-              value={codigoDesembolso}
-              onChange={(e) => setCodigoDesembolso(e.target.value)}
-              autoFocus
-            />
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="codigoDesembolso"
+                className="text-sm leading-none font-medium"
+              >
+                Código de Transferencia / Comprobante{' '}
+                <span className="text-destructive">*</span>
+              </label>
+              <Input
+                id="codigoDesembolso"
+                placeholder="Ej. TRF-2026-00123"
+                value={codigoDesembolso}
+                onChange={(e) => setCodigoDesembolso(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <label
+                htmlFor="urlComprobante"
+                className="text-sm leading-none font-medium"
+              >
+                URL del Comprobante PDF{' '}
+                <span className="text-muted-foreground ml-1 font-normal">
+                  (opcional)
+                </span>
+              </label>
+              <Input
+                id="urlComprobante"
+                type="url"
+                placeholder="Ej. https://drive.google.com/file/d/..."
+                value={urlComprobante}
+                onChange={(e) => setUrlComprobante(e.target.value)}
+              />
+              <p className="text-muted-foreground text-xs">
+                Enlace al PDF escaneado del comprobante de depósito.
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -259,6 +289,7 @@ export function InboxActions({
               onClick={() => {
                 setIsApproveOpen(false);
                 setCodigoDesembolso('');
+                setUrlComprobante('');
               }}
               disabled={submitting}
             >

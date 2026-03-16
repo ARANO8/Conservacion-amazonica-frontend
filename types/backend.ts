@@ -188,6 +188,7 @@ export interface ObservarSolicitudDto {
 
 export interface DesembolsarSolicitudDto {
   codigoDesembolso: string;
+  urlComprobante?: string;
 }
 
 // Catalog types
