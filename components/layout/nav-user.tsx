@@ -46,11 +46,14 @@ export function NavUser() {
     notification: (typeof notificaciones)[0]
   ) => {
     // Marcar como leída de forma asíncrona
-    if (!notification.leida && user?.id) {
+    if (!notification.leida) {
       await markAsRead(notification.id);
     }
-    // Navegar a la URL de destino
-    router.push(notification.urlDestino || '/dashboard/inbox');
+    // Navegar: preferir solicitudId para ir a la vista de detalle
+    const href = notification.solicitudId
+      ? `/dashboard/inbox/${notification.solicitudId}`
+      : (notification.urlDestino ?? '/dashboard/inbox');
+    router.push(href);
   };
 
   // Últimas 3 notificaciones no leídas

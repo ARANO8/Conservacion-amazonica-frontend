@@ -72,14 +72,14 @@ export default function InboxDetailPage() {
     fetchSolicitud();
 
     // Listen for updates from the action modals
-    window.addEventListener('solicitud-updated', () => {
+    const handleSolicitudUpdated = () => {
       router.push('/dashboard/inbox');
-    });
+    };
+
+    window.addEventListener('solicitud-updated', handleSolicitudUpdated);
 
     return () => {
-      window.removeEventListener('solicitud-updated', () => {
-        router.push('/dashboard/inbox');
-      });
+      window.removeEventListener('solicitud-updated', handleSolicitudUpdated);
     };
   }, [id, router]);
 
