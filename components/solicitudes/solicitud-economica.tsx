@@ -520,8 +520,8 @@ export default function SolicitudEconomica({
                 {' '}
                 eliminarán permanentemente
               </span>{' '}
-              todas las partidas presupuestarias seleccionadas y los
-              gastos/viáticos ingresados hasta el momento.
+              todas las partidas presupuestarias seleccionadas y los ítems
+              ingresados hasta el momento.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

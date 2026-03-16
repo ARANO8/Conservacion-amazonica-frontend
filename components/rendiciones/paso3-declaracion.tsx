@@ -64,7 +64,7 @@ export default function Paso3Declaracion() {
         <div>
           <div className="mb-4 flex items-center gap-2">
             <h3 className="text-sm font-bold tracking-wider uppercase">
-              Gastos sin Respaldo Oficial
+              Egresos sin Respaldo Oficial
             </h3>
             {fields.length > 0 && (
               <Badge variant="secondary">{fields.length}</Badge>
@@ -74,10 +74,10 @@ export default function Paso3Declaracion() {
           {fields.length === 0 ? (
             <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
               <p className="text-muted-foreground text-sm font-medium">
-                No hay gastos sin respaldo agregados
+                No hay egresos sin respaldo agregados
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                Presiona el botón de abajo si necesitas registrar gastos sin
+                Presiona el botón de abajo si necesitas registrar egresos sin
                 documentación oficial.
               </p>
             </div>
@@ -88,7 +88,7 @@ export default function Paso3Declaracion() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-2">
                       <CardTitle className="text-sm font-semibold">
-                        Gasto sin Respaldo #{index + 1}
+                        Egreso sin Respaldo #{index + 1}
                       </CardTitle>
                       <Button
                         type="button"
@@ -98,21 +98,21 @@ export default function Paso3Declaracion() {
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0"
                       >
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Eliminar gasto</span>
+                        <span className="sr-only">Eliminar egreso</span>
                       </Button>
                     </div>
                   </CardHeader>
 
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {/* --- Fecha del Gasto --- */}
+                      {/* --- Fecha del Egreso --- */}
                       <FormField
                         control={control}
                         name={`gastosSinRespaldo.${index}.fechaGasto`}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                              Fecha del Gasto
+                              Fecha del Egreso
                             </FormLabel>
                             <FormControl>
                               <input
@@ -177,7 +177,7 @@ export default function Paso3Declaracion() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                            Detalle del Gasto *
+                            Detalle del Egreso *
                           </FormLabel>
                           <FormControl>
                             <textarea
@@ -201,7 +201,7 @@ export default function Paso3Declaracion() {
             </div>
           )}
 
-          {/* --- Botón Agregar Gasto sin Respaldo --- */}
+          {/* --- Botón Agregar Egreso sin Respaldo --- */}
           <Button
             type="button"
             variant="outline"
@@ -209,7 +209,7 @@ export default function Paso3Declaracion() {
             className="mt-4 w-full border-dashed"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Agregar Gasto sin Respaldo
+            Agregar Egreso sin Respaldo
           </Button>
 
           {/* --- Resumen de Gastos sin Respaldo --- */}
@@ -218,7 +218,7 @@ export default function Paso3Declaracion() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold uppercase">
-                    Total Gastos sin Respaldo:
+                    Total Egresos sin Respaldo:
                   </span>
                   <span className="text-lg font-black text-amber-600 dark:text-amber-400">
                     {formatMoney(totalGastosSinRespaldo)} Bs.
@@ -256,9 +256,9 @@ export default function Paso3Declaracion() {
                     </FormControl>
                     <div className="flex-1">
                       <FormLabel className="cursor-pointer text-sm leading-relaxed font-semibold">
-                        Declaro bajo juramento que los gastos detallados en este
+                        Declaro bajo juramento que los montos detallados en este
                         formulario son verídicos y se realizaron conforme a lo
-                        aprobado en la solicitud de fondos.
+                        aprobado en la solicitud.
                       </FormLabel>
                       <p className="text-muted-foreground mt-1 text-xs">
                         * Este campo es obligatorio para continuar

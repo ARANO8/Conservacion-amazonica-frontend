@@ -52,7 +52,7 @@ function buildFormularioItems(rol?: Role) {
   // Revisión: ADMIN y TESORERO son aprobadores
   if (rol === 'ADMIN' || rol === 'TESORERO') {
     items.push({
-      title: 'Revisión',
+      title: 'Nueva Rendición',
       url: '/dashboard/rendiciones/nueva',
     });
   }

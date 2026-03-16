@@ -116,7 +116,7 @@ export function PresupuestoBreakdown({ partidas }: PresupuestoBreakdownProps) {
                     <p className="text-muted-foreground py-1 text-center text-[10px] italic">
                       {partida.esViatico
                         ? 'Sin viáticos cargados'
-                        : 'Sin gastos u hospedajes cargados'}
+                        : 'Sin comprobantes u hospedajes cargados'}
                     </p>
                   )}
                 </div>

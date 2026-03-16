@@ -86,10 +86,10 @@ export default function Paso2Gastos() {
 
   return (
     <FieldSet>
-      <FieldLegend>Detalle de Gastos y Respaldo Documental</FieldLegend>
+      <FieldLegend>Detalle de Comprobantes y Respaldo Documental</FieldLegend>
       <p className="text-muted-foreground mb-6 text-sm">
-        Registra cada gasto realizado con su documento respaldo (Factura, Recibo
-        o Boleta). Asegúrate de incluir todos los montos (total y neto).
+        Registra cada comprobante con su documento respaldo (Factura, Recibo o
+        Boleta). Asegúrate de incluir todos los montos (total y neto).
       </p>
 
       <FieldGroup className="space-y-6">
@@ -97,10 +97,11 @@ export default function Paso2Gastos() {
         {fields.length === 0 ? (
           <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
             <p className="text-muted-foreground text-sm font-medium">
-              No hay gastos agregados aún
+              No hay comprobantes agregados aún
             </p>
             <p className="text-muted-foreground mt-1 text-xs">
-              Presiona el botón de abajo para empezar a registrar tus gastos.
+              Presiona el botón de abajo para empezar a registrar tus
+              comprobantes.
             </p>
           </div>
         ) : (
@@ -110,7 +111,7 @@ export default function Paso2Gastos() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between gap-2">
                     <CardTitle className="text-sm font-semibold">
-                      Gasto #{index + 1}
+                      Comprobante #{index + 1}
                     </CardTitle>
                     <Button
                       type="button"
@@ -120,7 +121,7 @@ export default function Paso2Gastos() {
                       className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0"
                     >
                       <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar gasto</span>
+                      <span className="sr-only">Eliminar comprobante</span>
                     </Button>
                   </div>
                 </CardHeader>
@@ -350,7 +351,7 @@ export default function Paso2Gastos() {
 
         <Separator className="my-6" />
 
-        {/* --- Botón Agregar Gasto --- */}
+        {/* --- Botón Agregar Comprobante --- */}
         <Button
           type="button"
           variant="outline"
@@ -358,7 +359,7 @@ export default function Paso2Gastos() {
           className="w-full border-dashed"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Agregar Gasto
+          Agregar Comprobante
         </Button>
 
         {/* --- Resumen Total --- */}
@@ -366,7 +367,7 @@ export default function Paso2Gastos() {
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-bold">
-                Resumen de Gastos
+                Resumen de Comprobantes
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -396,7 +397,7 @@ export default function Paso2Gastos() {
                 </span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2 text-sm dark:bg-black/10">
-                <span className="font-bold">Cantidad de Gastos:</span>
+                <span className="font-bold">Cantidad de Comprobantes:</span>
                 <Badge variant="secondary">{fields.length}</Badge>
               </div>
             </CardContent>

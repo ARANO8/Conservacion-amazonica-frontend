@@ -138,7 +138,7 @@ export default function SolicitudForm({
           tieneHospedajesSinFuente
         ) {
           toast.error(
-            'Todos los ítems (viáticos, gastos y hospedajes) deben estar vinculados a una fuente de financiamiento'
+            'Todos los ítems (viáticos, comprobantes y hospedajes) deben estar vinculados a una fuente de financiamiento'
           );
           return;
         }
@@ -203,7 +203,7 @@ export default function SolicitudForm({
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
-        toast.error('Corrige los errores en la solicitud de fondos');
+        toast.error('Corrige los errores en el detalle económico');
       }
       return;
     }

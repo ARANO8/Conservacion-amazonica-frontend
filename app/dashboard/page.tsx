@@ -48,10 +48,9 @@ export default function Page() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Solicitud de Viaje/Taller</CardTitle>
+                <CardTitle>Nueva Solicitud de Fondos</CardTitle>
                 <CardDescription>
-                  Inicia una nueva solicitud para viajes o talleres
-                  institucionales.
+                  Inicia una nueva solicitud para actividades institucionales.
                 </CardDescription>
               </CardHeader>
               <CardFooter>
@@ -63,9 +62,9 @@ export default function Page() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Rendición de Gastos</CardTitle>
+                <CardTitle>Rendición de Fondos</CardTitle>
                 <CardDescription>
-                  Carga la rendición de gastos para tus solicitudes.
+                  Carga la rendición de fondos para tus solicitudes.
                 </CardDescription>
               </CardHeader>
               <CardFooter>

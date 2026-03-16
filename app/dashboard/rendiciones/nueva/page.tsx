@@ -30,8 +30,8 @@ export default function NuevaRendicionPage() {
               Nueva Rendición de Fondos
             </h1>
             <p className="text-muted-foreground text-xs">
-              Selecciona una solicitud desembolsada y registra los gastos
-              realizados.
+              Selecciona una solicitud desembolsada y registra los comprobantes
+              del gasto realizado.
             </p>
           </div>
         </div>

@@ -56,7 +56,7 @@ export default function SolicitudGastos({
       <div className="mb-4 flex items-center justify-between">
         <FieldLegend className="flex items-center gap-2">
           <Receipt className="h-5 w-5" />
-          Detalle de Gastos
+          Detalle de Comprobantes
         </FieldLegend>
         <Button
           type="button"
@@ -76,7 +76,7 @@ export default function SolicitudGastos({
 
             if (!tienePresupuestoGastos) {
               toast.error(
-                'Las fuentes seleccionadas son exclusivas para VIÁTICOS u HOSPEDAJE. No puede agregar gastos generales.'
+                'Las fuentes seleccionadas son exclusivas para VIÁTICOS u HOSPEDAJE. No puede agregar comprobantes generales.'
               );
               return;
             }
@@ -96,7 +96,7 @@ export default function SolicitudGastos({
           className="gap-2"
         >
           <Plus className="h-4 w-4" />
-          Agregar Gasto
+          Agregar Comprobante
         </Button>
       </div>
 
@@ -118,7 +118,7 @@ export default function SolicitudGastos({
           <div className="border-muted-foreground/25 flex h-32 flex-col items-center justify-center rounded-lg border-2 border-dashed">
             <Receipt className="text-muted-foreground/50 mb-2 h-8 w-8" />
             <p className="text-muted-foreground text-sm italic">
-              No hay gastos registrados.
+              No hay comprobantes registrados.
             </p>
           </div>
         )}

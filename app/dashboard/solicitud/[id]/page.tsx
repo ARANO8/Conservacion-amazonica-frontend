@@ -336,8 +336,8 @@ export default function SolicitudDetailPage() {
               Desglose Financiero por Partida
             </CardTitle>
             <CardDescription>
-              Resumen detallado de viáticos y gastos agrupados por su respectiva
-              partida presupuestaria.
+              Resumen detallado de viáticos y comprobantes agrupados por su
+              respectiva partida presupuestaria.
             </CardDescription>
           </CardHeader>
           <CardContent>
