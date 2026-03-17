@@ -73,9 +73,10 @@ function getTipoDocumentoLabel(tipo: string): string {
 
 interface PartidasAprobadasProps {
   solicitud: SolicitudResponse | null;
+  gastos: CreateRendicionInput['gastos'];
 }
 
-function PartidasAprobadas({ solicitud }: PartidasAprobadasProps) {
+function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
   const presupuestos = solicitud?.presupuestos ?? [];
 
   // Filtrar entradas que tengan al menos código POA para que la card tenga sentido
@@ -117,9 +118,34 @@ function PartidasAprobadas({ solicitud }: PartidasAprobadasProps) {
           const partida = p.poa?.estructura?.partida?.nombre ?? 'Sin partida';
           const proyecto = p.poa?.estructura?.proyecto?.nombre;
           const grupo = p.poa?.estructura?.grupo?.nombre;
-          const monto = Number(
+          const montoAprobado = Number(
             p.subtotalPresupuestado ?? p.poa?.montoPresupuestado ?? 0
           );
+          const montoRendido = (gastos ?? []).reduce((sum, gasto) => {
+            if (!gasto) return sum;
+            if (Number(gasto.partidaId) !== p.id) return sum;
+            return sum + (Number(gasto.montoTotal) || 0);
+          }, 0);
+          const saldo = Number((montoAprobado - montoRendido).toFixed(2));
+
+          const saldoUi =
+            saldo > 0
+              ? {
+                  label: `A DEVOLVER: ${formatMoney(saldo)} Bs.`,
+                  className:
+                    'text-amber-600 border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40',
+                }
+              : saldo < 0
+                ? {
+                    label: `A REEMBOLSAR: ${formatMoney(Math.abs(saldo))} Bs.`,
+                    className:
+                      'text-blue-600 border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/40',
+                  }
+                : {
+                    label: 'RENDICIÓN EXACTA',
+                    className:
+                      'text-emerald-600 border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/40',
+                  };
 
           return (
             <Card
@@ -147,19 +173,38 @@ function PartidasAprobadas({ solicitud }: PartidasAprobadasProps) {
 
               <CardContent className="pb-3">
                 <Separator className="mb-2" />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <Banknote className="text-muted-foreground h-3.5 w-3.5" />
-                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
-                      Aprobado
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Banknote className="text-muted-foreground h-3.5 w-3.5" />
+                      <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                        Aprobado
+                      </span>
+                    </div>
+                    <span className="text-primary text-sm font-black tracking-tight">
+                      {formatMoney(montoAprobado)}{' '}
+                      <span className="text-muted-foreground text-[10px] font-normal">
+                        Bs.
+                      </span>
                     </span>
                   </div>
-                  <span className="text-primary text-sm font-black tracking-tight">
-                    {formatMoney(monto)}{' '}
-                    <span className="text-muted-foreground text-[10px] font-normal">
-                      Bs.
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                      Rendido
                     </span>
-                  </span>
+                    <span className="text-sm font-bold tracking-tight">
+                      {formatMoney(montoRendido)}{' '}
+                      <span className="text-muted-foreground text-[10px] font-normal">
+                        Bs.
+                      </span>
+                    </span>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={`mt-1 w-full justify-center text-[10px] font-extrabold tracking-wide ${saldoUi.className}`}
+                  >
+                    {saldoUi.label}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
@@ -598,6 +643,7 @@ export default function Paso2Gastos({
 }) {
   const form = useFormContext<CreateRendicionInput>();
   const { control } = form;
+  const gastos = useWatch({ control, name: 'gastos' }) ?? [];
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'gastos',
@@ -642,7 +688,7 @@ export default function Paso2Gastos({
         documento y la partida presupuestaria.
       </p>
 
-      <PartidasAprobadas solicitud={solicitud} />
+      <PartidasAprobadas solicitud={solicitud} gastos={gastos} />
 
       <FieldGroup className="space-y-6">
         {/* --- Lista de gastos --- */}
