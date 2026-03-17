@@ -42,6 +42,13 @@ export function NavUser() {
     router.push('/login');
   };
 
+  const sanitizeUrl = (url: string | null | undefined): string => {
+    if (!url) return '/app/aprobaciones';
+    return url
+      .replace(/^\/dashboard\/inbox\//, '/app/aprobaciones/')
+      .replace(/^\/dashboard\//, '/app/');
+  };
+
   const handleNotificationClick = async (
     notification: (typeof notificaciones)[0]
   ) => {
@@ -49,13 +56,14 @@ export function NavUser() {
     if (!notification.leida) {
       await markAsRead(notification.id);
     }
-    // Navegar: usar urlDestino si está definido, sino construir la URL de detalle
-    const href =
+    // Navegar: usar urlDestino (sanitizado) si está definido,
+    // sino construir la URL de detalle de aprobaciones
+    const rawUrl =
       notification.urlDestino ??
       (notification.solicitudId
         ? `/app/aprobaciones/${notification.solicitudId}`
-        : '/app/aprobaciones');
-    router.push(href);
+        : null);
+    router.push(sanitizeUrl(rawUrl));
   };
 
   // Últimas 3 notificaciones no leídas

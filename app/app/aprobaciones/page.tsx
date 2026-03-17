@@ -37,6 +37,15 @@ function tipoVariant(
 
 // ─── NotificationCard ─────────────────────────────────────────────────────────
 
+function sanitizeUrl(url: string | null | undefined): string {
+  if (!url) return '#';
+  // Migra URLs legacy /dashboard/inbox/:id → /app/aprobaciones/:id
+  // y cualquier otro /dashboard/* → /app/*
+  return url
+    .replace(/^\/dashboard\/inbox\//, '/app/aprobaciones/')
+    .replace(/^\/dashboard\//, '/app/');
+}
+
 function NotificationCard({
   notification,
   onRead,
@@ -44,11 +53,12 @@ function NotificationCard({
   notification: NotificacionBackend;
   onRead: (id: number) => void;
 }) {
-  const href =
+  const rawUrl =
     notification.urlDestino ??
     (notification.solicitudId
       ? `/app/aprobaciones/${notification.solicitudId}`
-      : '#');
+      : null);
+  const href = sanitizeUrl(rawUrl);
 
   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
     addSuffix: true,
