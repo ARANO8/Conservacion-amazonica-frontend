@@ -27,6 +27,11 @@
 
 import { normalizeString } from '@/lib/utils';
 
+function round2(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Number.parseFloat(value.toFixed(2));
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -108,7 +113,8 @@ export function calcularMontoNetoRendicion(
   categoria: CategoriaGasto,
   tipoRetencion: TipoRetencionGeneral = 'SERVICIO'
 ): TaxResult {
-  const bruto = Number(montoTotal) || 0;
+  const brutoRaw = Number(montoTotal);
+  const bruto = Number.isFinite(brutoRaw) ? round2(brutoRaw) : 0;
 
   if (bruto <= 0) {
     return { montoNeto: 0, totalRetenciones: 0, desglose: [] };
@@ -117,7 +123,7 @@ export function calcularMontoNetoRendicion(
   // --- FACTURA: sin retención en ningún caso ---
   // Replica: solicitud-gastos.tsx → if (!isRecibo) return netoTotal (factor 1.0)
   if (tipoDocumento === 'FACTURA') {
-    return { montoNeto: bruto, totalRetenciones: 0, desglose: [] };
+    return { montoNeto: round2(bruto), totalRetenciones: 0, desglose: [] };
   }
 
   // --- RECIBO o BOLETA: factor según categoría ---
@@ -126,12 +132,12 @@ export function calcularMontoNetoRendicion(
     // Replica: solicitud-viaticos.tsx → factor INSTITUCIONAL = 0.87 (RC-IVA 13%)
     // montoNeto_solicitud = netoTotal / 0.87  →  netoTotal = montoNeto × 0.87
     // En rendición: montoTotal = montoNeto_solicitud (bruto), montoNeto = netoTotal (líquido)
-    const neto = Number((bruto * 0.87).toFixed(2));
-    const rcIva = Number((bruto * 0.13).toFixed(2));
+    const neto = round2(bruto * 0.87);
+    const rcIva = round2(bruto * 0.13);
     return {
-      montoNeto: neto,
-      totalRetenciones: Number((bruto - neto).toFixed(2)),
-      desglose: [{ label: 'RC-IVA 13%', porcentaje: 13, monto: rcIva }],
+      montoNeto: round2(neto),
+      totalRetenciones: round2(bruto - neto),
+      desglose: [{ label: 'RC-IVA 13%', porcentaje: 13, monto: round2(rcIva) }],
     };
   }
 
@@ -139,15 +145,15 @@ export function calcularMontoNetoRendicion(
     // Replica: solicitud-hospedajes.tsx → Acrecentamiento Combinado / 0.84 (IVA 13% + IT 3%)
     // montoBruto = costoTotal / 0.84  →  costoTotal = montoBruto × 0.84
     // En rendición: montoTotal = montoBruto, montoNeto = costoTotal (lo que recibe el hotel)
-    const neto = Number((bruto * 0.84).toFixed(2));
-    const iva = Number((bruto * 0.13).toFixed(2));
-    const it = Number((bruto * 0.03).toFixed(2));
+    const neto = round2(bruto * 0.84);
+    const iva = round2(bruto * 0.13);
+    const it = round2(bruto * 0.03);
     return {
-      montoNeto: neto,
-      totalRetenciones: Number((bruto - neto).toFixed(2)),
+      montoNeto: round2(neto),
+      totalRetenciones: round2(bruto - neto),
       desglose: [
-        { label: 'IVA 13%', porcentaje: 13, monto: iva },
-        { label: 'IT 3%', porcentaje: 3, monto: it },
+        { label: 'IVA 13%', porcentaje: 13, monto: round2(iva) },
+        { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
       ],
     };
   }
@@ -158,15 +164,15 @@ export function calcularMontoNetoRendicion(
   if (tipoRetencion === 'BIEN') {
     // Ret. Compra 8%: IUE 5% + IT 3% → factor 0.92
     // Replica: tipoNombre === 'COMPRA' → factor = 0.92
-    const neto = Number((bruto * 0.92).toFixed(2));
-    const iue = Number((bruto * 0.05).toFixed(2));
-    const it = Number((bruto * 0.03).toFixed(2));
+    const neto = round2(bruto * 0.92);
+    const iue = round2(bruto * 0.05);
+    const it = round2(bruto * 0.03);
     return {
-      montoNeto: neto,
-      totalRetenciones: Number((bruto - neto).toFixed(2)),
+      montoNeto: round2(neto),
+      totalRetenciones: round2(bruto - neto),
       desglose: [
-        { label: 'IUE 5% (Ret. Compra)', porcentaje: 5, monto: iue },
-        { label: 'IT 3%', porcentaje: 3, monto: it },
+        { label: 'IUE 5% (Ret. Compra)', porcentaje: 5, monto: round2(iue) },
+        { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
       ],
     };
   }
@@ -174,15 +180,15 @@ export function calcularMontoNetoRendicion(
   if (tipoRetencion === 'ALQUILER') {
     // Ret. Alquiler 16%: IVA 13% + IT 3% → factor 0.84
     // Replica: tipoNombre.includes('ALQUILER') → factor = 0.84
-    const neto = Number((bruto * 0.84).toFixed(2));
-    const iva = Number((bruto * 0.13).toFixed(2));
-    const it = Number((bruto * 0.03).toFixed(2));
+    const neto = round2(bruto * 0.84);
+    const iva = round2(bruto * 0.13);
+    const it = round2(bruto * 0.03);
     return {
-      montoNeto: neto,
-      totalRetenciones: Number((bruto - neto).toFixed(2)),
+      montoNeto: round2(neto),
+      totalRetenciones: round2(bruto - neto),
       desglose: [
-        { label: 'IVA 13%', porcentaje: 13, monto: iva },
-        { label: 'IT 3%', porcentaje: 3, monto: it },
+        { label: 'IVA 13%', porcentaje: 13, monto: round2(iva) },
+        { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
       ],
     };
   }
@@ -190,15 +196,19 @@ export function calcularMontoNetoRendicion(
   // SERVICIO (default): IUE 12.5% + IT 3% → factor 0.84
   // Replica: tipoNombre.includes('SERVICIO') → factor = 0.84
   // Desglose: iue = bruto × 0.125, it = bruto × 0.03 (solicitud-gastos.tsx líneas 242–243)
-  const neto = Number((bruto * 0.84).toFixed(2));
-  const iue = Number((bruto * 0.125).toFixed(2));
-  const it = Number((bruto * 0.03).toFixed(2));
+  const neto = round2(bruto * 0.84);
+  const iue = round2(bruto * 0.125);
+  const it = round2(bruto * 0.03);
   return {
-    montoNeto: neto,
-    totalRetenciones: Number((bruto - neto).toFixed(2)),
+    montoNeto: round2(neto),
+    totalRetenciones: round2(bruto - neto),
     desglose: [
-      { label: 'IUE 12.5% (Ret. Servicios)', porcentaje: 12.5, monto: iue },
-      { label: 'IT 3%', porcentaje: 3, monto: it },
+      {
+        label: 'IUE 12.5% (Ret. Servicios)',
+        porcentaje: 12.5,
+        monto: round2(iue),
+      },
+      { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
     ],
   };
 }

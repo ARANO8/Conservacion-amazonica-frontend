@@ -74,6 +74,11 @@ function sanitizeMonetaryInput(value: string): string {
   return `${integerPart}.${decimalParts.join('')}`;
 }
 
+function round2(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Number.parseFloat(value.toFixed(2));
+}
+
 // ---------------------------------------------------------------------------
 // Sub-componente: Grid de Partidas Aprobadas
 // ---------------------------------------------------------------------------
@@ -133,7 +138,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
             if (Number(gasto.partidaId) !== p.id) return sum;
             return sum + (Number(gasto.montoTotal) || 0);
           }, 0);
-          const saldo = Number((montoAprobado - montoRendido).toFixed(2));
+          const saldo = round2(montoAprobado - montoRendido);
 
           const saldoUi =
             saldo > 0
@@ -525,7 +530,6 @@ function ComprobanteCard({
                   inputMode="decimal"
                   className="h-9 text-sm"
                   name={field.name}
-                  onBlur={field.onBlur}
                   ref={field.ref}
                   value={montoTotalInput}
                   onChange={(e) => {
@@ -539,6 +543,24 @@ function ComprobanteCard({
 
                     const parsed = Number.parseFloat(sanitized);
                     field.onChange(Number.isFinite(parsed) ? parsed : 0);
+                  }}
+                  onBlur={() => {
+                    field.onBlur();
+                    if (!montoTotalInput || montoTotalInput === '.') {
+                      setMontoTotalInput('');
+                      return;
+                    }
+
+                    const parsed = Number.parseFloat(montoTotalInput);
+                    if (!Number.isFinite(parsed) || parsed <= 0) {
+                      setMontoTotalInput('');
+                      field.onChange(0);
+                      return;
+                    }
+
+                    const rounded = round2(parsed);
+                    setMontoTotalInput(rounded.toFixed(2));
+                    field.onChange(rounded);
                   }}
                 />
               </FormControl>
