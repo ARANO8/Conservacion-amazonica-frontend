@@ -48,11 +48,10 @@ export default function RendicionFooter({
   }, [gastos]);
 
   const saldo = montoAnticipado - totalRendido;
-  const isLastStep = step === 'DECLARACION_JURADA';
+  const isLastStep = step === 'GASTOS_RESPALDO';
   const isFirstStep = step === 'SELECCION';
   const showFinancialSummary =
-    (step === 'GASTOS_RESPALDO' || step === 'DECLARACION_JURADA') &&
-    montoAnticipado > 0;
+    step === 'GASTOS_RESPALDO' && montoAnticipado > 0;
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">

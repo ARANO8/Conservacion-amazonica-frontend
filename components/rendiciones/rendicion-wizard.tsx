@@ -2,26 +2,51 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, FormProvider, FieldError, useWatch } from 'react-hook-form';
+import {
+  useForm,
+  FormProvider,
+  FieldError,
+  FieldErrors,
+  FieldValues,
+  Path,
+  useWatch,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 
 import {
   CreateRendicionSchema,
   CreateRendicionInput,
+  DeclaracionJurada,
   defaultRendicionValues,
   WizardStepRendicion,
 } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
 import Paso2Respaldos from './paso2-respaldos';
 import Paso2Gastos from './paso2-gastos';
-import Paso3Declaracion from './paso3-declaracion';
 
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
@@ -37,6 +62,7 @@ export default function RendicionWizard({
   const router = useRouter();
   const [step, setStep] = useState<WizardStepRendicion>('SELECCION');
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const form = useForm<CreateRendicionInput>({
     resolver: zodResolver(CreateRendicionSchema),
@@ -48,6 +74,17 @@ export default function RendicionWizard({
     control: form.control,
     name: 'solicitudId',
   });
+  const [confirmaDatosVeridicos, aceptaPoliticaDevolucion] = useWatch({
+    control: form.control,
+    name: [
+      'declaracionJurada.confirmaDatosVeridicos',
+      'declaracionJurada.aceptaPoliticaDevolucion',
+    ],
+  }) as [boolean | undefined, boolean | undefined];
+
+  const canConfirmSubmit =
+    confirmaDatosVeridicos === true && aceptaPoliticaDevolucion === true;
+
   const solicitudSeleccionada =
     solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
 
@@ -106,18 +143,12 @@ export default function RendicionWizard({
     }
 
     if (step === 'GASTOS_RESPALDO') {
-      const isValid = await form.trigger(['gastos']);
+      const isValid = await form.trigger(['gastos', 'gastosSinRespaldo']);
       if (!isValid) {
         toast.error('Revisa los gastos antes de continuar');
         return;
       }
-      setStep('DECLARACION_JURADA');
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    if (step === 'DECLARACION_JURADA') {
-      await handleSubmit();
+      setIsModalOpen(true);
     }
   };
 
@@ -128,9 +159,6 @@ export default function RendicionWizard({
     } else if (step === 'GASTOS_RESPALDO') {
       setStep('RESPALDOS_GENERALES');
       window.scrollTo(0, 0);
-    } else if (step === 'DECLARACION_JURADA') {
-      setStep('GASTOS_RESPALDO');
-      window.scrollTo(0, 0);
     }
   };
 
@@ -138,41 +166,9 @@ export default function RendicionWizard({
   // Envío final
   // ------------------------------------------------------------------
 
-  const handleSubmit = async () => {
-    const isValid = await form.trigger();
-    if (!isValid) {
-      const errors = form.formState.errors;
-
-      // Mostrar el primer error encontrado al usuario
-      const firstErrorField = Object.keys(errors)[0];
-      let errorMessage = 'Completa todos los campos requeridos';
-
-      if (firstErrorField === 'declaracionJurada') {
-        const declaracionErrors = errors.declaracionJurada as FieldError & {
-          confirmaDatosVeridicos?: FieldError;
-          aceptaPoliticaDevolucion?: FieldError;
-        };
-        if (declaracionErrors?.confirmaDatosVeridicos?.message) {
-          errorMessage = declaracionErrors.confirmaDatosVeridicos.message;
-        } else if (declaracionErrors?.aceptaPoliticaDevolucion?.message) {
-          errorMessage = declaracionErrors.aceptaPoliticaDevolucion.message;
-        } else {
-          errorMessage = 'Revisa los términos y condiciones antes de continuar';
-        }
-      } else if (firstErrorField) {
-        const fieldError = errors[firstErrorField as keyof typeof errors] as
-          | FieldError
-          | undefined;
-        errorMessage = fieldError?.message || errorMessage;
-      }
-
-      toast.error(errorMessage);
-      return;
-    }
-
+  const handleValidSubmit = async (data: CreateRendicionInput) => {
     setLoading(true);
     try {
-      const data = form.getValues();
       const solicitudId = data.solicitudId;
 
       // Paso 1: Crear la rendición en el backend
@@ -189,6 +185,7 @@ export default function RendicionWizard({
       }
 
       // Paso 3: Redirigir al inicio
+      setIsModalOpen(false);
       setTimeout(() => {
         router.push('/app/inicio');
       }, 1000);
@@ -227,6 +224,71 @@ export default function RendicionWizard({
     }
   };
 
+  const handleInvalidSubmit = (errors: FieldErrors<CreateRendicionInput>) => {
+    // Mostrar el primer error encontrado al usuario
+    const firstErrorField = Object.keys(errors)[0];
+    let errorMessage = 'Completa todos los campos requeridos';
+
+    if (firstErrorField === 'declaracionJurada') {
+      const declaracionErrors = errors.declaracionJurada as FieldError & {
+        confirmaDatosVeridicos?: FieldError;
+        aceptaPoliticaDevolucion?: FieldError;
+      };
+      if (declaracionErrors?.confirmaDatosVeridicos?.message) {
+        errorMessage = declaracionErrors.confirmaDatosVeridicos.message;
+      } else if (declaracionErrors?.aceptaPoliticaDevolucion?.message) {
+        errorMessage = declaracionErrors.aceptaPoliticaDevolucion.message;
+      } else {
+        errorMessage = 'Revisa los términos y condiciones antes de continuar';
+      }
+    } else if (firstErrorField) {
+      const fieldError = errors[firstErrorField as keyof typeof errors] as
+        | FieldError
+        | undefined;
+      errorMessage = fieldError?.message || errorMessage;
+    }
+
+    toast.error(errorMessage);
+  };
+
+  const submitRendicion = form.handleSubmit(
+    handleValidSubmit,
+    handleInvalidSubmit
+  );
+
+  const getFieldErrorByPath = <TFieldValues extends FieldValues>(
+    errors: FieldErrors<TFieldValues>,
+    path: Path<TFieldValues>
+  ): FieldError | undefined => {
+    const keys = path.split('.');
+    let current: unknown = errors;
+
+    for (const key of keys) {
+      if (!current || typeof current !== 'object' || !(key in current)) {
+        return undefined;
+      }
+      current = (current as Record<string, unknown>)[key];
+    }
+
+    if (current && typeof current === 'object' && 'message' in current) {
+      return current as FieldError;
+    }
+
+    return undefined;
+  };
+
+  const declaracionErrors = form.formState.errors.declaracionJurada as Partial<
+    Record<keyof DeclaracionJurada, FieldError>
+  >;
+  const confirmaError = getFieldErrorByPath(
+    form.formState.errors,
+    'declaracionJurada.confirmaDatosVeridicos'
+  );
+  const aceptaError = getFieldErrorByPath(
+    form.formState.errors,
+    'declaracionJurada.aceptaPoliticaDevolucion'
+  );
+
   // ------------------------------------------------------------------
   // Render
   // ------------------------------------------------------------------
@@ -248,8 +310,6 @@ export default function RendicionWizard({
           {step === 'GASTOS_RESPALDO' && (
             <Paso2Gastos solicitud={solicitudSeleccionada} />
           )}
-
-          {step === 'DECLARACION_JURADA' && <Paso3Declaracion />}
         </div>
 
         {/* Footer con navegación */}
@@ -261,6 +321,117 @@ export default function RendicionWizard({
           form={form}
           solicitudes={solicitudes}
         />
+
+        <Dialog
+          open={isModalOpen}
+          onOpenChange={(open) => {
+            if (!loading) setIsModalOpen(open);
+          }}
+        >
+          <DialogContent className="sm:max-w-[640px]">
+            <DialogHeader>
+              <DialogTitle>Confirmación de Declaración Jurada</DialogTitle>
+              <DialogDescription>
+                Antes de enviar la rendición, confirma los siguientes términos.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="bg-card rounded-lg border p-4">
+                <FormField
+                  control={form.control}
+                  name="declaracionJurada.confirmaDatosVeridicos"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value === true}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked === true);
+                          }}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <div className="flex-1">
+                        <FormLabel className="cursor-pointer text-sm leading-relaxed font-semibold">
+                          Declaro bajo juramento que los montos detallados en
+                          esta rendición son verídicos y se realizaron conforme
+                          a lo aprobado en la solicitud.
+                        </FormLabel>
+                        <FormMessage className="mt-2 text-[10px]" />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                {confirmaError && (
+                  <p className="text-destructive mt-2 text-xs">
+                    {String(confirmaError.message)}
+                  </p>
+                )}
+              </div>
+
+              <div className="bg-card rounded-lg border p-4">
+                <FormField
+                  control={form.control}
+                  name="declaracionJurada.aceptaPoliticaDevolucion"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value === true}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked === true);
+                          }}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <div className="flex-1">
+                        <FormLabel className="cursor-pointer text-sm leading-relaxed font-semibold">
+                          Acepto la política de devolución de saldos y, en caso
+                          de corresponder, me comprometo a devolver la
+                          diferencia dentro de los plazos establecidos.
+                        </FormLabel>
+                        <FormMessage className="mt-2 text-[10px]" />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                {aceptaError && (
+                  <p className="text-destructive mt-2 text-xs">
+                    {String(aceptaError.message)}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {(declaracionErrors?.confirmaDatosVeridicos ||
+              declaracionErrors?.aceptaPoliticaDevolucion) && (
+              <p className="text-destructive text-xs">
+                Marca ambos checkboxes para confirmar la declaración jurada.
+              </p>
+            )}
+
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={loading || !canConfirmSubmit}
+                onClick={() => {
+                  void submitRendicion();
+                }}
+              >
+                {loading ? 'Procesando...' : 'Confirmar y Enviar Rendición'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </FormProvider>
   );

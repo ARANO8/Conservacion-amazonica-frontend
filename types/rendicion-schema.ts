@@ -23,8 +23,7 @@ export type TipoDeclaracion = z.infer<typeof TipoDeclaracionEnum>;
 export type WizardStepRendicion =
   | 'SELECCION'
   | 'RESPALDOS_GENERALES'
-  | 'GASTOS_RESPALDO'
-  | 'DECLARACION_JURADA';
+  | 'GASTOS_RESPALDO';
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -120,11 +119,11 @@ export const CreateRendicionSchema = z.object({
   // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
 
-  // --- Paso 4: DECLARACION_JURADA ---
+  // --- Confirmación final (Modal de Declaración Jurada) ---
   /** Gastos sin respaldo oficial (taxi, compras, etc.) */
   gastosSinRespaldo: z.array(GastoSinRespaldoSchema).optional(),
   /** Declaración jurada final con términos y condiciones */
-  declaracionJurada: DeclaracionJuradaSchema.optional(),
+  declaracionJurada: DeclaracionJuradaSchema,
 
   /** Observaciones generales de la rendición */
   observaciones: z.string().optional(),

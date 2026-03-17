@@ -693,13 +693,25 @@ export default function Paso2Gastos({
   const form = useFormContext<CreateRendicionInput>();
   const { control } = form;
   const gastos = useWatch({ control, name: 'gastos' }) ?? [];
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: gastosFields,
+    append: appendGasto,
+    remove: removeGasto,
+  } = useFieldArray({
     control,
     name: 'gastos',
   });
+  const {
+    fields: gastosSinRespaldoFields,
+    append: appendGastoSinRespaldo,
+    remove: removeGastoSinRespaldo,
+  } = useFieldArray({
+    control,
+    name: 'gastosSinRespaldo',
+  });
 
   const handleAgregarGasto = () => {
-    append({
+    appendGasto({
       concepto: '',
       tipoDocumento: 'FACTURA',
       numeroDocumento: '',
@@ -714,19 +726,37 @@ export default function Paso2Gastos({
     });
   };
 
-  const totalMontoTotal = fields.reduce((sum, _, idx) => {
+  const handleAgregarGastoSinRespaldo = () => {
+    appendGastoSinRespaldo({
+      fechaGasto: new Date().toISOString().split('T')[0],
+      detalle: '',
+      monto: 0,
+    });
+  };
+
+  const totalMontoTotal = gastosFields.reduce((sum, _, idx) => {
     const monto = form.watch(`gastos.${idx}.montoTotal`);
     const valor =
       typeof monto === 'number' ? monto : parseFloat(String(monto ?? 0)) || 0;
     return sum + valor;
   }, 0);
 
-  const totalMontoNeto = fields.reduce((sum, _, idx) => {
+  const totalMontoNeto = gastosFields.reduce((sum, _, idx) => {
     const monto = form.watch(`gastos.${idx}.montoNeto`);
     const valor =
       typeof monto === 'number' ? monto : parseFloat(String(monto ?? 0)) || 0;
     return sum + valor;
   }, 0);
+
+  const totalGastosSinRespaldo = gastosSinRespaldoFields.reduce(
+    (sum, _, idx) => {
+      const monto = form.watch(`gastosSinRespaldo.${idx}.monto`);
+      const valor =
+        typeof monto === 'number' ? monto : parseFloat(String(monto ?? 0)) || 0;
+      return sum + valor;
+    },
+    0
+  );
 
   return (
     <FieldSet>
@@ -741,7 +771,7 @@ export default function Paso2Gastos({
 
       <FieldGroup className="space-y-6">
         {/* --- Lista de gastos --- */}
-        {fields.length === 0 ? (
+        {gastosFields.length === 0 ? (
           <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
             <p className="text-muted-foreground text-sm font-medium">
               No hay comprobantes agregados aún
@@ -753,12 +783,12 @@ export default function Paso2Gastos({
           </div>
         ) : (
           <div className="space-y-4">
-            {fields.map((field, index) => (
+            {gastosFields.map((field, index) => (
               <ComprobanteCard
                 key={field.id}
                 index={index}
                 solicitud={solicitud}
-                onRemove={() => remove(index)}
+                onRemove={() => removeGasto(index)}
                 form={form}
               />
             ))}
@@ -779,7 +809,7 @@ export default function Paso2Gastos({
         </Button>
 
         {/* --- Resumen Total --- */}
-        {fields.length > 0 && (
+        {gastosFields.length > 0 && (
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-bold">
@@ -814,11 +844,192 @@ export default function Paso2Gastos({
               </div>
               <div className="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2 text-sm dark:bg-black/10">
                 <span className="font-bold">Cantidad de Comprobantes:</span>
-                <Badge variant="secondary">{fields.length}</Badge>
+                <Badge variant="secondary">{gastosFields.length}</Badge>
               </div>
             </CardContent>
           </Card>
         )}
+
+        <Separator className="my-6" />
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold tracking-wider uppercase">
+              Gastos Menores / Sin Respaldo (Opcional)
+            </h3>
+            {gastosSinRespaldoFields.length > 0 && (
+              <Badge variant="secondary">
+                {gastosSinRespaldoFields.length}
+              </Badge>
+            )}
+          </div>
+
+          {gastosSinRespaldoFields.length === 0 ? (
+            <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
+              <p className="text-muted-foreground text-sm font-medium">
+                No hay gastos menores agregados
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                Agrega aquí egresos sin respaldo oficial (ej: taxi o compras
+                menores).
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {gastosSinRespaldoFields.map((field, index) => (
+                <Card key={field.id} className="border shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardTitle className="text-sm font-semibold">
+                        Gasto Menor #{index + 1}
+                      </CardTitle>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeGastoSinRespaldo(index)}
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Eliminar gasto menor</span>
+                      </Button>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={control}
+                        name={`gastosSinRespaldo.${index}.fechaGasto`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                              Fecha del Gasto
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                className="h-9"
+                                value={
+                                  typeof field.value === 'string'
+                                    ? field.value
+                                    : field.value instanceof Date
+                                      ? field.value.toISOString().split('T')[0]
+                                      : ''
+                                }
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-[10px]" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name={`gastosSinRespaldo.${index}.monto`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                              Monto (Bs.)
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0"
+                                className="h-9 text-sm"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    e.target.value
+                                      ? Number.parseFloat(e.target.value)
+                                      : 0
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage className="text-[10px]" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={control}
+                      name={`gastosSinRespaldo.${index}.detalle`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            Detalle del Gasto
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe el gasto menor realizado"
+                              className="min-h-16 resize-none text-sm"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-[10px]" />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAgregarGastoSinRespaldo}
+            className="w-full border-dashed"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Agregar Gasto Menor
+          </Button>
+
+          {gastosSinRespaldoFields.length > 0 && (
+            <Card className="border-amber-200/50 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold uppercase">
+                    Total Gastos Menores:
+                  </span>
+                  <span className="text-lg font-black text-amber-600 dark:text-amber-400">
+                    {formatMoney(totalGastosSinRespaldo)} Bs.
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <Separator className="my-6" />
+
+        <div>
+          <h3 className="mb-3 text-sm font-bold tracking-wider uppercase">
+            Observaciones Generales (Opcional)
+          </h3>
+          <FormField
+            control={control}
+            name="observaciones"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Textarea
+                    placeholder="Agrega cualquier observación o comentario adicional sobre tu rendición..."
+                    className="min-h-20 resize-none text-sm"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px]" />
+              </FormItem>
+            )}
+          />
+        </div>
       </FieldGroup>
     </FieldSet>
   );
