@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   useFormContext,
   useFieldArray,
@@ -67,11 +67,11 @@ function getTipoDocumentoLabel(tipo: string): string {
   }
 }
 
-function parseMonetaryInput(value: string): number {
-  if (!value) return 0;
-  const normalized = value.replace(',', '.');
-  const parsed = Number.parseFloat(normalized);
-  return Number.isNaN(parsed) ? 0 : parsed;
+function sanitizeMonetaryInput(value: string): string {
+  const normalized = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+  const [integerPart, ...decimalParts] = normalized.split('.');
+  if (decimalParts.length === 0) return integerPart;
+  return `${integerPart}.${decimalParts.join('')}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -253,6 +253,16 @@ function ComprobanteCard({
   const tipoRetencion = useWatch({
     control,
     name: `gastos.${index}.tipoRetencion`,
+  });
+  const [montoTotalInput, setMontoTotalInput] = useState<string>(() => {
+    const numericMontoTotal =
+      typeof montoTotal === 'number'
+        ? montoTotal
+        : Number.parseFloat(String(montoTotal ?? 0));
+    if (!Number.isFinite(numericMontoTotal) || numericMontoTotal <= 0) {
+      return '';
+    }
+    return String(numericMontoTotal);
   });
 
   // Derive category from selected partida name
@@ -510,16 +520,26 @@ function ComprobanteCard({
               </FormLabel>
               <FormControl>
                 <Input
-                  type="number"
+                  type="text"
                   placeholder="0.00"
-                  step="0.01"
-                  min="0"
                   inputMode="decimal"
                   className="h-9 text-sm"
-                  {...field}
-                  onChange={(e) =>
-                    field.onChange(parseMonetaryInput(e.target.value))
-                  }
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  value={montoTotalInput}
+                  onChange={(e) => {
+                    const sanitized = sanitizeMonetaryInput(e.target.value);
+                    setMontoTotalInput(sanitized);
+
+                    if (!sanitized || sanitized === '.') {
+                      field.onChange(0);
+                      return;
+                    }
+
+                    const parsed = Number.parseFloat(sanitized);
+                    field.onChange(Number.isFinite(parsed) ? parsed : 0);
+                  }}
                 />
               </FormControl>
               <FormMessage className="text-[10px]" />
