@@ -7,6 +7,13 @@ import { z } from 'zod';
 export const TipoDocumentoGastoEnum = z.enum(['FACTURA', 'RECIBO', 'BOLETA']);
 export type TipoDocumentoGasto = z.infer<typeof TipoDocumentoGastoEnum>;
 
+/**
+ * Sub-categoría de retención para gastos GENERALES con RECIBO o BOLETA.
+ * Replica el campo `tipoGastoId` de solicitud-gastos.tsx (COMPRA/SERVICIO/ALQUILER).
+ */
+export const TipoRetencionEnum = z.enum(['BIEN', 'SERVICIO', 'ALQUILER']);
+export type TipoRetencion = z.infer<typeof TipoRetencionEnum>;
+
 export const EstadoGastoEnum = z.enum(['PENDIENTE', 'COMPROBADO', 'RECHAZADO']);
 export type EstadoGasto = z.infer<typeof EstadoGastoEnum>;
 
@@ -37,13 +44,18 @@ export const GastoRendicionSchema = z.object({
   fechaDocumento: z.union([z.string(), z.date()]).optional(),
   /** Monto real gastado (con impuestos) */
   montoTotal: z.number().min(0.01, 'El monto debe ser mayor a 0'),
-  /** Monto líquido sin impuestos */
+  /** Monto líquido sin retenciones (calculado automáticamente) */
   montoNeto: z.number().min(0.01, 'El monto neto debe ser mayor a 0'),
   estado: EstadoGastoEnum.optional(),
   /** ID del presupuesto (partida POA) al que se imputa este gasto */
   partidaId: z.number().min(1, 'Debes seleccionar una partida presupuestaria'),
   /** URL del comprobante digital adjunto */
   urlComprobante: z.string().url('La URL del comprobante no es válida'),
+  /**
+   * Sub-categoría de retención — sólo aplica para RECIBO/BOLETA en gastos GENERALES.
+   * Determina el factor de retención: BIEN=0.92, SERVICIO=0.84, ALQUILER=0.84.
+   */
+  tipoRetencion: TipoRetencionEnum.optional(),
 });
 
 export type GastoRendicion = z.infer<typeof GastoRendicionSchema>;
