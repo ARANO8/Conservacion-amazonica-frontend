@@ -39,6 +39,10 @@ export const GastoRendicionSchema = z.object({
   /** Monto líquido sin impuestos */
   montoNeto: z.number().min(0.01, 'El monto neto debe ser mayor a 0'),
   estado: EstadoGastoEnum.optional(),
+  /** ID del presupuesto (partida POA) al que se imputa este gasto */
+  partidaId: z.number().min(1, 'Debes seleccionar una partida presupuestaria'),
+  /** URL del comprobante digital adjunto */
+  urlComprobante: z.string().url('La URL del comprobante no es válida'),
 });
 
 export type GastoRendicion = z.infer<typeof GastoRendicionSchema>;
@@ -88,6 +92,15 @@ export const CreateRendicionSchema = z.object({
     .string()
     .min(1, 'La fecha de rendición es requerida')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
+  /** URL del cuadro comparativo de cotizaciones (opcional) */
+  urlCuadroComparativo: z
+    .string()
+    .url('La URL del cuadro comparativo no es válida')
+    .optional(),
+  /** URLs de las cotizaciones adjuntas (al menos una requerida) */
+  urlCotizaciones: z
+    .array(z.string().url('La URL de la cotización no es válida'))
+    .min(1, 'Debes adjuntar al menos una cotización'),
 
   // --- Paso 2: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
@@ -111,6 +124,8 @@ export type CreateRendicionInput = z.infer<typeof CreateRendicionSchema>;
 export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
   fechaRendicion: new Date().toISOString().split('T')[0],
+  urlCuadroComparativo: '',
+  urlCotizaciones: [''],
   gastos: [],
   gastosSinRespaldo: [],
   observaciones: '',

@@ -6,6 +6,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import {
@@ -34,6 +35,8 @@ import {
   MapPin,
   FileText,
   Banknote,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 
 import { cn, formatMoney, formatDateShort } from '@/lib/utils';
@@ -166,6 +169,27 @@ export default function Paso1Seleccion({
   const solicitudId = useWatch({ control: form.control, name: 'solicitudId' });
   const solicitudSeleccionada = solicitudes.find((s) => s.id === solicitudId);
 
+  // Gestión manual del array de cotizaciones (string[])
+  const urlCotizaciones = useWatch({
+    control: form.control,
+    name: 'urlCotizaciones',
+  }) ?? [''];
+
+  const handleAddCotizacion = () => {
+    form.setValue('urlCotizaciones', [...urlCotizaciones, ''], {
+      shouldValidate: false,
+      shouldDirty: true,
+    });
+  };
+
+  const handleRemoveCotizacion = (idx: number) => {
+    const updated = urlCotizaciones.filter((_, i) => i !== idx);
+    form.setValue('urlCotizaciones', updated.length > 0 ? updated : [''], {
+      shouldValidate: false,
+      shouldDirty: true,
+    });
+  };
+
   return (
     <FieldSet>
       <FieldLegend>Vincular a una Solicitud Desembolsada</FieldLegend>
@@ -267,7 +291,7 @@ export default function Paso1Seleccion({
             <SolicitudResumenCard solicitud={solicitudSeleccionada} />
           )}
 
-          {/* ---- Fecha de Rendición ---- */}
+          {/* ---- Fecha de Rendición (solo lectura — siempre es hoy) ---- */}
           <FormField
             control={form.control}
             name="fechaRendicion"
@@ -275,12 +299,102 @@ export default function Paso1Seleccion({
               <FormItem>
                 <span className="text-sm font-medium">Fecha de Rendición</span>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    readOnly
+                    className="bg-muted cursor-not-allowed"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <Separator />
+
+          {/* ---- URL Cuadro Comparativo (opcional) ---- */}
+          <FormField
+            control={form.control}
+            name="urlCuadroComparativo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  URL Cuadro Comparativo{' '}
+                  <span className="text-muted-foreground font-normal">
+                    (opcional)
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="https://drive.google.com/..."
+                    className="text-sm"
+                    {...field}
+                    value={field.value ?? ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* ---- URLs de Cotizaciones (mínimo 1 requerida) ---- */}
+          <div className="space-y-3">
+            <span className="text-sm font-medium">
+              Cotizaciones <span className="text-destructive">*</span>
+            </span>
+            <p className="text-muted-foreground text-xs">
+              Adjunta al menos una cotización para respaldar los gastos
+              realizados.
+            </p>
+
+            {urlCotizaciones.map((_, idx) => (
+              <FormField
+                key={idx}
+                control={form.control}
+                name={`urlCotizaciones.${idx}`}
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center gap-2">
+                      <FormControl>
+                        <Input
+                          type="url"
+                          placeholder={`https://drive.google.com/... (cotización ${idx + 1})`}
+                          className="text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      {urlCotizaciones.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveCotizacion(idx)}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-9 w-9 shrink-0 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Eliminar cotización</span>
+                        </Button>
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddCotizacion}
+              className="border-dashed text-xs"
+            >
+              <Plus className="mr-1 h-3 w-3" />
+              Añadir otra cotización
+            </Button>
+          </div>
         </FieldGroup>
       )}
     </FieldSet>

@@ -26,6 +26,7 @@ import {
   CreateRendicionInput,
   TipoDocumentoGastoEnum,
 } from '@/types/rendicion-schema';
+import { SolicitudResponse } from '@/types/solicitud-backend';
 import { formatMoney } from '@/lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -50,7 +51,11 @@ function getTipoDocumentoLabel(tipo: string): string {
 // Componente Principal
 // ---------------------------------------------------------------------------
 
-export default function Paso2Gastos() {
+export default function Paso2Gastos({
+  solicitud,
+}: {
+  solicitud: SolicitudResponse | null;
+}) {
   const form = useFormContext<CreateRendicionInput>();
   const { control } = form;
   const { fields, append, remove } = useFieldArray({
@@ -68,6 +73,8 @@ export default function Paso2Gastos() {
       montoNeto: 0,
       proveedor: '',
       detalle: '',
+      partidaId: 0,
+      urlComprobante: '',
     });
   };
 
@@ -246,6 +253,64 @@ export default function Paso2Gastos() {
                           <Textarea
                             placeholder="Describe el gasto realizado (requerido)"
                             className="min-h-16 resize-none text-sm"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[10px]" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* --- Partida Presupuestaria --- */}
+                  <FormField
+                    control={control}
+                    name={`gastos.${index}.partidaId`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                          Partida Presupuestaria *
+                        </FormLabel>
+                        <Select
+                          value={field.value ? String(field.value) : ''}
+                          onValueChange={(val) => field.onChange(Number(val))}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue placeholder="Selecciona una partida..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {(solicitud?.presupuestos ?? []).map((p) => {
+                              const codigo = p.poa?.codigoPoa ?? '—';
+                              const partida =
+                                p.poa?.estructura?.partida?.nombre ?? '—';
+                              return (
+                                <SelectItem key={p.id} value={String(p.id)}>
+                                  {codigo} – {partida}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-[10px]" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* --- URL Comprobante --- */}
+                  <FormField
+                    control={control}
+                    name={`gastos.${index}.urlComprobante`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                          URL Comprobante *
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="url"
+                            placeholder="https://drive.google.com/..."
+                            className="h-9 text-sm"
                             {...field}
                           />
                         </FormControl>

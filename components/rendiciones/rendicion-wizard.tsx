@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, FormProvider, FieldError } from 'react-hook-form';
+import { useForm, FormProvider, FieldError, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 
@@ -41,6 +41,14 @@ export default function RendicionWizard({
     resolver: zodResolver(CreateRendicionSchema),
     defaultValues: defaultRendicionValues,
   });
+
+  // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
+  const watchedSolicitudId = useWatch({
+    control: form.control,
+    name: 'solicitudId',
+  });
+  const solicitudSeleccionada =
+    solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
 
   // Efecto para pre-seleccionar una solicitud si se proporciona el ID
   useEffect(() => {
@@ -214,7 +222,9 @@ export default function RendicionWizard({
             <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
 
-          {step === 'GASTOS_RESPALDO' && <Paso2Gastos />}
+          {step === 'GASTOS_RESPALDO' && (
+            <Paso2Gastos solicitud={solicitudSeleccionada} />
+          )}
 
           {step === 'DECLARACION_JURADA' && <Paso3Declaracion />}
         </div>
