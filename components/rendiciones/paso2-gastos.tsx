@@ -28,7 +28,7 @@ import {
 } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { formatMoney } from '@/lib/utils';
-import { Plus, Trash2 } from 'lucide-react';
+import { Banknote, BookOpen, Layers, Plus, Trash2 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -45,6 +45,111 @@ function getTipoDocumentoLabel(tipo: string): string {
     default:
       return tipo;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Sub-componente: Grid de Partidas Aprobadas
+// ---------------------------------------------------------------------------
+
+interface PartidasAprobadasProps {
+  solicitud: SolicitudResponse | null;
+}
+
+function PartidasAprobadas({ solicitud }: PartidasAprobadasProps) {
+  const presupuestos = solicitud?.presupuestos ?? [];
+
+  // Filtrar entradas que tengan al menos código POA para que la card tenga sentido
+  const partidas = presupuestos.filter((p) => p.poa?.codigoPoa);
+
+  if (!solicitud) return null;
+
+  if (partidas.length === 0) {
+    return (
+      <div className="bg-muted/40 mb-6 rounded-lg border border-dashed p-4">
+        <div className="flex items-center gap-2">
+          <Layers className="text-muted-foreground h-4 w-4 shrink-0" />
+          <p className="text-muted-foreground text-sm">
+            No se encontraron partidas presupuestarias para esta solicitud.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6 space-y-3">
+      {/* Encabezado de sección */}
+      <div className="flex items-center gap-2">
+        <BookOpen className="text-primary h-4 w-4 shrink-0" />
+        <h3 className="text-sm font-bold tracking-wide uppercase">
+          Partidas Aprobadas para esta Rendición
+        </h3>
+      </div>
+      <p className="text-muted-foreground text-xs">
+        Cada comprobante debe imputarse a una de estas partidas. El monto
+        mostrado es el subtotal presupuestado aprobado por línea.
+      </p>
+
+      {/* Grid de tarjetas */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {partidas.map((p) => {
+          const codigo = p.poa?.codigoPoa ?? '—';
+          const partida = p.poa?.estructura?.partida?.nombre ?? 'Sin partida';
+          const proyecto = p.poa?.estructura?.proyecto?.nombre;
+          const grupo = p.poa?.estructura?.grupo?.nombre;
+          const monto = Number(
+            p.subtotalPresupuestado ?? p.poa?.montoPresupuestado ?? 0
+          );
+
+          return (
+            <Card
+              key={p.id}
+              className="bg-muted/40 border shadow-none transition-shadow hover:shadow-sm"
+            >
+              <CardHeader className="pt-3 pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="text-primary bg-primary/10 border-primary/20 shrink-0 border font-mono text-[10px] font-bold"
+                  >
+                    {codigo}
+                  </Badge>
+                </div>
+                <CardTitle className="text-foreground mt-1 text-xs leading-snug font-semibold">
+                  {partida}
+                </CardTitle>
+                {(proyecto || grupo) && (
+                  <p className="text-muted-foreground truncate text-[10px]">
+                    {[proyecto, grupo].filter(Boolean).join(' / ')}
+                  </p>
+                )}
+              </CardHeader>
+
+              <CardContent className="pb-3">
+                <Separator className="mb-2" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <Banknote className="text-muted-foreground h-3.5 w-3.5" />
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                      Aprobado
+                    </span>
+                  </div>
+                  <span className="text-primary text-sm font-black tracking-tight">
+                    {formatMoney(monto)}{' '}
+                    <span className="text-muted-foreground text-[10px] font-normal">
+                      Bs.
+                    </span>
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      <Separator className="mt-4" />
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -99,6 +204,8 @@ export default function Paso2Gastos({
         Registra cada comprobante con su documento respaldo (Factura, Recibo o
         Boleta). Asegúrate de incluir todos los montos (total y neto).
       </p>
+
+      <PartidasAprobadas solicitud={solicitud} />
 
       <FieldGroup className="space-y-6">
         {/* --- Lista de gastos --- */}
