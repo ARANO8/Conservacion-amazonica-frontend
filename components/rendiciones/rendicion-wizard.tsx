@@ -19,6 +19,7 @@ import { solicitudesService } from '@/lib/services/solicitudes-service';
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
+import Paso2Respaldos from './paso2-respaldos';
 import Paso2Gastos from './paso2-gastos';
 import Paso3Declaracion from './paso3-declaracion';
 
@@ -65,8 +66,9 @@ export default function RendicionWizard({
         const today = new Date().toISOString().split('T')[0];
         form.setValue('fechaRendicion', today);
 
-        // Opcional: saltar directamente al paso de gastos
-        setStep('GASTOS_RESPALDO');
+        // Con solicitud pre-seleccionada, saltar al paso de respaldos generales
+        // para que el usuario no omita adjuntar las cotizaciones obligatorias
+        setStep('RESPALDOS_GENERALES');
       }
     }
   }, [preSelectedSolicitudId, solicitudes, form]);
@@ -80,6 +82,22 @@ export default function RendicionWizard({
       const isValid = await form.trigger(['solicitudId', 'fechaRendicion']);
       if (!isValid) {
         toast.error('Selecciona una solicitud antes de continuar');
+        return;
+      }
+      setStep('RESPALDOS_GENERALES');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (step === 'RESPALDOS_GENERALES') {
+      const isValid = await form.trigger([
+        'urlCotizaciones',
+        'urlCuadroComparativo',
+      ]);
+      if (!isValid) {
+        toast.error(
+          'Adjunta al menos una cotización válida antes de continuar'
+        );
         return;
       }
       setStep('GASTOS_RESPALDO');
@@ -104,8 +122,11 @@ export default function RendicionWizard({
   };
 
   const handleBack = () => {
-    if (step === 'GASTOS_RESPALDO') {
+    if (step === 'RESPALDOS_GENERALES') {
       setStep('SELECCION');
+      window.scrollTo(0, 0);
+    } else if (step === 'GASTOS_RESPALDO') {
+      setStep('RESPALDOS_GENERALES');
       window.scrollTo(0, 0);
     } else if (step === 'DECLARACION_JURADA') {
       setStep('GASTOS_RESPALDO');
@@ -221,6 +242,8 @@ export default function RendicionWizard({
           {step === 'SELECCION' && (
             <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
+
+          {step === 'RESPALDOS_GENERALES' && <Paso2Respaldos />}
 
           {step === 'GASTOS_RESPALDO' && (
             <Paso2Gastos solicitud={solicitudSeleccionada} />

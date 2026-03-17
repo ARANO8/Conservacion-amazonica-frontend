@@ -15,6 +15,7 @@ export type TipoDeclaracion = z.infer<typeof TipoDeclaracionEnum>;
 
 export type WizardStepRendicion =
   | 'SELECCION'
+  | 'RESPALDOS_GENERALES'
   | 'GASTOS_RESPALDO'
   | 'DECLARACION_JURADA';
 
@@ -92,6 +93,8 @@ export const CreateRendicionSchema = z.object({
     .string()
     .min(1, 'La fecha de rendición es requerida')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
+
+  // --- Paso 2: RESPALDOS_GENERALES ---
   /** URL del cuadro comparativo de cotizaciones (opcional) */
   urlCuadroComparativo: z
     .string()
@@ -102,10 +105,10 @@ export const CreateRendicionSchema = z.object({
     .array(z.string().url('La URL de la cotización no es válida'))
     .min(1, 'Debes adjuntar al menos una cotización'),
 
-  // --- Paso 2: GASTOS_RESPALDO ---
+  // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
 
-  // --- Paso 3: DECLARACION_JURADA ---
+  // --- Paso 4: DECLARACION_JURADA ---
   /** Gastos sin respaldo oficial (taxi, compras, etc.) */
   gastosSinRespaldo: z.array(GastoSinRespaldoSchema).optional(),
   /** Declaración jurada final con términos y condiciones */

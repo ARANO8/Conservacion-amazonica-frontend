@@ -8,14 +8,19 @@ const STEPS: { key: WizardStepRendicion; label: string; short: string }[] = [
     short: '1. Selección',
   },
   {
+    key: 'RESPALDOS_GENERALES',
+    label: '2. Respaldos Generales',
+    short: '2. Respaldos',
+  },
+  {
     key: 'GASTOS_RESPALDO',
-    label: '2. Comprobantes y Respaldo',
-    short: '2. Comprobantes',
+    label: '3. Comprobantes y Respaldo',
+    short: '3. Comprobantes',
   },
   {
     key: 'DECLARACION_JURADA',
-    label: '3. Declaración Jurada',
-    short: '3. Declaración',
+    label: '4. Declaración Jurada',
+    short: '4. Declaración',
   },
 ];
 
