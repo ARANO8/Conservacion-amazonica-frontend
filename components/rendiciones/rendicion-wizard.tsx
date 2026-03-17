@@ -47,6 +47,7 @@ import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
 import Paso2Respaldos from './paso2-respaldos';
 import Paso2Gastos from './paso2-gastos';
+import Paso4Informe from './paso4-informe';
 
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
@@ -148,6 +149,17 @@ export default function RendicionWizard({
         toast.error('Revisa los gastos antes de continuar');
         return;
       }
+      setStep('INFORME_GASTOS');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (step === 'INFORME_GASTOS') {
+      const isValid = await form.trigger(['informeGastos']);
+      if (!isValid) {
+        toast.error('Completa el informe de gastos antes de finalizar');
+        return;
+      }
       setIsModalOpen(true);
     }
   };
@@ -158,6 +170,9 @@ export default function RendicionWizard({
       window.scrollTo(0, 0);
     } else if (step === 'GASTOS_RESPALDO') {
       setStep('RESPALDOS_GENERALES');
+      window.scrollTo(0, 0);
+    } else if (step === 'INFORME_GASTOS') {
+      setStep('GASTOS_RESPALDO');
       window.scrollTo(0, 0);
     }
   };
@@ -241,6 +256,8 @@ export default function RendicionWizard({
       } else {
         errorMessage = 'Revisa los términos y condiciones antes de continuar';
       }
+    } else if (firstErrorField === 'informeGastos') {
+      errorMessage = 'Completa el informe de gastos antes de continuar';
     } else if (firstErrorField) {
       const fieldError = errors[firstErrorField as keyof typeof errors] as
         | FieldError
@@ -310,6 +327,8 @@ export default function RendicionWizard({
           {step === 'GASTOS_RESPALDO' && (
             <Paso2Gastos solicitud={solicitudSeleccionada} />
           )}
+
+          {step === 'INFORME_GASTOS' && <Paso4Informe />}
         </div>
 
         {/* Footer con navegación */}

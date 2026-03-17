@@ -89,6 +89,36 @@ export function adaptCreateRendicionPayload(
         })),
       }),
 
+    // Informe de gastos (Anexo 7): solo incluir si existe y tiene actividades
+    ...(data.informeGastos?.actividades &&
+      data.informeGastos.actividades.length > 0 && {
+        informeGastos: {
+          ...(data.informeGastos.fechaInicio && {
+            fechaInicio:
+              data.informeGastos.fechaInicio instanceof Date
+                ? data.informeGastos.fechaInicio.toISOString().split('T')[0]
+                : data.informeGastos.fechaInicio,
+          }),
+          ...(data.informeGastos.fechaFin && {
+            fechaFin:
+              data.informeGastos.fechaFin instanceof Date
+                ? data.informeGastos.fechaFin.toISOString().split('T')[0]
+                : data.informeGastos.fechaFin,
+          }),
+          actividades: data.informeGastos.actividades.map((actividad) => ({
+            ...(actividad.fecha && {
+              fecha:
+                actividad.fecha instanceof Date
+                  ? actividad.fecha.toISOString().split('T')[0]
+                  : actividad.fecha,
+            }),
+            lugar: actividad.lugar,
+            personaInstitucion: actividad.personaInstitucion,
+            actividadesRealizadas: actividad.actividadesRealizadas,
+          })),
+        },
+      }),
+
     // Declaración jurada: solo incluir si tiene contenido
     ...(Object.keys(declaracionJurada).length > 0 && {
       declaracionJurada,
