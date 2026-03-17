@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EstadoBadge } from '@/components/shared/estado-badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Card,
   CardContent,
@@ -37,6 +38,7 @@ import {
   ClipboardList,
   Wallet,
   Users,
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
@@ -374,12 +376,26 @@ export default function AprobacionDetailPage() {
 
       <Separator />
 
-      {/* Action Buttons */}
-      <div className="bg-background sticky bottom-0 border-t py-4">
-        <div className="mx-auto max-w-2xl">
-          <InboxActions request={solicitud} mode="buttons" />
+      {/* Action Buttons — solo cuando la solicitud sigue pendiente de acción */}
+      {solicitud.estado === 'PENDIENTE' ? (
+        <div className="bg-background sticky bottom-0 border-t py-4">
+          <div className="mx-auto max-w-2xl">
+            <InboxActions request={solicitud} mode="buttons" />
+          </div>
         </div>
-      </div>
+      ) : (
+        <Alert className="border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+          <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle className="text-amber-800 dark:text-amber-300">
+            Solicitud ya procesada
+          </AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-400">
+            Esta solicitud ya fue procesada y se encuentra en estado:{' '}
+            <span className="font-semibold">{solicitud.estado}</span>. No se
+            pueden realizar más acciones desde esta vista.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

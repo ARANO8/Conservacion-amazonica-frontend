@@ -44,9 +44,11 @@ function NotificationCard({
   notification: NotificacionBackend;
   onRead: (id: number) => void;
 }) {
-  const href = notification.solicitudId
-    ? `/app/aprobaciones/${notification.solicitudId}`
-    : (notification.urlDestino ?? '#');
+  const href =
+    notification.urlDestino ??
+    (notification.solicitudId
+      ? `/app/aprobaciones/${notification.solicitudId}`
+      : '#');
 
   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
     addSuffix: true,
@@ -105,7 +107,7 @@ function NotificationCard({
               )}
             </div>
 
-            <p className="text-muted-foreground mb-2 line-clamp-2 text-sm">
+            <p className="text-muted-foreground mb-2 line-clamp-3 text-sm">
               {notification.mensaje}
             </p>
 

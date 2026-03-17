@@ -49,10 +49,12 @@ export function NavUser() {
     if (!notification.leida) {
       await markAsRead(notification.id);
     }
-    // Navegar: preferir solicitudId para ir a la vista de detalle
-    const href = notification.solicitudId
-      ? `/app/aprobaciones/${notification.solicitudId}`
-      : (notification.urlDestino ?? '/app/aprobaciones');
+    // Navegar: usar urlDestino si está definido, sino construir la URL de detalle
+    const href =
+      notification.urlDestino ??
+      (notification.solicitudId
+        ? `/app/aprobaciones/${notification.solicitudId}`
+        : '/app/aprobaciones');
     router.push(href);
   };
 
