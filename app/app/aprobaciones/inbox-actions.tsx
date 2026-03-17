@@ -262,7 +262,7 @@ export function InboxActions({
                 htmlFor="urlComprobante"
                 className="text-sm leading-none font-medium"
               >
-                URL del Comprobante PDF{' '}
+                URL del Comprobante{' '}
                 <span className="text-muted-foreground ml-1 font-normal">
                   (opcional)
                 </span>
@@ -270,12 +270,13 @@ export function InboxActions({
               <Input
                 id="urlComprobante"
                 type="url"
-                placeholder="Ej. https://drive.google.com/file/d/..."
+                placeholder="Ej: Google Drive, OneDrive..."
                 value={urlComprobante}
                 onChange={(e) => setUrlComprobante(e.target.value)}
               />
               <p className="text-muted-foreground text-xs">
-                Enlace al PDF escaneado del comprobante de depósito.
+                Enlace al comprobante de transferencia (Google Drive, OneDrive,
+                etc.).
               </p>
             </div>
           </div>
