@@ -67,6 +67,13 @@ function getTipoDocumentoLabel(tipo: string): string {
   }
 }
 
+function parseMonetaryInput(value: string): number {
+  if (!value) return 0;
+  const normalized = value.replace(',', '.');
+  const parsed = Number.parseFloat(normalized);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 // ---------------------------------------------------------------------------
 // Sub-componente: Grid de Partidas Aprobadas
 // ---------------------------------------------------------------------------
@@ -507,12 +514,11 @@ function ComprobanteCard({
                   placeholder="0.00"
                   step="0.01"
                   min="0"
+                  inputMode="decimal"
                   className="h-9 text-sm"
                   {...field}
                   onChange={(e) =>
-                    field.onChange(
-                      e.target.value ? parseFloat(e.target.value) : 0
-                    )
+                    field.onChange(parseMonetaryInput(e.target.value))
                   }
                 />
               </FormControl>
@@ -613,6 +619,7 @@ function ComprobanteCard({
                     <FormControl>
                       <Input
                         type="number"
+                        step="0.01"
                         readOnly
                         tabIndex={-1}
                         className="bg-background h-8 w-32 cursor-not-allowed text-right text-sm font-bold"
