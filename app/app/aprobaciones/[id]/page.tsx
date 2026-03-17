@@ -9,6 +9,7 @@ import { InboxActions } from '../inbox-actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { EstadoBadge } from '@/components/shared/estado-badge';
 import {
   Card,
   CardContent,
@@ -40,6 +41,7 @@ import {
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapResponseToBreakdown } from '@/lib/mappers/breakdown-mapper';
+import { formatMoney, formatDateShort } from '@/lib/utils';
 
 export default function AprobacionDetailPage() {
   const params = useParams();
@@ -87,47 +89,6 @@ export default function AprobacionDetailPage() {
     };
   }, [id, router]);
 
-  const formatCurrency = (value: number | string) => {
-    return new Intl.NumberFormat('es-BO', {
-      style: 'currency',
-      currency: 'BOB',
-    }).format(Number(value));
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '-';
-    return new Intl.DateTimeFormat('es-BO', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(date);
-  };
-
-  const getEstadoBadge = (estado: string) => {
-    const variants: Record<string, string> = {
-      PENDIENTE:
-        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-      APROBADO:
-        'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-      RECHAZADO: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-      OBSERVADO:
-        'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-    };
-
-    return (
-      <Badge
-        variant="outline"
-        className={
-          variants[estado] ||
-          'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400'
-        }
-      >
-        {estado}
-      </Badge>
-    );
-  };
-
   if (loading) {
     return (
       <div className="space-y-6 p-6">
@@ -167,7 +128,7 @@ export default function AprobacionDetailPage() {
               <h1 className="text-2xl font-bold tracking-tight">
                 {solicitud.codigoSolicitud}
               </h1>
-              {getEstadoBadge(solicitud.estado)}
+              <EstadoBadge estado={solicitud.estado} />
             </div>
             <p className="text-muted-foreground">
               Revisa los detalles antes de tomar una decisión.
@@ -207,11 +168,11 @@ export default function AprobacionDetailPage() {
           <CardContent>
             <div className="text-lg font-semibold">
               {solicitud.fechaInicio
-                ? `${formatDate(solicitud.fechaInicio)} - ${formatDate(solicitud.fechaFin || solicitud.fechaInicio)}`
-                : formatDate(solicitud.fechaSolicitud)}
+                ? `${formatDateShort(solicitud.fechaInicio)} - ${formatDateShort(solicitud.fechaFin || solicitud.fechaInicio)}`
+                : formatDateShort(solicitud.fechaSolicitud)}
             </div>
             <p className="text-muted-foreground text-xs">
-              Solicitado: {formatDate(solicitud.fechaSolicitud)}
+              Solicitado: {formatDateShort(solicitud.fechaSolicitud)}
             </p>
           </CardContent>
         </Card>
@@ -235,10 +196,10 @@ export default function AprobacionDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-lg font-semibold text-emerald-600">
-              {formatCurrency(solicitud.montoTotalNeto)}
+              {formatMoney(solicitud.montoTotalNeto)}
             </div>
             <p className="text-muted-foreground text-xs">
-              Presupuestado: {formatCurrency(solicitud.montoTotalPresupuestado)}
+              Presupuestado: {formatMoney(solicitud.montoTotalPresupuestado)}
             </p>
           </CardContent>
         </Card>
@@ -295,8 +256,8 @@ export default function AprobacionDetailPage() {
                       {plan.actividadProgramada}
                     </TableCell>
                     <TableCell>
-                      {formatDate(plan.fechaInicio)} -{' '}
-                      {formatDate(plan.fechaFin)}
+                      {formatDateShort(plan.fechaInicio)} -{' '}
+                      {formatDateShort(plan.fechaFin)}
                     </TableCell>
                     <TableCell className="text-center">
                       {plan.diasCalculados ?? '-'}
@@ -396,7 +357,7 @@ export default function AprobacionDetailPage() {
             <div>
               <p className="text-muted-foreground text-sm">Total liquido</p>
               <p className="text-2xl font-bold text-emerald-600">
-                {formatCurrency(solicitud.montoTotalNeto)}
+                {formatMoney(solicitud.montoTotalNeto)}
               </p>
             </div>
             <div className="text-right">
@@ -404,7 +365,7 @@ export default function AprobacionDetailPage() {
                 Total Presupuestado (Incl. Impuestos)
               </p>
               <p className="text-2xl font-bold">
-                {formatCurrency(solicitud.montoTotalPresupuestado)}
+                {formatMoney(solicitud.montoTotalPresupuestado)}
               </p>
             </div>
           </div>

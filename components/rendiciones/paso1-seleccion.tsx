@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/command';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { FieldGroup, FieldSet, FieldLegend } from '@/components/ui/field';
+import { EstadoBadge } from '@/components/shared/estado-badge';
 import {
   CalendarDays,
   Check,
@@ -35,45 +36,9 @@ import {
   Banknote,
 } from 'lucide-react';
 
-import { cn, formatMoney } from '@/lib/utils';
+import { cn, formatMoney, formatDateShort } from '@/lib/utils';
 import { CreateRendicionInput } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function formatFecha(iso?: string | null): string {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-BO', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-function estadoBadgeProps(estado: string): {
-  label: string;
-  className: string;
-} {
-  switch (estado?.toUpperCase()) {
-    case 'DESEMBOLSADO':
-      return {
-        label: 'Desembolsado',
-        className: 'border-emerald-200 bg-emerald-100 text-emerald-800',
-      };
-    case 'APROBADO':
-      return {
-        label: 'Aprobado',
-        className: 'border-blue-200 bg-blue-100 text-blue-800',
-      };
-    default:
-      return {
-        label: estado ?? 'Desconocido',
-        className: 'border-border bg-muted text-muted-foreground',
-      };
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Card de resumen de la solicitud seleccionada
@@ -84,7 +49,6 @@ interface SolicitudResumenCardProps {
 }
 
 function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
-  const badge = estadoBadgeProps(solicitud.estado);
   const montoAnticipado = Number(solicitud.montoTotalNeto ?? 0);
 
   return (
@@ -97,12 +61,10 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
               {solicitud.codigoSolicitud}
             </CardTitle>
           </div>
-          <Badge
-            variant="outline"
-            className={cn('text-[10px] font-bold uppercase', badge.className)}
-          >
-            {badge.label}
-          </Badge>
+          <EstadoBadge
+            estado={solicitud.estado}
+            className="text-[10px] font-bold uppercase"
+          />
         </div>
       </CardHeader>
 
@@ -136,9 +98,9 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
             Período
           </span>
           <p className="text-foreground text-sm font-medium">
-            {formatFecha(solicitud.fechaInicio)}
+            {formatDateShort(solicitud.fechaInicio)}
             {' → '}
-            {formatFecha(solicitud.fechaFin)}
+            {formatDateShort(solicitud.fechaFin)}
           </p>
         </div>
 
@@ -313,16 +275,7 @@ export default function Paso1Seleccion({
               <FormItem>
                 <span className="text-sm font-medium">Fecha de Rendición</span>
                 <FormControl>
-                  <input
-                    type="date"
-                    className={cn(
-                      'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                      'focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2',
-                      'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                      'disabled:cursor-not-allowed disabled:opacity-50'
-                    )}
-                    {...field}
-                  />
+                  <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

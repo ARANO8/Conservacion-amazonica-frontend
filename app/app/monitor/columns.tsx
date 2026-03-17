@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
+import { EstadoBadge } from '@/components/shared/estado-badge';
+import { formatDateShort } from '@/lib/utils';
 
 /**
  * Columnas para el Monitor de Solicitudes (solo lectura).
@@ -49,19 +51,7 @@ export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
     id: 'fecha',
     header: 'Fecha',
     accessorFn: (row) => row.fechaSolicitud,
-    cell: ({ row }) => {
-      const value = row.original.fechaSolicitud;
-      if (!value) return '-';
-
-      const date = new Date(value);
-      if (isNaN(date.getTime())) return '-';
-
-      return new Intl.DateTimeFormat('es-BO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }).format(date);
-    },
+    cell: ({ row }) => formatDateShort(row.original.fechaSolicitud),
   },
   {
     id: 'aprobador',
@@ -72,52 +62,9 @@ export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
   {
     accessorKey: 'estado',
     header: 'Estado',
-    cell: ({ row }) => {
-      const estado = (row.original.estado as string) || '';
-
-      const variants: Record<string, string> = {
-        PENDIENTE:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        PENDING:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        REVIEW_SUPERVISOR:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        REVIEW_DIRECTOR:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        REVIEW_FINANCE:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        APPROVED:
-          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        APROBADO:
-          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        DISBURSED:
-          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        COMPLETED:
-          'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-800',
-        REJECTED:
-          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
-        RECHAZADO:
-          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
-        OBSERVADO:
-          'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/40 border-amber-200 dark:border-amber-800',
-        DRAFT:
-          'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-zinc-200 dark:border-zinc-700',
-        BORRADOR:
-          'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-zinc-200 dark:border-zinc-700',
-      };
-
-      return (
-        <Badge
-          variant="outline"
-          className={
-            variants[estado] ||
-            'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400'
-          }
-        >
-          {estado}
-        </Badge>
-      );
-    },
+    cell: ({ row }) => (
+      <EstadoBadge estado={(row.original.estado as string) || ''} />
+    ),
   },
   {
     id: 'verDetalle',

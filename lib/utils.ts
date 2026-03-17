@@ -24,6 +24,19 @@ export function formatDate(date: string | Date): string {
   }).format(dateObj);
 }
 
+export function formatDateShort(
+  date: string | Date | null | undefined
+): string {
+  if (!date) return '-';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '-';
+  return new Intl.DateTimeFormat('es-BO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(d);
+}
+
 export function normalizeString(text?: string | null): string {
   if (!text) return '';
   return text

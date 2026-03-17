@@ -7,6 +7,8 @@ import { SolicitudResponse } from '@/types/solicitud-backend';
 import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { DownloadPdfButton } from '@/components/solicitudes/download-pdf-button';
+import { EstadoBadge } from '@/components/shared/estado-badge';
+import { formatMoney, formatDateShort } from '@/lib/utils';
 
 export const columns: ColumnDef<SolicitudResponse>[] = [
   {
@@ -41,19 +43,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     id: 'fecha',
     header: 'Fecha Solicitud',
     accessorFn: (row) => row.fechaSolicitud,
-    cell: ({ row }) => {
-      const value = row.original.fechaSolicitud;
-      if (!value) return '-';
-
-      const date = new Date(value);
-      if (isNaN(date.getTime())) return '-';
-
-      return new Intl.DateTimeFormat('es-BO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }).format(date);
-    },
+    cell: ({ row }) => formatDateShort(row.original.fechaSolicitud),
   },
   {
     id: 'solicitante',
@@ -63,49 +53,18 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
   {
     id: 'montoNeto',
     header: () => <div className="text-right">Monto Neto</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.montoTotalNeto || 0);
-      const formatted = new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
+    cell: ({ row }) => (
+      <div className="text-right font-medium">
+        {formatMoney(Number(row.original.montoTotalNeto || 0))}
+      </div>
+    ),
   },
   {
     accessorKey: 'estado',
     header: 'Estado',
-    cell: ({ row }) => {
-      const estado = (row.original.estado as string) || '';
-
-      const variants: Record<string, string> = {
-        PENDIENTE:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        PENDING:
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800',
-        APPROVED:
-          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        APROBADO:
-          'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
-        REJECTED:
-          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
-        RECHAZADO:
-          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 border-red-200 dark:border-red-800',
-      };
-
-      return (
-        <Badge
-          variant="outline"
-          className={
-            variants[estado] ||
-            'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400'
-          }
-        >
-          {estado}
-        </Badge>
-      );
-    },
+    cell: ({ row }) => (
+      <EstadoBadge estado={(row.original.estado as string) || ''} />
+    ),
   },
   {
     id: 'revisar',

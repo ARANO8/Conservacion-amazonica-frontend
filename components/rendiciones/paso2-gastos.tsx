@@ -19,13 +19,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { FieldGroup, FieldSet, FieldLegend } from '@/components/ui/field';
 import {
   CreateRendicionInput,
   TipoDocumentoGastoEnum,
 } from '@/types/rendicion-schema';
-import { cn, formatMoney } from '@/lib/utils';
+import { formatMoney } from '@/lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
@@ -138,14 +139,9 @@ export default function Paso2Gastos() {
                             Fecha
                           </FormLabel>
                           <FormControl>
-                            <input
+                            <Input
                               type="date"
-                              className={cn(
-                                'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                                'focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-2',
-                                'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                                'disabled:cursor-not-allowed disabled:opacity-50'
-                              )}
+                              className="h-9"
                               value={
                                 typeof field.value === 'string'
                                   ? field.value
@@ -247,14 +243,9 @@ export default function Paso2Gastos() {
                           Concepto / Detalle *
                         </FormLabel>
                         <FormControl>
-                          <textarea
+                          <Textarea
                             placeholder="Describe el gasto realizado (requerido)"
-                            className={cn(
-                              'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                              'focus-visible:ring-ring flex min-h-16 w-full rounded-md border px-3 py-2',
-                              'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                              'resize-none disabled:cursor-not-allowed disabled:opacity-50'
-                            )}
+                            className="min-h-16 resize-none text-sm"
                             {...field}
                           />
                         </FormControl>

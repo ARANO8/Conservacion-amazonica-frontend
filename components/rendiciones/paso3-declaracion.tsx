@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { FieldGroup, FieldSet, FieldLegend } from '@/components/ui/field';
@@ -115,14 +116,9 @@ export default function Paso3Declaracion() {
                               Fecha del Egreso
                             </FormLabel>
                             <FormControl>
-                              <input
+                              <Input
                                 type="date"
-                                className={cn(
-                                  'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                                  'focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-2',
-                                  'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                                  'disabled:cursor-not-allowed disabled:opacity-50'
-                                )}
+                                className="h-9"
                                 value={
                                   typeof field.value === 'string'
                                     ? field.value
@@ -180,14 +176,9 @@ export default function Paso3Declaracion() {
                             Detalle del Egreso *
                           </FormLabel>
                           <FormControl>
-                            <textarea
+                            <Textarea
                               placeholder="Describe el gasto realizado (ej: pasaje de taxi, compras en mercado, etc.)"
-                              className={cn(
-                                'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                                'focus-visible:ring-ring flex min-h-16 w-full rounded-md border px-3 py-2',
-                                'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                                'resize-none disabled:cursor-not-allowed disabled:opacity-50'
-                              )}
+                              className="min-h-16 resize-none text-sm"
                               {...field}
                             />
                           </FormControl>
@@ -342,14 +333,9 @@ export default function Paso3Declaracion() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <textarea
+                  <Textarea
                     placeholder="Agrega cualquier observación o comentario adicional sobre tu rendición..."
-                    className={cn(
-                      'border-input bg-background ring-offset-background placeholder:text-muted-foreground',
-                      'focus-visible:ring-ring flex min-h-20 w-full rounded-md border px-3 py-2',
-                      'text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-                      'resize-none disabled:cursor-not-allowed disabled:opacity-50'
-                    )}
+                    className="min-h-20 resize-none text-sm"
                     {...field}
                   />
                 </FormControl>
