@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 
 import { DynamicBreadcrumbs } from '@/components/dynamic-breadcrumbs';
 import { NotificacionesPollingProvider } from '@/components/layout/notificaciones-polling-provider';
+import { AuthExpiredListener } from '@/components/auth/auth-expired-listener';
 
 export default async function AppLayout({
   children,
@@ -21,6 +22,7 @@ export default async function AppLayout({
 
   return (
     <NotificacionesPollingProvider>
+      <AuthExpiredListener />
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
         <SidebarInset>

@@ -1,9 +1,9 @@
 import api from '@/lib/api';
 import { CreateSolicitudPayload } from '@/types/solicitud-backend';
-import Cookies from 'js-cookie';
 
 /**
  * Service to handle Solicitudes related API calls.
+ * El token Bearer es inyectado automáticamente por el interceptor de `api` (lib/api.ts).
  */
 export const solicitudesService = {
   /**
@@ -11,16 +11,7 @@ export const solicitudesService = {
    * @param payload The adapted form data for the backend.
    */
   async createSolicitud(payload: CreateSolicitudPayload) {
-    // Explicitly read the token from cookies as requested by the user
-    // to guarantee it travels in this critical POST.
-    const token = Cookies.get('token');
-
-    const response = await api.post('/solicitudes', payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+    const response = await api.post('/solicitudes', payload);
     return response.data;
   },
 
@@ -51,12 +42,7 @@ export const solicitudesService = {
     id: number | string,
     payload: Partial<CreateSolicitudPayload>
   ) {
-    const token = Cookies.get('token');
-    const response = await api.patch(`/solicitudes/${id}`, payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.patch(`/solicitudes/${id}`, payload);
     return response.data;
   },
 
@@ -70,16 +56,10 @@ export const solicitudesService = {
     codigoDesembolso: string,
     urlComprobante?: string
   ) {
-    const token = Cookies.get('token');
-    const response = await api.patch(
-      `/solicitudes/${id}/desembolsar`,
-      { codigoDesembolso, ...(urlComprobante ? { urlComprobante } : {}) },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await api.patch(`/solicitudes/${id}/desembolsar`, {
+      codigoDesembolso,
+      ...(urlComprobante ? { urlComprobante } : {}),
+    });
     return response.data;
   },
 
@@ -99,16 +79,7 @@ export const solicitudesService = {
    * @param id The ID of the solicitud to mark as executed.
    */
   async marcarEjecutada(id: string | number) {
-    const token = Cookies.get('token');
-    const response = await api.patch(
-      `/solicitudes/${id}/ejecutar`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await api.patch(`/solicitudes/${id}/ejecutar`, {});
     return response.data;
   },
 };

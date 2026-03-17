@@ -30,10 +30,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Logout automático si el token es inválido o expiró
+      // 1. Limpiar estado de autenticación en el store (elimina cookie + localStorage)
       useAuthStore.getState().logout();
+      // 2. Emitir evento para que el layout protegido redirija con router.push
+      //    (evita full-page refresh de window.location.href)
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        window.dispatchEvent(new Event('auth-expired'));
       }
     }
     return Promise.reject(error);

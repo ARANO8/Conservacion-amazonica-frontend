@@ -49,16 +49,12 @@ export type GastoRendicion = z.infer<typeof GastoRendicionSchema>;
 export const DeclaracionJuradaSchema = z.object({
   tipoDeclaracion: TipoDeclaracionEnum.optional(),
   /** El usuario confirma que los gastos declarados son reales */
-  confirmaDatosVeridicos: z.literal(true, {
-    errorMap: () => ({
-      message: 'Debes confirmar que los datos son verídicos',
-    }),
+  confirmaDatosVeridicos: z.boolean().refine((val) => val === true, {
+    message: 'Debes confirmar que los datos son verídicos',
   }),
   /** El usuario acepta la política de devolución de saldos */
-  aceptaPoliticaDevolucion: z.literal(true, {
-    errorMap: () => ({
-      message: 'Debes aceptar la política de devolución de saldos',
-    }),
+  aceptaPoliticaDevolucion: z.boolean().refine((val) => val === true, {
+    message: 'Debes aceptar la política de devolución de saldos',
   }),
   /** Monto que el usuario declara devolver (si tipoDeclaracion !== 'COMPLETA') */
   montoADevolver: z.number().min(0).optional(),
@@ -120,8 +116,8 @@ export const defaultRendicionValues: CreateRendicionInput = {
   observaciones: '',
   declaracionJurada: {
     tipoDeclaracion: undefined,
-    confirmaDatosVeridicos: false as unknown as true,
-    aceptaPoliticaDevolucion: false as unknown as true,
+    confirmaDatosVeridicos: false,
+    aceptaPoliticaDevolucion: false,
     montoADevolver: undefined,
     observaciones: '',
   },
