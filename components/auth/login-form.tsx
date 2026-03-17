@@ -50,7 +50,7 @@ export function LoginForm({
     setFormRootError(null);
     try {
       await login(data);
-      router.push('/dashboard');
+      router.push('/app/inicio');
     } catch (error) {
       // Manejar error de NestJS: { message: string | string[], statusCode: number }
       // O error genérico de conexión

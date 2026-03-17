@@ -27,9 +27,9 @@ export default function RendicionDetailPage() {
         const data = await rendicionesService.getRendicionById(id);
         setRendicion(data);
       } catch (error) {
-        console.error('Error fetching rendición:', error);
+        void error;
         toast.error('No se pudo cargar la rendición.');
-        router.push('/dashboard/requests');
+        router.push('/app/solicitudes');
       } finally {
         setLoading(false);
       }
@@ -56,7 +56,7 @@ export default function RendicionDetailPage() {
           No se encontró la rendición solicitada.
         </p>
         <Button asChild variant="link" className="mt-4">
-          <Link href="/dashboard/requests">Volver</Link>
+          <Link href="/app/solicitudes">Volver</Link>
         </Button>
       </div>
     );

@@ -11,15 +11,13 @@ import { Separator } from '@/components/ui/separator';
 import { DynamicBreadcrumbs } from '@/components/dynamic-breadcrumbs';
 import { NotificacionesPollingProvider } from '@/components/layout/notificaciones-polling-provider';
 
-export default async function DashboardLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
-  // Si necesitas validar sesión para renderizar algo condicionalmente, hazlo aquí.
-  // Por ahora, el middleware ya protege la ruta, así que podemos renderizar directamente.
 
   return (
     <NotificacionesPollingProvider>

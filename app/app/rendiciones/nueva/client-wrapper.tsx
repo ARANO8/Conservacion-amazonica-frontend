@@ -38,9 +38,6 @@ export function NuevaRendicionClientWrapper() {
         const todas: SolicitudResponse[] =
           await solicitudesService.getSolicitudes();
 
-        console.log('Total solicitudes del backend:', todas.length);
-        console.log('ID del usuario autenticado:', user.id);
-
         // Filtrar: solo las del usuario autenticado que ya fueron desembolsadas
         const desembolsadas = todas.filter((s) => {
           const esDesembolsado = s.estado === 'DESEMBOLSADO';
@@ -50,28 +47,8 @@ export function NuevaRendicionClientWrapper() {
             String(s.usuario?.id) === String(user.id) ||
             String(s.usuarioEmisor?.id) === String(user.id);
 
-          // Log para debugging
-          if (esDesembolsado || esDelUsuario) {
-            console.log('Solicitud evaluada:', {
-              id: s.id,
-              codigo: s.codigoSolicitud,
-              estado: s.estado,
-              usuarioEmisorId: s.usuarioEmisorId,
-              usuarioId: s.usuarioId,
-              usuarioEmisornombre: s.usuarioEmisor?.nombreCompleto,
-              usuarioNombre: s.usuario?.nombreCompleto,
-              cumpleEstado: esDesembolsado,
-              cumpleUsuario: esDelUsuario,
-            });
-          }
-
           return esDesembolsado && esDelUsuario;
         });
-
-        console.log(
-          'Solicitudes desembolsadas filtradas:',
-          desembolsadas.length
-        );
 
         setSolicitudes(desembolsadas);
 
@@ -82,11 +59,7 @@ export function NuevaRendicionClientWrapper() {
 
           if (solicitudExiste) {
             setPreSelectedSolicitudId(idParam);
-            console.log(`Solicitud pre-seleccionada: ${idParam}`);
           } else {
-            console.warn(
-              `Solicitud con ID ${idParam} no encontrada en las desembolsadas`
-            );
             toast.warning(
               'La solicitud especificada no está disponible o no ha sido desembolsada.'
             );
@@ -99,7 +72,6 @@ export function NuevaRendicionClientWrapper() {
           );
         }
       } catch (error: unknown) {
-        console.error('Error al cargar solicitudes:', error);
         const errorMessage =
           error instanceof Error
             ? error.message

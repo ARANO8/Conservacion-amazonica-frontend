@@ -14,7 +14,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     header: 'Código',
     cell: ({ row }) => {
       return (
-        <Link href={`/dashboard/inbox/${row.original.id}`}>
+        <Link href={`/app/aprobaciones/${row.original.id}`}>
           <Badge
             variant="outline"
             className="hover:bg-muted cursor-pointer font-medium"
@@ -112,7 +112,7 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     header: 'Acciones',
     cell: ({ row }) => (
       <Button asChild variant="ghost" size="sm">
-        <Link href={`/dashboard/solicitud/${row.original.id}?source=inbox`}>
+        <Link href={`/app/solicitudes/${row.original.id}?source=aprobaciones`}>
           <Eye className="mr-2 h-4 w-4" />
           Revisar
         </Link>

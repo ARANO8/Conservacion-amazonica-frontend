@@ -59,9 +59,6 @@ export default function RendicionWizard({
 
         // Opcional: saltar directamente al paso de gastos
         setStep('GASTOS_RESPALDO');
-        console.log(
-          `Solicitud pre-seleccionada y wizard saltó al paso GASTOS_RESPALDO`
-        );
       }
     }
   }, [preSelectedSolicitudId, solicitudes, form]);
@@ -116,7 +113,6 @@ export default function RendicionWizard({
     const isValid = await form.trigger();
     if (!isValid) {
       const errors = form.formState.errors;
-      console.error('Errores de validación:', errors);
 
       // Mostrar el primer error encontrado al usuario
       const firstErrorField = Object.keys(errors)[0];
@@ -150,29 +146,22 @@ export default function RendicionWizard({
       const data = form.getValues();
       const solicitudId = data.solicitudId;
 
-      console.log('Payload que se envía:', JSON.stringify(data, null, 2));
-
       // Paso 1: Crear la rendición en el backend
-      const rendicionResponse = await rendicionesService.createRendicion(data);
-      console.log('Rendición creada:', rendicionResponse);
+      await rendicionesService.createRendicion(data);
 
       toast.success('Rendición enviada correctamente');
 
       // Paso 2: Intentar marcar la solicitud como EJECUTADA (es opcional)
       try {
         await solicitudesService.marcarEjecutada(solicitudId);
-        console.log('Solicitud marcada como EJECUTADA');
       } catch (markError) {
-        console.warn(
-          'No se pudo marcar la solicitud como EJECUTADA (endpoint no implementado aún)',
-          markError
-        );
+        void markError;
         // No es crítico si esto falla - la rendición ya fue creada exitosamente
       }
 
-      // Paso 3: Redirigir al dashboard
+      // Paso 3: Redirigir al inicio
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/app/inicio');
       }, 1000);
     } catch (error: unknown) {
       let message = 'Error al enviar la rendición';
@@ -203,7 +192,6 @@ export default function RendicionWizard({
         message = error.message;
       }
 
-      console.error('Error en handleSubmit:', { error, statusCode });
       toast.error(message);
     } finally {
       setLoading(false);

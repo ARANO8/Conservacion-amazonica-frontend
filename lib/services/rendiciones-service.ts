@@ -17,7 +17,6 @@ export const rendicionesService = {
 
     // Adaptar el payload al formato exacto que espera el backend
     const adaptedPayload = adaptCreateRendicionPayload(payload);
-    console.log('Payload adaptado:', JSON.stringify(adaptedPayload, null, 2));
 
     try {
       const response = await api.post('/rendiciones', adaptedPayload, {
@@ -28,22 +27,8 @@ export const rendicionesService = {
 
       return response.data;
     } catch (error) {
-      // Log completo del error para debugging
-      if (axios.isAxiosError(error)) {
-        console.error('Error de Axios en createRendicion:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          message: error.message,
-        });
-      }
-
       // Si el error es 404 en /rendiciones, intentar con ruta alternativa
       if (axios.isAxiosError(error) && error.response?.status === 404) {
-        console.warn(
-          'Endpoint /rendiciones no encontrado (404). Intentando ruta alternativa...'
-        );
-
         try {
           // Intentar con ruta alternativa: POST a /solicitudes/:id/rendiciones
           const response = await api.post(
@@ -58,7 +43,6 @@ export const rendicionesService = {
 
           return response.data;
         } catch (altError) {
-          console.error('Error en ruta alternativa también:', altError);
           throw altError;
         }
       }

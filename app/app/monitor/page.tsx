@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Activity } from 'lucide-react';
 
-export default function MonitorSolicitudesPage() {
+export default function MonitorPage() {
   const [data, setData] = useState<SolicitudResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +17,6 @@ export default function MonitorSolicitudesPage() {
     const fetchAll = async () => {
       try {
         setLoading(true);
-        // El backend devuelve TODAS las solicitudes para TESORERO/ADMIN
         const response = await solicitudesService.getSolicitudes();
         setData(response);
       } catch {

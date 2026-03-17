@@ -24,7 +24,7 @@ export function RendicionSolicitudSection({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/dashboard/solicitud/${solicitud.id}`)}
+            onClick={() => router.push(`/app/solicitudes/${solicitud.id}`)}
           >
             Ver detalles
             <ArrowRight className="ml-2 h-4 w-4" />

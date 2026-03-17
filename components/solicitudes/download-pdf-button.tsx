@@ -30,8 +30,7 @@ export function DownloadPdfButton({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       toast.success('Documento PDF descargado correctamente.');
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
+    } catch {
       toast.error('No se pudo descargar el documento PDF.');
     } finally {
       setIsLoading(false);

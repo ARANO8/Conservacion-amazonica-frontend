@@ -23,10 +23,8 @@ export default function RequestsPage() {
 
       try {
         setLoading(true);
-        // Traemos las solicitudes y filtramos las creadas por el usuario
         const response = await solicitudesService.getSolicitudes();
 
-        // Filtrado: Mis creaciones (Salientes)
         const outgoing = response.filter(
           (s: SolicitudResponse) =>
             String(s.usuarioEmisorId) === String(user.id) ||
@@ -57,7 +55,7 @@ export default function RequestsPage() {
           </p>
         </div>
         <Button asChild className="bg-primary hover:bg-primary/90">
-          <Link href="/dashboard/solicitud">Nueva Solicitud</Link>
+          <Link href="/app/solicitudes/nueva">Nueva Solicitud</Link>
         </Button>
       </div>
 

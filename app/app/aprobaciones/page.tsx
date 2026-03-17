@@ -45,7 +45,7 @@ function NotificationCard({
   onRead: (id: number) => void;
 }) {
   const href = notification.solicitudId
-    ? `/dashboard/inbox/${notification.solicitudId}`
+    ? `/app/aprobaciones/${notification.solicitudId}`
     : (notification.urlDestino ?? '#');
 
   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
@@ -147,7 +147,7 @@ function NotificationSkeleton() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function InboxPage() {
+export default function AprobacionesPage() {
   const {
     notificaciones,
     isLoading,

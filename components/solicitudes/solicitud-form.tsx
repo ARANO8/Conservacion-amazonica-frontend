@@ -262,7 +262,7 @@ export default function SolicitudForm({
         toast.success('Solicitud enviada exitosamente');
       }
 
-      router.push('/dashboard/requests');
+      router.push('/app/solicitudes');
     } catch (error: unknown) {
       toast.error('Error al enviar la solicitud');
       let errorMessage = 'Ocurrió un error al procesar la solicitud';

@@ -98,7 +98,7 @@ export function InboxActions({
       setIsApproveOpen(false);
       setNuevoAprobadorId('');
       if (mode === 'buttons') {
-        router.push('/dashboard/inbox');
+        router.push('/app/aprobaciones');
       } else {
         router.refresh();
       }
@@ -128,7 +128,7 @@ export function InboxActions({
       setCodigoDesembolso('');
       setUrlComprobante('');
       if (mode === 'buttons') {
-        router.push('/dashboard/inbox');
+        router.push('/app/aprobaciones');
       } else {
         router.refresh();
       }
@@ -155,7 +155,7 @@ export function InboxActions({
       setIsObserveOpen(false);
       setObservacion('');
       if (mode === 'buttons') {
-        router.push('/dashboard/inbox');
+        router.push('/app/aprobaciones');
       } else {
         router.refresh();
       }
@@ -180,7 +180,7 @@ export function InboxActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link
-            href={`/dashboard/inbox/${request.id}`}
+            href={`/app/aprobaciones/${request.id}`}
             className="flex items-center"
           >
             <Download className="mr-2 h-4 w-4" />
@@ -231,7 +231,6 @@ export function InboxActions({
   // ── Modal content: Derivar vs Desembolsar ──
   const renderApproveModalContent = () => {
     if (isTesorero) {
-      // ── TESORERO: Formulario de desembolso ──
       return (
         <DialogContent>
           <DialogHeader>
@@ -304,7 +303,6 @@ export function InboxActions({
       );
     }
 
-    // ── ADMIN / otros: Formulario de derivación ──
     return (
       <DialogContent>
         <DialogHeader>

@@ -37,7 +37,7 @@ export default function Page() {
               </CardHeader>
               <CardFooter>
                 <Button asChild>
-                  <Link href="/dashboard/revision?role=approver">
+                  <Link href="/app/aprobaciones?role=approver">
                     Ir a Revisión
                   </Link>
                 </Button>
@@ -55,7 +55,7 @@ export default function Page() {
               </CardHeader>
               <CardFooter>
                 <Button asChild>
-                  <Link href="/dashboard/solicitud">Crear solicitud</Link>
+                  <Link href="/app/solicitudes/nueva">Crear solicitud</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -69,9 +69,7 @@ export default function Page() {
               </CardHeader>
               <CardFooter>
                 <Button asChild>
-                  <Link href="/dashboard/rendiciones/nueva">
-                    Cargar rendición
-                  </Link>
+                  <Link href="/app/rendiciones/nueva">Cargar rendición</Link>
                 </Button>
               </CardFooter>
             </Card>

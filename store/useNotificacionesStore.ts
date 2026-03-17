@@ -34,7 +34,6 @@ export const useNotificacionesStore = create<NotificacionesState>(
           const errorMsg =
             error instanceof Error ? error.message : 'Error desconocido';
           set({ error: errorMsg, isLoading: false });
-          console.error('Error fetching notifications:', error);
         }
       },
 
@@ -46,8 +45,8 @@ export const useNotificacionesStore = create<NotificacionesState>(
           const count =
             await notificacionesService.getCountNotificacionesNoLeidas();
           set({ noLeidas: count });
-        } catch (error) {
-          console.error('Error fetching unread count:', error);
+        } catch {
+          // conteo silencioso — no interrumpir la UI
         }
       },
 
@@ -65,8 +64,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
             ),
             noLeidas: Math.max(0, state.noLeidas - 1),
           }));
-        } catch (error) {
-          console.error('Error marking notification as read:', error);
+        } catch {
           toast.error('No se pudo marcar la notificación como leída');
         }
       },
@@ -88,8 +86,7 @@ export const useNotificacionesStore = create<NotificacionesState>(
           }));
 
           toast.success('Todas las notificaciones marcadas como leídas');
-        } catch (error) {
-          console.error('Error marking all notifications as read:', error);
+        } catch {
           toast.error('No se pudieron marcar todas las notificaciones');
         }
       },

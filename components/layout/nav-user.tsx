@@ -51,8 +51,8 @@ export function NavUser() {
     }
     // Navegar: preferir solicitudId para ir a la vista de detalle
     const href = notification.solicitudId
-      ? `/dashboard/inbox/${notification.solicitudId}`
-      : (notification.urlDestino ?? '/dashboard/inbox');
+      ? `/app/aprobaciones/${notification.solicitudId}`
+      : (notification.urlDestino ?? '/app/aprobaciones');
     router.push(href);
   };
 
@@ -158,7 +158,7 @@ export function NavUser() {
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/inbox" className="cursor-pointer">
+                <Link href="/app/aprobaciones" className="cursor-pointer">
                   Ver todas las notificaciones
                 </Link>
               </DropdownMenuItem>

@@ -26,7 +26,7 @@ export default function EditSolicitudPage() {
 
         if (solicitud.estado !== 'OBSERVADO') {
           toast.error('Solo se pueden editar solicitudes observadas');
-          router.push('/dashboard/requests');
+          router.push('/app/solicitudes');
           return;
         }
 
@@ -34,7 +34,7 @@ export default function EditSolicitudPage() {
         setInitialData(formData);
       } catch (error) {
         toast.error('Error al cargar la solicitud');
-        router.push('/dashboard/requests');
+        router.push('/app/solicitudes');
       } finally {
         setLoading(false);
       }

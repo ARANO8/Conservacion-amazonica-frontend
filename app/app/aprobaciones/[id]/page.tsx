@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
-import { InboxActions } from '@/app/dashboard/inbox/inbox-actions';
+import { InboxActions } from '../inbox-actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,25 +36,16 @@ import {
   ClipboardList,
   Wallet,
   Users,
-  Landmark,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapResponseToBreakdown } from '@/lib/mappers/breakdown-mapper';
-import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
 
-export default function SolicitudDetailPage() {
+export default function AprobacionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [solicitud, setSolicitud] = useState<SolicitudResponse | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Determine source and permissions
-  const source = searchParams.get('source') || 'requests';
-  const canApprove = source === 'inbox';
-  const backUrl =
-    source === 'inbox' ? '/dashboard/inbox' : '/dashboard/requests';
 
   const breakdownPartidas = React.useMemo(() => {
     return solicitud ? mapResponseToBreakdown(solicitud) : [];
@@ -63,34 +54,38 @@ export default function SolicitudDetailPage() {
   const id = params.id as string;
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchSolicitud = async () => {
       if (!id) return;
 
       try {
         setLoading(true);
         const data = await solicitudesService.getSolicitudById(id);
+        if (!mounted) return;
         setSolicitud(data);
       } catch {
+        if (!mounted) return;
         toast.error('No se pudo cargar la solicitud.');
-        router.push(backUrl);
+        router.push('/app/aprobaciones');
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     fetchSolicitud();
 
-    // Listen for updates from the action modals
-    const handleUpdate = () => {
-      router.push(backUrl);
+    const handleSolicitudUpdated = () => {
+      router.push('/app/aprobaciones');
     };
 
-    window.addEventListener('solicitud-updated', handleUpdate);
+    window.addEventListener('solicitud-updated', handleSolicitudUpdated);
 
     return () => {
-      window.removeEventListener('solicitud-updated', handleUpdate);
+      mounted = false;
+      window.removeEventListener('solicitud-updated', handleSolicitudUpdated);
     };
-  }, [id, router, backUrl]);
+  }, [id, router]);
 
   const formatCurrency = (value: number | string) => {
     return new Intl.NumberFormat('es-BO', {
@@ -106,7 +101,6 @@ export default function SolicitudDetailPage() {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-      timeZone: 'UTC',
     }).format(date);
   };
 
@@ -152,7 +146,7 @@ export default function SolicitudDetailPage() {
           No se encontró la solicitud solicitada.
         </p>
         <Button asChild variant="link" className="mt-4">
-          <Link href={backUrl}>Volver</Link>
+          <Link href="/app/aprobaciones">Volver a Notificaciones</Link>
         </Button>
       </div>
     );
@@ -164,7 +158,7 @@ export default function SolicitudDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href={backUrl}>
+            <Link href="/app/aprobaciones">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
@@ -176,9 +170,7 @@ export default function SolicitudDetailPage() {
               {getEstadoBadge(solicitud.estado)}
             </div>
             <p className="text-muted-foreground">
-              {canApprove
-                ? 'Revisa los detalles antes de tomar una decisión.'
-                : 'Detalles de tu solicitud.'}
+              Revisa los detalles antes de tomar una decisión.
             </p>
           </div>
         </div>
@@ -273,7 +265,7 @@ export default function SolicitudDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Planificaciones - Siempre visible */}
+      {/* Planificaciones */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -362,26 +354,6 @@ export default function SolicitudDetailPage() {
         </Card>
       )}
 
-      {/* Cuenta Bancaria - Solo visible si hay solicitud con cuenta*/}
-      {solicitud.presupuestos && solicitud.presupuestos.length > 0 && (
-        <Card className="mt-6 rounded-lg border p-4">
-          <CardHeader className="mb-4 p-0">
-            <CardTitle className="flex items-center gap-2 font-semibold">
-              <Landmark className="h-5 w-5" />
-              Información Bancaria del Proyecto
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <CuentaBancariaCard
-              cuentaBancaria={
-                solicitud.presupuestos[0]?.poa?.estructura?.proyecto
-                  ?.cuentaBancaria
-              }
-            />
-          </CardContent>
-        </Card>
-      )}
-
       {/* Sección de Participantes Externos */}
       <Card className="mt-6 rounded-lg border p-4">
         <CardHeader className="mb-4 p-0">
@@ -441,14 +413,12 @@ export default function SolicitudDetailPage() {
 
       <Separator />
 
-      {/* Action Buttons - Solo visible desde inbox */}
-      {canApprove && (
-        <div className="bg-background sticky bottom-0 border-t py-4">
-          <div className="mx-auto max-w-2xl">
-            <InboxActions request={solicitud} mode="buttons" />
-          </div>
+      {/* Action Buttons */}
+      <div className="bg-background sticky bottom-0 border-t py-4">
+        <div className="mx-auto max-w-2xl">
+          <InboxActions request={solicitud} mode="buttons" />
         </div>
-      )}
+      </div>
     </div>
   );
 }
