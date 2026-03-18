@@ -90,41 +90,6 @@ export default function SolicitudViaticos({
           <Briefcase className="h-5 w-5" />
           Detalle de Viáticos
         </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            // Validar que existan partidas de viáticos antes de agregar
-            const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
-              normalizeString(f.poa?.estructura?.partida?.nombre).includes(
-                'VIATICO'
-              )
-            );
-
-            if (!tienePresupuestoViaticos) {
-              toast.error(
-                'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
-              );
-              return;
-            }
-
-            append({
-              conceptoId: 0,
-              planificacionIndexes: [],
-              tipoDestino: 'INSTITUCIONAL',
-              dias: 0,
-              cantidadPersonas: 0,
-              montoNeto: 0,
-              solicitudPresupuestoId: 0,
-              liquidoPagable: 0,
-            });
-          }}
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Viático
-        </Button>
       </div>
 
       <div className="space-y-4">
@@ -148,6 +113,44 @@ export default function SolicitudViaticos({
             </p>
           </div>
         )}
+
+        <div className="mt-4 flex justify-start">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Validar que existan partidas de viáticos antes de agregar
+              const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
+                normalizeString(f.poa?.estructura?.partida?.nombre).includes(
+                  'VIATICO'
+                )
+              );
+
+              if (!tienePresupuestoViaticos) {
+                toast.error(
+                  'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
+                );
+                return;
+              }
+
+              append({
+                conceptoId: 0,
+                planificacionIndexes: [],
+                tipoDestino: 'INSTITUCIONAL',
+                dias: 0,
+                cantidadPersonas: 0,
+                montoNeto: 0,
+                solicitudPresupuestoId: 0,
+                liquidoPagable: 0,
+              });
+            }}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar Viático
+          </Button>
+        </div>
       </div>
     </FieldSet>
   );

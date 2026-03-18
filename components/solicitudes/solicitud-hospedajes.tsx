@@ -81,53 +81,6 @@ export default function SolicitudHospedajes({
           <Home className="h-5 w-5" />
           Hospedajes
         </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const tienePartida = fuentesDisponibles.some((f) => {
-              const p = f.poa;
-              if (!p) return false;
-
-              const searchStr = normalizeString(
-                [
-                  p.actividad?.detalleDescripcion,
-                  p.estructura?.partida?.nombre,
-                  (p as { partida?: { nombre?: string } }).partida?.nombre,
-                  p.codigoPresupuestario?.descripcion,
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-              );
-
-              return searchStr.includes('HOSPEDAJE');
-            });
-
-            if (!tienePartida) {
-              toast.error(
-                "No se encontró presupuesto para alojamiento. Para agregar un hospedaje, primero debe seleccionar una partida presupuestaria de 'Hospedaje' en el Paso 1."
-              );
-              return;
-            }
-
-            append({
-              poaId: 0,
-              region: '',
-              destino: '',
-              personas: 1,
-              noches: 1,
-              cantidadUnitaria: 0,
-              costoTotal: 0,
-              iva: 0,
-              it: 0,
-            });
-          }}
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Hospedaje
-        </Button>
       </div>
 
       <div className="space-y-4">
@@ -147,6 +100,56 @@ export default function SolicitudHospedajes({
             </p>
           </div>
         )}
+
+        <div className="mt-4 flex justify-start">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const tienePartida = fuentesDisponibles.some((f) => {
+                const p = f.poa;
+                if (!p) return false;
+
+                const searchStr = normalizeString(
+                  [
+                    p.actividad?.detalleDescripcion,
+                    p.estructura?.partida?.nombre,
+                    (p as { partida?: { nombre?: string } }).partida?.nombre,
+                    p.codigoPresupuestario?.descripcion,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                );
+
+                return searchStr.includes('HOSPEDAJE');
+              });
+
+              if (!tienePartida) {
+                toast.error(
+                  "No se encontró presupuesto para alojamiento. Para agregar un hospedaje, primero debe seleccionar una partida presupuestaria de 'Hospedaje' en el Paso 1."
+                );
+                return;
+              }
+
+              append({
+                poaId: 0,
+                region: '',
+                destino: '',
+                personas: 1,
+                noches: 1,
+                cantidadUnitaria: 0,
+                costoTotal: 0,
+                iva: 0,
+                it: 0,
+              });
+            }}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar Hospedaje
+          </Button>
+        </div>
       </div>
     </FieldSet>
   );

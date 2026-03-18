@@ -416,26 +416,6 @@ export default function SolicitudEconomica({
           <div className="flex items-center gap-3">
             <FieldLegend>Partida Presupuestaria</FieldLegend>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              append({
-                grupoId: '',
-                partidaId: '',
-                codigoPresupuestarioId: '',
-                poaId: null,
-                montoReservado: 0,
-                isLocked: false,
-              })
-            }
-            disabled={!watchedProyecto || isCleaning}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Agregar Partida
-          </Button>
         </div>
 
         <div className="space-y-4">
@@ -462,6 +442,29 @@ export default function SolicitudEconomica({
               </p>
             </div>
           )}
+
+          <div className="mt-4 flex justify-start">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                append({
+                  grupoId: '',
+                  partidaId: '',
+                  codigoPresupuestarioId: '',
+                  poaId: null,
+                  montoReservado: 0,
+                  isLocked: false,
+                })
+              }
+              disabled={!watchedProyecto || isCleaning}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Agregar Partida
+            </Button>
+          </div>
         </div>
       </FieldSet>
 

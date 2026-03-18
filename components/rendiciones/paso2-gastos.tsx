@@ -837,21 +837,34 @@ export default function Paso2Gastos({
                 form={form}
               />
             ))}
+
+            <div className="mt-4 flex justify-start">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAgregarGasto}
+                className="border-dashed"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar Comprobante
+              </Button>
+            </div>
           </div>
         )}
 
-        <Separator className="my-6" />
-
-        {/* --- Botón Agregar Comprobante --- */}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleAgregarGasto}
-          className="w-full border-dashed"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Agregar Comprobante
-        </Button>
+        {gastosFields.length === 0 && (
+          <div className="mt-4 flex justify-start">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAgregarGasto}
+              className="border-dashed"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Agregar Comprobante
+            </Button>
+          </div>
+        )}
 
         <Separator className="my-6" />
 
@@ -981,18 +994,34 @@ export default function Paso2Gastos({
                   </CardContent>
                 </Card>
               ))}
+
+              <div className="mt-4 flex justify-start">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAgregarGastoSinRespaldo}
+                  className="border-dashed"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Agregar Gasto Menor
+                </Button>
+              </div>
             </div>
           )}
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAgregarGastoSinRespaldo}
-            className="w-full border-dashed"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Agregar Gasto Menor
-          </Button>
+          {gastosSinRespaldoFields.length === 0 && (
+            <div className="mt-4 flex justify-start">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAgregarGastoSinRespaldo}
+                className="border-dashed"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar Gasto Menor
+              </Button>
+            </div>
+          )}
         </div>
 
         <Separator className="my-6" />
