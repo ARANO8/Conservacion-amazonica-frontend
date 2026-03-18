@@ -138,18 +138,6 @@ export default function ReviewModal({
     return mapFormToBreakdown(data, misSelecciones, conceptos, tiposGasto);
   }, [data, misSelecciones, conceptos, tiposGasto]);
 
-  // FIXME: DEBUGGING
-  console.log('DATA EN STEP 3:', {
-    fuentesSeleccionadas: data.fuentesSeleccionadas,
-    misSelecciones,
-  });
-  console.log(
-    'PROYECTO SELECCIONADO:',
-    misSelecciones.find(
-      (r) => r.poaId === data.fuentesSeleccionadas?.[0]?.poaId
-    )?.poa?.estructura?.proyecto
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-full sm:max-w-[550px]">

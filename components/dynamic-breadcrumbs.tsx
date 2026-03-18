@@ -12,11 +12,16 @@ import {
 } from '@/components/ui/breadcrumb';
 
 const routeNameMap: Record<string, string> = {
-  dashboard: 'Dashboard',
+  app: 'App',
+  inicio: 'Inicio',
   planificacion: 'Planificación',
   solicitudes: 'Solicitudes',
   solicitud: 'Solicitud',
   nueva: 'Nueva',
+  editar: 'Editar',
+  aprobaciones: 'Aprobaciones',
+  monitor: 'Monitor',
+  rendiciones: 'Rendiciones',
   reportes: 'Reportes',
   configuracion: 'Configuración',
 };

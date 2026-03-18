@@ -210,4 +210,10 @@ export interface SolicitudResponse {
     nombreCompleto: string;
     procedenciaInstitucion: string;
   }>;
+  codigoDesembolso?: string;
+  urlComprobante?: string;
+  rendicion?: {
+    id: number;
+    estado: string;
+  };
 }

@@ -31,21 +31,31 @@ export const HOSPEDAJE_DICT = {
     destinos: ['La Paz', 'Santa Cruz', 'Cochabamba'],
     min: 243.6,
     max: 522.0,
+    editable: false,
   },
-  'Ciudades Intermedias': {
+  'Bolivia Sur': {
     destinos: ['Sucre', 'Potosi', 'Oruro', 'Tarija'],
     min: 208.8,
     max: 487.2,
+    editable: false,
   },
   'Bolivia Norte': {
     destinos: ['Trinidad', 'Cobija'],
     min: 180.96,
     max: 348.0,
+    editable: false,
   },
-  Pueblos: {
-    destinos: ['Rurrenabaque', 'San Buenaventura', 'Coroico'],
+  'Ciudades Intermedias': {
+    destinos: [],
     min: 139.2,
     max: 348.0,
+    editable: true,
+  },
+  'Pueblos y Comunidades': {
+    destinos: [],
+    min: 40.0,
+    max: 200.0,
+    editable: true,
   },
 } as const;
 
@@ -71,53 +81,6 @@ export default function SolicitudHospedajes({
           <Home className="h-5 w-5" />
           Hospedajes
         </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const tienePartida = fuentesDisponibles.some((f) => {
-              const p = f.poa;
-              if (!p) return false;
-
-              const searchStr = normalizeString(
-                [
-                  p.actividad?.detalleDescripcion,
-                  p.estructura?.partida?.nombre,
-                  (p as { partida?: { nombre?: string } }).partida?.nombre,
-                  p.codigoPresupuestario?.descripcion,
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-              );
-
-              return searchStr.includes('HOSPEDAJE');
-            });
-
-            if (!tienePartida) {
-              toast.error(
-                "No se encontró presupuesto para alojamiento. Para agregar un hospedaje, primero debe seleccionar una partida presupuestaria de 'Hospedaje' en el Paso 1."
-              );
-              return;
-            }
-
-            append({
-              poaId: 0,
-              region: '',
-              destino: '',
-              personas: 1,
-              noches: 1,
-              cantidadUnitaria: 0,
-              costoTotal: 0,
-              iva: 0,
-              it: 0,
-            });
-          }}
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Hospedaje
-        </Button>
       </div>
 
       <div className="space-y-4">
@@ -137,6 +100,56 @@ export default function SolicitudHospedajes({
             </p>
           </div>
         )}
+
+        <div className="mt-4 flex justify-start">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const tienePartida = fuentesDisponibles.some((f) => {
+                const p = f.poa;
+                if (!p) return false;
+
+                const searchStr = normalizeString(
+                  [
+                    p.actividad?.detalleDescripcion,
+                    p.estructura?.partida?.nombre,
+                    (p as { partida?: { nombre?: string } }).partida?.nombre,
+                    p.codigoPresupuestario?.descripcion,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                );
+
+                return searchStr.includes('HOSPEDAJE');
+              });
+
+              if (!tienePartida) {
+                toast.error(
+                  "No se encontró presupuesto para alojamiento. Para agregar un hospedaje, primero debe seleccionar una partida presupuestaria de 'Hospedaje' en el Paso 1."
+                );
+                return;
+              }
+
+              append({
+                poaId: 0,
+                region: '',
+                destino: '',
+                personas: 1,
+                noches: 1,
+                cantidadUnitaria: 0,
+                costoTotal: 0,
+                iva: 0,
+                it: 0,
+              });
+            }}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar Hospedaje
+          </Button>
+        </div>
       </div>
     </FieldSet>
   );
@@ -323,29 +336,42 @@ function HospedajeCard({
             render={({ field }) => (
               <Field>
                 <FieldLabel>Destino</FieldLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!selectedRegion}
-                >
+                {selectedRegion && HOSPEDAJE_DICT[selectedRegion]?.editable ? (
+                  // Input de texto para regiones editables
                   <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar Destino" />
-                    </SelectTrigger>
+                    <Input
+                      type="text"
+                      placeholder="Escribir destino"
+                      {...field}
+                      disabled={!selectedRegion}
+                    />
                   </FormControl>
-                  <SelectContent
-                    position="popper"
-                    side="bottom"
-                    align="start"
-                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                ) : (
+                  // Select para regiones predefinidas
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={!selectedRegion}
                   >
-                    {destinosDisponibles.map((dest) => (
-                      <SelectItem key={dest} value={dest}>
-                        {dest}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar Destino" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent
+                      position="popper"
+                      side="bottom"
+                      align="start"
+                      className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                    >
+                      {destinosDisponibles.map((dest) => (
+                        <SelectItem key={dest} value={dest}>
+                          {dest}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <FormMessage />
               </Field>
             )}

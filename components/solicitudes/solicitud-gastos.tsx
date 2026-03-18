@@ -58,46 +58,6 @@ export default function SolicitudGastos({
           <Receipt className="h-5 w-5" />
           Detalle de Gastos
         </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            // 1. Validar que exista al menos una partida que NO sea de Viáticos
-            const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
-              const nombrePartida = normalizeString(
-                f.poa?.estructura?.partida?.nombre
-              );
-              return (
-                !nombrePartida.includes('VIATICO') &&
-                !nombrePartida.includes('HOSPEDAJE')
-              );
-            });
-
-            if (!tienePresupuestoGastos) {
-              toast.error(
-                'Las fuentes seleccionadas son exclusivas para VIÁTICOS u HOSPEDAJE. No puede agregar gastos generales.'
-              );
-              return;
-            }
-
-            append({
-              solicitudPresupuestoId: 0,
-              tipoDocumento: 'FACTURA',
-              tipoGastoId: 1,
-              cantidad: 0,
-              costoUnitario: 0,
-              montoNeto: 0,
-              detalle: '',
-              liquidoPagable: 0,
-            });
-          }}
-          disabled={!proyectoId}
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Gasto
-        </Button>
       </div>
 
       <div className="space-y-4">
@@ -122,6 +82,49 @@ export default function SolicitudGastos({
             </p>
           </div>
         )}
+
+        <div className="mt-4 flex justify-start">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // 1. Validar que exista al menos una partida que NO sea de Viáticos
+              const tienePresupuestoGastos = fuentesDisponibles.some((f) => {
+                const nombrePartida = normalizeString(
+                  f.poa?.estructura?.partida?.nombre
+                );
+                return (
+                  !nombrePartida.includes('VIATICO') &&
+                  !nombrePartida.includes('HOSPEDAJE')
+                );
+              });
+
+              if (!tienePresupuestoGastos) {
+                toast.error(
+                  'Las fuentes seleccionadas son exclusivas para VIÁTICOS u HOSPEDAJE. No puede agregar gastos generales.'
+                );
+                return;
+              }
+
+              append({
+                solicitudPresupuestoId: 0,
+                tipoDocumento: 'FACTURA',
+                tipoGastoId: 1,
+                cantidad: 0,
+                costoUnitario: 0,
+                montoNeto: 0,
+                detalle: '',
+                liquidoPagable: 0,
+              });
+            }}
+            disabled={!proyectoId}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar Gasto
+          </Button>
+        </div>
       </div>
     </FieldSet>
   );

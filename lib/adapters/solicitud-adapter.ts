@@ -208,6 +208,43 @@ export const adaptResponseToFormData = (
     };
   });
 
+  // 5. Mapeo de Hospedajes
+  // Prioridad: hospedajes top-level (si el backend los incluye directamente).
+  // Fallback: reconstruir desde response.presupuestos[*].hospedajes usando el poa.id padre.
+  const hospedajesTopLevel = (response.hospedajes || []).map((h) => ({
+    id: h.id,
+    poaId: Number(h.poaId) || 0,
+    region: h.region || '',
+    destino: h.destino || '',
+    personas: Number(h.personas) || 1,
+    noches: Number(h.noches) || 1,
+    cantidadUnitaria: Number(h.cantidadUnitaria) || 0,
+    costoTotal: Number(h.costoTotal) || 0,
+    iva: Number(h.iva) || 0,
+    it: Number(h.it) || 0,
+  }));
+
+  const hospedajesFromPresupuestos = (response.presupuestos || []).flatMap(
+    (p) =>
+      (p.hospedajes || []).map((h) => ({
+        id: h.id,
+        poaId: Number(p.poa?.id) || 0,
+        region: h.region || '',
+        destino: h.destino || '',
+        personas: Number(h.personas) || 1,
+        noches: Number(h.noches) || 1,
+        cantidadUnitaria: Number(h.cantidadUnitaria) || 0,
+        costoTotal: Number(h.costoTotal) || 0,
+        iva: Number(h.iva) || 0,
+        it: Number(h.it) || 0,
+      }))
+  );
+
+  const hospedajes =
+    hospedajesTopLevel.length > 0
+      ? hospedajesTopLevel
+      : hospedajesFromPresupuestos;
+
   return {
     planificacionLugares: response.lugarViaje || '',
     planificacionObjetivo: response.motivoViaje || '',
@@ -221,6 +258,7 @@ export const adaptResponseToFormData = (
     fuentesSeleccionadas,
     viaticos,
     items,
+    hospedajes,
     nomina: (response.personasExternas || []).map((p) => ({
       nombreCompleto: p.nombreCompleto,
       procedenciaInstitucion: p.procedenciaInstitucion,

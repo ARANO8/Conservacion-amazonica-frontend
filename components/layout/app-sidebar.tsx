@@ -46,14 +46,14 @@ function buildFormularioItems(rol?: Role) {
 
   // Solicitud: USUARIO, TESORERO y ADMIN pueden crear solicitudes
   if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
-    items.push({ title: 'Solicitud', url: '/dashboard/solicitud' });
+    items.push({ title: 'Solicitud', url: '/app/solicitudes/nueva' });
   }
 
   // Revisión: ADMIN y TESORERO son aprobadores
   if (rol === 'ADMIN' || rol === 'TESORERO') {
     items.push({
-      title: 'Revisión',
-      url: '/dashboard/revision?role=approver',
+      title: 'Nueva Rendición',
+      url: '/app/rendiciones/nueva',
     });
   }
 
@@ -61,13 +61,13 @@ function buildFormularioItems(rol?: Role) {
   if (rol === 'TESORERO' || rol === 'ADMIN') {
     items.push({
       title: 'Monitor Solicitudes',
-      url: '/dashboard/monitor-solicitudes',
+      url: '/app/monitor',
     });
   }
 
-  // Rendición: Solo USUARIO
+  // Rendición: Solo USUARIO (acceso directo al formulario de rendición)
   if (rol === 'USUARIO') {
-    items.push({ title: 'Rendicion', url: '/dashboard/rendicion' });
+    items.push({ title: 'Nueva Rendición', url: '/app/rendiciones/nueva' });
   }
 
   return items;
@@ -79,12 +79,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
     {
       title: 'Mis Solicitudes',
-      url: '/dashboard/requests',
+      url: '/app/solicitudes',
       icon: FileText,
     },
     {
       title: 'Notificaciones',
-      url: '/dashboard/inbox',
+      url: '/app/aprobaciones',
       icon: Bell,
     },
     {

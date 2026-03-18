@@ -31,7 +31,7 @@ import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
-import { SeleccionPresupuesto } from '@/types/backend';
+import { SeleccionPresupuesto, PoaStructureItem } from '@/types/backend';
 import {
   formSchema,
   defaultValues,
@@ -71,6 +71,10 @@ export default function SolicitudForm({
     (initialValues?.fuentesSeleccionadas as unknown as SeleccionPresupuesto[]) ||
       []
   );
+  const [selectedPoa, setSelectedPoa] = useState<string>(
+    initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa || ''
+  );
+  const [poaStructure, setPoaStructure] = useState<PoaStructureItem[]>([]);
   const [showBudgetWarning, setShowBudgetWarning] = useState(false);
 
   const { conceptos, tiposGasto, usuarios, poaCodes, isLoading } =
@@ -134,7 +138,7 @@ export default function SolicitudForm({
           tieneHospedajesSinFuente
         ) {
           toast.error(
-            'Todos los ítems (viáticos, gastos y hospedajes) deben estar vinculados a una fuente de financiamiento'
+            'Todos los ítems (viáticos, comprobantes y hospedajes) deben estar vinculados a una fuente de financiamiento'
           );
           return;
         }
@@ -199,7 +203,7 @@ export default function SolicitudForm({
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
-        toast.error('Corrige los errores en la solicitud de fondos');
+        toast.error('Corrige los errores en el detalle económico');
       }
       return;
     }
@@ -258,7 +262,7 @@ export default function SolicitudForm({
         toast.success('Solicitud enviada exitosamente');
       }
 
-      router.push('/dashboard/requests');
+      router.push('/app/solicitudes');
     } catch (error: unknown) {
       toast.error('Error al enviar la solicitud');
       let errorMessage = 'Ocurrió un error al procesar la solicitud';
@@ -377,6 +381,10 @@ export default function SolicitudForm({
                       initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa
                     }
                     isEditMode={isEditMode}
+                    selectedPoa={selectedPoa}
+                    setSelectedPoa={setSelectedPoa}
+                    poaStructure={poaStructure}
+                    setPoaStructure={setPoaStructure}
                   />
                 )}
 

@@ -46,6 +46,25 @@ import { Concepto } from '@/types/catalogs';
 import { SeleccionPresupuesto } from '@/types/backend';
 import { toast } from 'sonner';
 
+// Helper function to validate that all selected planificaciones have the same person count
+const validatePersonCountMatch = (
+  selectedPlanificaciones: FormData['actividades'],
+  tipoDestino: string | undefined
+): boolean => {
+  if (selectedPlanificaciones.length <= 1) return true;
+
+  const personField =
+    tipoDestino === 'TERCEROS' ? 'cantTerceros' : 'cantInstitucion';
+  const firstValue =
+    selectedPlanificaciones[0]?.[
+      personField as keyof (typeof selectedPlanificaciones)[0]
+    ];
+
+  return selectedPlanificaciones.every(
+    (plan) => plan[personField as keyof typeof plan] === firstValue
+  );
+};
+
 interface SolicitudViaticosProps {
   control: Control<FormData>;
   actividadesPlanificadas: FormData['actividades'];
@@ -71,41 +90,6 @@ export default function SolicitudViaticos({
           <Briefcase className="h-5 w-5" />
           Detalle de Viáticos
         </FieldLegend>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            // Validar que existan partidas de viáticos antes de agregar
-            const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
-              normalizeString(f.poa?.estructura?.partida?.nombre).includes(
-                'VIATICO'
-              )
-            );
-
-            if (!tienePresupuestoViaticos) {
-              toast.error(
-                'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
-              );
-              return;
-            }
-
-            append({
-              conceptoId: 0,
-              planificacionIndexes: [],
-              tipoDestino: 'INSTITUCIONAL',
-              dias: 0,
-              cantidadPersonas: 0,
-              montoNeto: 0,
-              solicitudPresupuestoId: 0,
-              liquidoPagable: 0,
-            });
-          }}
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Viático
-        </Button>
       </div>
 
       <div className="space-y-4">
@@ -129,6 +113,44 @@ export default function SolicitudViaticos({
             </p>
           </div>
         )}
+
+        <div className="mt-4 flex justify-start">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Validar que existan partidas de viáticos antes de agregar
+              const tienePresupuestoViaticos = fuentesDisponibles.some((f) =>
+                normalizeString(f.poa?.estructura?.partida?.nombre).includes(
+                  'VIATICO'
+                )
+              );
+
+              if (!tienePresupuestoViaticos) {
+                toast.error(
+                  'No se encontraron partidas de VIÁTICOS en las fuentes seleccionadas.'
+                );
+                return;
+              }
+
+              append({
+                conceptoId: 0,
+                planificacionIndexes: [],
+                tipoDestino: 'INSTITUCIONAL',
+                dias: 0,
+                cantidadPersonas: 0,
+                montoNeto: 0,
+                solicitudPresupuestoId: 0,
+                liquidoPagable: 0,
+              });
+            }}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar Viático
+          </Button>
+        </div>
       </div>
     </FieldSet>
   );
@@ -219,22 +241,37 @@ function ViaticoCard({
       (isPlanificacionDirty || isTipoDestinoDirty) &&
       selectedPlanificaciones.length > 0
     ) {
+      // Validate that all selected planificaciones have the same person count
+      if (
+        !validatePersonCountMatch(selectedPlanificaciones, watchTipoDestino)
+      ) {
+        toast.error(
+          'La cantidad de personas difiere entre las actividades. Debe crear un viático separado para cada actividad.'
+        );
+        // Revert selection to previous state
+        setValue(`viaticos.${index}.planificacionIndexes`, [], {
+          shouldDirty: true,
+        });
+        return;
+      }
+
       // Sum logic:
       let sumDias = 0;
-      let sumPersonas = 0;
+      const personField =
+        watchTipoDestino === 'TERCEROS' ? 'cantTerceros' : 'cantInstitucion';
+      const personasValue =
+        (selectedPlanificaciones[0]?.[
+          personField as keyof (typeof selectedPlanificaciones)[0]
+        ] as number) || 0;
 
       selectedPlanificaciones.forEach((plan) => {
         sumDias += plan.cantDias || 0;
-        sumPersonas +=
-          watchTipoDestino === 'TERCEROS'
-            ? plan.cantTerceros || 0
-            : plan.cantInstitucion || 0;
       });
 
       setValue(`viaticos.${index}.dias`, sumDias, {
         shouldDirty: true,
       });
-      setValue(`viaticos.${index}.cantidadPersonas`, sumPersonas, {
+      setValue(`viaticos.${index}.cantidadPersonas`, personasValue, {
         shouldDirty: true,
       });
     } else if (isPlanificacionDirty && selectedPlanificaciones.length === 0) {
@@ -391,6 +428,37 @@ function ViaticoCard({
           />
           <FormField
             control={control}
+            name={`viaticos.${index}.tipoDestino`}
+            render={({ field }) => (
+              <FormItem>
+                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                  Tipo
+                </Label>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? 'INSTITUCIONAL'}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    <SelectItem value="INSTITUCIONAL">Institucional</SelectItem>
+                    <SelectItem value="TERCEROS">Tercero</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
             name={`viaticos.${index}.planificacionIndexes`}
             render={({ field }) => {
               const selectedValues = Array.isArray(field.value)
@@ -453,6 +521,29 @@ function ViaticoCard({
                                             (v) => v !== idx
                                           )
                                         : [...selectedValues, idx];
+
+                                      // If adding a new item, validate person count match
+                                      if (!isSelected && updated.length > 1) {
+                                        const planificacionesToValidate =
+                                          updated
+                                            .map(
+                                              (i) => actividadesPlanificadas[i]
+                                            )
+                                            .filter(Boolean);
+
+                                        if (
+                                          !validatePersonCountMatch(
+                                            planificacionesToValidate,
+                                            watchTipoDestino
+                                          )
+                                        ) {
+                                          toast.error(
+                                            'La cantidad de personas difiere entre las actividades. Debe crear un viático separado para cada actividad.'
+                                          );
+                                          return;
+                                        }
+                                      }
+
                                       field.onChange(updated);
                                     }}
                                   >
@@ -481,37 +572,6 @@ function ViaticoCard({
                 </FormItem>
               );
             }}
-          />
-          <FormField
-            control={control}
-            name={`viaticos.${index}.tipoDestino`}
-            render={({ field }) => (
-              <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
-                  Tipo
-                </Label>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? 'INSTITUCIONAL'}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent
-                    position="popper"
-                    side="bottom"
-                    align="start"
-                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
-                  >
-                    <SelectItem value="INSTITUCIONAL">Institucional</SelectItem>
-                    <SelectItem value="TERCEROS">Tercero</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
           />
         </div>
 

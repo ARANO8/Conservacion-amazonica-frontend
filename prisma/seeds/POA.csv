@@ -1,0 +1,808 @@
+1111,AAF9_BENI,TALLERES_Y_REUNIONES,TALLERES,A.1.2 - Área B,Talleres y reuniones de socialización de las propuestas de creación de APs en el Beni,1,"22187,34","22187,34"
+1111,AAF9_BENI,VIAJES_AAF,COMBUSTIBLE,A.1.2 - Área B,Compra de combustible ,1,"12742,89","12742,89"
+1111,AAF9_BENI,VIAJES_AAF,HOSPEDAJE NACIONAL,A.1.2 - Área B,Hospedaje de personal y de socios locales,1,"17551,43","17551,43"
+1111,AAF9_BENI,VIAJES_AAF,PASAJES AÉREOS NACIONALES,A.1.2 - Área B,Compra de pasajes aéreos a Beni principalmente,1,12693,12693
+1111,AAF9_BENI,VIAJES_AAF,PASAJES TERRESTRES NACIONALES,A.1.2 - Área B,Pasajes terrestres para personal y para socios locales,1,"27860,68","27860,68"
+1111,AAF9_BENI,VIAJES_AAF,VIÁTICOS,A.1.2 - Área B,Viáticos de personal institucional y algún apoyo a socios locales,1,"19336,41","19336,41"
+1131,AAF9_BENI,CONSULTORES_AAF,CONSULTOR 1,A2.3 / Área B,Creación de Áreas Protegidas en el Beni,1,0,0
+1131,AAF_10,CONSULTORES_AAF,CONSULTOR 1,A1,Creación de Áreas Protegidas en el Beni,1,0,0
+1132,RAINFOREST,CREACIÓN_DE_ÁREAS_PROTEGIDAS_RF,SUB GRANT,A5.2/11/11,Transferencias a CI,1,1964000,1964000
+1211,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A1.7 / 2 / 2.2,Elaboración de los reglamentos municipales de pesca ,1,"52403,71","52403,71"
+1211,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,0,0
+1211,RAINFOREST,VIAJES_RF,VIÁTICOS,A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,0,0
+1211,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,"79,46","79,46"
+1211,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,"79,46","79,46"
+1211,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,0,0
+1211,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,"118,52","118,52"
+1211,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A1.7 / 7 / 7.1,Viajes para personal de ACEAA para los procesos de creación,1,"79,46","79,46"
+1221,AAF_10,CONSULTORES_AAF,CONSULTOR 1,NN,Construcción de Zonificaciones de APs Beni,1,0,0
+1221,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A2.3 / ,Construcción de Zonificaciones de APs,1,150000,150000
+1221,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,A2.4 / Area E / Pasajes Aéreos,Construcción de Zonificaciones de APs,1,28000,28000
+1221,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A2.1 / 2 / 2.6,Construcción de Zonificaciones de APs,1,62000,62000
+1221,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,A2.2 / Area C / Talleres,Construcción de Zonificaciones de APs,1,20000,20000
+1221,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,NN,Construcción de Zonificaciones de APs,1,30000,30000
+1221,RE_WILD_2,CONSULTORES_REWILD,CONSULTORES,A1.1,Construcción de Zonificaciones de APs,1,130000,130000
+1221,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,2","1604,2"
+1221,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,19","1604,19"
+1221,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,19","1604,19"
+1221,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,19","1604,19"
+1221,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,19","1604,19"
+1221,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,19","1604,19"
+1221,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.2 / 7 / 7.5,Construcción de Zonificaciones de APs,1,"1604,19","1604,19"
+1222,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A2.1 / 2 / 2.6,Construcción de las Agendas Estratégicas de APs,1,200000,200000
+1222,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,A1.1 / Area B / Talleres,Construcción de las Agendas Estratégicas de APs,1,15000,15000
+1222,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,A2.2 / Area C / Talleres,Construcción de las Agendas Estratégicas de APs,1,20000,20000
+1222,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,A2.4 / Area E / Pasajes Aéreos,Construcción de las Agendas Estratégicas de APs,1,30000,30000
+1222,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"112,77","112,77"
+1222,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"247,05","247,05"
+1222,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"1604,19","1604,19"
+1222,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"1604,19","1604,19"
+1222,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"1604,19","1604,19"
+1222,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"440,43","440,43"
+1222,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.1 / 7 / 7.5,Construcción de las Agendas Estratégicas de APs,1,"1604,19","1604,19"
+1223,AAF_10,CONSULTORES_AAF,CONSULTOR 1,B5.1 ,Plan de Vida Tacana II,1,0,0
+1231,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A2.5 / 2 / 2.6,Elaboración de los Planes de Control y Vigilancia,1,"63922,07","63922,07"
+1231,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A2.5 / 2 / 2.8,Elaboración de otros documentos relacionados a los Planes de Control y Vigilancia,1,"50013,72","50013,72"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACIÓN / VÍVERES,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"13886,43","13886,43"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"20018,61","20018,61"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,COMBUSTIBLE,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"17330,35","17330,35"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,INSUMOS Y EQUIPAMIENTO,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"14653,53","14653,53"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MANTENIMIENTO DE VEHÍCULOS,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"19516,65","19516,65"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HOSPEDAJE NACIONAL,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"18768,61","18768,61"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,VIÁTICOS,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"457,12","457,12"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE VEHÍCULOS,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"18107,89","18107,89"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,"PAGO PONTÓN, PEAJES, ETC",A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"19964,9","19964,9"
+1232,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,GUIAS LOCALES,A2.5 / 4 / 4.1,Realización de campañas de patrullaje para el control territorial,1,"20018,61","20018,61"
+1232,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"5213,63","5213,63"
+1232,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"3856,48","3856,48"
+1232,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"5213,64","5213,64"
+1232,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"5213,64","5213,64"
+1232,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"4441,32","4441,32"
+1232,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"3429,12","3429,12"
+1232,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.5 / 7 / 7.5,Apoyar a la realización de campañas de patrullaje para el control territorial,1,"5213,64","5213,64"
+1234,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"MAT. Y SUM, PROD. PLANTINES",A.2.2.6,Implementar medidas de proteccion en la cuenca del arroyo Bahia ,1,"54684,98","54684,98"
+1234,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,CANALES INFORMATYIVOS,A.2.2.6,Implementar medidas de proteccion en la cuenca del arroyo Bahia ,1,"8908,83","8908,83"
+1234,AFD,EQUIPAMIENTO_TECNICO_AFD,DESBROZADORA Y BOMBA DE AGUA,A.2.2.6,Implementar medidas de proteccion en la cuenca del arroyo Bahia ,1,"6093,46","6093,46"
+1234,AFD,EQUIPAMIENTO_TECNICO_AFD,TUBOS DE POLIETILENO,A.2.2.6,Implementar medidas de proteccion en la cuenca del arroyo Bahia ,1,"624,97","624,97"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACIÓN / VÍVERES,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"4922,89","4922,89"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE SALÓN,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"6683,84","6683,84"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,PASAJES TERRESTRES NACIONALES,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"4090,1","4090,1"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HOSPEDAJE NACIONAL,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"5512,42","5512,42"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,VIÁTICOS,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"1283,57","1283,57"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,COMBUSTIBLE,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"6764,9","6764,9"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE VEHÍCULOS,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"6862,42","6862,42"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,"PAGO PONTÓN, PEAJES, ETC",A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"6862,39","6862,39"
+1241,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,SUMINISTROS DE OFICINA,A2.4 / 4 / 4.2,Reuniones de los Comités de Gestión,1,"1359,14","1359,14"
+1241,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"1580,6","1580,6"
+1241,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"2182,32","2182,32"
+1241,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"7884,3","7884,3"
+1241,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"7972,85","7972,85"
+1241,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"6063,39","6063,39"
+1241,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"560,45","560,45"
+1241,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.4 / 7 / 7.5,Reuniones de los Comités de Gestión,1,"6153,31","6153,31"
+1241,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A. 2.2.5,Reuniones de Comites de Gestion ,1,"7718,21","7718,21"
+1241,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),A. 2.2.5,Reuniones de Comites de Gestion ,1,4000,4000
+1241,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A. 2.2.5,Reuniones de Comites de Gestion ,1,10000,10000
+1241,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A. 2.2.5,Reuniones de Comites de Gestion ,1,15176,15176
+1241,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,A. 2.2.5,Reuniones de Comites de Gestion ,1,4000,4000
+1241,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A. 2.2.5,Reuniones de Comites de Gestion ,1,6000,6000
+1242,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.2.1.5,Desarrollar estatutos de comites de gestión ,1,5000,5000
+1242,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),A.2.1.5,Desarrollar estatutos de comites de gestión ,1,2000,2000
+1242,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A.2.1.5,Desarrollar estatutos de comites de gestión ,1,4000,4000
+1242,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.2.1.5,Desarrollar estatutos de comites de gestión ,1,4000,4000
+1242,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.2.1.5,Desarrollar estatutos de comites de gestión ,1,"12090,22","12090,22"
+1242,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (COMUN. Y PUEBLOS),A.2.1.5,Desarrollar estatutos de comites de gestión ,1,"5555,3","5555,3"
+1242,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.2.1.5,Desarrollar estatutos de comites de gestión ,1,"12396,22","12396,22"
+1242,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,A.2.1.5,Desarrollar estatutos de comites de gestión ,1,"2556,7","2556,7"
+1243,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. ACUERD. LOC. GESTION AGUA,A.2.1.6,Desarrollar acuerdos de conservacion ,1,"109369,96","109369,96"
+1243,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.2.1.6,Desarrollar acuerdos de conservacion ,1,4000,4000
+1243,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,A.2.1.6,Desarrollar acuerdos de conservacion ,1,4000,4000
+1243,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.2.1.6,Desarrollar acuerdos de conservacion ,1,8000,8000
+1243,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.2.1.6,Desarrollar acuerdos de conservacion ,1,2640,2640
+1243,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (COMUN. Y PUEBLOS),A.2.1.6,Desarrollar acuerdos de conservacion ,1,2000,2000
+1243,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),A.2.1.6,Desarrollar acuerdos de conservacion ,1,2000,2000
+1243,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.2.1.6,Desarrollar acuerdos de conservacion ,1,5000,5000
+1243,AFD,AFD_N_A,N/A,NN,Elaboración de 1 documento de mecanismos financieros para 9 áreas protegidas de Pando,1,164000,164000
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,0,0
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"6113,23","6113,23"
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"4023,43","4023,43"
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"3382,13","3382,13"
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,0,0
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"3783,62","3783,62"
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"6113,23","6113,23"
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"5335,37","5335,37"
+1251,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A2.7 / 6 / 6.1,Talleres de capacitación sobre áreas protegidas,1,"1445,15","1445,15"
+1251,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,"6416,78","6416,78"
+1251,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,"215,53","215,53"
+1251,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,"6416,78","6416,78"
+1251,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,"6416,78","6416,78"
+1251,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,"1043,09","1043,09"
+1251,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,0,0
+1251,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.7 / 7 / 7.5,Talleres de capacitación sobre áreas protegidas,1,"5741,78","5741,78"
+1251,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"10115,31","10115,31"
+1251,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"15335,31","15335,31"
+1251,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"15335,31","15335,31"
+1251,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"15335,31","15335,31"
+1251,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"15060,81","15060,81"
+1251,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"10972,82","10972,82"
+1251,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.7 / 7 / 7.8,Reuniones con autoridades y otras reuniones,1,"13859,1","13859,1"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3212,31","3212,31"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3212,31","3212,31"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3214,73","3214,73"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3212,31","3212,31"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3212,31","3212,31"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"2653,67","2653,67"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3212,31","3212,31"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3212,31","3212,31"
+1261,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A4.2 / 6 / 6.1,Reuniones de apoyo a GAD Pando para reuniones de la RECPA,1,"3129,81","3129,81"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3212,31","3212,31"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3212,31","3212,31"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3143,3","3143,3"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3212,31","3212,31"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3212,31","3212,31"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"2310,98","2310,98"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3212,31","3212,31"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"3212,31","3212,31"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A4.3 / 6 / 6.1,Promover intercambios de experiencias entre miembros de la RECPA,1,"2874,81","2874,81"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"55,37","55,37"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"28969,17","28969,17"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"13321,97","13321,97"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"26652,03","26652,03"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,25552,25552
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"26470,89","26470,89"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"15881,67","15881,67"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"29284,17","29284,17"
+1262,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A4.3 / 6 / 6.2,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"27762,67","27762,67"
+1262,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"1460,64","1460,64"
+1262,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"5386,89","5386,89"
+1262,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"5386,89","5386,89"
+1262,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"5386,89","5386,89"
+1262,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"5386,89","5386,89"
+1262,RAINFOREST,VIAJES_RF,VIÁTICOS,A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"5386,89","5386,89"
+1262,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A4.3 / 7 / 7.10,Realizar talleres de interacmbios de experiencias entre áreas protegidas de la RECPA,1,"5386,89","5386,89"
+1263,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,MUEBLES,A5.1 / 5 / 5,"Administración costos de personal, costos operativos, administrativos y otros",1,"145127,55","145127,55"
+1263,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPOS,A5.1 / 5 / 5,"Administración costos de personal, costos operativos, administrativos y otros",1,0,0
+1263,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE PROYECTO,A5.1 / 5 / 5,"Administración costos de personal, costos operativos, administrativos y otros",1,"67053,93","67053,93"
+1263,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,LAPTOP,A5.1 / 5 / 5,"Administración costos de personal, costos operativos, administrativos y otros",1,0,0
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,ALQUILERES,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,50000,50000
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,SERVICIOS BÁSICOS,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,"156907,34","156907,34"
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,INTERNET,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,"20474,42","20474,42"
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,MANTENIMIENTO DE VEHÍCULOS,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,150000,150000
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,Suministros de oficina,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,"3202,62","3202,62"
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,IMPUESTOS,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,30000,30000
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,MOTOCICLETAS,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,0,0
+1263,RAINFOREST,COSTOS_OPERATIVOS_RF,MOVILIDADES,A5.1 / 8 / 8,"Administración costos de personal, costos operativos, administrativos y otros",1,0,0
+1263,RAINFOREST,COSTOS_CONTABLES_Y_ADMINISTRATIVOS_RF,AUDITORIA,A5.1 / 9 / 9,"Administración costos de personal, costos operativos, administrativos y otros",1,40000,40000
+1263,RAINFOREST,COSTOS_CONTABLES_Y_ADMINISTRATIVOS_RF,TRANSACCIONES BANCARIAS,A5.1 / 9 / 9,"Administración costos de personal, costos operativos, administrativos y otros",1,5000,5000
+1263,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A5.1 / 10 / 10,"Administración costos de personal, costos operativos, administrativos y otros",1,"140366,02","140366,02"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,REUNIONES,1.1.3,Reuniones para presentacion de resultados.,1,"11213,36","11213,36"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,TALLERES,1.2.1,Talleres de capacitaciones,7,"38637,17","270460,19"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,TALLERES,1.2.2,Talleres de capacitaciones,3,"59003,97","177011,91"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,TALLERES,1.4.1,Talleres de capacitaciones,2,"35035,18","70070,36"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,TALLERES,2.1.1,Talleres de capacitaciones,3,"38401,65","115204,95"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,TALLERES,2.1.2,Talleres de capacitaciones,2,"9158,36","18316,72"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,SERVICIOS DE MANO DE OBRA,4.2,Mantenimiento de vehiculo,1,"3641,24","3641,24"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,SEMINARIOS,2.1.3,Seminarios para exponer los resultados,2,"43839,48","87678,96"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,SEMINARIOS,2.2.2,Seminarios para exponer los resultados,1,"45727,7","45727,7"
+1271,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,CUMBRES,2.2.1,Apoyo a 1 cumbre,1,"38155,79","38155,79"
+1271,AKAM_CCAM,LOCAL_PARTNER_INVESTMENTS,EQUIPOS RIEGO,1.2.3/2.1,Implementacion de 1 sistema de agua y 5 atajados,6,"235228,44","1411370,64"
+1271,AKAM_CCAM,LOCAL_PARTNER_STAFF_AND_VOLUNTEERS,CONSULTORES,NN,ND,5,10000,50000
+12101,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A2.8 / 2 / 2.3,Elaboración de 1 documento de mecanismos financieros para 9 áreas protegidas de Pando,1,85000,85000
+12101,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,NN,Elaboración de 1 documento de mecanismos financieros para 9 áreas protegidas de Pando,1,240000,240000
+12101,RE_WILD_2,CONSULTORES_REWILD,CONSULTORES,NN,Elaboración de 1 documento de mecanismos financieros para 9 áreas protegidas de Pando,1,60000,60000
+2111,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 1,A21 AREA B,CONSULTORIA DE REGISTRO ACUSTICO,1,40000,40000
+2122,AAF9_PANDO,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A24 AREA E,COMPRA DE ESTACION,1,105000,105000
+2122,AAF9_PANDO,CONSULTORES_AAF,CONSULTOR 2,A31 ADM,CONSULTORIAECOCLIMATICA,1,35000,35000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACIÓN / VÍVERES,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,0,0
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPO DE PROTECCIÓN PERSONAL,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"4809,55","4809,55"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"3846,02","3846,02"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,COMBUSTIBLE,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"5312,76","5312,76"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,INSUMOS Y EQUIPAMIENTO,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,0,0
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MANTENIMIENTO DE VEHÍCULOS,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"4767,18","4767,18"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HOSPEDAJE NACIONAL,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"5113,69","5113,69"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,VIÁTICOS,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"2980,07","2980,07"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE VEHÍCULOS,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"3498,53","3498,53"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,"PAGO PONTÓN, PEAJES, ETC",A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"5319,96","5319,96"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,GUIAS LOCALES,A1.2 / 4 / 4.4,"Realizar campañas de campo para relevar información socioeconómica y ambiental para sistemas de monitoreo de áreas protegidas Ingavi, San Pedro, Santos Mercado y Villa Nueva",1,"4822,56","4822,56"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACIÓN / VÍVERES,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,25000,25000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPO DE PROTECCIÓN PERSONAL,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,"20196,69","20196,69"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,30000,30000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,COMBUSTIBLE,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,22500,22500
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,INSUMOS Y EQUIPAMIENTO,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,"643,92","643,92"
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MANTENIMIENTO DE VEHÍCULOS,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,20000,20000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HOSPEDAJE NACIONAL,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,28000,28000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,VIÁTICOS,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,25000,25000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE VEHÍCULOS,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,30000,30000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,"PAGO PONTÓN, PEAJES, ETC",A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,15000,15000
+2131,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,GUIAS LOCALES,A2.3 / 4 / 4.4,Diseñar e implementar los sistemas de monitoreo integral,1,"24121,71","24121,71"
+2131,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,"21187,52","21187,52"
+2131,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,"7851,72","7851,72"
+2131,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,"22420,84","22420,84"
+2131,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,"23983,52","23983,52"
+2131,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,15000,15000
+2131,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,"20134,36","20134,36"
+2131,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.3 / 7 / 7.3,Diseñar e implementar los sistemas de monitoreo integral,1,"22622,99","22622,99"
+2131,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"13275,11","13275,11"
+2131,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"15135,79","15135,79"
+2131,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"16049,94","16049,94"
+2131,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"15651,85","15651,85"
+2131,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"13837,75","13837,75"
+2131,RAINFOREST,VIAJES_RF,VIÁTICOS,A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"9694,89","9694,89"
+2131,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A2.3 / 7 / 7.4,Diseñar e implementar los sistemas de monitoreo integral,1,"13461,98","13461,98"
+2131,BID_PV,VIAJES_BID_PV,VIÁTICOS CAMPO,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,11113,11113
+2131,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,11363,11363
+2131,BID_PV,GUIAS,GUIAS LOCALES,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,165076,165076
+2131,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,41215,41215
+2131,SUECIA_PV,VIAJES_SUECIA_PV,VIÁTICOS,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,165,165
+2131,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,16075,16075
+2131,SUECIA_PV,VIAJES_SUECIA_PV,HOSPEDAJE NACIONAL,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte).",1,1960,1960
+2133,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,CAMARAS TRAMPA,A5.1/5/5,Compra de camaras trampa,1,"106506,12","106506,12"
+2133,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SENSORES ACUSTICOS,A5.1/5/5,SENSORES ACUSTICOS,1,"8149,51","8149,51"
+2154,FCF_3,EQUIPOS_Y_SUMINISTROS_FCF3,SUMINISTROS DE OFICINA,1.3,Material de escritorio para talleres ,1,"2564,98","2564,98"
+2154,FCF_3,EQUIPOS_Y_SUMINISTROS_FCF3,IMPRESIONES Y COMUNICACIONE,1.3,"Impresiones de ploters,mapas para comunidades y guias ",1,"4006,85","4006,85"
+2154,FCF_3,EQUIPOS_Y_SUMINISTROS_FCF3,SUMINISTROS DE OFICINA,1.3 ,Compra de 3 Memorias portátiles USB para monitores de TIM I,1,360,360
+2154,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5 ,Alquiler de salones para capacitación,1,400,400
+2154,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5 ,Alimentación para capacitación,1,8000,8000
+2154,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5,Transporte para capacitados,1,5000,5000
+2154,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5,Viáticos para capacitados ,1,2100,2100
+2154,FCF_3,VIAJES_FCF3,PASAJES TERRESTRES NACIONALES,1.4,Pasajes terrestres para Carla Ramirez y Stephanie Torrico ,1,1200,1200
+2154,FCF_3,VIAJES_FCF3,PASAJES AÉREOS NACIONALES,1.4,Pasajes aéreos para Carla Ramirez  Stephanie Torrico ,1,9000,9000
+2154,FCF_3,VIAJES_FCF3,"VIÁTICOS, ALIMENTACIÓN E IMPREVISTOS",1.4,Viáticos y hospedaje para Carla y Stephanie Torrico,1,5200,5200
+2154,FCF_3,VIAJES_FCF3,COMBUSTIBLE,1.4,Combustible para auto institucional,1,4880,4880
+2154,FCF_3,REUNIONES_Y_TALLERES,CAPACITADORES,1.5,Técnico de Campo,1,6960,6960
+2154,FCF_3,CONSULTORES_FCF_3,CONSULTORES,"1,2",Consultor de viaje biocultural ,1,12030,12030
+2221,BID_PV,GUIAS,GUIAS LOCALES,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial.",1,173544,173544
+2221,BID_PV,VIAJES_BID_PV,VIÁTICOS CAMPO,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial.",1,8677,8677
+2221,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial.",1,7955,7955
+2221,BID_PV,VIAJES_BID_PV,VIÁTICOS,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial.",1,12892,12892
+2221,BID_PV,VIAJES_BID_PV,PASAJES AÉREOS NACIONALES,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial.",1,18182,18182
+2221,BID_PV,VIAJES_BID_PV,HOSPEDAJE NACIONAL,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial.",1,18204,18204
+2221,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES NACIONALES,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial  ",1,30910,30910
+2263,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial  ",1,92231,92231
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACIÓN / VÍVERES,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,"33912,28","33912,28"
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPO DE PROTECCIÓN PERSONAL,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,30000,30000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,30000,30000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,COMBUSTIBLE,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,40000,40000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,INSUMOS Y EQUIPAMIENTO,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,"35890,19","35890,19"
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MANTENIMIENTO DE VEHÍCULOS,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,40000,40000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HOSPEDAJE NACIONAL,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,45000,45000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,VIÁTICOS,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,45000,45000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE VEHÍCULOS,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,40000,40000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,"PAGO PONTÓN, PEAJES, ETC",A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,20000,20000
+2211,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,GUIAS LOCALES,A3.1 / 4 / 4.3,Realizar campañas de campo para evaluar potencial productivo,1,45000,45000
+2211,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPOS,A3.1 / 5 / 5.1,Realizar campañas de campo para evaluar potencial productivo,1,"7860,56","7860,56"
+2211,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE PROYECTO,A3.1 / 5 / 5.1,Realizar campañas de campo para evaluar potencial productivo,1,"4298,06","4298,06"
+2211,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,HERRAMIENTAS VARIAS,A3.1 / 5 / 5.1,Realizar campañas de campo para evaluar potencial productivo,1,"7860,56","7860,56"
+2211,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPO DE PROTECCIÓN PERSONAL,A3.1 / 5 / 5.1,Realizar campañas de campo para evaluar potencial productivo,1,"7860,56","7860,56"
+2211,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE OFICINA,A3.1 / 5 / 5.1,Realizar campañas de campo para evaluar potencial productivo,1,"7860,55","7860,55"
+2221,BID_PV,CONSULTORIAS,CONSULTORES,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes.,1,18679,18679
+2221,BID_PV,GUIAS,GUIAS LOCALES,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes.,1,2099,2099
+2133,BID_PV,TALLERES_BID_PV,TALLERES,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes.,1,49120,49120
+2221,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes.,1,4127,4127
+2221,BID_PV,VIAJES_BID_PV,PASAJES AÉREOS NACIONALES,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes. ,1,8753,8753
+2221,BID_PV,VIAJES_BID_PV,HOSPEDAJE,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes. ,1,2289,2289
+2221,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES NACIONALES,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes. ,1,24369,24369
+2221,BID_PV,VIAJES_BID_PV,VIÁTICOS CAMPO,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes. ,1,356,356
+2221,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,114,Complementar los sistemas de alerta temprana de producción de frutos y generar reportes. ,1,21635,21635
+2222,BID_PV,VIAJES_BID_PV,HOSPEDAJE,115,Contribuir al establecimiento de una línea de base inicial de reservas de carbono.,1,205,205
+2222,BID_PV,VIAJES_BID_PV,PASAJES AEREOS,115,Contribuir al establecimiento de una línea de base inicial de reservas de carbono.,1,1790,1790
+2222,BID_PV,CONSULTORIAS,CONSULTORES,115,Contribuir al establecimiento de una línea de base inicial de reservas de carbono. - modelamiento GEI,1,127013,127013
+2222,SUECIA_PV,VIAJES_SUECIA_PV,COMBUSTIBLE,115,Contribuir al establecimiento de una línea de base inicial de reservas de carbono. - modelamiento GEI,1,5767,5767
+2231,BID_PV,TALLERES_BID_PV,TALLERES,116,"Generar un módulo para incluir información sobre mercados, precios y características de las organizaciones productivas del Departamento",1,47371,47371
+2231,BID_PV,IMPRESIONES,IMPRESIONES,116,"Generar un módulo para incluir información sobre mercados, precios y características de las organizaciones productivas del Departamento",1,30331,30331
+2231,BID_PV,VIAJES_BID_PV,PASAJES AÉREOS NACIONALES,116,"Generar un módulo para incluir información sobre mercados, precios y características de las organizaciones productivas del Departamento",1,20611,20611
+2231,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,116,"Generar un módulo para incluir información sobre mercados, precios y características de las organizaciones productivas del Departamento",1,33647,33647
+2233,GIZ,SERVICIOS_EXTERNOS_GIZ,CONSULTOR 1,R1,Desarrollo de un marco conceptual de un sistema piloto de monitoreo de biodiversidad - Analisis de mapeo de servicios ecosistémicos y vulnerabilidad socio-ecológica del norte de la Amazonia boliviana. Consultor por producto.,1,"31739,8","31739,8"
+2134,GIZ,SERVICIOS_EXTERNOS_GIZ,CONSULTOR 2,R1,Desarrollo de un marco conceptual de un sistema piloto de monitoreo de biodiversidad - Estimación de cobertura forestal (bosque) para Pando y área referenciales del proyecto. Consultor por producto.,1,"42319,66","42319,66"
+2134,GIZ,SERVICIOS_EXTERNOS_GIZ,CONSULTOR 3,R2,"Diseño de un sistema piloto de monitoreo de biodiversidad - Identificación y propuesta de indicadores relaciones con estructura y vigor del bosque usando escenas Sentinel-2, de alta resolucion (Planet) ",1,"31739,8","31739,8"
+2234,GIZ,SERVICIOS_EXTERNOS_GIZ,CONSULTOR 4,R2,Diseño de un sistema piloto de monitoreo de biodiversidad - Estudio de costo-eficiencia del sistema de monitoreo de biodiversidad. ,1,"47609,63","47609,63"
+2131,GIZ,SERVICIOS_EXTERNOS_GIZ,CONSULTOR 5,R3,Implementación de un sistema de monitoreo de biodiversidad - Sistematización de registros y actualizacion de base de datos de registros de camaras trampa. Consultor por producto.,1,"37029,69","37029,69"
+2131,GIZ,SERVICIOS_EXTERNOS_GIZ,GUIAS LOCALS,R3,Implementación de un sistema de monitoreo de biodiversidad - Apoyo de expertos o guias locales,1,"20313,48","20313,48"
+2131,GIZ,SERVICIOS_EXTERNOS_GIZ,CONSULTOR 6,R3,Implementación de un sistema de monitoreo de biodiversidad - Sistematización de registros y actualizacion de base de datos de registros acustícos. Consultor por producto.,1,"7405,94","7405,94"
+2131,GIZ,SERVICIOS_EXTERNOS_GIZ,ALQUILER MOTOCICLETAS,R3,Implementación de un sistema de monitoreo de biodiversidad - Alquiler de motocicletas (desplazamiento en campo),1,"15235,07","15235,07"
+2151,GIZ,SERVICIOS_EXTERNOS_GIZ,ALQUILER DE SALÓN,R2,Diseño de un sistema piloto de monitoreo de biodiversidad - Alquiler de salas (Capacitaciones),1,"28565,81","28565,81"
+2114,GIZ,SERVICIOS_EXTERNOS_GIZ,ALQUILER DE SALÓN,R1,Desarrollo de un marco conceptual de un sistema piloto de monitoreo de biodiversidad - Alquiler de salas,1,"28565,81","28565,81"
+2151,GIZ,SERVICIOS_EXTERNOS_GIZ,ALIMENTACION / VIVERES,R2,Diseño de un sistema piloto de monitoreo de biodiversidad - Alimentación (Capacitaciones),1,"8887,16","8887,16"
+2131,GIZ,SERVICIOS_EXTERNOS_GIZ,ALIMENTACION / VIVERES,R3,Implementación de un sistema de monitoreo de biodiversidad - Alimentación,1,"2221,75","2221,75"
+2151,GIZ,SERVICIOS_EXTERNOS_GIZ,DISEÑO Y DIAGRAMACION MATERIAL COMUNICACIONAL,R2,"Diseño de un sistema piloto de monitoreo de biodiversidad -  Diseno, diagramación e impresión de protocolos de toma de datos y análisis (Capacitaciones)",1,"29623,75","29623,75"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,VIÁTICOS,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Viaticos de ciudad nacional (Capacitaciones),1,"16927,93","16927,93"
+2131,GIZ,GASTOS_DE_VIAJE_GIZ,VIÁTICOS,R3,Implementación de un sistema de monitoreo de biodiversidad - Viaticos de ciudad nacional,1,"16927,93","16927,93"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,VIATICOS CAMPO,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Viaticos de campo (Capacitaciones),1,"14282,9","14282,9"
+2131,GIZ,GASTOS_DE_VIAJE_GIZ,VIATICOS CAMPO,R3,Implementación de un sistema de monitoreo de biodiversidad -  Viaticos de campo,1,"14282,9","14282,9"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,HOSPEDAJE NACIONAL,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Hospedaje para participantes de talleres (Capacitaciones),1,"63479,53","63479,53"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,PASAJES TERRESTRES NACIONALES,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Transporte de participantes de taller,1,"31739,8","31739,8"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,PASAJES AEREOS NACIONALES,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Pasajes aéreos (Capacitaciones),1,"47609,71","47609,71"
+2131,GIZ,GASTOS_DE_VIAJE_GIZ,PASAJES AEREOS NACIONALES,R3,Implementación de un sistema de monitoreo de biodiversidad  -  Pasajes aéreos,1,"47609,71","47609,71"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,TRANSPORTE LOCAL,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Transporte taxis aeropuerto La Paz (Capacitaciones),1,"9521,99","9521,99"
+2131,GIZ,GASTOS_DE_VIAJE_GIZ,TRANSPORTE LOCAL,R3,Implementación de un sistema de monitoreo de biodiversidad  -  Transporte taxis aeropuerto La Paz,1,"9521,99","9521,99"
+2151,GIZ,GASTOS_DE_VIAJE_GIZ,TRANSPORTE LOCAL,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Transporte taxis aeropuerto Cobija (Capacitaciones),1,"2221,83","2221,83"
+2131,GIZ,GASTOS_DE_VIAJE_GIZ,TRANSPORTE LOCAL,R3,Implementación de un sistema de monitoreo de biodiversidad -  Transporte taxis aeropuerto Cobija,1,"2221,83","2221,83"
+2134,GIZ,EQUIPOS_Y_MATERIALES_GIZ,LICENCIAS SOFTWARE,R3,Implementación de un sistema de monitoreo de biodiversidad -  Licencias/creditos ArcGIS Pro,1,"8463,96","8463,96"
+2134,GIZ,EQUIPOS_Y_MATERIALES_GIZ,LICENCIAS SOFTWARE,R3,Implementación de un sistema de monitoreo de biodiversidad -  Licencias/creditos Google Colab,1,"31739,8","31739,8"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,CAMARAS TRAMPA,R3,Implementación de un sistema de monitoreo de biodiversidad -  Camaras Trampa Bushnell,1,"206308,49","206308,49"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,SENSORES ACÚSTICOS,R3,Implementación de un sistema de monitoreo de biodiversidad -  Sensores acústicos,1,"89929,36","89929,36"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,MEMORIA SD,R3,Implementación de un sistema de monitoreo de biodiversidad -  90 Memorias SD 32 Gb,1,"25391,81","25391,81"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,EQUIPOS IT,R3,Implementación de un sistema de monitoreo de biodiversidad -  Discos Externos de 2 Gb,1,"9310,35","9310,35"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,EQUIPOS IT,R3,Implementación de un sistema de monitoreo de biodiversidad -  Monitor de 24 pulgadas,1,"2848,73","2848,73"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,EQUIPOS IT,R3,Implementación de un sistema de monitoreo de biodiversidad -  Laptops Core I5,1,"22217,82","22217,82"
+2131,GIZ,EQUIPOS_Y_MATERIALES_GIZ,EQUIPOS IT,R3,"Implementación de un sistema de monitoreo de biodiversidad -  Disco duro de 1 TB, 7200 RPM, SAS 2.0 6 GB/s 16 MB.",1,"5078,33","5078,33"
+2131,GIZ,OTROS_COSTOS_CONSUMIBLES,COMBUSTIBLE,R3,Implementación de un sistema de monitoreo de biodiversidad -  Combustible ,1,"27753,04","27753,04"
+2131,GIZ,OTROS_COSTOS_CONSUMIBLES,MANTENIMIENTO VEHÍCULOS,R3,Implementación de un sistema de monitoreo de biodiversidad -  Mantenimiento vehiculos institucionales,1,"15858,88","15858,88"
+2151,GIZ,OTROS_COSTOS_CONSUMIBLES,MATERIAL DE ESCRITORIO,R2,Diseño de un sistema piloto de monitoreo de biodiversidad -  Material de escritorio para talleres,1,"4757,66","4757,66"
+2131,GIZ,OTROS_COSTOS_CONSUMIBLES,PILAS ALCALINAS,R3,Implementación de un sistema de monitoreo de biodiversidad -  Pilas AA para funcionamiento de cámaras trampa y sensores,1,"23788,32","23788,32"
+2152,MOORE,OTROS_GASTOS_DIRECTOS,CAPACITACIONES,3,Capacitar a las comunidades sobre la normativa minera,1,147800,147800
+2152,MOORE,OTROS_GASTOS_DIRECTOS,"VIÁTICOS, ALIMENTACIÓN E IMPREVISTOS","3, 5",Organización de logistica de talleres de capacitaciones y Conferencia Internacional,1,110000,110000
+2262,MOORE,OTROS_GASTOS_DIRECTOS,COMUNICACIONES Y PUBLICACIONE,8,Elaborar una cartilla informativa sobre normativa minera,1,26600,26600
+2252,MOORE,CONSULTORES_Y_CONTRATISTAS,CONSULTORES,"2,4","Actualizar el geoportal con la region MAP, y publicacion de reportes",1,20900,20900
+2212,AAF9_PANDO,MATERIALES_DE_DIVULGACION,MATERIALES DE PROMOCIÓN Y COMUNICACIÓN,2,"B.1. Inicio de la gestión en el Área Protegida Municipal ""Arroyo Guarichona"", Departamento del Beni.",1,0,0
+2252,EROL_2,CONSULTING_EROL_2,CONSULTORÍA MÓDULO OBSERVATORIO,R3,R.3 Creación de una red regional de promoción e intercambio de datos para la integración de políticas,1,48720,48720
+2142,AAF9_PANDO,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A2.2,A2.2 (Estacion meteorológica HOBO-DAVIS),1,50000,50000
+2153,AAF9_PANDO,TALLERES_Y_REUNIONES,TALLERES,A2.3,"A2.3 (Capacitacion técnicos RECPA en ""Meteorología y climatología: Análisis de datos climáticos"")",1,25000,25000
+2132,AAF9_BENI,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A 2.1. Area C,A2.1 AreaC (Desarrollo de aplicativo en GEE para monitoreo de áreas inundadas),1,20000,20000
+2253,AAF9_BENI,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A2.1 Area C,A2.1 Area C (Desarrollo de geoportal Beni),1,35000,35000
+2114,AAF9_PANDO,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A 2.1 ,A2.1: AREA B - TAHUAMANU ORTHON,1,20000,20000
+2131,AAF9_PANDO,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A2.3,A2.3: AREA D - APM LAGOS DE SAN PEDRO,1,12000,12000
+2212,AAF9_BENI,MATERIALES_DE_DIVULGACION,MATERIALES DE PROMOCIÓN Y COMUNICACIÓN,"A2,1","A2.1: AREA C - INICIO DE LA GESTIÓN APM ""ARROYO GUARICHONA""",1,15000,15000
+2281,AAF9_PANDO,EQUIPOS_Y_SUMINISTROS_AAF,INSUMOS Y EQUIPAMIENTO,A24 area E,Equipamiento EBT,1,118000,118000
+3111,BID_PV,TALLERES_BID_PV,TALLERES,211,ND,1,1200,1200
+3111,BID_PV,TALLERES_BID_PV,TALLERES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,46148,46148
+3111,BID_PV,VIAJES_BID_PV,VIÁTICOS,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,8037,8037
+3111,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,1492,1492
+3111,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,22539,22539
+3111,SUECIA_PV,VIAJES_SUECIA_PV,VIÁTICOS,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,2456,2456
+3111,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES TERRESTRES NACIONALES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,2355,2355
+3111,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,2836,2836
+3111,SUECIA_PV,VIAJES_SUECIA_PV,HOSPEDAJE NACIONAL,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,983,983
+3111,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,13134,13134
+3112,BID_PV,TALLERES_BID_PV,TALLERES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,30765,30765
+3112,BID_PV,VIAJES_BID_PV,VIÁTICOS,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,5358,5358
+3112,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,995,995
+3112,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,15026,15026
+3112,SUECIA_PV,VIAJES_SUECIA_PV,VIÁTICOS,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,1637,1637
+3112,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES TERRESTRES NACIONALES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,1570,1570
+3112,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,1890,1890
+3112,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,8756,8756
+3112,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A3.3 / 2 / 2.4,"Apoyo a la elaboración de planes de manejo en San pedro, Ingavi, Santos Mercado  y Villa Nueva",1,"16474,69","16474,69"
+3112,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. PLANES COMUN. PFNM,211,Fortalecer el manejo sostenible de bosques .,1,"372943,75","372943,75"
+3112,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MAT. PARA PARCELAS EVAL. POT. PROD.,211,Fortalecer el manejo sostenible de bosques .,1,"5468,5","5468,5"
+3112,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (COMUN. Y PUEBLOS),211,Fortalecer el manejo sostenible de bosques .,1,"5555,3","5555,3"
+3112,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,211,Fortalecer el manejo sostenible de bosques .,1,"9942,72","9942,72"
+3112,EROL_2,CONSULTING_EROL_2,CONSULTORÍAS PARA PLANES COMUNALES DE MANEJO,R1.2.,Apoyo a 8 comunidades de BEI y LSP ,1,62640,62640
+3121,BID_PV,TALLERES_BID_PV,TALLERES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,76914,76914
+3121,BID_PV,VIAJES_BID_PV,VIÁTICOS,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,13395,13395
+3121,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,2487,2487
+3121,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,37565,37565
+3121,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,106527,106527
+3121,SUECIA_PV,VIAJES_SUECIA_PV,VIÁTICOS,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,4094,4094
+3121,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES TERRESTRES NACIONALES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,3926,3926
+3121,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,4726,4726
+3121,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,211,Fortalecimiento de capacidades en buenas prácticas de recolección y almacenamiento de frutos.,1,21890,21890
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,CAPACITADORES,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"6077,86","6077,86"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7047,01","7047,01"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"4365,91","4365,91"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7748,26","7748,26"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7748,26","7748,26"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7748,26","7748,26"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7748,26","7748,26"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7748,26","7748,26"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7178,79","7178,79"
+3121,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A3.4 / 6 / 6.3,"Brindar asistencia técnica e insumos para la implementación de buenas prácticas de cosecha, acopio y transporte de los productos forestales no maderables, en el marco de los planes elaborados.",1,"7748,26","7748,26"
+3121,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"3876,06","3876,06"
+3121,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"1531,11","1531,11"
+3121,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2342,1","2342,1"
+3121,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2729,99","2729,99"
+3121,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2399,24","2399,24"
+3121,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"4583,99","4583,99"
+3121,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.4 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"4292,78","4292,78"
+3121,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE OFICINA,A3.4 / 5 / 5.2,Promover buenas prácticas de cosecha de frutos y de pesca,1,0,0
+3121,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPOS,A3.4 / 5 / 5.2,Promover buenas prácticas de cosecha de frutos ,1,"901,85","901,85"
+3121,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE PROYECTO,A3.4 / 5 / 5.2,Promover buenas prácticas de cosecha de frutos ,1,"1184,05","1184,05"
+3121,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPO DE PROTECCIÓN PERSONAL,A3.4 / 5 / 5.2,Promover buenas prácticas de cosecha de frutos ,1,"1184,05","1184,05"
+3121,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,HERRAMIENTAS VARIAS,A3.4 / 5 / 5.2,Promover buenas prácticas de cosecha de frutos ,1,"1184,05","1184,05"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,CAPACITADORES,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A3.6 / 6 / 6.4,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"8422,03","8422,03"
+3122,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3122,RAINFOREST,SERVICIOS_PROFESIONALES_Y_DE_CONSULTORÍA_RF,CONSULTORES,A3.6 / 2 / 2..5 ,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"224587,35","224587,35"
+3131,RE_WILD_2,CONSULTORES_REWILD,CONSULTORES,A1.2,Un reporte de la experiencia piloto de trazabilidad donde se evalúa la factibilidad de su implementación y escalamiento.,1,75000,75000
+3212,BID_PV,TALLERES_BID_PV,TALLERES,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,24193,24193
+3212,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,3604,3604
+3212,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES TERRESTRES NACIONALES,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,3138,3138
+3212,SUECIA_PV,VIAJES_SUECIA_PV,COMBUSTIBLE,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,3378,3378
+3212,SUECIA_PV,VIAJES_SUECIA_PV,VIÁTICOS,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,15362,15362
+3212,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,10683,10683
+3212,SUECIA_PV,VIAJES_SUECIA_PV,HOSPEDAJE NACIONAL,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,0,0
+3212,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,122,Fortalecer capacidades organizativas y de gestión de la FEDAFAP y FACOAP ,1,25828,25828
+3212,SUECIA_PV,TALLERES_SUECIA_PV,TALLERES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM.",1,1500,1500
+3212,SUECIA_PV,VIAJES_SUECIA_PV,HOSPEDAJE NACIONAL,213,Fortalecimiento de capacidades en gestión de negocios de PFNM,1,2000,2000
+3221,BID_PV,VIAJES_BID_PV,VIÁTICOS CAMPO,221,"Adecuar las plantas procesadoras, complementando los equipos para la transformación de otros frutos amazónicos.",1,7437,7437
+3221,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,221,"Adecuar las plantas procesadoras, complementando los equipos para la transformación de otros frutos amazónicos.",1,3408,3408
+3221,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,221,"Adecuar las plantas procesadoras, complementando los equipos para la transformación de otros frutos amazónicos.",1,182001,182001
+3222,BID_PV,TALLERES_BID_PV,TALLERES,212 - 223, Fortalecimiento de capacidades en buenas prácticas de transformación de PFNM y Brindar asistencia técnica para la estandarización de los procesos de transformación primaria.,1,70589,70589
+3222,BID_PV,VIAJES_BID_PV,VIÁTICOS CAMPO,212 - 223, Fortalecimiento de capacidades en buenas prácticas de transformación de PFNM y Brindar asistencia técnica para la estandarización de los procesos de transformación primaria.,1,32064,32064
+3222,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,212 - 223, Fortalecimiento de capacidades en buenas prácticas de transformación de PFNM y Brindar asistencia técnica para la estandarización de los procesos de transformación primaria.,1,12196,12196
+3222,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,212 - 223, Fortalecimiento de capacidades en buenas prácticas de transformación de PFNM y Brindar asistencia técnica para la estandarización de los procesos de transformación primaria.,1,23918,23918
+3222,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,MATERIAL DE DIFUSIÓN,212 - 223, Fortalecimiento de capacidades en buenas prácticas de transformación de PFNM y Brindar asistencia técnica para la estandarización de los procesos de transformación primaria.,1,11858,11858
+3112,AFD,VIAJES_AFD,ALIMENTACION TALLERES,211,Fortalecer el manejo sostenible de bosques .,1,5000,5000
+3121,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,KITS DE COSECHA FRUTOS AMAZONICOS,"A,2,1,2,",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"267175,19","267175,19"
+3121,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"7718,21","7718,21"
+3121,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"7161,12","7161,12"
+3121,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,20000,20000
+3121,AFD,VIAJES_AFD,ALIMENTACION TALLERES,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,13000,13000
+3222,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,SACOS DE YUTE,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"11163,55","11163,55"
+3121,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,PASAJES AEREOS,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,4463,4463
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CAPACITADORES,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,LABORATORIO,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,PASAJES TERRESTRES NACIONALES,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACION TALLERES,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE SALÓN,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPOS DE PRODUCCIÓN,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MATERIAL DE CONSTRUCCIÓN,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24953,07","24953,07"
+3221,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CERTIFICACIÓN ORGANICA,A3.5 / 4 / 4.5,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"24962,75","24962,75"
+3221,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE PROYECTO,A3.5 / 5 / 5.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"104393,92","104393,92"
+3221,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPOS DE PRODUCCIÓN,A3.5 / 5 / 5.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"112293,67","112293,67"
+3221,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,HERRAMIENTAS VARIAS,A3.5 / 5 / 5.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"112293,67","112293,67"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CAPACITADORES,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,LABORATORIO,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,PASAJES TERRESTRES NACIONALES,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACION TALLERES,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE SALÓN,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPOS DE PRODUCCIÓN,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MATERIAL DE CONSTRUCCIÓN,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46788,22","46788,22"
+3222,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CERTIFICACIÓN ORGANICA,A3.6 / 4 / 4.5,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"46795,48","46795,48"
+3222,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.6 / 7 / 7.7,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"3208,39","3208,39"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE OFICINA,A3.6 / 5 / 5.2,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"10106,43","10106,43"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPOS,A3.6 / 5 / 5.2,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"10106,43","10106,43"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE PROYECTO,A3.6 / 5 / 5.2,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"10106,43","10106,43"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPO DE PROTECCIÓN PERSONAL,A3.6 / 5 / 5.2,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"10106,43","10106,43"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,HERRAMIENTAS VARIAS,A3.6 / 5 / 5.2,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"10106,43","10106,43"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,SUMINISTROS DE PROYECTO,A3.6 / 5 / 5.3,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"37431,22","37431,22"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,EQUIPOS DE PRODUCCIÓN,A3.6 / 5 / 5.3,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"37431,22","37431,22"
+3222,RAINFOREST,EQUIPOS_Y_SUMINISTROS_RF,HERRAMIENTAS VARIAS,A3.6 / 5 / 5.3,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"37431,22","37431,22"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CAPACITADORES,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"31191,34","31191,34"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,LABORATORIO,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"31191,34","31191,34"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,PASAJES TERRESTRES NACIONALES,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"25391,59","25391,59"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACIÓN / VÍVERES,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"29630,13","29630,13"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE SALÓN,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"25391,59","25391,59"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPOS DE PRODUCCIÓN,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"31191,34","31191,34"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"29616,34","29616,34"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MATERIAL DE CONSTRUCCIÓN,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"31191,34","31191,34"
+3121,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CERTIFICACIÓN ORGANICA,A3.4 / 4 / 4.5,Fortalecimiento organizacional,1,"31203,44","31203,44"
+3121,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"3876,06","3876,06"
+3121,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"1531,11","1531,11"
+3121,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"2342,1","2342,1"
+3121,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"2729,99","2729,99"
+3121,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"2399,24","2399,24"
+3121,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"4583,99","4583,99"
+3121,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.4 / 7 / 7.7,Fortalecimiento organizacional,1,"4292,78","4292,78"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CAPACITADORES,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"31192,15","31192,15"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,LABORATORIO,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"31192,15","31192,15"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,PASAJES TERRESTRES NACIONALES,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"31192,15","31192,15"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALIMENTACION TALLERES,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"31061,72","31061,72"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,ALQUILER DE SALÓN,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"29992,15","29992,15"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,EQUIPOS DE PRODUCCIÓN,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"24832,15","24832,15"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,HERRAMIENTAS VARIAS,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"24674,65","24674,65"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,MATERIAL DE CONSTRUCCIÓN,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"31192,15","31192,15"
+3212,RAINFOREST,GESTIÓN_DE_ÁREAS_PROTEGIDAS_RF,CERTIFICACIÓN ORGANICA,A3.7 / 4 / 4.5,Implementación de emprendimientos comunitarios de manejo de PFNM y otros recursos.,1,"31196,99","31196,99"
+3212,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"2627,93","2627,93"
+3212,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,0,0
+3212,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,0,0
+3212,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,0,0
+3212,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"935,78","935,78"
+3212,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"2975,78","2975,78"
+3212,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"1390,96","1390,96"
+3311,BID_PV,TALLERES_BID_PV,TALLERES,213, Fortalecimiento de capacidades en gestión de negocios de PFNM.,1,20669,20669
+3311,BID_PV,VIAJES_BID_PV,VIÁTICOS,213, Fortalecimiento de capacidades en gestión de negocios de PFNM.,1,10413,10413
+3311,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,213, Fortalecimiento de capacidades en gestión de negocios de PFNM.,1,9782,9782
+3311,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,213,Fortalecimiento de capacidades en gestión de negocios de PFNM,1,18262,18262
+3311,SUECIA_PV,VIAJES_SUECIA_PV,HOSPEDAJE NACIONAL,213,Fortalecimiento de capacidades en gestión de negocios de PFNM,1,425,425
+3311,SUECIA_PV,COMUNICACIÓN_Y_DIFUSIÓN,IMPRESIONES,214,Fortalecimiento de capacidades en gestión de negocios de PFNM,1,18533,18533
+3221,RE_WILD_2,EQUIPAMIENTO_REWILD,INSUMOS Y EQUIPAMIENTO,A 1.4 y A1.5,Equipos a insumos asociaciones de asaì y castaña,1,194000,194000
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,CAPACITADORES,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3221,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A3.5 / 6 / 6.3,"Promover la agregación de valor a partir de la construcción y funcionamiento de una planta procesadora de pulpa de frutos de palmeras, en base a un estudio de factibilidad que incluya el diseño de esquemas de suministro con las comunidades de las áreas protegidas y el establecimiento de una cadena de frío.",1,"7299,09","7299,09"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,CAPACITADORES,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"7860,56","7860,56"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,SUMINISTROS DE OFICINA,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"5992,04","5992,04"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALIMENTACIÓN / VÍVERES,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"6364,41","6364,41"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,COMBUSTIBLE,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"7002,4","7002,4"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,VIÁTICOS,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"5177,78","5177,78"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,PASAJES TERRESTRES NACIONALES,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"4507,34","4507,34"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,HOSPEDAJE NACIONAL,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"7545,56","7545,56"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE VEHÍCULOS,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"5772,56","5772,56"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"5772,56","5772,56"
+3311,RAINFOREST,TALLERES_Y_CAPACITACIONES_RF,ALQUILER DE SALÓN,A3.7 / 6 / 6.3,"Talleres en manejo sustentable del bosque, fortalecimiento organizacional, manejo administrativo, estrategias de mercado.",1,"7860,56","7860,56"
+3311,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"2627,93","2627,93"
+3311,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,0,0
+3311,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,0,0
+3311,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,0,0
+3311,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"935,78","935,78"
+3311,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"2975,78","2975,78"
+3311,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.7 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales.,1,"1390,96","1390,96"
+3321,BID_PV,TALLERES_BID_PV,TALLERES,231,Fortalecer las capaciadades de las asociaciones para vincularse a los mercados y promover su vinculación a organizaciones que ofrecen financiamiento (créditos u otros mecanismos).,1,18378,18378
+3321,BID_PV,VIAJES_BID_PV,VIÁTICOS,231,Fortalecer las capaciadades de las asociaciones para vincularse a los mercados y promover su vinculación a organizaciones que ofrecen financiamiento (créditos u otros mecanismos).,1,6880,6880
+3321,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES NACIONALES,231,Fortalecer las capaciadades de las asociaciones para vincularse a los mercados y promover su vinculación a organizaciones que ofrecen financiamiento (créditos u otros mecanismos).,1,2884,2884
+3321,BID_PV,VIAJES_BID_PV,PASAJES AÉREOS NACIONALES,231,Fortalecer las capaciadades de las asociaciones para vincularse a los mercados y promover su vinculación a organizaciones que ofrecen financiamiento (créditos u otros mecanismos).,1,37214,37214
+3321,BID_PV,VIAJES_BID_PV,HOSPEDAJE NACIONAL,231,Fortalecer las capaciadades de las asociaciones para vincularse a los mercados y promover su vinculación a organizaciones que ofrecen financiamiento (créditos u otros mecanismos).,1,4306,4306
+3331,RE_WILD_2,VIAJES_REWILD,VIÁTICOS,"A.1.3.1,",viàticos nacionales,1,15040,15040
+3331,RE_WILD_2,VIAJES_REWILD,VIÁTICOS,"A.1.3.1,",Viaticos internacionales,1,16875,16875
+3331,RE_WILD_2,VIAJES_REWILD,PASAJES TERRESTRES NACIONALES,"A.1.3.1,",pasajes nacionales,1,8673,8673
+3331,RE_WILD_2,VIAJES_REWILD,PASAJES AÉREOS NACIONALES,"A.1.3.1,",pasajes nacionales,1,4346,4346
+3331,RE_WILD_2,VIAJES_REWILD,PASAJES AÉREOS NACIONALES,"A.1.3.1,",pasajes internacionales,1,60000,60000
+3331,RE_WILD_2,VIAJES_REWILD,HOSPEDAJE NACIONAL,"A.1.3.1,",hospedaje nacional,1,11953,11953
+3331,RE_WILD_2,VIAJES_REWILD,HOSPEDAJE NACIONAL,"A.1.3.1,",hospedaje internacional,1,30000,30000
+3331,RE_WILD_2,VIAJES_RF,HOSPEDAJE NACIONAL,"A.1.3.1,",hospedaje terceros,1,10828,10828
+3331,RE_WILD_2,VIAJES_REWILD,VIÁTICOS,"A.1.3.1,",Gasolina,1,1630,1630
+3331,RE_WILD_2,EQUIPAMIENTO_REWILD,ALIMENTACIÓN / VÍVERES,A.1.6,talleres  alimentaciòn,1,13402,13402
+3331,RE_WILD_2,EQUIPAMIENTO_REWILD,ALIMENTACIÓN / VÍVERES,A.1.6,alquiler salon,1,5500,5500
+3331,RE_WILD_2,CONSULTORES_REWILD,CONSULTORES,A1.2,consultor exportaciòn,1,75000,75000
+3331,BID_PV,VIAJES_BID_PV,VIÁTICOS,232,Promover el posicionamiento de los recursos del bosque de Pando con eventos comerciales en localidades priorizadas,1,10235,10235
+3331,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES NACIONALES,232,Promover el posicionamiento de los recursos del bosque de Pando con eventos comerciales en localidades priorizadas,1,3985,3985
+3331,BID_PV,VIAJES_BID_PV,PASAJES AÉREOS NACIONALES,232,Promover el posicionamiento de los recursos del bosque de Pando con eventos comerciales en localidades priorizadas,1,21475,21475
+3331,BID_PV,VIAJES_BID_PV,HOSPEDAJE NACIONAL,232,Promover el posicionamiento de los recursos del bosque de Pando con eventos comerciales en localidades priorizadas,1,2071,2071
+3331,BID_PV,TALLERES_BID_PV,REUNIONES Y TALLERES EMPREND. PRODUC.,232,Promover el posicionamiento de los recursos del bosque de Pando con eventos comerciales en localidades priorizadas,1,62882,62882
+3331,RAINFOREST,VIAJES_RF,COMBUSTIBLE,A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2218,74","2218,74"
+3331,RAINFOREST,VIAJES_RF,VIÁTICOS,A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,0,0
+3331,RAINFOREST,VIAJES_RF,PASAJES TERRESTRES NACIONALES,A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2031,3","2031,3"
+3331,RAINFOREST,VIAJES_RF,PASAJES AÉREOS NACIONALES,A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2406,3","2406,3"
+3331,RAINFOREST,VIAJES_RF,HOSPEDAJE NACIONAL,A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"966,3","966,3"
+3331,RAINFOREST,VIAJES_RF,ALQUILER DE VEHÍCULOS,A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"2406,28","2406,28"
+3331,RAINFOREST,VIAJES_RF,"PAGO PONTÓN, PEAJES, ETC",A3.2 / 7 / 7.7,Viajes para personal de ACEAA para promover manejo sostenible de recursos naturales,1,"1520,62","1520,62"
+3331,EROL_2,CONSULTING_EROL_2,CONSULTORÍA PARA IDENTIFICACIÓN DE REQUERIMIENTOS DE EXPORTACIÓN,R.3.1.,Diagnosis of the economic effects of the cross-border movement of NTFPs (micro and macro),1,24360,24360
+3421,AKAM_CCAM,LOCAL_PARTNER_ACTIVITIES,CAPACITADORES,1.4.3,Organizaciòn y equipamiento para reforestaciones en las comunidades (CIPLA y comunidades campesinas),1,"47212,45","47212,45"
+3421,AKAM_CCAM,LOCAL_PARTNER_INVESTMENTS,EQUIPOS RIEGO,2.2,Implementaciòn y equipamiento de viveros comunales,1,"1247,66","1247,66"
+3521,BID_PV,CONSULTORIAS,CONSULTORES,222,Optimizar los procesos de transformación: uso adecuado agua y promoviendo uso de energía renovable.,1,242645,242645
+3521,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,222,Optimizar los procesos de transformación: uso adecuado agua y promoviendo uso de energía renovable.,1,3753,3753
+3121,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"9942,72","9942,72"
+3121,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (COMUN. Y PUEBLOS),"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"4555,3","4555,3"
+3121,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"7396,22","7396,22"
+3121,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"2556,7","2556,7"
+3121,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA","A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"3756,92","3756,92"
+3121,AFD,EQUIPAMIENTO_TECNICO_AFD,CONGELADORAS PARA FRUTAS,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"10046,41","10046,41"
+3121,AFD,EQUIPAMIENTO_TECNICO_AFD,TELEFONOS CELULARES,"A,2,2.1",Impulsar la organzacion de las comunidades para el aprovechamiento sostenible de los bosques ,1,"12022,88","12022,88"
+4111,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. DES. MODULOS DE CAPACIT.,A.1.1.1.,Talleres y Capacitacion ,1,"70309,26","70309,26"
+4112,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MOCHILAS CON MATERIAL EDUCATIVO,A.1.1.1.,Material Ludico,1,"28904,92","28904,92"
+4113,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. DISEÑO APLIC. COMUNIC. Y EDUCACION,A.1.1.1.,Aplicación con enfoque pedagogico ,1,"54684,98","54684,98"
+4113,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,FOLLETOS Y APLIC. DIGITALES,A.1.1.1.,Aplicación con enfoque pedagogico ,1,"77340,17","77340,17"
+4113,AAF9_PANDO,MATERIALES_DE_DIVULGACION,MATERIALES DE PROMOCIÓN Y COMUNICACIÓN,A 2.1. ,Juegos de fauna amazónica ,1,6000,6000
+4113,AAF9_BENI,MATERIALES_DE_DIVULGACION,MATERIALES DE PROMOCIÓN Y COMUNICACIÓN,A 2.3 Area C,"Comic Borochi, diagramacion ajuste e impreisones",1,15000,15000
+4114,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. MEJORA MOD. OBSERV.,"A.1.3.1,",Actualizacion del OFACC,1,"117182,1","117182,1"
+4114,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),A.1.2.3,Incluir breves conceptos de politicas publicas al OFACC,1,5000,5000
+4114,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),A.1.2.3,Incluir breves conceptos de politicas publicas al OFACC,1,"3161,12","3161,12"
+4114,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,A.1.2.3,Incluir breves conceptos de politicas publicas al OFACC,1,"4942,72","4942,72"
+4114,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.1.2.3,Incluir breves conceptos de politicas publicas al OFACC,1,"1896,22","1896,22"
+4121,IIED,TALLERES_IIED,TALLERES,1.5.9,Talleres y capacitaciones (8),1,89700,89700
+4121,IIED,VIAJES_Y_CAMPO,GASTOS DE VIAJE CAMPO,1.5.9,Viajes nacionales (8),1,40700,40700
+4121,IIED,TALLERES_IIED,TALLERES,2.1.7,Viaje internacional (1),1,"107349,6","107349,6"
+4122,AFD,VIAJES_AFD,PASAJES AEREOS,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,18000,18000
+4122,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"35154,63","35154,63"
+4122,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"29828,16","29828,16"
+4122,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,27000,27000
+4122,AFD,VIAJES_AFD,ALIMENTACION TALLERES,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"84533,67","84533,67"
+4122,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"28644,36","28644,36"
+4122,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,75000,75000
+4122,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"69529,5","69529,5"
+4122,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA","A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"11270,76","11270,76"
+4122,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"16665,9","16665,9"
+4122,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"7610,1","7610,1"
+4122,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),"A.1.1.2 , A.1.1.3, A.1.1.4","Impartir talleres sobre conceptos de conservacion de biodiversidad, manejo de bosques,adaptación, cambio climatico y politicas publicas.",1,"30467,34","30467,34"
+4123,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,"20311,56","20311,56"
+4123,AFD,VIAJES_AFD,ALIMENTACION TALLERES,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,"22090,22","22090,22"
+4123,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,"23436,42","23436,42"
+4123,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,36000,36000
+4123,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,46353,46353
+4123,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,13000,13000
+4123,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,8000,8000
+4123,AFD,VIAJES_AFD,PASAJES AEREOS,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,"8403,6","8403,6"
+4123,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,10000,10000
+4123,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,21000,21000
+4123,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,"A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,"5113,4","5113,4"
+4123,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA","A.1.4.1 , A.1.4.2.",Impartir talleres de politicas publicas a tecnicos municipales y de la gobernacion ,1,"7513,84","7513,84"
+4131,IIED,CONSULTORIAS_IIED,CONSULTORES,B5,ND,1,"35229,09","35229,09"
+4142,AFD,VIAJES_AFD,PASAJES AEREOS,"A,1.2.2",Generar material audiovisual e impreso ,1,6000,6000
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,BANNERS,"A,1.2.2",Generar material audiovisual e impreso ,2,"898,39","1796,78"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,PUBLICIDAD RADIOS,"A,1.2.2",Generar material audiovisual e impreso ,3,"39060,7","117182,1"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,DISEÑO E IMPRESIÓN DE COMICS,"A,1.2.2",Generar material audiovisual e impreso ,1,"21092,78","21092,78"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,FOLLETOS Y APLIC. DIGITALES,"A,1.2.2",Generar material audiovisual e impreso ,1,"11718,2","11718,2"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,VIDEOS,A.1.2.2,Generar material audiovisual e impreso ,1,"54684,98","54684,98"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,PAGO REDES SOC. MATERIAL AUDIOVISUAL,A.1.2.3,Difundir informacion comunicacional de sensibilizacion mediante redes sociales ,1,"6257,52","6257,52"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,PAGO TV Y REDIODIFUSIÓN SPOT,A.1.2.3,Difundir informacion comunicacional de sensibilizacion mediante redes sociales ,1,"25780,06","25780,06"
+4142,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,STAND PARA FERIAS,"A,.1.2.3",Difundir informacion comunicacional de sensibilizacion mediante redes sociales ,1,"6249,71","6249,71"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.1,"Diseño e impresión de cartillas de planes de manejo, planes de control y planes financieros.",1,"4491,75","4491,75"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.2,Establecer la señalizacion para la delimitación de las áreas protegidas,1,"138592,9","138592,9"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.3,Material impreso y audiovisual para promover las APs,1,"206539,86","206539,86"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.4,Diseño e imprsión de cartillas de capacitación sobre manejo de APs,1,"29944,98","29944,98"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.5,Diseño e impresión de cartillas sobre manejo de recursos forestales,1,"53342,34","53342,34"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.6,"Impulsar la aplicación de buenas prácticas en el manejo sostenible de los recursos hídricos, con énfasis en la pesca, por parte de las comunidades campesinas e indígenas de las áreas protegidas.",1,"59889,96","59889,96"
+4142,RAINFOREST,COSTOS_OPERATIVOS_RF,"DISEÑO. IMPRESIÓN, DIVULGACIÓN MATERIALES",A5.1 / 8 / 8.7,Diseño e impresión de cartillas de capacitación de módulos de pesca,1,"29944,98","29944,98"
+4211,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. DESARR. PLANES ACCION CLIMATICA,A.2.1.4.,Elaborar planes de accion climatica para enfrentar los efectos adversos del cambio climatico (inundaciones e incendios),1,"85399,54","85399,54"
+4211,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.2.1.4.,Elaborar planes de accion climatica para enfrentar los efectos adversos del cambio climatico (inundaciones e incendios),1,5000,5000
+4213,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. DES. PLANES DE ECOTURISMO,A.2.1.3,Elaborar planes locales de ecoturismo ,1,"46872,84","46872,84"
+4213,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.2.1.3,Elaborar planes locales de ecoturismo ,1,5000,5000
+4214,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"8718,21","8718,21"
+4214,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,12000,12000
+4214,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,13000,13000
+4214,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"7161,12","7161,12"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"10155,78","10155,78"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"2556,7","2556,7"
+4214,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"3309,26","3309,26"
+4214,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"23176,5","23176,5"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"12396,22","12396,22"
+4214,AFD,ESTUDIOS_CONSULTORIAS_AFD,CONS. INCLUSION PROP. PTDIs,A.3.1.2,Reuniones con OSC y gobiernos municipales y departamental,1,"191397,43","191397,43"
+4214,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),A.3.1.3,Validacion de talleres de documentos de planificacion ,1,3500,3500
+4214,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,12000,12000
+4214,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"23176,5","23176,5"
+4214,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,13000,13000
+4214,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"7161,12","7161,12"
+4214,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"8718,21","8718,21"
+4214,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"9885,48","9885,48"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"10115,78","10115,78"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"12396,22","12396,22"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"2556,7","2556,7"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,FOLLETOS Y APLIC. DIGITALES,A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"11718,2","11718,2"
+4214,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA",A.3.1.3,Validacion de talleres de documentos de planificacion ,1,"3756,92","3756,92"
+4212,FCF_3,VIAJES_FCF3,COMBUSTIBLE,1.4,Combustible,1,1400,1400
+4222,EROL_2,CONSULTING_EROL_2,CONSULTORÍAS PARA INCORPORAR ECONOMÍA DE BOSQUES EN PLANES SUBNACIONALES,R3.2.,Integrating forest management into subnational government planning,1,55680,55680
+4222,EROL_2,TRAVEL_AND_WORKSHOPS_EROL_2,VIAJES,R3.2.,Viajes ,1,20880,20880
+4222,EROL_2,TRAVEL_AND_WORKSHOPS_EROL_2,TALLERES,R3.2.,Talleres,1,13920,13920
+4212,FCF_3,VIAJES_FCF3,PASAJES TERRESTRES NACIONALES,1.4,Lavado de auto,1,80,80
+4212,FCF_3,VIAJES_FCF3,PASAJES AÉREOS NACIONALES,1.4,Pasajes aéreos  Carla Ramirez y Stephanie Torrico ,1,5000,5000
+4212,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5,Alimentación ,1,4000,4000
+4212,FCF_3,REUNIONES_Y_TALLERES,ALQUILERES VARIOS PARA PROYECTOS,1.5,Técnicos de campo ,1,22000,22000
+4212,FCF_3,REUNIONES_Y_TALLERES,ALQUILERES VARIOS PARA PROYECTOS,1.5,Viaticos de tereros ,1,4000,4000
+4232,FCF_3,VIAJES_FCF3,COMBUSTIBLE,1.4,Combustible ,1,"477,02","477,02"
+4232,FCF_3,VIAJES_FCF3,PASAJES TERRESTRES NACIONALES,1.4,Pasajes terrestre Beni,1,1200,1200
+4232,FCF_3,VIAJES_FCF3,PASAJES AÉREOS NACIONALES,1.4,Pasajes aéreos nacionales ,1,4000,4000
+4232,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5,Alimento para patrullaje  EBB,1,"3823,23","3823,23"
+4232,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA),A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,3500,3500
+4232,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,"5942,72","5942,72"
+4232,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,10000,10000
+4232,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA",A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,"3756,92","3756,92"
+4232,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,10000,10000
+4232,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,10000,10000
+4232,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,9000,9000
+4232,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,"6155,78","6155,78"
+4232,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,"12396,22","12396,22"
+4232,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,FOLLETOS Y APLIC. DIGITALES,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,"11718,2","11718,2"
+4232,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,A.2.3.2,Realizar monitoreos de implementacio de normas y procedimientos locales.,1,"2556,7","2556,7"
+4234,IIED,TALLERES_IIED,TALLERES,1.2.1,Ejecución de Planes de Acción (),1,"87951,63","87951,63"
+4234,IIED,VIAJES_Y_CAMPO,GASTOS DE VIAJE CAMPO,1.2.2,Viaje nacional para el monitoreo,1,6000,6000
+4234,IIED,TALLERES_IIED,TALLERES,1.2.2,Monitoreo de los planes de acción y otros,1,1000,1000
+4141,BID_PV,CONSULTORIAS,CONSULTORES,133,"Consultoria en desarrollo de una estrategia de posicionamiento de la economia basada en bosque del departamento de Pando, que incluya organización de eventos de posicionamiento a nivel naciona",1,920251,920251
+4141,BID_PV,TALLERES_BID_PV,TALLERES,133,"Consultoria en desarrollo de una estrategia de posicionamiento de la economia basada en bosque del departamento de Pando, que incluya organización de eventos de posicionamiento a nivel naciona",1,1507,1507
+4141,BID_PV,IMPRESIONES,IMPRESIONES,133,"Consultoria en desarrollo de una estrategia de posicionamiento de la economia basada en bosque del departamento de Pando, que incluya organización de eventos de posicionamiento a nivel naciona",1,6960,6960
+4221,BID_PV,CONSULTORIAS,CONSULTORES,CONSULTORES,"Elaborar estrategia de sostenibilidad financiera para cuatro PFNM priorizados, identificando diversos mecanismos.",1,227479,227479
+4312,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.2.3.1,Generar un dideño de monitoreo de aplicacion de normativas ,1,12090,12090
+4312,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA",A.2.3.1,Generar un dideño de monitoreo de aplicacion de normativas ,1,"3756,92","3756,92"
+4312,IIED,TALLERES_IIED,TALLERES,1.3.1,Evaluación SAGE de Gobernanza y Equidad de Coapata y Santa Rosa del Abuná,2,30000,60000
+4321,BID_PV,TALLERES_BID_PV,TALLERES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,88854,88854
+4321,BID_PV,VIAJES_BID_PV,VIÁTICOS TERCEROS,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,68265,68265
+4321,BID_PV,VIAJES_BID_PV,HOSPEDAJE TERCEROS,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,73810,73810
+4321,BID_PV,VIAJES_BID_PV,COMBUSTIBLE,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,3326,3326
+4321,BID_PV,VIAJES_BID_PV,PASAJES TERRESTRES NACIONALES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,59957,59957
+4321,SUECIA_PV,TALLERES_SUECIA_PV,TALLERES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,28884,28884
+4321,SUECIA_PV,VIAJES_SUECIA_PV,VIÁTICOS,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,803,803
+4321,SUECIA_PV,VIAJES_SUECIA_PV,HOSPEDAJE NACIONAL,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,0,0
+4321,SUECIA_PV,VIAJES_SUECIA_PV,COMBUSTIBLE,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,0,0
+4321,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES TERRESTRES NACIONALES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,0,0
+4321,SUECIA_PV,VIAJES_SUECIA_PV,PASAJES AÉREOS NACIONALES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,0,0
+4321,SUECIA_PV,CONSULTORIAS_Y_O_SERVICIOS,CONSULTORES,121,"Realizar reuniones de las mesas de trabajo y la asamblea general de la PICFA, para la toma decisiones a escala departamental sobre el manejo de PFNM",1,60879,60879
+4322,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,"GASOLINA, ACEITE Y PRODUCTOS DE LIMIPIEZA",A.3.1.1 ,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"3756,92","3756,92"
+4322,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,MATERIALES DE OFICINA,A.3.1.1 ,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"2556,7","2556,7"
+4322,AFD,VIAJES_AFD,VIATICOS CAMPO (ACEAA), A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,7000,7000
+4322,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA), A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"7161,12","7161,12"
+4322,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,FOLLETOS Y APLIC. DIGITALES, A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"11718,2","11718,2"
+4322,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (COMUN. Y PUEBLOS), A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"5555,3","5555,3"
+4322,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE SALÓN (CIUDAD),A.3.1.1 - A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"20231,56","20231,56"
+4322,AFD,COMPRAS_Y_SERVICIOS_EXT_AFD,ALQUILER DE VEHICULOS (INCLUYE BOTES),A.3.1.1 - A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"24468,46","24468,46"
+4322,AFD,VIAJES_AFD,ALIMENTACION TALLERES,A.3.1.1 - A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"25090,22","25090,22"
+4322,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A.3.1.1 - A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,36353,36353
+4322,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"8718,21","8718,21"
+4322,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.3.1.1 - A.3.2.1.,"Promover el dialogo de OSC, donde definan las estrategias sobre bosques, biodiversidad ",1,"24880,5","24880,5"
+4332,AFD,VIAJES_AFD,PASAJES AEREOS,A.3.2.2,Appyar la participacion de representantes de la sociedad civil  en foros nacionales e internacionales,1,80000,80000
+4332,AFD,VIAJES_AFD,HOSPEDAJE ACEAA,A.3.2.2,Appyar la participacion de representantes de la sociedad civil  en foros nacionales e internacionales,1,10000,10000
+4332,AFD,VIAJES_AFD,HOSPEDAJE TERCEROS,A.3.2.2,Appyar la participacion de representantes de la sociedad civil  en foros nacionales e internacionales,1,"23176,5","23176,5"
+4332,AFD,VIAJES_AFD,VIÁTICOS TERCEROS,A.3.2.2,Appyar la participacion de representantes de la sociedad civil  en foros nacionales e internacionales,1,15000,15000
+4332,AFD,VIAJES_AFD,TRANSPORTE TERRESTRE,A.3.2.2,Appyar la participacion de representantes de la sociedad civil  en foros nacionales e internacionales,1,"7161,12","7161,12"
+4332,AFD,VIAJES_AFD,VIATICOS CIUDAD (ACEAA),A.3.2.2,Appyar la participacion de representantes de la sociedad civil  en foros nacionales e internacionales,1,"11718,21","11718,21"
+4333,FCF_3,VIAJES_FCF3,PASAJES AÉREOS NACIONALES,1.4,Pasajes aéreos para beneficiarios ,1,"35522,98","35522,98"
+4333,FCF_3,VIAJES_FCF3,"VIÁTICOS, ALIMENTACIÓN E IMPREVISTOS",1.4 ,"Viáticos y viaje para Carla Ramirez, Stephanie Torrico ",1,2400,2400
+4333,FCF_3,REUNIONES_Y_TALLERES,REUNIONES Y TALLERES EMPREND. PRODUC. ,1.5,"Taller, comida, alojamiento por dos noches para 40 personas ",1,8000,8000
+4333,FCF_3,REUNIONES_Y_TALLERES,ALQUILERES VARIOS PARA PROYECTOS,"1,5",Comunicaciones para la feria ,1,27630,27630
+5112,AFD,PERSONAL_AFD,PERSONAL,NN,Personal Institucional,1,"601441,44","601441,44"
+5112,GIZ,PERSONAL_GIZ,PERSONAL,NN,Personal Institucional,1,"232754,51","232754,51"
+5112,AKAM_CCAM,LOCAL_PARTNER_STAFF_AND_VOLUNTEERS,PERSONAL,NN,Personal Institucional,1,"97842,29","97842,29"
+5112,CEPF,CEPF_N_A,PERSONAL,NN,Personal Institucional,1,"68076,25","68076,25"
+5112,MOORE,PERSONAL_MOORE,PERSONAL,NN,Personal Institucional,1,"62848,8","62848,8"
+5112,BID_PV,PERSONAL_BID_PV,PERSONAL,NN,Personal Institucional,1,"2440389,25","2440389,25"
+5112,SUECIA_PV,PERSONAL_SUECIA_PV,PERSONAL,NN,Personal Institucional,1,"22410,43","22410,43"
+5112,RAINFOREST,SALARIOS_DEL_PERSONAL_RF,PERSONAL,NN,Personal Institucional,1,"2924797,6","2924797,6"
+5112,RE_WILD,PERSONAL_REWILD,PERSONAL,NN,Personal Institucional,1,"217572,38","217572,38"
+5112,IIED,STAFF,PERSONAL,NN,Personal Institucional,1,"618291,67","618291,67"
+5112,KATZ,COSTOS_INDIRECTOS_KATZ,PERSONAL,NN,Personal Institucional KATZ,1,"180184,31","180184,31"
+5112,AAF9_BENI,PERSONAL_AAF,PERSONAL,NN,Personal Institucional,1,"99114,92","99114,92"
+5112,AAF9_PANDO,PERSONAL_AAF,PERSONAL,NN,Personal Institucional,1,"449910,62","449910,62"
+5112,AAF_FORT,PERSONAL_AAF,PERSONAL,NN,Personal Institucional,1,"257485,2","257485,2"
+5112,FCF_3,PERSONAL_FCF_3,PERSONAL,NN,Personal Institucional,1,"123672,24","123672,24"
+5112,DOROTHY,FORTALECER_LAS_CADENAS_DE_SUMINISTRO,PERSONAL,NN,Personal Institucional,1,"979221,19","979221,19"
+5112,AAF_10,PERSONAL_AAF,PERSONAL,NN,Personal Institucional Pando,1,"1324689,28","1324689,28"
+5112,AAF_10,PERSONAL_AAF,PERSONAL,NN,Personal Institucional Beni,1,"583124,74","583124,74"
+5112,RE_WILD_2,PERSONAL_REWILD,PERSONAL,NN,Personal Institucional,1,"133003,65","133003,65"
+5112,EROL_2,PERSONNEL_EROL_2,PERSONAL,NN,Personal Institucional,1,"146572,17","146572,17"
+5112,RECURSOS_PROPIOS,RECURSOS_PROPIOS_N_A,PERSONAL,NN,Personal Institucional,1,"297643,36","297643,36"
+5112,AFD,COSTOS_INDIRECTOS_AFD,MATERIAL DE OFICINA,NN,Costos de oficina,1,"212599,32","212599,32"
+5112,GIZ,EQUIPOS_Y_MATERIALES_GIZ,COSTOS INDIRECTOS,NN,Costos de oficina,1,"27874,66","27874,66"
+5112,AKAM_CCAM,LOCAL_PARTNER_ADMINISTRATION,SUMINISTROS DE OFICINA,NN,Costos de oficina,1,"28051,93","28051,93"
+5112,CEPF,CEPF_N_A,MATERIAL DE OFICINA,NN,Costos de oficina,1,"1325,39","1325,39"
+5112,MOORE,COSTOS_INDIRECTOS_MOORE,COSTOS INDIRECTOS,NN,Costos de oficina,1,"98495,62","98495,62"
+5112,BID_PV,,,NN,Costos de oficina,1,0,0
+5112,SUECIA_PV,COSTOS_INDIRECTOS_DE_OFICINA,COSTOS DE OFICINA,NN,Costos de oficina,1,0,0
+5112,RAINFOREST,COSTOS_OPERATIVOS_RF,SUMINISTROS DE OFICINA,NN,Costos de oficina,1,"41540,27","41540,27"
+5112,RE_WILD,COSTOS_INDIRECTOS_REWILD,COSTOS INDIRECTOS,NN,Costos de oficina,1,"63275,73","63275,73"
+5112,IIED,COSTOS_DE_OFICINA,COSTOS INDIRECTOS,NN,Costos de oficina,1,"4026,5","4026,5"
+5112,KATZ,COSTOS_INDIRECTOS_KATZ,COSTOS OPERATIVOS,NN,Costos de oficina KATZ,1,0,0
+5112,AAF9_BENI,COSTOS_DE_OFICINA,COSTOS INDIRECTOS,NN,Costos de oficina,1,0,0
+5112,AAF9_PANDO,COSTOS_DE_OFICINA,COSTOS INDIRECTOS,NN,Costos de oficina,1,0,0
+5112,AAF_FORT,COSTOS_DE_OFICINA,COSTOS INDIRECTOS,NN,Costos de oficina,1,0,0
+5112,FCF_3,COSTOS_INDIRECTOS,COSTOS INDIRECTOS,NN,Costos de oficina,1,"17109,49","17109,49"
+5112,DOROTHY,FORTALECER_LAS_CADENAS_DE_SUMINISTRO,COSTOS INDIRECTOS,NN,Costos de oficina,1,0,0
+5112,AAF_10,COSTOS_DE_OFICINA,COSTOS INDIRECTOS,NN,Costos de oficina,1,0,0
+5112,AAF_10,COSTOS_DE_OFICINA,COSTOS INDIRECTOS,NN,Costos de oficina,1,0,0
+5112,RE_WILD_2,COSTOS_INDIRECTOS_REWILD,COSTOS INDIRECTOS,NN,Costos de oficina,1,"41883,89","41883,89"
+5112,EROL_2,INDIRECT_COST_EROL_2,N/A,NN,Costos de oficina,1,"66850,8","66850,8"
+5112,RECURSOS_PROPIOS,RECURSOS_PROPIOS_N_A,PERSONAL,NN,Costos de oficina,1,"44861,38","44861,38"
+5112,SUECIA_PV,COSTOS_VEHÍCULOS,MANTENIMIENTO DE VEHÍCULOS,"3,1,1",Mantenimiento Vehículo,1,"118060,6","118060,6"
+5113,AAF_FORT,MATERIALES_DE_DIVULGACION,MATERIALES DE PROMOCIÓN Y COMUNICACIÓN,NN,Impresión del PEI y Memoria Institucional,1,"26420,16","26420,16"
+5113,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Talleres de arranque 2026 y elaboracion POA,1,18555,18555
+5113,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Consultoria bibliotecologo,1,21000,21000
+5113,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Sistematización de información de fortalecimiento de capacidades,1,18000,18000
+5114,AFD,EQUIPAMIENTO_TECNICO_AFD,COMPUTADORAS,NN,ND,1,0,0
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,111,Analizar periódicamente la deforestación y quemas utilzando tecnología satelital en tiempo real (MAAP) - Imagenes satelitales Planet,2,113740,227480
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,111,Analizar periódicamente la deforestación y quemas utilzando tecnología satelital en tiempo real (MAAP) - Servidor,1,90992,90992
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,111,Analizar periódicamente la deforestación y quemas utilzando tecnología satelital en tiempo real (MAAP) - Licencias,1,15073,15073
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte) - cámaras trampa",1,331085,331085
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte) - baterias cámaras trampa",1,52314,52314
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,112,"Evaluar poblaciones de especies de fauna seleccionadas (ej. jaguar, puma, chanchos de monte) - sensores",1,37871,37871
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial - insumos para apliación del servidor",1,37065,37065
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial - drones",1,191635,191635
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,113,"Implementar modelos de distribución de PFNM utilizando datos geoespaciales, datos de campo y algoritmos de inteligencia artificial - licencias",1,11498,11498
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,114, Complementar los sistemas de alerta temprana de producción de frutos y generar reportes - insumos para la instalación de estaciones,1,14445,14445
+5114,BID_PV,EQUIPAMIENTO,INSUMOS Y EQUIPAMIENTO,114, Complementar los sistemas de alerta temprana de producción de frutos y generar reportes - licencias,1,13700,13700
+5122,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Automatización de Formularios institucionales,1,8000,8000
+5123,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Elaboración y ajuste de PGSST,1,10000,10000
+5142,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Plan de capacitación,1,60000,60000
+5211,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Campañas de recaudación,1,10000,10000
+5311,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Campañas ejecutadas,1,13920,13920
+5312,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Memorias,1,6960,6960
+5313,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Informes,1,6960,6960
+5314,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Publicaciones realizadas,1,6960,6960
+5315,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Plan de implementación de Políticas verdes,1,6960,6960
+5321,RAINFOREST,MISCELANEOS_RF,FORTALECIMIENTO INSTITUCIONAL,A51/10/10,Viajes institucionales,1,20880,20880
+5321,AAF_FORT,VIAJES_AAF,PASAJES AÉREOS NACIONALES,NN,Viajes institucionales,1,32016,32016

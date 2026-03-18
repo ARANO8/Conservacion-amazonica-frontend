@@ -35,8 +35,8 @@ export function ApiStatus() {
     checkStatus(true); // Verificación inicial
 
     const interval = setInterval(() => {
-      checkStatus(false); // Polling silencioso cada 10s
-    }, 1000);
+      checkStatus(false); // Polling silencioso cada 30s
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
