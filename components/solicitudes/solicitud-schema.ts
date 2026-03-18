@@ -5,7 +5,7 @@ export const formSchema = z.object({
   // Campos de Planificación (Paso 1)
   planificacionLugares: z
     .string()
-    .min(1, 'Lugar/es del viaje y/o taller es/son requerido/s'),
+    .min(1, 'El lugar de la actividad es requerido'),
   planificacionObjetivo: z.string().min(1, 'El objetivo es requerido'),
   actividades: z
     .array(

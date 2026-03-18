@@ -315,7 +315,7 @@ export default function SolicitudForm({
                   <FieldGroup>
                     <FieldSet>
                       <FieldLegend>
-                        Información General del Viaje/Taller
+                        Información General de la Actividad
                       </FieldLegend>
                       <div className="grid gap-4">
                         <FormField
@@ -323,9 +323,7 @@ export default function SolicitudForm({
                           name="planificacionLugares"
                           render={({ field }) => (
                             <Field>
-                              <FieldLabel>
-                                Lugar/es del viaje y/o taller
-                              </FieldLabel>
+                              <FieldLabel>Lugar de la actividad</FieldLabel>
                               <FormControl>
                                 <Input
                                   {...field}
@@ -341,13 +339,11 @@ export default function SolicitudForm({
                           name="planificacionObjetivo"
                           render={({ field }) => (
                             <Field>
-                              <FieldLabel>
-                                Objetivo del Viaje / Taller
-                              </FieldLabel>
+                              <FieldLabel>Objetivo de la actividad</FieldLabel>
                               <FormControl>
                                 <Textarea
                                   {...field}
-                                  placeholder="Describe el propósito de esta movilización"
+                                  placeholder="Describe el objetivo de esta actividad"
                                   className="min-h-24"
                                 />
                               </FormControl>
