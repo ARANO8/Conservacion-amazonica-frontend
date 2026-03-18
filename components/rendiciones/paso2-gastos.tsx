@@ -124,7 +124,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
       </p>
 
       {/* Grid de tarjetas */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="flex w-full flex-wrap gap-4">
         {partidas.map((p) => {
           const codigo = p.poa?.codigoPoa ?? '—';
           const partida = p.poa?.estructura?.partida?.nombre ?? 'Sin partida';
@@ -162,7 +162,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
           return (
             <Card
               key={p.id}
-              className="bg-muted/40 w-full border shadow-none transition-shadow hover:shadow-sm"
+              className="bg-muted/40 w-full min-w-[280px] flex-1 border shadow-none transition-shadow hover:shadow-sm"
             >
               <CardHeader className="pt-3 pb-2">
                 <div className="flex items-start justify-between gap-2">
