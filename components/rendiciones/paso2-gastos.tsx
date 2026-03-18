@@ -305,11 +305,26 @@ function ComprobanteCard({
 
   // Sync montoNeto whenever taxResult changes
   useEffect(() => {
+    const montoBruto = round2(taxResult.montoNeto + taxResult.totalRetenciones);
+    const montoImpuestos = round2(taxResult.totalRetenciones);
+
+    setValue(`gastos.${index}.montoBruto`, montoBruto, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    setValue(`gastos.${index}.montoImpuestos`, montoImpuestos, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    setValue(`gastos.${index}.montoTotal`, montoBruto, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     setValue(`gastos.${index}.montoNeto`, taxResult.montoNeto, {
       shouldValidate: true,
       shouldDirty: true,
     });
-  }, [taxResult.montoNeto, index, setValue]);
+  }, [taxResult.montoNeto, taxResult.totalRetenciones, index, setValue]);
 
   return (
     <Card className="border shadow-sm">
@@ -542,7 +557,12 @@ function ComprobanteCard({
                     }
 
                     const parsed = Number.parseFloat(sanitized);
-                    field.onChange(Number.isFinite(parsed) ? parsed : 0);
+                    const parsedValue = Number.isFinite(parsed) ? parsed : 0;
+                    field.onChange(parsedValue);
+                    setValue(`gastos.${index}.montoBruto`, parsedValue, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
                   }}
                   onBlur={() => {
                     field.onBlur();
@@ -561,10 +581,38 @@ function ComprobanteCard({
                     const rounded = round2(parsed);
                     setMontoTotalInput(rounded.toFixed(2));
                     field.onChange(rounded);
+                    setValue(`gastos.${index}.montoBruto`, rounded, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
                   }}
                 />
               </FormControl>
               <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name={`gastos.${index}.montoBruto`}
+          render={({ field }) => (
+            <FormItem className="hidden">
+              <FormControl>
+                <Input type="number" readOnly tabIndex={-1} {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name={`gastos.${index}.montoImpuestos`}
+          render={({ field }) => (
+            <FormItem className="hidden">
+              <FormControl>
+                <Input type="number" readOnly tabIndex={-1} {...field} />
+              </FormControl>
             </FormItem>
           )}
         />
@@ -716,6 +764,8 @@ export default function Paso2Gastos({
       tipoDocumento: 'FACTURA',
       numeroDocumento: '',
       fechaDocumento: new Date().toISOString().split('T')[0],
+      montoBruto: 0,
+      montoImpuestos: 0,
       montoTotal: 0,
       montoNeto: 0,
       proveedor: '',

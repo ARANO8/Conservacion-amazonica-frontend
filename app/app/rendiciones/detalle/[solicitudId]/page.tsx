@@ -51,15 +51,27 @@ function parseNumber(value: string | number | undefined): number {
 
 function normalizeGasto(gasto: GastoRendicionResponse) {
   const montoBruto =
-    parseNumber(gasto.montoTotal) || parseNumber(gasto.monto) || 0;
+    parseNumber(gasto.montoBruto) ||
+    parseNumber(gasto.montoTotal) ||
+    parseNumber(gasto.monto) ||
+    0;
+  const impuestosRetenciones = parseNumber(gasto.montoImpuestos);
   const montoNeto = parseNumber(gasto.montoNeto);
-  const impuestosRetenciones = montoBruto - montoNeto;
+
+  const partidaCodigo = gasto.partida?.poa?.codigoPoa;
+  const partidaNombre = gasto.partida?.poa?.estructura?.partida?.nombre;
+  const partidaLabel =
+    partidaCodigo || partidaNombre
+      ? `[${partidaCodigo ?? '---'}] ${partidaNombre ?? 'Sin nombre de partida'}`
+      : gasto.partidaId
+        ? `Partida #${gasto.partidaId}`
+        : 'Sin partida';
 
   return {
     fecha: gasto.fechaDocumento ?? gasto.fecha,
     proveedor: gasto.proveedor,
     concepto: gasto.concepto ?? gasto.detalle,
-    partidaId: gasto.partidaId,
+    partidaLabel,
     tipoDocumento: gasto.tipoDocumento,
     montoBruto,
     impuestosRetenciones,
@@ -287,11 +299,7 @@ export default function RendicionDetalleBySolicitudPage() {
                     <TableCell>{formatDateShort(gasto.fecha)}</TableCell>
                     <TableCell>{gasto.proveedor || 'Sin proveedor'}</TableCell>
                     <TableCell>{gasto.concepto || '-'}</TableCell>
-                    <TableCell>
-                      {gasto.partidaId
-                        ? `Partida #${gasto.partidaId}`
-                        : 'Sin partida'}
-                    </TableCell>
+                    <TableCell>{gasto.partidaLabel}</TableCell>
                     <TableCell className="text-right font-medium">
                       {formatMoney(gasto.montoBruto)}
                     </TableCell>

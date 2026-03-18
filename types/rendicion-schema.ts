@@ -43,6 +43,12 @@ export const GastoRendicionSchema = z.object({
   proveedor: z.string().optional(),
   fechaDocumento: z.union([z.string(), z.date()]).optional(),
   /** Monto real gastado (con impuestos) */
+  montoBruto: z.number().min(0.01, 'El monto bruto debe ser mayor a 0'),
+  /** Monto de impuestos/retenciones calculadas */
+  montoImpuestos: z
+    .number()
+    .min(0, 'El monto de impuestos no puede ser negativo'),
+  /** Alias de compatibilidad para cálculos antiguos */
   montoTotal: z.number().min(0.01, 'El monto debe ser mayor a 0'),
   /** Monto líquido sin retenciones (calculado automáticamente) */
   montoNeto: z.number().min(0.01, 'El monto neto debe ser mayor a 0'),

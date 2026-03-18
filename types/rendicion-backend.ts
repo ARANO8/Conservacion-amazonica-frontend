@@ -50,8 +50,22 @@ export interface GastoRendicionResponse {
   nroDocumento?: string;
   fecha?: string;
   monto?: string;
+  montoBruto?: string;
+  montoImpuestos?: string;
   partidaId?: number;
   urlComprobante?: string;
+  partida?: {
+    id: number;
+    poa?: {
+      codigoPoa?: string;
+      estructura?: {
+        partida?: {
+          id: number;
+          nombre: string;
+        };
+      };
+    };
+  };
 }
 
 // ---------------------------------------------------------------------------

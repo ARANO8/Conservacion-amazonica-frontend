@@ -13,6 +13,8 @@ export interface CreateRendicionApiPayload {
     numeroDocumento?: string;
     proveedor?: string;
     fechaDocumento?: string;
+    montoBruto: number;
+    montoImpuestos: number;
     montoTotal: number;
     montoNeto: number;
     estado?: 'PENDIENTE' | 'COMPROBADO' | 'RECHAZADO';
@@ -80,6 +82,8 @@ export function adaptCreateRendicionPayload(
       ...(toIsoDateString(gasto.fechaDocumento)
         ? { fechaDocumento: toIsoDateString(gasto.fechaDocumento) }
         : {}),
+      montoBruto: Number(gasto.montoBruto ?? gasto.montoTotal),
+      montoImpuestos: Number(gasto.montoImpuestos ?? 0),
       montoTotal: Number(gasto.montoTotal),
       montoNeto: Number(gasto.montoNeto),
       ...(gasto.estado ? { estado: gasto.estado } : {}),
