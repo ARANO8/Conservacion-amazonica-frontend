@@ -47,7 +47,7 @@ export default function Paso2Respaldos() {
   return (
     <FieldSet>
       <FieldLegend>Respaldos Generales de la Rendición</FieldLegend>
-      <p className="text-muted-foreground mb-6 text-sm">
+      <p className="text-foreground mb-6 text-sm">
         Adjunta los documentos de respaldo generales antes de registrar los
         comprobantes individuales. Las cotizaciones son obligatorias para
         continuar.
@@ -59,11 +59,11 @@ export default function Paso2Respaldos() {
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="text-muted-foreground h-4 w-4 shrink-0" />
             <span className="text-sm font-semibold">Cuadro Comparativo</span>
-            <span className="text-muted-foreground text-xs font-normal">
+            <span className="text-foreground text-sm font-normal">
               (opcional)
             </span>
           </div>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-foreground text-sm">
             Si realizaste una comparación de proveedores, adjunta aquí el enlace
             al cuadro comparativo (Google Sheets, Drive, etc.).
           </p>
@@ -98,7 +98,7 @@ export default function Paso2Respaldos() {
               Cotizaciones <span className="text-destructive">*</span>
             </span>
           </div>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-foreground text-sm">
             Adjunta al menos una cotización que respalde los precios de los
             bienes o servicios adquiridos.
           </p>
@@ -153,7 +153,7 @@ export default function Paso2Respaldos() {
             variant="outline"
             size="sm"
             onClick={handleAddCotizacion}
-            className="border-dashed text-xs"
+            className="border-dashed text-sm"
           >
             <Plus className="mr-1 h-3 w-3" />
             Añadir otra cotización

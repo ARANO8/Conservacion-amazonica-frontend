@@ -261,7 +261,7 @@ function GastoCard({
             name={`items.${index}.solicitudPresupuestoId`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Partida Presupuestaria
                 </Label>
                 <Select
@@ -320,7 +320,7 @@ function GastoCard({
             name={`items.${index}.tipoDocumento`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Documento
                 </Label>
                 <Select
@@ -351,7 +351,7 @@ function GastoCard({
             name={`items.${index}.tipoGastoId`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Tipo
                 </Label>
                 <Select
@@ -389,7 +389,7 @@ function GastoCard({
             name={`items.${index}.cantidad`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Cantidad
                 </Label>
                 <FormControl>
@@ -421,7 +421,7 @@ function GastoCard({
             name={`items.${index}.costoUnitario`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Costo Unitario (Bs)
                 </Label>
                 <FormControl>
@@ -449,7 +449,7 @@ function GastoCard({
             )}
           />
           <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs font-bold uppercase">
+            <Label className="text-foreground text-sm font-bold uppercase">
               TOTAL LÍQUIDO (A Recibir)
             </Label>
             <Input
@@ -465,7 +465,7 @@ function GastoCard({
       <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-4 border-t p-3 px-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-bold uppercase">
+            <span className="text-foreground text-sm font-bold uppercase">
               TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
@@ -475,22 +475,16 @@ function GastoCard({
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IVA 13%
-              </span>
-              <span className="text-xs font-medium">{formatMoney(iva)}</span>
+              <span className="text-foreground text-sm uppercase">IVA 13%</span>
+              <span className="text-sm font-semibold">{formatMoney(iva)}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IT 3%
-              </span>
-              <span className="text-xs font-medium">{formatMoney(it)}</span>
+              <span className="text-foreground text-sm uppercase">IT 3%</span>
+              <span className="text-sm font-semibold">{formatMoney(it)}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IUE 5%
-              </span>
-              <span className="text-xs font-medium">{formatMoney(iue)}</span>
+              <span className="text-foreground text-sm uppercase">IUE 5%</span>
+              <span className="text-sm font-semibold">{formatMoney(iue)}</span>
             </div>
           </div>
         </div>

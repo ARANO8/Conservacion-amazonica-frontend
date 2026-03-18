@@ -101,7 +101,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
       <div className="bg-muted/40 mb-6 rounded-lg border border-dashed p-4">
         <div className="flex items-center gap-2">
           <Layers className="text-muted-foreground h-4 w-4 shrink-0" />
-          <p className="text-muted-foreground text-sm">
+          <p className="text-foreground text-sm">
             No se encontraron partidas presupuestarias para esta solicitud.
           </p>
         </div>
@@ -118,7 +118,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
           Partidas Aprobadas para esta Rendición
         </h3>
       </div>
-      <p className="text-muted-foreground text-xs">
+      <p className="text-foreground text-sm">
         Cada comprobante debe imputarse a una de estas partidas. El monto
         mostrado es el subtotal presupuestado aprobado por línea.
       </p>
@@ -177,7 +177,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
                   {partida}
                 </CardTitle>
                 {(proyecto || grupo) && (
-                  <p className="text-muted-foreground truncate text-[10px]">
+                  <p className="text-foreground truncate text-sm">
                     {[proyecto, grupo].filter(Boolean).join(' / ')}
                   </p>
                 )}
@@ -189,31 +189,31 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Banknote className="text-muted-foreground h-3.5 w-3.5" />
-                      <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                      <span className="text-foreground text-sm font-bold tracking-wider uppercase">
                         Aprobado
                       </span>
                     </div>
                     <span className="text-primary text-sm font-black tracking-tight">
                       {formatMoney(montoAprobado)}{' '}
-                      <span className="text-muted-foreground text-[10px] font-normal">
+                      <span className="text-foreground text-sm font-normal">
                         Bs.
                       </span>
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                    <span className="text-foreground text-sm font-bold tracking-wider uppercase">
                       Rendido
                     </span>
                     <span className="text-sm font-bold tracking-tight">
                       {formatMoney(montoRendido)}{' '}
-                      <span className="text-muted-foreground text-[10px] font-normal">
+                      <span className="text-foreground text-sm font-normal">
                         Bs.
                       </span>
                     </span>
                   </div>
                   <Badge
                     variant="outline"
-                    className={`mt-1 w-full justify-center text-[10px] font-extrabold tracking-wide ${saldoUi.className}`}
+                    className={`mt-1 w-full justify-center text-sm font-extrabold tracking-wide ${saldoUi.className}`}
                   >
                     {saldoUi.label}
                   </Badge>
@@ -353,7 +353,7 @@ function ComprobanteCard({
           name={`gastos.${index}.fechaDocumento`}
           render={({ field }) => (
             <FormItem className="md:col-span-1">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 Fecha
               </FormLabel>
               <FormControl>
@@ -370,7 +370,7 @@ function ComprobanteCard({
                   onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -381,7 +381,7 @@ function ComprobanteCard({
           name={`gastos.${index}.tipoDocumento`}
           render={({ field }) => (
             <FormItem className="md:col-span-1">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 Tipo
               </FormLabel>
               <Select value={field.value} onValueChange={field.onChange}>
@@ -398,7 +398,7 @@ function ComprobanteCard({
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -409,7 +409,7 @@ function ComprobanteCard({
           name={`gastos.${index}.numeroDocumento`}
           render={({ field }) => (
             <FormItem className="md:col-span-1">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 N° Documento
               </FormLabel>
               <FormControl>
@@ -419,7 +419,7 @@ function ComprobanteCard({
                   {...field}
                 />
               </FormControl>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -430,7 +430,7 @@ function ComprobanteCard({
           name={`gastos.${index}.proveedor`}
           render={({ field }) => (
             <FormItem className="md:col-span-2">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 Proveedor
               </FormLabel>
               <FormControl>
@@ -440,7 +440,7 @@ function ComprobanteCard({
                   {...field}
                 />
               </FormControl>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -451,7 +451,7 @@ function ComprobanteCard({
           name={`gastos.${index}.partidaId`}
           render={({ field }) => (
             <FormItem className="md:col-span-1">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 Partida Presupuestaria *
               </FormLabel>
               <Select
@@ -475,7 +475,7 @@ function ComprobanteCard({
                   })}
                 </SelectContent>
               </Select>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -486,7 +486,7 @@ function ComprobanteCard({
           name={`gastos.${index}.urlComprobante`}
           render={({ field }) => (
             <FormItem className="md:col-span-3">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 URL Comprobante *
               </FormLabel>
               <FormControl>
@@ -497,7 +497,7 @@ function ComprobanteCard({
                   {...field}
                 />
               </FormControl>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -508,7 +508,7 @@ function ComprobanteCard({
           name={`gastos.${index}.concepto`}
           render={({ field }) => (
             <FormItem className="md:col-span-3">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 Concepto / Detalle *
               </FormLabel>
               <FormControl>
@@ -518,7 +518,7 @@ function ComprobanteCard({
                   {...field}
                 />
               </FormControl>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -531,7 +531,7 @@ function ComprobanteCard({
           name={`gastos.${index}.montoTotal`}
           render={({ field }) => (
             <FormItem className="md:col-span-1">
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+              <FormLabel className="text-sm font-bold tracking-wider uppercase">
                 Monto Total Pagado (bruto) Bs. *
               </FormLabel>
               <FormControl>
@@ -584,20 +584,20 @@ function ComprobanteCard({
                   }}
                 />
               </FormControl>
-              <FormMessage className="text-[10px]" />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
 
         {/* --- Panel de Retenciones y Monto Neto --- */}
-        <div className="bg-muted/50 space-y-2 rounded-lg p-3 text-xs md:col-span-2">
+        <div className="bg-muted/50 space-y-2 rounded-lg p-3 text-sm md:col-span-2">
           {showTipoRetencion && (
             <FormField
               control={control}
               name={`gastos.${index}.tipoRetencion`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                  <FormLabel className="text-sm font-bold tracking-wider uppercase">
                     Tipo de Gasto (Retención) *
                   </FormLabel>
                   <Select
@@ -624,7 +624,7 @@ function ComprobanteCard({
                       })}
                     </SelectContent>
                   </Select>
-                  <FormMessage className="text-[10px]" />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
@@ -656,15 +656,13 @@ function ComprobanteCard({
 
           <div className="flex items-center gap-1.5">
             <Calculator className="text-muted-foreground h-3.5 w-3.5" />
-            <span className="text-muted-foreground font-bold tracking-wider uppercase">
+            <span className="text-foreground font-bold tracking-wider uppercase">
               Retenciones Calculadas
             </span>
           </div>
 
           {taxResult.desglose.length === 0 ? (
-            <p className="text-muted-foreground italic">
-              Sin retenciones (Factura).
-            </p>
+            <p className="text-foreground italic">Sin retenciones (Factura).</p>
           ) : (
             <div className="space-y-1">
               {taxResult.desglose.map((d) => (
@@ -672,7 +670,7 @@ function ComprobanteCard({
                   key={d.label}
                   className="flex items-center justify-between"
                 >
-                  <span className="text-muted-foreground">{d.label}:</span>
+                  <span className="text-foreground">{d.label}:</span>
                   <span className="font-semibold text-orange-600 dark:text-orange-400">
                     − {formatMoney(d.monto)} Bs.
                   </span>
@@ -680,7 +678,7 @@ function ComprobanteCard({
               ))}
               <Separator className="my-1" />
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground font-medium">
+                <span className="text-foreground font-medium">
                   Total Retenciones:
                 </span>
                 <span className="font-bold text-red-600 dark:text-red-400">
@@ -698,7 +696,7 @@ function ComprobanteCard({
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between gap-2">
-                    <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                    <FormLabel className="text-sm font-bold tracking-wider uppercase">
                       Monto Neto (líquido a proveedor) Bs.
                     </FormLabel>
                     <FormControl>
@@ -713,7 +711,7 @@ function ComprobanteCard({
                       />
                     </FormControl>
                   </div>
-                  <FormMessage className="text-[10px]" />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
@@ -801,7 +799,7 @@ export default function Paso2Gastos({
   return (
     <FieldSet>
       <FieldLegend>Detalle de Comprobantes y Respaldo Documental</FieldLegend>
-      <p className="text-muted-foreground mb-6 text-sm">
+      <p className="text-foreground mb-6 text-sm">
         Registra cada comprobante con su documento respaldo (Factura, Recibo o
         Boleta). El monto neto se calcula automáticamente según el tipo de
         documento y la partida presupuestaria.
@@ -813,10 +811,10 @@ export default function Paso2Gastos({
         {/* --- Lista de gastos --- */}
         {gastosFields.length === 0 ? (
           <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
-            <p className="text-muted-foreground text-sm font-medium">
+            <p className="text-foreground text-sm font-medium">
               No hay comprobantes agregados aún
             </p>
-            <p className="text-muted-foreground mt-1 text-xs">
+            <p className="text-foreground mt-1 text-sm">
               Presiona el botón de abajo para empezar a registrar tus
               comprobantes.
             </p>
@@ -877,10 +875,10 @@ export default function Paso2Gastos({
 
           {gastosSinRespaldoFields.length === 0 ? (
             <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
-              <p className="text-muted-foreground text-sm font-medium">
+              <p className="text-foreground text-sm font-medium">
                 No hay gastos menores agregados
               </p>
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-foreground mt-1 text-sm">
                 Agrega aquí egresos sin respaldo oficial (ej: taxi o compras
                 menores).
               </p>
@@ -914,7 +912,7 @@ export default function Paso2Gastos({
                         name={`gastosSinRespaldo.${index}.fechaGasto`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Fecha del Gasto
                             </FormLabel>
                             <FormControl>
@@ -931,7 +929,7 @@ export default function Paso2Gastos({
                                 onChange={(e) => field.onChange(e.target.value)}
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />
@@ -941,7 +939,7 @@ export default function Paso2Gastos({
                         name={`gastosSinRespaldo.${index}.monto`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Monto (Bs.)
                             </FormLabel>
                             <FormControl>
@@ -961,7 +959,7 @@ export default function Paso2Gastos({
                                 }
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />
@@ -970,7 +968,7 @@ export default function Paso2Gastos({
                         name={`gastosSinRespaldo.${index}.detalle`}
                         render={({ field }) => (
                           <FormItem className="md:col-span-2 lg:col-span-3">
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Detalle del Gasto
                             </FormLabel>
                             <FormControl>
@@ -980,7 +978,7 @@ export default function Paso2Gastos({
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />
@@ -1036,7 +1034,7 @@ export default function Paso2Gastos({
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-[10px]" />
+                <FormMessage className="text-sm" />
               </FormItem>
             )}
           />
@@ -1050,7 +1048,7 @@ export default function Paso2Gastos({
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground font-medium">
+              <span className="text-foreground font-medium">
                 Total con Respaldo (Comprobantes):
               </span>
               <span className="font-bold">
@@ -1058,7 +1056,7 @@ export default function Paso2Gastos({
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground font-medium">
+              <span className="text-foreground font-medium">
                 Total sin Respaldo (Gastos Menores):
               </span>
               <span className="font-bold text-amber-600 dark:text-amber-400">

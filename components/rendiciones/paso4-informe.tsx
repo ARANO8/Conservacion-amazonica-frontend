@@ -39,7 +39,7 @@ export default function Paso4Informe() {
   return (
     <FieldSet>
       <FieldLegend>Anexo 7: Informe de Gastos</FieldLegend>
-      <p className="text-muted-foreground mb-6 text-sm">
+      <p className="text-foreground mb-6 text-sm">
         Registra el rango del viaje y detalla la bitácora de actividades
         realizadas.
       </p>
@@ -51,7 +51,7 @@ export default function Paso4Informe() {
             name="informeGastos.fechaInicio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                <FormLabel className="text-sm font-bold tracking-wider uppercase">
                   Fecha Inicio *
                 </FormLabel>
                 <FormControl>
@@ -68,7 +68,7 @@ export default function Paso4Informe() {
                     onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
-                <FormMessage className="text-[10px]" />
+                <FormMessage className="text-sm" />
               </FormItem>
             )}
           />
@@ -78,7 +78,7 @@ export default function Paso4Informe() {
             name="informeGastos.fechaFin"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                <FormLabel className="text-sm font-bold tracking-wider uppercase">
                   Fecha Fin *
                 </FormLabel>
                 <FormControl>
@@ -95,7 +95,7 @@ export default function Paso4Informe() {
                     onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
-                <FormMessage className="text-[10px]" />
+                <FormMessage className="text-sm" />
               </FormItem>
             )}
           />
@@ -115,10 +115,10 @@ export default function Paso4Informe() {
 
           {fields.length === 0 ? (
             <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
-              <p className="text-muted-foreground text-sm font-medium">
+              <p className="text-foreground text-sm font-medium">
                 No hay actividades registradas
               </p>
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-foreground mt-1 text-sm">
                 Debes registrar al menos una actividad para completar el
                 informe.
               </p>
@@ -152,7 +152,7 @@ export default function Paso4Informe() {
                         name={`informeGastos.actividades.${index}.fecha`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Fecha *
                             </FormLabel>
                             <FormControl>
@@ -169,7 +169,7 @@ export default function Paso4Informe() {
                                 onChange={(e) => field.onChange(e.target.value)}
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />
@@ -179,7 +179,7 @@ export default function Paso4Informe() {
                         name={`informeGastos.actividades.${index}.lugar`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Lugar *
                             </FormLabel>
                             <FormControl>
@@ -189,7 +189,7 @@ export default function Paso4Informe() {
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />
@@ -199,7 +199,7 @@ export default function Paso4Informe() {
                         name={`informeGastos.actividades.${index}.personaInstitucion`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Persona / Institución / Lugar *
                             </FormLabel>
                             <FormControl>
@@ -209,7 +209,7 @@ export default function Paso4Informe() {
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />
@@ -219,7 +219,7 @@ export default function Paso4Informe() {
                         name={`informeGastos.actividades.${index}.actividadesRealizadas`}
                         render={({ field }) => (
                           <FormItem className="md:col-span-2 lg:col-span-3">
-                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                            <FormLabel className="text-sm font-bold tracking-wider uppercase">
                               Actividades Realizadas *
                             </FormLabel>
                             <FormControl>
@@ -229,7 +229,7 @@ export default function Paso4Informe() {
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage className="text-[10px]" />
+                            <FormMessage className="text-sm" />
                           </FormItem>
                         )}
                       />

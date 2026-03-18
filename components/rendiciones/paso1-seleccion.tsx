@@ -63,7 +63,7 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
           </div>
           <EstadoBadge
             estado={solicitud.estado}
-            className="text-[10px] font-bold uppercase"
+            className="text-sm font-bold uppercase"
           />
         </div>
       </CardHeader>
@@ -72,7 +72,7 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
         {/* Fila 1: Motivo / Destino */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-0.5">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+            <span className="text-foreground text-sm font-bold tracking-wider uppercase">
               Motivo / Objetivo
             </span>
             <p className="text-foreground text-sm leading-snug font-medium">
@@ -81,7 +81,7 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-muted-foreground flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
+            <span className="text-foreground flex items-center gap-1 text-sm font-bold tracking-wider uppercase">
               <MapPin className="h-3 w-3" />
               Destino
             </span>
@@ -93,7 +93,7 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
 
         {/* Fila 2: Fechas */}
         <div className="space-y-0.5">
-          <span className="text-muted-foreground flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
+          <span className="text-foreground flex items-center gap-1 text-sm font-bold tracking-wider uppercase">
             <CalendarDays className="h-3 w-3" />
             Período
           </span>
@@ -122,7 +122,7 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
               {solicitud.montoTotalPresupuestado &&
                 solicitud.montoTotalPresupuestado !==
                   solicitud.montoTotalNeto && (
-                  <p className="text-muted-foreground text-[10px]">
+                  <p className="text-foreground text-sm">
                     Presupuestado:{' '}
                     {formatMoney(Number(solicitud.montoTotalPresupuestado))}
                   </p>
@@ -134,7 +134,7 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
         {/* Aprobador (si existe) */}
         {solicitud.aprobador && (
           <div className="space-y-0.5">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+            <span className="text-foreground text-sm font-bold tracking-wider uppercase">
               Aprobado por
             </span>
             <p className="text-foreground text-sm font-medium">
@@ -169,7 +169,7 @@ export default function Paso1Seleccion({
   return (
     <FieldSet>
       <FieldLegend>Vincular a una Solicitud Desembolsada</FieldLegend>
-      <p className="text-muted-foreground mb-6 text-sm">
+      <p className="text-foreground mb-6 text-sm">
         Selecciona la solicitud de fondos que estás rindiendo. Solo se muestran
         solicitudes en estado <strong>Desembolsado</strong>.
       </p>
@@ -179,7 +179,7 @@ export default function Paso1Seleccion({
           <p className="text-sm text-amber-900 dark:text-amber-100">
             No hay solicitudes desembolsadas disponibles para rendir.
           </p>
-          <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">
+          <p className="mt-2 text-sm text-amber-800 dark:text-amber-100">
             Asegúrate de que existe al menos una solicitud creada y en estado
             &quot;Desembolsado&quot; antes de proceder con una rendición.
           </p>
@@ -243,11 +243,11 @@ export default function Paso1Seleccion({
                                 <span className="text-sm font-semibold">
                                   {s.codigoSolicitud}
                                 </span>
-                                <span className="text-muted-foreground truncate text-xs">
+                                <span className="text-foreground truncate text-sm">
                                   {s.motivoViaje}
                                 </span>
                               </div>
-                              <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                              <span className="text-foreground ml-auto shrink-0 text-sm font-medium">
                                 {formatMoney(Number(s.montoTotalNeto ?? 0))}
                               </span>
                             </CommandItem>

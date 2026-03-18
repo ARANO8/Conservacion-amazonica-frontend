@@ -445,7 +445,7 @@ function HospedajeCard({
                       <Input
                         type="number"
                         step="0.01"
-                        className="h-7 w-24 px-2 py-0 text-right text-xs font-semibold"
+                        className="h-7 w-24 px-2 py-0 text-right text-sm font-semibold"
                         value={field.value || ''}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -483,14 +483,14 @@ function HospedajeCard({
                       className="w-full disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     {selectedRegion && !fieldState.error && (
-                      <div className="text-muted-foreground flex w-full justify-between text-[15px]">
+                      <div className="text-foreground flex w-full justify-between text-sm">
                         <span>Mín: {rangoMin}</span>
                         <span>Máx: {rangoMax}</span>
                       </div>
                     )}
                   </div>
                 </FormControl>
-                <FormMessage className="mt-1 text-[10px] leading-tight" />
+                <FormMessage className="mt-1 text-sm leading-tight" />
               </Field>
             )}
           />
@@ -501,10 +501,10 @@ function HospedajeCard({
       <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-4 border-t p-3 px-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] uppercase">
+            <span className="text-foreground text-sm uppercase">
               TOTAL LÍQUIDO A RECIBIR
             </span>
-            <span className="text-xs font-medium">
+            <span className="text-sm font-semibold">
               {formatMoney(Number(costoTotal))}
             </span>
           </div>
@@ -512,7 +512,7 @@ function HospedajeCard({
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
 
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-bold uppercase">
+            <span className="text-foreground text-sm font-bold uppercase">
               TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
@@ -524,19 +524,15 @@ function HospedajeCard({
 
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IVA 13%
-              </span>
-              <span className="text-xs font-medium">
+              <span className="text-foreground text-sm uppercase">IVA 13%</span>
+              <span className="text-sm font-semibold">
                 {formatMoney(Number(iva))}
               </span>
             </div>
 
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IT 3%
-              </span>
-              <span className="text-xs font-medium">
+              <span className="text-foreground text-sm uppercase">IT 3%</span>
+              <span className="text-sm font-semibold">
                 {formatMoney(Number(it))}
               </span>
             </div>

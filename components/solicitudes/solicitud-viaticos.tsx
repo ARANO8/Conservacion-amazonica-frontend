@@ -343,7 +343,7 @@ function ViaticoCard({
             name={`viaticos.${index}.solicitudPresupuestoId`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Partida Presupuestaria
                 </Label>
                 <Select
@@ -397,7 +397,7 @@ function ViaticoCard({
             name={`viaticos.${index}.conceptoId`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Concepto Viático
                 </Label>
                 <Select
@@ -431,7 +431,7 @@ function ViaticoCard({
             name={`viaticos.${index}.tipoDestino`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Tipo
                 </Label>
                 <Select
@@ -466,7 +466,7 @@ function ViaticoCard({
                 : [];
               return (
                 <FormItem className="flex flex-col">
-                  <Label className="text-muted-foreground mb-[2px] text-xs font-bold uppercase">
+                  <Label className="text-foreground mb-[2px] text-sm font-bold uppercase">
                     Planificaciones
                   </Label>
                   <Popover>
@@ -487,7 +487,7 @@ function ViaticoCard({
                                 <Badge
                                   key={val}
                                   variant="secondary"
-                                  className="max-w-[150px] truncate text-[10px] font-normal"
+                                  className="max-w-[150px] truncate text-sm font-normal"
                                 >
                                   {
                                     actividadesPlanificadas[val]
@@ -582,7 +582,7 @@ function ViaticoCard({
             name={`viaticos.${index}.dias`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Días
                 </Label>
                 <FormControl>
@@ -604,7 +604,7 @@ function ViaticoCard({
             name={`viaticos.${index}.cantidadPersonas`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Personas
                 </Label>
                 <FormControl>
@@ -625,7 +625,7 @@ function ViaticoCard({
             name={`viaticos.${index}.costoUnitario`}
             render={({ field }) => (
               <FormItem>
-                <Label className="text-muted-foreground text-xs font-bold uppercase">
+                <Label className="text-foreground text-sm font-bold uppercase">
                   Costo Unitario (Bs)
                 </Label>
                 <FormControl>
@@ -663,7 +663,7 @@ function ViaticoCard({
       <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-4 border-t p-3 px-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-bold uppercase">
+            <span className="text-foreground text-sm font-bold uppercase">
               TOTAL LÍQUIDO (A Recibir)
             </span>
             <span className="text-primary text-lg font-semibold">
@@ -672,7 +672,7 @@ function ViaticoCard({
           </div>
           <div className="bg-border hidden h-10 w-[1px] sm:block" />
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-bold uppercase">
+            <span className="text-foreground text-sm font-bold uppercase">
               TOTAL PRESUPUESTADO
             </span>
             <span className="text-sm font-bold">
@@ -682,19 +682,17 @@ function ViaticoCard({
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
+              <span className="text-foreground text-sm uppercase">
                 RC-IVA 13%
               </span>
-              <span className="text-xs font-medium">
+              <span className="text-sm font-semibold">
                 {formatMoney((Number(montoNeto) || 0) * 0.13)}
               </span>
             </div>
             {watchTipoDestino === 'TERCEROS' && (
               <div className="flex flex-col">
-                <span className="text-muted-foreground text-[10px] uppercase">
-                  IT 3%
-                </span>
-                <span className="text-xs font-medium">
+                <span className="text-foreground text-sm uppercase">IT 3%</span>
+                <span className="text-sm font-semibold">
                   {formatMoney((Number(montoNeto) || 0) * 0.03)}
                 </span>
               </div>

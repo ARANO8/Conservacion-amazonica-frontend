@@ -144,7 +144,7 @@ export default function RendicionDetalleBySolicitudPage() {
   if (!rendicion) {
     return (
       <div className="flex flex-col items-center justify-center p-12">
-        <p className="text-muted-foreground">No se encontró la rendición.</p>
+        <p className="text-foreground">No se encontró la rendición.</p>
         <Button asChild variant="link" className="mt-4">
           <Link href="/app/solicitudes">Volver</Link>
         </Button>
@@ -163,7 +163,7 @@ export default function RendicionDetalleBySolicitudPage() {
             <h1 className="text-2xl font-bold tracking-tight">
               Detalle de Rendición
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-foreground text-sm">
               Solicitud #{rendicion.solicitudId}
             </p>
           </div>
@@ -177,14 +177,14 @@ export default function RendicionDetalleBySolicitudPage() {
             <Calendar className="h-5 w-5" />
             Encabezado Financiero
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-foreground text-sm">
             Información general de fecha y respaldos documentales.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase">
+              <p className="text-foreground text-sm font-semibold uppercase">
                 Fecha de Rendición
               </p>
               <p className="text-base font-bold">
@@ -193,7 +193,7 @@ export default function RendicionDetalleBySolicitudPage() {
             </div>
 
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase">
+              <p className="text-foreground text-sm font-semibold uppercase">
                 Monto Respaldado
               </p>
               <p className="text-base font-bold text-emerald-600">
@@ -202,7 +202,7 @@ export default function RendicionDetalleBySolicitudPage() {
             </div>
 
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase">
+              <p className="text-foreground text-sm font-semibold uppercase">
                 Saldo Líquido
               </p>
               <p className="text-base font-bold text-blue-600">
@@ -215,7 +215,7 @@ export default function RendicionDetalleBySolicitudPage() {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="rounded-md border p-3">
-              <p className="text-muted-foreground mb-2 text-xs font-semibold uppercase">
+              <p className="text-foreground mb-2 text-sm font-semibold uppercase">
                 Cuadro Comparativo
               </p>
               {rendicion.urlCuadroComparativo ? (
@@ -231,12 +231,12 @@ export default function RendicionDetalleBySolicitudPage() {
                   </a>
                 </Button>
               ) : (
-                <p className="text-muted-foreground text-sm">No adjunto</p>
+                <p className="text-foreground text-sm">No adjunto</p>
               )}
             </div>
 
             <div className="rounded-md border p-3">
-              <p className="text-muted-foreground mb-2 text-xs font-semibold uppercase">
+              <p className="text-foreground mb-2 text-sm font-semibold uppercase">
                 Cotizaciones
               </p>
               {rendicion.urlCotizaciones &&
@@ -257,7 +257,7 @@ export default function RendicionDetalleBySolicitudPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">No adjuntas</p>
+                <p className="text-foreground text-sm">No adjuntas</p>
               )}
             </div>
           </div>
@@ -270,13 +270,13 @@ export default function RendicionDetalleBySolicitudPage() {
             <ReceiptText className="h-5 w-5" />
             Detalle de Gastos
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-foreground text-sm">
             Comprobantes con importes brutos, retenciones y montos netos.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {gastos.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-foreground text-sm">
               No hay gastos registrados en esta rendición.
             </p>
           ) : (
@@ -284,14 +284,30 @@ export default function RendicionDetalleBySolicitudPage() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Proveedor</TableHead>
-                    <TableHead>Concepto</TableHead>
-                    <TableHead>Partida</TableHead>
-                    <TableHead className="text-right">Bruto</TableHead>
-                    <TableHead className="text-right">Impuestos</TableHead>
-                    <TableHead className="text-right">Neto</TableHead>
-                    <TableHead>Respaldo</TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Fecha
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Proveedor
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Concepto
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Partida
+                    </TableHead>
+                    <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Bruto
+                    </TableHead>
+                    <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Impuestos
+                    </TableHead>
+                    <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Neto
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Respaldo
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -303,7 +319,7 @@ export default function RendicionDetalleBySolicitudPage() {
                       </TableCell>
                       <TableCell>{gasto.concepto || '-'}</TableCell>
                       <TableCell>{gasto.partidaLabel}</TableCell>
-                      <TableCell className="text-right font-medium">
+                      <TableCell className="text-right font-semibold">
                         {formatMoney(gasto.montoBruto)}
                       </TableCell>
                       <TableCell className="text-right text-orange-600">
@@ -324,7 +340,7 @@ export default function RendicionDetalleBySolicitudPage() {
                             </a>
                           </Button>
                         ) : (
-                          <span className="text-muted-foreground text-xs">
+                          <span className="text-foreground text-sm">
                             Sin enlace
                           </span>
                         )}
@@ -341,22 +357,28 @@ export default function RendicionDetalleBySolicitudPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Gastos Menores</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-foreground text-sm">
             Registros sin respaldo formal (si aplica).
           </CardDescription>
         </CardHeader>
         <CardContent>
           {gastosMenores.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-foreground text-sm">
               No se registraron gastos menores en esta rendición.
             </p>
           ) : (
-            <Table>
+            <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Detalle</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
+                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Fecha
+                  </TableHead>
+                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Detalle
+                  </TableHead>
+                  <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Monto
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -381,7 +403,7 @@ export default function RendicionDetalleBySolicitudPage() {
             <NotebookPen className="h-5 w-5" />
             Informe de Gastos (Anexo 7)
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-foreground text-sm">
             Rango de viaje y actividades realizadas durante la comisión.
           </CardDescription>
         </CardHeader>
@@ -394,13 +416,21 @@ export default function RendicionDetalleBySolicitudPage() {
                 {formatDateShort(rendicion.informeGastos.fechaFin)}
               </div>
 
-              <Table>
+              <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Lugar</TableHead>
-                    <TableHead>Persona / Institución</TableHead>
-                    <TableHead>Actividades Realizadas</TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Fecha
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Lugar
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Persona / Institución
+                    </TableHead>
+                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Actividades Realizadas
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -418,7 +448,7 @@ export default function RendicionDetalleBySolicitudPage() {
               </Table>
             </>
           ) : (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-foreground text-sm">
               Esta rendición no incluye informe de gastos.
             </p>
           )}
