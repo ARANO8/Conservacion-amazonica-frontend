@@ -97,19 +97,19 @@
 }
 
 @layer components {
-  .text-sifin-label {
+  .text-amzdesk-label {
     @apply text-foreground text-sm font-medium;
   }
 
-  .text-sifin-helper {
+  .text-amzdesk-helper {
     @apply text-sm text-slate-600 dark:text-slate-400;
   }
 
-  .text-sifin-monto {
+  .text-amzdesk-monto {
     @apply text-base font-semibold text-slate-900 dark:text-slate-50;
   }
 
-  .text-sifin-table-header {
+  .text-amzdesk-table-header {
     @apply text-sm font-bold tracking-wide text-slate-800 uppercase dark:text-slate-200;
   }
 }

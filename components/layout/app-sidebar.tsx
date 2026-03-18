@@ -36,11 +36,11 @@ import { Role } from '@/types/backend';
 
 const SUPPORT_EMAIL = 'alanarnez51@gmail.com';
 
-const SUPPORT_SUBJECT = '[SIFIN] Soporte tecnico';
+const SUPPORT_SUBJECT = '[AMZdesk] Soporte tecnico';
 const SUPPORT_BODY = [
   'Hola equipo de soporte,',
   '',
-  'Necesito ayuda con el sistema SIFIN.',
+  'Necesito ayuda con el sistema AMZdesk.',
   '',
   'Detalle del problema:',
   '- Modulo o pantalla:',
@@ -52,9 +52,9 @@ const SUPPORT_BODY = [
   'Gracias.',
 ].join('\n');
 
-const FEEDBACK_SUBJECT = '[SIFIN] Sugerencia de mejora';
+const FEEDBACK_SUBJECT = '[AMZdesk] Sugerencia de mejora';
 const FEEDBACK_BODY = [
-  'Hola equipo SIFIN,',
+  'Hola equipo AMZdesk,',
   '',
   'Quiero compartir una sugerencia de mejora.',
   '',
@@ -156,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <a href="#">
               <Image
                 src="/Logo-AMZ-desk-ok.webp"
-                alt="AMZ Desk"
+                alt="AMZdesk"
                 width={120}
                 height={40}
                 priority
@@ -193,17 +193,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </DialogHeader>
 
           <div className="space-y-3">
-            <p className="text-sifin-helper">
+            <p className="text-amzdesk-helper">
               Usa un asunto claro para priorizar tu caso y comparte el detalle
               completo del problema.
             </p>
             <div className="rounded-md border p-3">
-              <p className="text-sifin-label">Asunto sugerido</p>
-              <p className="text-sifin-helper">[SIFIN] Soporte tecnico</p>
+              <p className="text-amzdesk-label">Asunto sugerido</p>
+              <p className="text-amzdesk-helper">[AMZdesk] Soporte tecnico</p>
             </div>
             <div className="rounded-md border p-3">
-              <p className="text-sifin-label">Detalle minimo</p>
-              <ul className="text-sifin-helper list-disc space-y-1 pl-5">
+              <p className="text-amzdesk-label">Detalle minimo</p>
+              <ul className="text-amzdesk-helper list-disc space-y-1 pl-5">
                 <li>Modulo o pantalla afectada.</li>
                 <li>Accion que realizaste y resultado esperado.</li>
                 <li>Resultado obtenido y fecha/hora aproximada.</li>
@@ -239,17 +239,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </DialogHeader>
 
           <div className="space-y-3">
-            <p className="text-sifin-helper">
+            <p className="text-amzdesk-helper">
               Describe tu sugerencia con contexto para que podamos evaluar su
               impacto y priorizacion.
             </p>
             <div className="rounded-md border p-3">
-              <p className="text-sifin-label">Asunto sugerido</p>
-              <p className="text-sifin-helper">[SIFIN] Sugerencia de mejora</p>
+              <p className="text-amzdesk-label">Asunto sugerido</p>
+              <p className="text-amzdesk-helper">
+                [AMZdesk] Sugerencia de mejora
+              </p>
             </div>
             <div className="rounded-md border p-3">
-              <p className="text-sifin-label">Detalle minimo</p>
-              <ul className="text-sifin-helper list-disc space-y-1 pl-5">
+              <p className="text-amzdesk-label">Detalle minimo</p>
+              <ul className="text-amzdesk-helper list-disc space-y-1 pl-5">
                 <li>Modulo o pantalla relacionada.</li>
                 <li>Situacion actual que quieres mejorar.</li>
                 <li>Propuesta de cambio y beneficio esperado.</li>

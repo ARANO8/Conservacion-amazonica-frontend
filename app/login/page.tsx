@@ -13,7 +13,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <Image
           src="/Logo-AMZ-desk-ok.webp"
-          alt="AMZ Desk"
+          alt="AMZdesk"
           width={180}
           height={60}
           priority
