@@ -1,14 +1,23 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { differenceInDays, format, parseISO, startOfToday } from 'date-fns';
+import { es } from 'date-fns/locale';
+import type { DateRange } from 'react-day-picker';
+import { CalendarIcon, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import {
   Control,
   useFieldArray,
   useWatch,
   UseFormSetValue,
-  useFormState,
 } from 'react-hook-form';
 import {
   FormControl,
@@ -16,12 +25,40 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 
 interface PlanificacionActividadesProps {
   control: Control<FormData>;
   setValue: UseFormSetValue<FormData>;
+}
+
+function toDate(value: string | Date | undefined): Date | undefined {
+  if (!value) return undefined;
+  const date = value instanceof Date ? value : parseISO(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+function toInputDate(value: Date): string {
+  return format(value, 'yyyy-MM-dd');
+}
+
+function formatRangeLabel(range: DateRange | undefined): string {
+  if (!range?.from) return 'Seleccionar rango de fechas';
+  if (!range.to) return format(range.from, 'PPP', { locale: es });
+  return `${format(range.from, 'PPP', { locale: es })} - ${format(
+    range.to,
+    'PPP',
+    { locale: es }
+  )}`;
+}
+
+function calculateCalendarDays(from: Date, to: Date): number {
+  const start = new Date(from);
+  const end = new Date(to);
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  return Math.max(differenceInDays(end, start) + 1, 1);
 }
 
 export default function PlanificacionActividades({
@@ -35,10 +72,8 @@ export default function PlanificacionActividades({
 
   return (
     <div className="space-y-4">
-      {/* Header - Desktop */}
       <div className="text-muted-foreground mb-1 hidden grid-cols-12 gap-2 px-2 text-[10px] font-bold tracking-wider uppercase md:grid">
-        <div className="col-span-2">Fecha Inicio</div>
-        <div className="col-span-2">Fecha Fin</div>
+        <div className="col-span-4">Rango de Fechas</div>
         <div className="col-span-1 text-center">Días</div>
         <div className="col-span-4">Actividad Programada</div>
         <div className="col-span-1 text-center leading-tight">Pers. Inst.</div>
@@ -47,17 +82,15 @@ export default function PlanificacionActividades({
       </div>
 
       <div className="space-y-2">
-        {fields.map((field, idx) => {
-          return (
-            <ActividadRow
-              key={field.id}
-              idx={idx}
-              control={control}
-              setValue={setValue}
-              remove={remove}
-            />
-          );
-        })}
+        {fields.map((field, idx) => (
+          <ActividadRow
+            key={field.id}
+            idx={idx}
+            control={control}
+            setValue={setValue}
+            remove={remove}
+          />
+        ))}
       </div>
 
       <div className="flex items-center justify-between pt-2">
@@ -66,16 +99,17 @@ export default function PlanificacionActividades({
           size="sm"
           type="button"
           className="text-xs"
-          onClick={() =>
+          onClick={() => {
+            const today = new Date();
             append({
-              fechaInicio: new Date().toISOString().split('T')[0],
-              fechaFin: new Date().toISOString().split('T')[0],
+              fechaInicio: toInputDate(today),
+              fechaFin: toInputDate(today),
               cantDias: 1,
               actividadProgramada: '',
               cantInstitucion: 0,
               cantTerceros: 0,
-            })
-          }
+            });
+          }}
         >
           + Agregar Actividad al Cronograma
         </Button>
@@ -92,133 +126,113 @@ interface ActividadRowProps {
 }
 
 function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
-  // Watch dates to calculate days
   const fechaInicio = useWatch({
     control,
     name: `actividades.${idx}.fechaInicio`,
   });
+
   const fechaFin = useWatch({
     control,
     name: `actividades.${idx}.fechaFin`,
   });
 
-  const calculateDays = useCallback(
-    (start: string | Date, end: string | Date) => {
-      if (!start || !end) return 1;
-      const s = new Date(start);
-      const e = new Date(end);
-      if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
+  const selectedRange = useMemo<DateRange | undefined>(() => {
+    const from = toDate(fechaInicio as string | Date | undefined);
+    const to = toDate(fechaFin as string | Date | undefined);
 
-      // Reset hours to avoid DST issues
-      s.setHours(0, 0, 0, 0);
-      e.setHours(0, 0, 0, 0);
+    if (!from && !to) return undefined;
+    return { from, to: to ?? from };
+  }, [fechaInicio, fechaFin]);
 
-      const diffTime = e.getTime() - s.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      return diffDays > 0 ? diffDays : 1;
-    },
-    []
-  );
+  const handleRangeChange = useCallback(
+    (range: DateRange | undefined) => {
+      const from = range?.from;
+      const to = range?.to;
 
-  // Access form state to check for dirty fields
-  const { dirtyFields } = useFormState({ control });
+      if (!from) {
+        setValue(`actividades.${idx}.fechaInicio`, '', {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setValue(`actividades.${idx}.fechaFin`, '', {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setValue(`actividades.${idx}.cantDias`, 1, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        return;
+      }
 
-  useEffect(() => {
-    // Check if the specific date fields for this row are dirty
-    const isFechaInicioDirty = dirtyFields.actividades?.[idx]?.fechaInicio;
-    const isFechaFinDirty = dirtyFields.actividades?.[idx]?.fechaFin;
+      const normalizedTo = to ?? from;
+      const days = calculateCalendarDays(from, normalizedTo);
 
-    // Only recalculate if the user has manually changed the dates
-    if ((isFechaInicioDirty || isFechaFinDirty) && fechaInicio && fechaFin) {
-      const days = calculateDays(fechaInicio, fechaFin);
+      setValue(`actividades.${idx}.fechaInicio`, toInputDate(from), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue(`actividades.${idx}.fechaFin`, toInputDate(normalizedTo), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       setValue(`actividades.${idx}.cantDias`, days, {
         shouldDirty: true,
         shouldValidate: true,
       });
-    }
-  }, [fechaInicio, fechaFin, idx, setValue, calculateDays, dirtyFields]);
+    },
+    [idx, setValue]
+  );
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = useMemo(() => startOfToday(), []);
 
   return (
     <div className="bg-card hover:bg-muted/30 grid grid-cols-1 items-start gap-2 rounded-lg border p-3 transition-colors md:grid-cols-12 md:p-2">
-      {/* Fecha Inicio */}
-      <div className="md:col-span-2">
-        <LabelMobile label="Fecha Inicio" />
+      <div className="md:col-span-4">
+        <LabelMobile label="Rango de Fechas" />
+
         <FormField
           control={control}
           name={`actividades.${idx}.fechaInicio`}
-          render={({ field }) => (
+          render={() => (
             <FormItem>
-              <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                  value={
-                    field.value instanceof Date
-                      ? field.value.toISOString().split('T')[0]
-                      : field.value || ''
-                  }
-                  min={today}
-                  className="h-9 text-xs"
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    field.onChange(newValue);
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left text-xs font-normal',
+                        !selectedRange?.from && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      <span className="truncate">
+                        {formatRangeLabel(selectedRange)}
+                      </span>
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
 
-                    // Date Push Logic: If new start date > current end date, push end date
-                    if (
-                      fechaFin &&
-                      newValue >
-                        (fechaFin instanceof Date
-                          ? fechaFin.toISOString().split('T')[0]
-                          : fechaFin)
-                    ) {
-                      setValue(`actividades.${idx}.fechaFin`, newValue, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                    }
-                  }}
-                />
-              </FormControl>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    locale={es}
+                    selected={selectedRange}
+                    onSelect={handleRangeChange}
+                    numberOfMonths={2}
+                    disabled={{ before: today }}
+                    className="rounded-md border"
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
 
-      {/* Fecha Fin */}
-      <div className="md:col-span-2">
-        <LabelMobile label="Fecha Fin" />
-        <FormField
-          control={control}
-          name={`actividades.${idx}.fechaFin`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                  value={
-                    field.value instanceof Date
-                      ? field.value.toISOString().split('T')[0]
-                      : field.value || ''
-                  }
-                  min={
-                    fechaInicio instanceof Date
-                      ? fechaInicio.toISOString().split('T')[0]
-                      : fechaInicio || today
-                  }
-                  className="h-9 text-xs"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Días (Editable con decimales) */}
       <div className="md:col-span-1">
         <LabelMobile label="Días" />
         <FormField
@@ -241,7 +255,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
         />
       </div>
 
-      {/* Actividad Programada */}
       <div className="md:col-span-4">
         <LabelMobile label="Actividad Programada" />
         <FormField
@@ -262,7 +275,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
         />
       </div>
 
-      {/* Personas Institución */}
       <div className="md:col-span-1">
         <LabelMobile label="Pers. Inst." />
         <FormField
@@ -285,7 +297,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
         />
       </div>
 
-      {/* Personas Terceros */}
       <div className="md:col-span-1">
         <LabelMobile label="Pers. Terc." />
         <FormField
@@ -308,7 +319,6 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
         />
       </div>
 
-      {/* Acciones */}
       <div className="mt-2 flex justify-end md:col-span-1 md:mt-0">
         <Button
           variant="ghost"
