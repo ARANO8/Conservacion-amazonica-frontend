@@ -37,6 +37,7 @@ export function LoginForm({
   // Estado local para errores generales (fuera de campos específicos)
   const [formRootError, setFormRootError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
 
   const {
     register,
@@ -50,7 +51,10 @@ export function LoginForm({
     setFormRootError(null);
     try {
       await login(data);
-      router.push('/app/inicio');
+      setShowSplash(true);
+      setTimeout(() => {
+        router.push('/app/inicio');
+      }, 1800);
     } catch (error) {
       // Manejar error de NestJS: { message: string | string[], statusCode: number }
       // O error genérico de conexión
@@ -68,82 +72,97 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <form onSubmit={handleSubmit(onSubmit)} method="post" action="#">
-        <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-xl font-bold">Bienvenido a AMZ Desk</h1>
-            <FieldDescription>
-              No tienes una cuenta? <Link href="/signup">Registrarse</Link>
-            </FieldDescription>
-          </div>
-
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </Field>
-
-          <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-              <Link
-                href="/forgot-password"
-                className="text-muted-foreground text-xs underline-offset-4 hover:underline"
-              >
-                Olvidaste tu contraseña?
-              </Link>
+    <>
+      <div className={cn('flex flex-col gap-6', className)} {...props}>
+        <form onSubmit={handleSubmit(onSubmit)} method="post" action="#">
+          <FieldGroup>
+            <div className="flex flex-col items-center gap-2 text-center">
+              <h1 className="text-xl font-bold">Bienvenido a AMZ Desk</h1>
+              <FieldDescription>
+                No tienes una cuenta? <Link href="/signup">Registrarse</Link>
+              </FieldDescription>
             </div>
-            <div className="relative">
+
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                {...register('email')}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
-              >
-                {showPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </Field>
+
+            <Field>
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+                <Link
+                  href="/forgot-password"
+                  className="text-muted-foreground text-xs underline-offset-4 hover:underline"
+                >
+                  Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
+            </Field>
+
+            {formRootError && (
+              <div className="bg-destructive/15 text-destructive rounded-md p-3 text-sm">
+                {formRootError}
+              </div>
             )}
-          </Field>
 
-          {formRootError && (
-            <div className="bg-destructive/15 text-destructive rounded-md p-3 text-sm">
-              {formRootError}
-            </div>
-          )}
+            <Field>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || authLoading}
+              >
+                {authLoading || isLoading ? 'Ingresando...' : 'Ingresar'}
+              </Button>
+            </Field>
+          </FieldGroup>
+        </form>
+        <FieldDescription className="px-6 text-center">
+          Desarrollado por <a href="#">Team aran08 </a>.
+        </FieldDescription>
+      </div>
 
-          <Field>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || authLoading}
-            >
-              {authLoading || isLoading ? 'Ingresando...' : 'Ingresar'}
-            </Button>
-          </Field>
-        </FieldGroup>
-      </form>
-      <FieldDescription className="px-6 text-center">
-        Desarrollado por <a href="#">Team aran08 </a>.
-      </FieldDescription>
-    </div>
+      {showSplash && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900">
+          <h2 className="animate-pulse text-5xl font-extrabold tracking-tight text-white md:text-7xl">
+            AMZdesk
+          </h2>
+          <p className="mt-4 text-sm text-slate-300 md:text-base">
+            Preparando tu entorno de trabajo...
+          </p>
+        </div>
+      )}
+    </>
   );
 }
