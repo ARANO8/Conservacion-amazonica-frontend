@@ -1,7 +1,9 @@
 import api from '@/lib/api';
 import { CreateRendicionInput } from '@/types/rendicion-schema';
-import { adaptCreateRendicionPayload } from '@/lib/adapters/rendicion-adapter';
-import axios from 'axios';
+import {
+  adaptCreateRendicionPayload,
+  type CreateRendicionApiPayload,
+} from '@/lib/adapters/rendicion-adapter';
 
 /**
  * Service to handle Rendiciones (accountability reports) API calls.
@@ -9,28 +11,21 @@ import axios from 'axios';
  */
 export const rendicionesService = {
   /**
+   * Envía la rendición ya adaptada al endpoint oficial del backend.
+   */
+  async submitRendicion(payload: CreateRendicionApiPayload) {
+    const response = await api.post('/rendiciones', payload);
+    return response.data;
+  },
+
+  /**
    * Creates a new rendición (accountability report) for a solicitud.
    * @param payload The form data with all rendición information.
    */
   async createRendicion(payload: CreateRendicionInput) {
     // Adaptar el payload al formato exacto que espera el backend
     const adaptedPayload = adaptCreateRendicionPayload(payload);
-
-    try {
-      const response = await api.post('/rendiciones', adaptedPayload);
-      return response.data;
-    } catch (error) {
-      // Si el error es 404 en /rendiciones, intentar con ruta alternativa
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        const response = await api.post(
-          `/solicitudes/${payload.solicitudId}/rendiciones`,
-          adaptedPayload
-        );
-        return response.data;
-      }
-
-      throw error;
-    }
+    return this.submitRendicion(adaptedPayload);
   },
 
   /**

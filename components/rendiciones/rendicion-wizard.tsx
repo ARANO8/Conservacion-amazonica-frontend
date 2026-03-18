@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import {
   useForm,
   FormProvider,
@@ -23,7 +24,7 @@ import {
 } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
-import { solicitudesService } from '@/lib/services/solicitudes-service';
+import { adaptCreateRendicionPayload } from '@/lib/adapters/rendicion-adapter';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormField,
@@ -62,7 +63,7 @@ export default function RendicionWizard({
 }: RendicionWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState<WizardStepRendicion>('SELECCION');
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const form = useForm<CreateRendicionInput>({
@@ -182,60 +183,37 @@ export default function RendicionWizard({
   // ------------------------------------------------------------------
 
   const handleValidSubmit = async (data: CreateRendicionInput) => {
-    setLoading(true);
+    void data;
+    setIsSubmitting(true);
     try {
-      const solicitudId = data.solicitudId;
+      const formData = form.getValues();
+      const payload = adaptCreateRendicionPayload(formData);
 
-      // Paso 1: Crear la rendición en el backend
-      await rendicionesService.createRendicion(data);
+      await rendicionesService.submitRendicion(payload);
 
       toast.success('Rendición enviada correctamente');
-
-      // Paso 2: Intentar marcar la solicitud como EJECUTADA (es opcional)
-      try {
-        await solicitudesService.marcarEjecutada(solicitudId);
-      } catch (markError) {
-        void markError;
-        // No es crítico si esto falla - la rendición ya fue creada exitosamente
-      }
-
-      // Paso 3: Redirigir al inicio
       setIsModalOpen(false);
-      setTimeout(() => {
-        router.push('/app/inicio');
-      }, 1000);
+      router.push('/app/solicitudes');
     } catch (error: unknown) {
-      let message = 'Error al enviar la rendición';
-      let statusCode: number | undefined;
+      let message = 'Error al enviar la rendición.';
 
-      // Intentar extraer información del error Axios
-      if (typeof error === 'object' && error !== null) {
-        const axiosError = error as {
-          response?: { status?: number; data?: { message?: string } };
-          message?: string;
-        };
+      if (axios.isAxiosError(error)) {
+        const backendMessage = error.response?.data?.message;
 
-        statusCode = axiosError.response?.status;
-        message =
-          axiosError.response?.data?.message || axiosError.message || message;
-
-        // Mensajes específicos para status codes comunes
-        if (statusCode === 404) {
-          message = `Endpoint no encontrado (404). Verifica que el backend tiene implementado el endpoint para rendiciones. ${message}`;
-        } else if (statusCode === 401) {
-          message = 'No autorizado. Tu sesión puede haber expirado.';
-        } else if (statusCode === 422) {
-          message = `Datos inválidos: ${message}`;
-        } else if (statusCode === 500) {
-          message = `Error del servidor. Intenta nuevamente más tarde. ${message}`;
+        if (Array.isArray(backendMessage)) {
+          message = backendMessage.join('. ');
+        } else if (typeof backendMessage === 'string') {
+          message = backendMessage;
+        } else if (typeof error.message === 'string') {
+          message = error.message;
         }
-      } else if (error instanceof Error) {
+      } else if (error instanceof Error && error.message) {
         message = error.message;
       }
 
       toast.error(message);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -336,7 +314,7 @@ export default function RendicionWizard({
           step={step}
           onNext={handleNext}
           onBack={handleBack}
-          loading={loading}
+          loading={isSubmitting}
           form={form}
           solicitudes={solicitudes}
         />
@@ -344,7 +322,7 @@ export default function RendicionWizard({
         <Dialog
           open={isModalOpen}
           onOpenChange={(open) => {
-            if (!loading) setIsModalOpen(open);
+            if (!isSubmitting) setIsModalOpen(open);
           }}
         >
           <DialogContent className="sm:max-w-[640px]">
@@ -434,19 +412,19 @@ export default function RendicionWizard({
               <Button
                 type="button"
                 variant="outline"
-                disabled={loading}
+                disabled={isSubmitting}
                 onClick={() => setIsModalOpen(false)}
               >
                 Cancelar
               </Button>
               <Button
                 type="button"
-                disabled={loading || !canConfirmSubmit}
+                disabled={isSubmitting || !canConfirmSubmit}
                 onClick={() => {
                   void submitRendicion();
                 }}
               >
-                {loading ? 'Procesando...' : 'Confirmar y Enviar Rendición'}
+                {isSubmitting ? 'Enviando...' : 'Confirmar y Enviar Rendición'}
               </Button>
             </DialogFooter>
           </DialogContent>
