@@ -228,7 +228,12 @@ export default function RendicionDetalleBySolicitudPage() {
               rendicion.urlCotizaciones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {rendicion.urlCotizaciones.map((url, idx) => (
-                    <Button key={url} asChild variant="outline" size="sm">
+                    <Button
+                      key={`${idx}-${url}`}
+                      asChild
+                      variant="outline"
+                      size="sm"
+                    >
                       <a href={url} target="_blank" rel="noreferrer">
                         Cotización {idx + 1}
                         <ExternalLink className="ml-2 h-3.5 w-3.5" />
