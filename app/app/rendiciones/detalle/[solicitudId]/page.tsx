@@ -106,7 +106,10 @@ export default function RendicionDetalleBySolicitudPage() {
   }, [solicitudId, router]);
 
   const gastos = useMemo(
-    () => (rendicion?.gastosRendicion ?? []).map(normalizeGasto),
+    () =>
+      (rendicion?.gastos ?? rendicion?.gastosRendicion ?? []).map(
+        normalizeGasto
+      ),
     [rendicion]
   );
 
@@ -282,10 +285,12 @@ export default function RendicionDetalleBySolicitudPage() {
                 {gastos.map((gasto, idx) => (
                   <TableRow key={`${gasto.concepto}-${idx}`}>
                     <TableCell>{formatDateShort(gasto.fecha)}</TableCell>
-                    <TableCell>{gasto.proveedor || '-'}</TableCell>
+                    <TableCell>{gasto.proveedor || 'Sin proveedor'}</TableCell>
                     <TableCell>{gasto.concepto || '-'}</TableCell>
                     <TableCell>
-                      {gasto.partidaId ? `Partida #${gasto.partidaId}` : '-'}
+                      {gasto.partidaId
+                        ? `Partida #${gasto.partidaId}`
+                        : 'Sin partida'}
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatMoney(gasto.montoBruto)}
@@ -298,18 +303,19 @@ export default function RendicionDetalleBySolicitudPage() {
                     </TableCell>
                     <TableCell>
                       {gasto.urlComprobante ? (
-                        <Button asChild variant="outline" size="sm">
+                        <Button variant="ghost" size="icon" asChild>
                           <a
                             href={gasto.urlComprobante}
                             target="_blank"
                             rel="noreferrer"
                           >
-                            Ver
-                            <ExternalLink className="ml-2 h-3.5 w-3.5" />
+                            <ExternalLink className="h-4 w-4" />
                           </a>
                         </Button>
                       ) : (
-                        <span className="text-muted-foreground">-</span>
+                        <span className="text-muted-foreground text-xs">
+                          Sin enlace
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>
