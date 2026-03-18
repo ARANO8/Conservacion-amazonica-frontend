@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import {
+  BarChart3,
   Bell,
   ClipboardPlus,
   FileText,
@@ -133,6 +134,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Monitor Solicitudes',
             url: '/app/monitor',
             icon: LayoutGrid,
+          },
+          {
+            title: 'Analítica',
+            url: '/app/analitica',
+            icon: BarChart3,
           },
         ]
       : []),
