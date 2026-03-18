@@ -45,7 +45,7 @@ export default function Paso4Informe() {
       </p>
 
       <FieldGroup className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={control}
             name="informeGastos.fechaInicio"
@@ -126,7 +126,7 @@ export default function Paso4Informe() {
           ) : (
             <div className="space-y-4">
               {fields.map((field, index) => (
-                <Card key={field.id} className="border shadow-sm">
+                <Card key={field.id} className="w-full border shadow-sm">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-2">
                       <CardTitle className="text-sm font-semibold">
@@ -146,7 +146,7 @@ export default function Paso4Informe() {
                   </CardHeader>
 
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                       <FormField
                         control={control}
                         name={`informeGastos.actividades.${index}.fecha`}
@@ -193,47 +193,47 @@ export default function Paso4Informe() {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={control}
+                        name={`informeGastos.actividades.${index}.personaInstitucion`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                              Persona / Institución / Lugar *
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Ej: Gobierno Autónomo Municipal de Cobija"
+                                className="h-9 text-sm"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-[10px]" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name={`informeGastos.actividades.${index}.actividadesRealizadas`}
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2 lg:col-span-3">
+                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                              Actividades Realizadas *
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Describe las actividades realizadas en esta fecha"
+                                className="min-h-20 resize-none text-sm"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-[10px]" />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-
-                    <FormField
-                      control={control}
-                      name={`informeGastos.actividades.${index}.personaInstitucion`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                            Persona / Institución / Lugar *
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Ej: Gobierno Autónomo Municipal de Cobija"
-                              className="h-9 text-sm"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={control}
-                      name={`informeGastos.actividades.${index}.actividadesRealizadas`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                            Actividades Realizadas *
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Describe las actividades realizadas en esta fecha"
-                              className="min-h-20 resize-none text-sm"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
                   </CardContent>
                 </Card>
               ))}

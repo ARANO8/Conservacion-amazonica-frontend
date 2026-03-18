@@ -280,56 +280,60 @@ export default function RendicionDetalleBySolicitudPage() {
               No hay gastos registrados en esta rendición.
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Proveedor</TableHead>
-                  <TableHead>Concepto</TableHead>
-                  <TableHead>Partida</TableHead>
-                  <TableHead className="text-right">Bruto</TableHead>
-                  <TableHead className="text-right">Impuestos</TableHead>
-                  <TableHead className="text-right">Neto</TableHead>
-                  <TableHead>Respaldo</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {gastos.map((gasto, idx) => (
-                  <TableRow key={`${gasto.concepto}-${idx}`}>
-                    <TableCell>{formatDateShort(gasto.fecha)}</TableCell>
-                    <TableCell>{gasto.proveedor || 'Sin proveedor'}</TableCell>
-                    <TableCell>{gasto.concepto || '-'}</TableCell>
-                    <TableCell>{gasto.partidaLabel}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatMoney(gasto.montoBruto)}
-                    </TableCell>
-                    <TableCell className="text-right text-orange-600">
-                      {formatMoney(gasto.impuestosRetenciones)}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold text-emerald-600">
-                      {formatMoney(gasto.montoNeto)}
-                    </TableCell>
-                    <TableCell>
-                      {gasto.urlComprobante ? (
-                        <Button variant="ghost" size="icon" asChild>
-                          <a
-                            href={gasto.urlComprobante}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">
-                          Sin enlace
-                        </span>
-                      )}
-                    </TableCell>
+            <div className="w-full overflow-x-auto">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Proveedor</TableHead>
+                    <TableHead>Concepto</TableHead>
+                    <TableHead>Partida</TableHead>
+                    <TableHead className="text-right">Bruto</TableHead>
+                    <TableHead className="text-right">Impuestos</TableHead>
+                    <TableHead className="text-right">Neto</TableHead>
+                    <TableHead>Respaldo</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {gastos.map((gasto, idx) => (
+                    <TableRow key={`${gasto.concepto}-${idx}`}>
+                      <TableCell>{formatDateShort(gasto.fecha)}</TableCell>
+                      <TableCell>
+                        {gasto.proveedor || 'Sin proveedor'}
+                      </TableCell>
+                      <TableCell>{gasto.concepto || '-'}</TableCell>
+                      <TableCell>{gasto.partidaLabel}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatMoney(gasto.montoBruto)}
+                      </TableCell>
+                      <TableCell className="text-right text-orange-600">
+                        {formatMoney(gasto.impuestosRetenciones)}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-emerald-600">
+                        {formatMoney(gasto.montoNeto)}
+                      </TableCell>
+                      <TableCell>
+                        {gasto.urlComprobante ? (
+                          <Button variant="ghost" size="icon" asChild>
+                            <a
+                              href={gasto.urlComprobante}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">
+                            Sin enlace
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

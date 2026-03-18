@@ -162,7 +162,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
           return (
             <Card
               key={p.id}
-              className="bg-muted/40 border shadow-none transition-shadow hover:shadow-sm"
+              className="bg-muted/40 w-full border shadow-none transition-shadow hover:shadow-sm"
             >
               <CardHeader className="pt-3 pb-2">
                 <div className="flex items-start justify-between gap-2">
@@ -327,7 +327,7 @@ function ComprobanteCard({
   }, [taxResult.montoNeto, taxResult.totalRetenciones, index, setValue]);
 
   return (
-    <Card className="border shadow-sm">
+    <Card className="w-full border shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-sm font-semibold">
@@ -347,7 +347,7 @@ function ComprobanteCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* --- Fecha Documento --- */}
           <FormField
             control={control}
@@ -403,9 +403,7 @@ function ComprobanteCard({
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* --- Número Documento --- */}
           <FormField
             control={control}
@@ -447,151 +445,193 @@ function ComprobanteCard({
               </FormItem>
             )}
           />
-        </div>
 
-        {/* --- Concepto / Detalle --- */}
-        <FormField
-          control={control}
-          name={`gastos.${index}.concepto`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                Concepto / Detalle *
-              </FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Describe el gasto realizado (requerido)"
-                  className="min-h-16 resize-none text-sm"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage className="text-[10px]" />
-            </FormItem>
-          )}
-        />
+          {/* --- Partida Presupuestaria --- */}
+          <FormField
+            control={control}
+            name={`gastos.${index}.partidaId`}
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                  Partida Presupuestaria *
+                </FormLabel>
+                <Select
+                  value={field.value ? String(field.value) : ''}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                >
+                  <FormControl>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Selecciona una partida..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(solicitud?.presupuestos ?? []).map((p) => {
+                      const codigo = p.poa?.codigoPoa ?? '—';
+                      const partida = p.poa?.estructura?.partida?.nombre ?? '—';
+                      return (
+                        <SelectItem key={p.id} value={String(p.id)}>
+                          {codigo} – {partida}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-[10px]" />
+              </FormItem>
+            )}
+          />
 
-        {/* --- Partida Presupuestaria --- */}
-        <FormField
-          control={control}
-          name={`gastos.${index}.partidaId`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                Partida Presupuestaria *
-              </FormLabel>
-              <Select
-                value={field.value ? String(field.value) : ''}
-                onValueChange={(val) => field.onChange(Number(val))}
-              >
+          {/* --- URL Comprobante --- */}
+          <FormField
+            control={control}
+            name={`gastos.${index}.urlComprobante`}
+            render={({ field }) => (
+              <FormItem className="md:col-span-2 lg:col-span-3">
+                <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                  URL Comprobante *
+                </FormLabel>
                 <FormControl>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Selecciona una partida..." />
-                  </SelectTrigger>
+                  <Input
+                    type="url"
+                    placeholder="https://drive.google.com/..."
+                    className="h-9 text-sm"
+                    {...field}
+                  />
                 </FormControl>
-                <SelectContent>
-                  {(solicitud?.presupuestos ?? []).map((p) => {
-                    const codigo = p.poa?.codigoPoa ?? '—';
-                    const partida = p.poa?.estructura?.partida?.nombre ?? '—';
-                    return (
-                      <SelectItem key={p.id} value={String(p.id)}>
-                        {codigo} – {partida}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-              <FormMessage className="text-[10px]" />
-            </FormItem>
-          )}
-        />
+                <FormMessage className="text-[10px]" />
+              </FormItem>
+            )}
+          />
 
-        {/* --- URL Comprobante --- */}
-        <FormField
-          control={control}
-          name={`gastos.${index}.urlComprobante`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                URL Comprobante *
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="https://drive.google.com/..."
-                  className="h-9 text-sm"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage className="text-[10px]" />
-            </FormItem>
-          )}
-        />
+          {/* --- Concepto / Detalle --- */}
+          <FormField
+            control={control}
+            name={`gastos.${index}.concepto`}
+            render={({ field }) => (
+              <FormItem className="md:col-span-2 lg:col-span-3">
+                <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                  Concepto / Detalle *
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe el gasto realizado (requerido)"
+                    className="min-h-16 resize-none text-sm"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px]" />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Separator className="my-2" />
 
-        {/* --- Monto Total (bruto pagado) --- */}
-        <FormField
-          control={control}
-          name={`gastos.${index}.montoTotal`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                Monto Total Pagado (bruto) Bs. *
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="0.00"
-                  inputMode="decimal"
-                  className="h-9 text-sm"
-                  name={field.name}
-                  ref={field.ref}
-                  value={montoTotalInput}
-                  onChange={(e) => {
-                    const sanitized = sanitizeMonetaryInput(e.target.value);
-                    setMontoTotalInput(sanitized);
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* --- Monto Total (bruto pagado) --- */}
+          <FormField
+            control={control}
+            name={`gastos.${index}.montoTotal`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                  Monto Total Pagado (bruto) Bs. *
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="0.00"
+                    inputMode="decimal"
+                    className="h-9 text-sm"
+                    name={field.name}
+                    ref={field.ref}
+                    value={montoTotalInput}
+                    onChange={(e) => {
+                      const sanitized = sanitizeMonetaryInput(e.target.value);
+                      setMontoTotalInput(sanitized);
 
-                    if (!sanitized || sanitized === '.') {
-                      field.onChange(0);
-                      return;
-                    }
+                      if (!sanitized || sanitized === '.') {
+                        field.onChange(0);
+                        return;
+                      }
 
-                    const parsed = Number.parseFloat(sanitized);
-                    const parsedValue = Number.isFinite(parsed) ? parsed : 0;
-                    field.onChange(parsedValue);
-                    setValue(`gastos.${index}.montoBruto`, parsedValue, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    });
-                  }}
-                  onBlur={() => {
-                    field.onBlur();
-                    if (!montoTotalInput || montoTotalInput === '.') {
-                      setMontoTotalInput('');
-                      return;
-                    }
+                      const parsed = Number.parseFloat(sanitized);
+                      const parsedValue = Number.isFinite(parsed) ? parsed : 0;
+                      field.onChange(parsedValue);
+                      setValue(`gastos.${index}.montoBruto`, parsedValue, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }}
+                    onBlur={() => {
+                      field.onBlur();
+                      if (!montoTotalInput || montoTotalInput === '.') {
+                        setMontoTotalInput('');
+                        return;
+                      }
 
-                    const parsed = Number.parseFloat(montoTotalInput);
-                    if (!Number.isFinite(parsed) || parsed <= 0) {
-                      setMontoTotalInput('');
-                      field.onChange(0);
-                      return;
-                    }
+                      const parsed = Number.parseFloat(montoTotalInput);
+                      if (!Number.isFinite(parsed) || parsed <= 0) {
+                        setMontoTotalInput('');
+                        field.onChange(0);
+                        return;
+                      }
 
-                    const rounded = round2(parsed);
-                    setMontoTotalInput(rounded.toFixed(2));
-                    field.onChange(rounded);
-                    setValue(`gastos.${index}.montoBruto`, rounded, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    });
-                  }}
-                />
-              </FormControl>
-              <FormMessage className="text-[10px]" />
-            </FormItem>
+                      const rounded = round2(parsed);
+                      setMontoTotalInput(rounded.toFixed(2));
+                      field.onChange(rounded);
+                      setValue(`gastos.${index}.montoBruto`, rounded, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }}
+                  />
+                </FormControl>
+                <FormMessage className="text-[10px]" />
+              </FormItem>
+            )}
+          />
+
+          {/* --- Tipo de Retención (solo para RECIBO/BOLETA + GENERAL) --- */}
+          {showTipoRetencion && (
+            <FormField
+              control={control}
+              name={`gastos.${index}.tipoRetencion`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                    Tipo de Gasto (Retención) *
+                  </FormLabel>
+                  <Select
+                    value={field.value ?? 'SERVICIO'}
+                    onValueChange={field.onChange}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TipoRetencionEnum.options.map((tipo) => {
+                        const labels: Record<string, string> = {
+                          BIEN: 'Compra de Bien (IUE 5% + IT 3% = 8%)',
+                          SERVICIO: 'Servicio (IUE 12.5% + IT 3% ≈ 16%)',
+                          ALQUILER: 'Alquiler (IVA 13% + IT 3% = 16%)',
+                        };
+                        return (
+                          <SelectItem key={tipo} value={tipo}>
+                            {labels[tipo] ?? tipo}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-[10px]" />
+                </FormItem>
+              )}
+            />
           )}
-        />
+        </div>
 
         <FormField
           control={control}
@@ -616,46 +656,6 @@ function ComprobanteCard({
             </FormItem>
           )}
         />
-
-        {/* --- Tipo de Retención (solo para RECIBO/BOLETA + GENERAL) --- */}
-        {showTipoRetencion && (
-          <FormField
-            control={control}
-            name={`gastos.${index}.tipoRetencion`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Tipo de Gasto (Retención) *
-                </FormLabel>
-                <Select
-                  value={field.value ?? 'SERVICIO'}
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {TipoRetencionEnum.options.map((tipo) => {
-                      const labels: Record<string, string> = {
-                        BIEN: 'Compra de Bien (IUE 5% + IT 3% = 8%)',
-                        SERVICIO: 'Servicio (IUE 12.5% + IT 3% ≈ 16%)',
-                        ALQUILER: 'Alquiler (IVA 13% + IT 3% = 16%)',
-                      };
-                      return (
-                        <SelectItem key={tipo} value={tipo}>
-                          {labels[tipo] ?? tipo}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
-        )}
 
         {/* --- Desglose de Retenciones + Monto Neto (readonly) --- */}
         <div className="bg-muted/50 space-y-2 rounded-lg p-3 text-xs">
@@ -893,7 +893,7 @@ export default function Paso2Gastos({
           ) : (
             <div className="space-y-4">
               {gastosSinRespaldoFields.map((field, index) => (
-                <Card key={field.id} className="border shadow-sm">
+                <Card key={field.id} className="w-full border shadow-sm">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-2">
                       <CardTitle className="text-sm font-semibold">
@@ -913,7 +913,7 @@ export default function Paso2Gastos({
                   </CardHeader>
 
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                       <FormField
                         control={control}
                         name={`gastosSinRespaldo.${index}.fechaGasto`}
@@ -970,27 +970,26 @@ export default function Paso2Gastos({
                           </FormItem>
                         )}
                       />
+                      <FormField
+                        control={control}
+                        name={`gastosSinRespaldo.${index}.detalle`}
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2 lg:col-span-3">
+                            <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                              Detalle del Gasto
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Describe el gasto menor realizado"
+                                className="min-h-16 resize-none text-sm"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-[10px]" />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-
-                    <FormField
-                      control={control}
-                      name={`gastosSinRespaldo.${index}.detalle`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                            Detalle del Gasto
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Describe el gasto menor realizado"
-                              className="min-h-16 resize-none text-sm"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
                   </CardContent>
                 </Card>
               ))}
@@ -1048,7 +1047,7 @@ export default function Paso2Gastos({
           />
         </div>
 
-        <Card className="border-primary/20 bg-primary/5">
+        <Card className="border-primary/20 bg-primary/5 w-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold uppercase">
               Resumen General de Gastos
