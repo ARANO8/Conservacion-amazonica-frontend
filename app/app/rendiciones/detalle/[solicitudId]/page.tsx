@@ -9,7 +9,6 @@ import {
   Calendar,
   CheckCircle2,
   ExternalLink,
-  FileText,
   Link2,
   NotebookPen,
   ReceiptText,
@@ -163,7 +162,7 @@ export default function RendicionDetalleBySolicitudPage() {
             <h1 className="text-2xl font-bold tracking-tight">
               Detalle de Rendición
             </h1>
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               Solicitud #{rendicion.solicitudId}
             </p>
           </div>
@@ -177,35 +176,29 @@ export default function RendicionDetalleBySolicitudPage() {
             <Calendar className="h-5 w-5" />
             Encabezado Financiero
           </CardTitle>
-          <CardDescription className="text-foreground text-sm">
+          <CardDescription className="text-sifin-helper">
             Información general de fecha y respaldos documentales.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div>
-              <p className="text-foreground text-sm font-semibold uppercase">
-                Fecha de Rendición
-              </p>
-              <p className="text-base font-bold">
+              <p className="text-sifin-label uppercase">Fecha de Rendición</p>
+              <p className="text-sifin-monto">
                 {formatDateShort(rendicion.fechaRendicion)}
               </p>
             </div>
 
             <div>
-              <p className="text-foreground text-sm font-semibold uppercase">
-                Monto Respaldado
-              </p>
-              <p className="text-base font-bold text-emerald-600">
+              <p className="text-sifin-label uppercase">Monto Respaldado</p>
+              <p className="text-sifin-monto text-emerald-600">
                 {formatMoney(rendicion.montoRespaldado)}
               </p>
             </div>
 
             <div>
-              <p className="text-foreground text-sm font-semibold uppercase">
-                Saldo Líquido
-              </p>
-              <p className="text-base font-bold text-blue-600">
+              <p className="text-sifin-label uppercase">Saldo Líquido</p>
+              <p className="text-sifin-monto text-blue-600">
                 {formatMoney(rendicion.saldoLiquido)}
               </p>
             </div>
@@ -215,7 +208,7 @@ export default function RendicionDetalleBySolicitudPage() {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="rounded-md border p-3">
-              <p className="text-foreground mb-2 text-sm font-semibold uppercase">
+              <p className="text-sifin-label mb-2 uppercase">
                 Cuadro Comparativo
               </p>
               {rendicion.urlCuadroComparativo ? (
@@ -231,14 +224,12 @@ export default function RendicionDetalleBySolicitudPage() {
                   </a>
                 </Button>
               ) : (
-                <p className="text-foreground text-sm">No adjunto</p>
+                <p className="text-sifin-helper">No adjunto</p>
               )}
             </div>
 
             <div className="rounded-md border p-3">
-              <p className="text-foreground mb-2 text-sm font-semibold uppercase">
-                Cotizaciones
-              </p>
+              <p className="text-sifin-label mb-2 uppercase">Cotizaciones</p>
               {rendicion.urlCotizaciones &&
               rendicion.urlCotizaciones.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -257,7 +248,7 @@ export default function RendicionDetalleBySolicitudPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-foreground text-sm">No adjuntas</p>
+                <p className="text-sifin-helper">No adjuntas</p>
               )}
             </div>
           </div>
@@ -270,13 +261,13 @@ export default function RendicionDetalleBySolicitudPage() {
             <ReceiptText className="h-5 w-5" />
             Detalle de Gastos
           </CardTitle>
-          <CardDescription className="text-foreground text-sm">
+          <CardDescription className="text-sifin-helper">
             Comprobantes con importes brutos, retenciones y montos netos.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {gastos.length === 0 ? (
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               No hay gastos registrados en esta rendición.
             </p>
           ) : (
@@ -284,28 +275,28 @@ export default function RendicionDetalleBySolicitudPage() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Fecha
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Proveedor
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Concepto
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Partida
                     </TableHead>
-                    <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header text-right">
                       Bruto
                     </TableHead>
-                    <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header text-right">
                       Impuestos
                     </TableHead>
-                    <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header text-right">
                       Neto
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Respaldo
                     </TableHead>
                   </TableRow>
@@ -319,13 +310,13 @@ export default function RendicionDetalleBySolicitudPage() {
                       </TableCell>
                       <TableCell>{gasto.concepto || '-'}</TableCell>
                       <TableCell>{gasto.partidaLabel}</TableCell>
-                      <TableCell className="text-right font-semibold">
+                      <TableCell className="text-sifin-monto text-right">
                         {formatMoney(gasto.montoBruto)}
                       </TableCell>
                       <TableCell className="text-right text-orange-600">
                         {formatMoney(gasto.impuestosRetenciones)}
                       </TableCell>
-                      <TableCell className="text-right font-semibold text-emerald-600">
+                      <TableCell className="text-sifin-monto text-right text-emerald-600">
                         {formatMoney(gasto.montoNeto)}
                       </TableCell>
                       <TableCell>
@@ -340,9 +331,7 @@ export default function RendicionDetalleBySolicitudPage() {
                             </a>
                           </Button>
                         ) : (
-                          <span className="text-foreground text-sm">
-                            Sin enlace
-                          </span>
+                          <span className="text-sifin-helper">Sin enlace</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -357,26 +346,26 @@ export default function RendicionDetalleBySolicitudPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Gastos Menores</CardTitle>
-          <CardDescription className="text-foreground text-sm">
+          <CardDescription className="text-sifin-helper">
             Registros sin respaldo formal (si aplica).
           </CardDescription>
         </CardHeader>
         <CardContent>
           {gastosMenores.length === 0 ? (
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               No se registraron gastos menores en esta rendición.
             </p>
           ) : (
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header">
                     Fecha
                   </TableHead>
-                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header">
                     Detalle
                   </TableHead>
-                  <TableHead className="text-right text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header text-right">
                     Monto
                   </TableHead>
                 </TableRow>
@@ -386,7 +375,7 @@ export default function RendicionDetalleBySolicitudPage() {
                   <TableRow key={`${item.detalle}-${idx}`}>
                     <TableCell>{formatDateShort(item.fecha)}</TableCell>
                     <TableCell>{item.detalle || '-'}</TableCell>
-                    <TableCell className="text-right font-semibold">
+                    <TableCell className="text-sifin-monto text-right">
                       {formatMoney(item.monto)}
                     </TableCell>
                   </TableRow>
@@ -403,15 +392,15 @@ export default function RendicionDetalleBySolicitudPage() {
             <NotebookPen className="h-5 w-5" />
             Informe de Gastos (Anexo 7)
           </CardTitle>
-          <CardDescription className="text-foreground text-sm">
+          <CardDescription className="text-sifin-helper">
             Rango de viaje y actividades realizadas durante la comisión.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {rendicion.informeGastos ? (
             <>
-              <div className="bg-muted/40 rounded-md p-3 text-sm">
-                <span className="font-semibold">Periodo: </span>
+              <div className="bg-muted/40 rounded-md p-3">
+                <span className="text-sifin-label">Periodo: </span>
                 {formatDateShort(rendicion.informeGastos.fechaInicio)} al{' '}
                 {formatDateShort(rendicion.informeGastos.fechaFin)}
               </div>
@@ -419,16 +408,16 @@ export default function RendicionDetalleBySolicitudPage() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Fecha
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Lugar
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Persona / Institución
                     </TableHead>
-                    <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <TableHead className="text-sifin-table-header">
                       Actividades Realizadas
                     </TableHead>
                   </TableRow>
@@ -448,7 +437,7 @@ export default function RendicionDetalleBySolicitudPage() {
               </Table>
             </>
           ) : (
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               Esta rendición no incluye informe de gastos.
             </p>
           )}
@@ -459,10 +448,10 @@ export default function RendicionDetalleBySolicitudPage() {
         <CardContent className="flex items-center gap-3 pt-6">
           <CheckCircle2 className="h-5 w-5 text-emerald-600" />
           <div>
-            <p className="font-semibold text-emerald-700 dark:text-emerald-300">
+            <p className="text-sifin-monto text-emerald-700 dark:text-emerald-300">
               Declaración Jurada Firmada
             </p>
-            <p className="text-sm text-emerald-700/80 dark:text-emerald-300/80">
+            <p className="text-sifin-helper text-emerald-700/80 dark:text-emerald-300/80">
               La rendición fue registrada con conformidad del responsable.
             </p>
           </div>

@@ -136,7 +136,7 @@ export default function SolicitudDetailPage() {
               </h1>
               <EstadoBadge estado={solicitud.estado} />
             </div>
-            <p className="text-foreground">
+            <p className="text-sifin-helper">
               {canApprove
                 ? 'Revisa los detalles antes de tomar una decisión.'
                 : 'Detalles de tu solicitud.'}
@@ -151,14 +151,14 @@ export default function SolicitudDetailPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Solicitante</CardTitle>
+            <CardTitle className="text-sifin-label">Solicitante</CardTitle>
             <User className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold">
+            <div className="text-sifin-monto">
               {solicitud.usuarioEmisor?.nombreCompleto || 'Sin asignar'}
             </div>
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               {solicitud.usuarioEmisor?.cargo ||
                 solicitud.usuarioEmisor?.email ||
                 ''}
@@ -168,18 +168,18 @@ export default function SolicitudDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sifin-label">
               Periodo del Viaje
             </CardTitle>
             <Calendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold">
+            <div className="text-sifin-monto">
               {solicitud.fechaInicio
                 ? `${formatDateShort(solicitud.fechaInicio)} - ${formatDateShort(solicitud.fechaFin || solicitud.fechaInicio)}`
                 : formatDateShort(solicitud.fechaSolicitud)}
             </div>
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               Solicitado: {formatDateShort(solicitud.fechaSolicitud)}
             </p>
           </CardContent>
@@ -187,11 +187,11 @@ export default function SolicitudDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Destino</CardTitle>
+            <CardTitle className="text-sifin-label">Destino</CardTitle>
             <MapPin className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold">
+            <div className="text-sifin-monto">
               {solicitud.lugarViaje || '-'}
             </div>
           </CardContent>
@@ -199,14 +199,14 @@ export default function SolicitudDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monto Total</CardTitle>
+            <CardTitle className="text-sifin-label">Monto Total</CardTitle>
             <DollarSign className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold text-emerald-600">
+            <div className="text-sifin-monto text-emerald-600">
               {formatMoney(solicitud.montoTotalNeto)}
             </div>
-            <p className="text-foreground text-sm">
+            <p className="text-sifin-helper">
               Presupuestado: {formatMoney(solicitud.montoTotalPresupuestado)}
             </p>
           </CardContent>
@@ -225,10 +225,8 @@ export default function SolicitudDetailPage() {
           <p className="font-medium">{solicitud.motivoViaje}</p>
           {solicitud.descripcion && (
             <div>
-              <p className="text-foreground mb-1 text-sm">
-                Descripción adicional:
-              </p>
-              <p className="text-sm">{solicitud.descripcion}</p>
+              <p className="text-sifin-helper mb-1">Descripción adicional:</p>
+              <p className="text-sifin-helper">{solicitud.descripcion}</p>
             </div>
           )}
         </CardContent>
@@ -241,7 +239,7 @@ export default function SolicitudDetailPage() {
             <ClipboardList className="h-5 w-5" />
             Planificación
           </CardTitle>
-          <CardDescription className="text-foreground text-sm">
+          <CardDescription className="text-sifin-helper">
             Cronograma de actividades programadas
           </CardDescription>
         </CardHeader>
@@ -250,19 +248,19 @@ export default function SolicitudDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header">
                     Actividad
                   </TableHead>
-                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header">
                     Periodo
                   </TableHead>
-                  <TableHead className="text-center text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header text-center">
                     Días
                   </TableHead>
-                  <TableHead className="text-center text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header text-center">
                     Personal Inst.
                   </TableHead>
-                  <TableHead className="text-center text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header text-center">
                     Terceros
                   </TableHead>
                 </TableRow>
@@ -291,7 +289,7 @@ export default function SolicitudDetailPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-foreground py-4 text-center">
+            <p className="text-sifin-helper py-4 text-center">
               Sin actividades planificadas registradas.
             </p>
           )}
@@ -306,7 +304,7 @@ export default function SolicitudDetailPage() {
               <Wallet className="h-5 w-5" />
               Desglose Financiero por Partida
             </CardTitle>
-            <CardDescription className="text-foreground text-sm">
+            <CardDescription className="text-sifin-helper">
               Resumen detallado de viáticos y comprobantes agrupados por su
               respectiva partida presupuestaria.
             </CardDescription>
@@ -314,11 +312,11 @@ export default function SolicitudDetailPage() {
           <CardContent>
             <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-3">
               <div>
-                <p className="font-medium">
+                <p className="text-sifin-label">
                   {'Código POA: ' + solicitud.presupuestos[0]?.poa?.codigoPoa ||
                     'Sin código POA'}
                 </p>
-                <p className="font-medium">
+                <p className="text-sifin-label">
                   {'Proyecto: ' +
                     solicitud.presupuestos[0]?.poa?.estructura?.proyecto
                       ?.nombre}
@@ -367,10 +365,10 @@ export default function SolicitudDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header">
                     Nombre Completo
                   </TableHead>
-                  <TableHead className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <TableHead className="text-sifin-table-header">
                     Procedencia / Institución
                   </TableHead>
                 </TableRow>
@@ -385,7 +383,7 @@ export default function SolicitudDetailPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-foreground py-2 text-sm italic">
+            <p className="text-sifin-helper py-2 italic">
               No hay participantes externos registrados en esta solicitud.
             </p>
           )}
@@ -403,14 +401,14 @@ export default function SolicitudDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-col gap-1">
-              <p className="text-foreground text-sm">Código de desembolso</p>
-              <p className="font-semibold">
+              <p className="text-sifin-helper">Código de desembolso</p>
+              <p className="text-sifin-monto">
                 {solicitud.codigoDesembolso || '-'}
               </p>
             </div>
             {solicitud.urlComprobante && (
               <div className="flex flex-col gap-1">
-                <p className="text-foreground text-sm">Comprobante</p>
+                <p className="text-sifin-helper">Comprobante</p>
                 <Button
                   asChild
                   variant="outline"
@@ -437,16 +435,16 @@ export default function SolicitudDetailPage() {
         <CardContent className="pt-6">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <p className="text-foreground text-sm">Total liquido</p>
-              <p className="text-2xl font-bold text-emerald-600">
+              <p className="text-sifin-helper">Total liquido</p>
+              <p className="text-sifin-monto text-2xl text-emerald-600">
                 {formatMoney(solicitud.montoTotalNeto)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-foreground text-sm">
+              <p className="text-sifin-helper">
                 Total Presupuestado (Incl. Impuestos)
               </p>
-              <p className="text-2xl font-bold">
+              <p className="text-sifin-monto text-2xl">
                 {formatMoney(solicitud.montoTotalPresupuestado)}
               </p>
             </div>
