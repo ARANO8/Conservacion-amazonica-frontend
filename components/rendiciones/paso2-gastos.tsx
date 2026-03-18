@@ -741,13 +741,6 @@ export default function Paso2Gastos({
     return sum + valor;
   }, 0);
 
-  const totalMontoNeto = gastosFields.reduce((sum, _, idx) => {
-    const monto = form.watch(`gastos.${idx}.montoNeto`);
-    const valor =
-      typeof monto === 'number' ? monto : parseFloat(String(monto ?? 0)) || 0;
-    return sum + valor;
-  }, 0);
-
   const totalGastosSinRespaldo = gastosSinRespaldoFields.reduce(
     (sum, _, idx) => {
       const monto = form.watch(`gastosSinRespaldo.${idx}.monto`);
@@ -757,6 +750,8 @@ export default function Paso2Gastos({
     },
     0
   );
+
+  const granTotalRendido = totalMontoTotal + totalGastosSinRespaldo;
 
   return (
     <FieldSet>
@@ -807,48 +802,6 @@ export default function Paso2Gastos({
           <Plus className="mr-2 h-4 w-4" />
           Agregar Comprobante
         </Button>
-
-        {/* --- Resumen Total --- */}
-        {gastosFields.length > 0 && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-bold">
-                Resumen de Comprobantes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground font-medium">
-                  Total Pagado (con Retenciones):
-                </span>
-                <span className="text-primary font-bold">
-                  {formatMoney(totalMontoTotal)} Bs.
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground font-medium">
-                  Total Retenciones:
-                </span>
-                <span className="font-bold text-red-600 dark:text-red-400">
-                  {formatMoney(totalMontoTotal - totalMontoNeto)} Bs.
-                </span>
-              </div>
-              <Separator className="my-2" />
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-bold uppercase">
-                  Total Neto (Líquido a Proveedores):
-                </span>
-                <span className="text-primary text-lg font-black">
-                  {formatMoney(totalMontoNeto)} Bs.
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2 text-sm dark:bg-black/10">
-                <span className="font-bold">Cantidad de Comprobantes:</span>
-                <Badge variant="secondary">{gastosFields.length}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <Separator className="my-6" />
 
@@ -990,21 +943,6 @@ export default function Paso2Gastos({
             <Plus className="mr-2 h-4 w-4" />
             Agregar Gasto Menor
           </Button>
-
-          {gastosSinRespaldoFields.length > 0 && (
-            <Card className="border-amber-200/50 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold uppercase">
-                    Total Gastos Menores:
-                  </span>
-                  <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                    {formatMoney(totalGastosSinRespaldo)} Bs.
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         <Separator className="my-6" />
@@ -1030,6 +968,43 @@ export default function Paso2Gastos({
             )}
           />
         </div>
+
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold uppercase">
+              Resumen General de Gastos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground font-medium">
+                Total con Respaldo (Comprobantes):
+              </span>
+              <span className="font-bold">
+                {formatMoney(totalMontoTotal)} Bs.
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground font-medium">
+                Total sin Respaldo (Gastos Menores):
+              </span>
+              <span className="font-bold text-amber-600 dark:text-amber-400">
+                {formatMoney(totalGastosSinRespaldo)} Bs.
+              </span>
+            </div>
+            <Separator className="my-2" />
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-bold uppercase">Gran Total Rendido:</span>
+              <span className="text-primary text-lg font-black">
+                {formatMoney(granTotalRendido)} Bs.
+              </span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2 text-sm dark:bg-black/10">
+              <span className="font-bold">Comprobantes:</span>
+              <Badge variant="secondary">{gastosFields.length}</Badge>
+            </div>
+          </CardContent>
+        </Card>
       </FieldGroup>
     </FieldSet>
   );

@@ -36,7 +36,7 @@ export default function RendicionFooter({
   // Monto anticipado (de la solicitud seleccionada)
   const montoAnticipado = useMemo(() => {
     const sol = solicitudes.find((s) => s.id === solicitudId);
-    return Number(sol?.montoTotalNeto ?? 0);
+    return Number(sol?.montoTotalPresupuestado ?? 0);
   }, [solicitudes, solicitudId]);
 
   // Total rendido (suma de gastos ingresados)
