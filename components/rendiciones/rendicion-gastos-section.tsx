@@ -44,11 +44,12 @@ export function RendicionGastosSection({
                 </div>
                 <Badge
                   className={
-                    ESTADO_GASTO_COLORS[gasto.estado] ||
-                    'bg-gray-100 text-gray-800'
+                    (gasto.estado
+                      ? ESTADO_GASTO_COLORS[gasto.estado]
+                      : undefined) || 'bg-gray-100 text-gray-800'
                   }
                 >
-                  {gasto.estado}
+                  {gasto.estado || 'SIN ESTADO'}
                 </Badge>
               </div>
 
@@ -85,13 +86,13 @@ export function RendicionGastosSection({
                 <div>
                   <p className="text-muted-foreground text-sm">Monto Neto</p>
                   <p className="text-lg font-semibold">
-                    {formatMoney(gasto.montoNeto)}
+                    {formatMoney(gasto.montoNeto ?? gasto.monto ?? 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">Monto Total</p>
                   <p className="text-lg font-semibold text-green-600">
-                    {formatMoney(gasto.montoTotal)}
+                    {formatMoney(gasto.montoTotal ?? gasto.monto ?? 0)}
                   </p>
                 </div>
               </div>

@@ -34,8 +34,10 @@ export function RendicionDeclaracionSection({
               Tipo de Declaración
             </p>
             <p className="mt-1 text-sm font-semibold">
-              {tipoDeclaracionLabels[declaracion.tipoDeclaracion] ||
-                declaracion.tipoDeclaracion}
+              {declaracion.tipoDeclaracion
+                ? tipoDeclaracionLabels[declaracion.tipoDeclaracion] ||
+                  declaracion.tipoDeclaracion
+                : 'No especificada'}
             </p>
           </div>
 

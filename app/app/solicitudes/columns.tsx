@@ -83,17 +83,6 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
       const esDesembolsado = row.original.estado === 'DESEMBOLSADO';
       const esEjecutado = row.original.estado === 'EJECUTADO';
 
-      if (tienneRendicion) {
-        return (
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/app/rendiciones/${row.original.rendicion!.id}`}>
-              <FileText className="mr-2 h-4 w-4" />
-              Ver Rendición
-            </Link>
-          </Button>
-        );
-      }
-
       if (esDesembolsado) {
         return (
           <Button asChild variant="outline" size="sm">
@@ -107,13 +96,18 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
         );
       }
 
-      if (esEjecutado) {
+      if (esEjecutado || tienneRendicion) {
         return (
-          <span className="text-muted-foreground text-xs">Sin rendición</span>
+          <Button asChild variant="secondary" size="sm">
+            <Link href={`/app/rendiciones/detalle/${row.original.id}`}>
+              <FileText className="mr-2 h-4 w-4" />
+              Ver Rendición
+            </Link>
+          </Button>
         );
       }
 
-      return null;
+      return <span className="text-muted-foreground text-xs">-</span>;
     },
   },
   {

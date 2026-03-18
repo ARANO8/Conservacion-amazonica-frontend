@@ -35,19 +35,23 @@ export enum TipoDocumentoGasto {
 export interface GastoRendicionResponse {
   id: number;
   rendicionId: number;
-  concepto: string;
+  concepto?: string;
   detalle?: string;
   tipoDocumento: TipoDocumentoGasto;
   numeroDocumento?: string;
   proveedor?: string;
   fechaDocumento?: string; // ISO date
-  montoTotal: string; // Decimal as string from backend
-  montoNeto: string; // Decimal as string
-  estado: EstadoGastoRendicion;
+  montoTotal?: string; // Decimal as string from backend
+  montoNeto?: string; // Decimal as string
+  estado?: EstadoGastoRendicion;
   createdAt?: string; // ISO timestamp
   updatedAt?: string; // ISO timestamp
-  // Backend names (from Prisma model)
+  // Backend names (from Prisma model actual)
   nroDocumento?: string;
+  fecha?: string;
+  monto?: string;
+  partidaId?: number;
+  urlComprobante?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -57,13 +61,35 @@ export interface GastoRendicionResponse {
 export interface DeclaracionJuradaResponse {
   id: number;
   rendicionId: number;
-  tipoDeclaracion: 'COMPLETA' | 'PARCIAL' | 'NEGATIVA';
-  confirmaDatosVeridicos: boolean;
-  aceptaPoliticaDevolucion: boolean;
+  tipoDeclaracion?: 'COMPLETA' | 'PARCIAL' | 'NEGATIVA';
+  confirmaDatosVeridicos?: boolean;
+  aceptaPoliticaDevolucion?: boolean;
   montoADevolver?: string; // Decimal as string
   observaciones?: string;
+  fecha?: string;
+  detalle?: string;
+  monto?: string;
   createdAt?: string; // ISO timestamp
   updatedAt?: string; // ISO timestamp
+}
+
+export interface ActividadInformeResponse {
+  id: number;
+  informeId: number;
+  fecha: string;
+  lugar: string;
+  personaInstitucion: string;
+  actividadesRealizadas: string;
+}
+
+export interface InformeGastosResponse {
+  id: number;
+  rendicionId: number;
+  fechaInicio: string;
+  fechaFin: string;
+  createdAt?: string;
+  updatedAt?: string;
+  actividades: ActividadInformeResponse[];
 }
 
 // ---------------------------------------------------------------------------
@@ -77,6 +103,8 @@ export interface RendicionResponse {
   montoRespaldado: string; // Decimal as string (sum of gastos montoTotal)
   saldoLiquido: string; // Decimal as string (desembolso - montoRespaldado)
   estado: EstadoRendicion;
+  urlCuadroComparativo?: string | null;
+  urlCotizaciones?: string[];
   observaciones?: string;
   createdAt?: string; // ISO timestamp
   updatedAt?: string; // ISO timestamp
@@ -85,6 +113,7 @@ export interface RendicionResponse {
   solicitud: SolicitudResponse;
   gastosRendicion: GastoRendicionResponse[];
   declaracionesJuradas: DeclaracionJuradaResponse[];
+  informeGastos?: InformeGastosResponse | null;
 
   // Legacy aliases for convenience (not from backend, added by frontend)
   gastos?: GastoRendicionResponse[];

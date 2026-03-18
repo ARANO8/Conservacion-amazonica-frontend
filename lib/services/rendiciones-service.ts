@@ -47,6 +47,14 @@ export const rendicionesService = {
     });
     return response.data;
   },
+
+  /**
+   * Obtiene una rendición a partir del ID de solicitud.
+   */
+  async getRendicionBySolicitud(solicitudId: string | number) {
+    const response = await api.get(`/rendiciones/solicitud/${solicitudId}`);
+    return response.data;
+  },
 };
 
 export default rendicionesService;
