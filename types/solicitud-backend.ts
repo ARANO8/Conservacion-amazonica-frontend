@@ -39,6 +39,7 @@ export interface CreateSolicitudPayload {
     poaId: number;
     region: string;
     destino: string;
+    tipoDocumento: string;
     personas: number;
     noches: number;
     cantidadUnitaria: number;
@@ -180,6 +181,7 @@ export interface SolicitudResponse {
       id: number;
       region: string;
       destino: string;
+      tipoDocumento?: string;
       personas: number;
       noches: number;
       cantidadUnitaria: number | string;
@@ -197,6 +199,7 @@ export interface SolicitudResponse {
     id: number;
     region: string;
     destino: string;
+    tipoDocumento?: string;
     personas: number;
     noches: number;
     cantidadUnitaria: number | string;

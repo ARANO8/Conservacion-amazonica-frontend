@@ -105,6 +105,7 @@ export const formSchema = z.object({
         poaId: z.number().min(1, 'Debes seleccionar una partida'),
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
+        tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
         personas: z.number().min(1, 'Mínimo 1 persona'),
         noches: z.number().min(1, 'Mínimo 1 noche'),
         cantidadUnitaria: z.number().min(0.01, 'La tarifa debe ser mayor a 0'),

@@ -136,6 +136,7 @@ export default function SolicitudHospedajes({
                 poaId: 0,
                 region: '',
                 destino: '',
+                tipoDocumento: 'RECIBO',
                 personas: 1,
                 noches: 1,
                 cantidadUnitaria: 0,
@@ -178,6 +179,10 @@ function HospedajeCard({
     control,
     name: `hospedajes.${index}.cantidadUnitaria`,
   });
+  const tipoDocumento = useWatch({
+    control,
+    name: `hospedajes.${index}.tipoDocumento`,
+  });
 
   const costoTotal =
     useWatch({ control, name: `hospedajes.${index}.costoTotal` }) || 0;
@@ -191,12 +196,16 @@ function HospedajeCard({
 
     const costoTotal = pers * noch * unit;
 
-    // Acrecentamiento Combinado (100% - 13% IVA - 3% IT = 84%)
-    // Monto Bruto = Líquido / 0.84
-    const montoBruto = costoTotal / 0.84;
+    let ivaCalculado = 0;
+    let itCalculado = 0;
 
-    const ivaCalculado = montoBruto * 0.13;
-    const itCalculado = montoBruto * 0.03;
+    if ((tipoDocumento || 'RECIBO') === 'RECIBO') {
+      // Acrecentamiento Combinado (100% - 13% IVA - 3% IT = 84%)
+      // Monto Bruto = Líquido / 0.84
+      const montoBruto = costoTotal / 0.84;
+      ivaCalculado = montoBruto * 0.13;
+      itCalculado = montoBruto * 0.03;
+    }
 
     setValue(
       `hospedajes.${index}.costoTotal`,
@@ -204,7 +213,7 @@ function HospedajeCard({
     );
     setValue(`hospedajes.${index}.iva`, parseFloat(ivaCalculado.toFixed(2)));
     setValue(`hospedajes.${index}.it`, parseFloat(itCalculado.toFixed(2)));
-  }, [personas, noches, cantidadUnitaria, index, setValue]);
+  }, [personas, noches, cantidadUnitaria, tipoDocumento, index, setValue]);
 
   useEffect(() => {
     calcularTotales();
@@ -372,6 +381,37 @@ function HospedajeCard({
                     </SelectContent>
                   </Select>
                 )}
+                <FormMessage />
+              </Field>
+            )}
+          />
+
+          {/* TIPO DOCUMENTO */}
+          <FormField
+            control={control}
+            name={`hospedajes.${index}.tipoDocumento`}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel>Tipo Documento</FieldLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'RECIBO'}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    <SelectItem value="RECIBO">Recibo</SelectItem>
+                    <SelectItem value="FACTURA">Factura</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </Field>
             )}

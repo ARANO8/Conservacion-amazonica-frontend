@@ -127,6 +127,7 @@ export interface CreateHospedajeDto {
   poaId: number;
   region: string;
   destino: string;
+  tipoDocumento: 'FACTURA' | 'RECIBO';
   personas: number;
   noches: number;
   cantidadUnitaria: number;
