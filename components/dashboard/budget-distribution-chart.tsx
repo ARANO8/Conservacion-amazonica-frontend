@@ -64,7 +64,8 @@ export function BudgetDistributionChart({
       <CardHeader>
         <CardTitle>Top 5 Partidas con Mayor Gasto</CardTitle>
         <CardDescription className="text-amzdesk-helper">
-          Concentración del gasto en partidas del periodo analizado.
+          Concentración del gasto en partidas del periodo analizado (Año
+          Actual).
         </CardDescription>
       </CardHeader>
       <CardContent>
