@@ -105,8 +105,7 @@ export default function RendicionWizard({
         const today = new Date().toISOString().split('T')[0];
         form.setValue('fechaRendicion', today);
 
-        // Con solicitud pre-seleccionada, saltar al paso de respaldos generales
-        // para que el usuario no omita adjuntar las cotizaciones obligatorias
+        // Con solicitud pre-seleccionada, saltar al paso de respaldos generales.
         setStep('RESPALDOS_GENERALES');
       }
     }
@@ -135,7 +134,7 @@ export default function RendicionWizard({
       ]);
       if (!isValid) {
         toast.error(
-          'Adjunta al menos una cotización válida antes de continuar'
+          'Revisa las URLs de respaldos generales antes de continuar'
         );
         return;
       }

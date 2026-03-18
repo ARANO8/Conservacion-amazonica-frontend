@@ -150,13 +150,20 @@ export const CreateRendicionSchema = z.object({
   // --- Paso 2: RESPALDOS_GENERALES ---
   /** URL del cuadro comparativo de cotizaciones (opcional) */
   urlCuadroComparativo: z
-    .string()
-    .url('La URL del cuadro comparativo no es válida')
+    .union([
+      z.string().url('La URL del cuadro comparativo no es válida'),
+      z.literal(''),
+    ])
     .optional(),
-  /** URLs de las cotizaciones adjuntas (al menos una requerida) */
+  /** URLs de las cotizaciones adjuntas (opcional) */
   urlCotizaciones: z
-    .array(z.string().url('La URL de la cotización no es válida'))
-    .min(1, 'Debes adjuntar al menos una cotización'),
+    .array(
+      z.union([
+        z.string().url('La URL de la cotización no es válida'),
+        z.literal(''),
+      ])
+    )
+    .optional(),
 
   // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),

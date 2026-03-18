@@ -49,8 +49,7 @@ export default function Paso2Respaldos() {
       <FieldLegend>Respaldos Generales de la Rendición</FieldLegend>
       <p className="text-foreground mb-6 text-sm">
         Adjunta los documentos de respaldo generales antes de registrar los
-        comprobantes individuales. Las cotizaciones son obligatorias para
-        continuar.
+        comprobantes individuales.
       </p>
 
       <FieldGroup>
@@ -90,17 +89,18 @@ export default function Paso2Respaldos() {
           />
         </div>
 
-        {/* ---- URLs de Cotizaciones (mínimo 1 requerida) ---- */}
+        {/* ---- URLs de Cotizaciones (opcional) ---- */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Link2 className="text-muted-foreground h-4 w-4 shrink-0" />
-            <span className="text-sm font-semibold">
-              Cotizaciones <span className="text-destructive">*</span>
+            <span className="text-sm font-semibold">Cotizaciones</span>
+            <span className="text-foreground text-sm font-normal">
+              (opcional)
             </span>
           </div>
           <p className="text-foreground text-sm">
-            Adjunta al menos una cotización que respalde los precios de los
-            bienes o servicios adquiridos.
+            Si cuentas con cotizaciones, adjúntalas para respaldar los precios
+            de los bienes o servicios adquiridos.
           </p>
 
           <div className="space-y-2">
