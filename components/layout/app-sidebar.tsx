@@ -3,10 +3,11 @@
 import * as React from 'react';
 import Image from 'next/image';
 import {
-  Activity,
   Bell,
   ClipboardPlus,
   FileText,
+  Home,
+  LayoutGrid,
   LifeBuoy,
   Send,
 } from 'lucide-react';
@@ -14,6 +15,15 @@ import {
 import { NavMain } from '@/components/ui/nav-main';
 import { NavSecondary } from '@/components/ui/nav-secondary';
 import { NavUser } from '@/components/layout/nav-user';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Sidebar,
   SidebarContent,
@@ -24,19 +34,41 @@ import { useAuthStore } from '@/store/auth-store';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Role } from '@/types/backend';
 
-// Menu items estáticos (se pueden mover a config si crecen)
-const navSecondary = [
-  {
-    title: 'Soporte',
-    url: '#',
-    icon: LifeBuoy,
-  },
-  {
-    title: 'Feedback',
-    url: '#',
-    icon: Send,
-  },
-];
+const SUPPORT_EMAIL = 'alanarnez51@gmail.com';
+
+const SUPPORT_SUBJECT = '[SIFIN] Soporte tecnico';
+const SUPPORT_BODY = [
+  'Hola equipo de soporte,',
+  '',
+  'Necesito ayuda con el sistema SIFIN.',
+  '',
+  'Detalle del problema:',
+  '- Modulo o pantalla:',
+  '- Que accion realice:',
+  '- Que resultado esperaba:',
+  '- Que resultado obtuve:',
+  '- Fecha y hora aproximada:',
+  '',
+  'Gracias.',
+].join('\n');
+
+const FEEDBACK_SUBJECT = '[SIFIN] Sugerencia de mejora';
+const FEEDBACK_BODY = [
+  'Hola equipo SIFIN,',
+  '',
+  'Quiero compartir una sugerencia de mejora.',
+  '',
+  'Detalle de la sugerencia:',
+  '- Modulo o pantalla:',
+  '- Situacion actual:',
+  '- Propuesta de mejora:',
+  '- Beneficio esperado:',
+  '',
+  'Gracias.',
+].join('\n');
+
+const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(SUPPORT_SUBJECT)}&body=${encodeURIComponent(SUPPORT_BODY)}`;
+const FEEDBACK_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(FEEDBACK_SUBJECT)}&body=${encodeURIComponent(FEEDBACK_BODY)}`;
 
 /**
  * Construye los sub-ítems del menú "Formularios" según el rol del usuario.
@@ -49,24 +81,8 @@ function buildFormularioItems(rol?: Role) {
     items.push({ title: 'Solicitud', url: '/app/solicitudes/nueva' });
   }
 
-  // Revisión: ADMIN y TESORERO son aprobadores
-  if (rol === 'ADMIN' || rol === 'TESORERO') {
-    items.push({
-      title: 'Nueva Rendición',
-      url: '/app/rendiciones/nueva',
-    });
-  }
-
-  // Monitor Solicitudes: Vista global solo para TESORERO y ADMIN
-  if (rol === 'TESORERO' || rol === 'ADMIN') {
-    items.push({
-      title: 'Monitor Solicitudes',
-      url: '/app/monitor',
-    });
-  }
-
-  // Rendición: Solo USUARIO (acceso directo al formulario de rendición)
-  if (rol === 'USUARIO') {
+  // Nueva rendición: disponible para los tres roles
+  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
     items.push({ title: 'Nueva Rendición', url: '/app/rendiciones/nueva' });
   }
 
@@ -75,8 +91,32 @@ function buildFormularioItems(rol?: Role) {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore();
+  const [isSupportOpen, setIsSupportOpen] = React.useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
+
+  const userRole = user?.rol as Role | undefined;
+  const canViewMonitor = userRole === 'ADMIN' || userRole === 'TESORERO';
+  const formularioItems = buildFormularioItems(userRole);
+
+  const navSecondary = [
+    {
+      title: 'Soporte',
+      icon: LifeBuoy,
+      onClick: () => setIsSupportOpen(true),
+    },
+    {
+      title: 'Feedback',
+      icon: Send,
+      onClick: () => setIsFeedbackOpen(true),
+    },
+  ];
 
   const navMain = [
+    {
+      title: 'Inicio',
+      url: '/app/inicio',
+      icon: Home,
+    },
     {
       title: 'Mis Solicitudes',
       url: '/app/solicitudes',
@@ -87,39 +127,146 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: '/app/aprobaciones',
       icon: Bell,
     },
-    {
-      title: 'Formularios',
-      url: '#',
-      icon: ClipboardPlus,
-      items: buildFormularioItems(user?.rol as Role | undefined),
-    },
+    ...(canViewMonitor
+      ? [
+          {
+            title: 'Monitor Solicitudes',
+            url: '/app/monitor',
+            icon: LayoutGrid,
+          },
+        ]
+      : []),
+    ...(formularioItems.length > 0
+      ? [
+          {
+            title: 'Formularios',
+            url: '#',
+            icon: ClipboardPlus,
+            items: formularioItems,
+          },
+        ]
+      : []),
   ];
 
   return (
-    <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
-        <div className="flex flex-row items-center justify-between px-2 py-2">
-          <a href="#">
-            <Image
-              src="/Logo-AMZ-desk-ok.webp"
-              alt="AMZ Desk"
-              width={120}
-              height={40}
-              priority
-              className="h-auto w-auto max-w-[120px]"
-              style={{ width: 'auto', height: 'auto' }}
-            />
-          </a>
-          <ModeToggle />
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={navMain} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser />
-      </SidebarFooter>
-    </Sidebar>
+    <>
+      <Sidebar variant="inset" {...props}>
+        <SidebarHeader>
+          <div className="flex flex-row items-center justify-between px-2 py-2">
+            <a href="#">
+              <Image
+                src="/Logo-AMZ-desk-ok.webp"
+                alt="AMZ Desk"
+                width={120}
+                height={40}
+                priority
+                className="h-auto w-auto max-w-[120px]"
+                style={{ width: 'auto', height: 'auto' }}
+              />
+            </a>
+            <ModeToggle />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={navMain} />
+          <NavSecondary items={navSecondary} className="mt-auto" />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser />
+        </SidebarFooter>
+      </Sidebar>
+
+      <Dialog open={isSupportOpen} onOpenChange={setIsSupportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Soporte</DialogTitle>
+            <DialogDescription>
+              Para Soporte, por favor envia un correo electronico a:{' '}
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="font-medium underline"
+              >
+                {SUPPORT_EMAIL}
+              </a>
+              .
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <p className="text-sifin-helper">
+              Usa un asunto claro para priorizar tu caso y comparte el detalle
+              completo del problema.
+            </p>
+            <div className="rounded-md border p-3">
+              <p className="text-sifin-label">Asunto sugerido</p>
+              <p className="text-sifin-helper">[SIFIN] Soporte tecnico</p>
+            </div>
+            <div className="rounded-md border p-3">
+              <p className="text-sifin-label">Detalle minimo</p>
+              <ul className="text-sifin-helper list-disc space-y-1 pl-5">
+                <li>Modulo o pantalla afectada.</li>
+                <li>Accion que realizaste y resultado esperado.</li>
+                <li>Resultado obtenido y fecha/hora aproximada.</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setIsSupportOpen(false)}>
+              Cerrar
+            </Button>
+            <Button asChild>
+              <a href={SUPPORT_MAILTO}>Enviar Correo</a>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dar Feedback</DialogTitle>
+            <DialogDescription>
+              Para Dar Feedback, por favor envia un correo electronico a:{' '}
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="font-medium underline"
+              >
+                {SUPPORT_EMAIL}
+              </a>
+              .
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <p className="text-sifin-helper">
+              Describe tu sugerencia con contexto para que podamos evaluar su
+              impacto y priorizacion.
+            </p>
+            <div className="rounded-md border p-3">
+              <p className="text-sifin-label">Asunto sugerido</p>
+              <p className="text-sifin-helper">[SIFIN] Sugerencia de mejora</p>
+            </div>
+            <div className="rounded-md border p-3">
+              <p className="text-sifin-label">Detalle minimo</p>
+              <ul className="text-sifin-helper list-disc space-y-1 pl-5">
+                <li>Modulo o pantalla relacionada.</li>
+                <li>Situacion actual que quieres mejorar.</li>
+                <li>Propuesta de cambio y beneficio esperado.</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setIsFeedbackOpen(false)}>
+              Cerrar
+            </Button>
+            <Button asChild>
+              <a href={FEEDBACK_MAILTO}>Enviar Correo</a>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
