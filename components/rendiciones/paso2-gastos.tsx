@@ -346,253 +346,251 @@ function ComprobanteCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {/* --- Fecha Documento --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.fechaDocumento`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Fecha
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    className="h-9"
-                    value={
-                      typeof field.value === 'string'
-                        ? field.value
-                        : field.value instanceof Date
-                          ? field.value.toISOString().split('T')[0]
-                          : ''
-                    }
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
+      <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* --- Fecha Documento --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.fechaDocumento`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-1">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                Fecha
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  className="h-9"
+                  value={
+                    typeof field.value === 'string'
+                      ? field.value
+                      : field.value instanceof Date
+                        ? field.value.toISOString().split('T')[0]
+                        : ''
+                  }
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
 
-          {/* --- Tipo Documento --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.tipoDocumento`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Tipo
-                </FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {TipoDocumentoGastoEnum.options.map((tipo) => (
-                      <SelectItem key={tipo} value={tipo}>
-                        {getTipoDocumentoLabel(tipo)}
+        {/* --- Tipo Documento --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.tipoDocumento`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-1">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                Tipo
+              </FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {TipoDocumentoGastoEnum.options.map((tipo) => (
+                    <SelectItem key={tipo} value={tipo}>
+                      {getTipoDocumentoLabel(tipo)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
+
+        {/* --- Número Documento --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.numeroDocumento`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-1">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                N° Documento
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: 0001-2025-0001234"
+                  className="h-9 text-sm"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
+
+        {/* --- Proveedor --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.proveedor`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-2">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                Proveedor
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Nombre del proveedor"
+                  className="h-9 text-sm"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
+
+        {/* --- Partida Presupuestaria --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.partidaId`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-1">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                Partida Presupuestaria *
+              </FormLabel>
+              <Select
+                value={field.value ? String(field.value) : ''}
+                onValueChange={(val) => field.onChange(Number(val))}
+              >
+                <FormControl>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Selecciona una partida..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {(solicitud?.presupuestos ?? []).map((p) => {
+                    const codigo = p.poa?.codigoPoa ?? '—';
+                    const partida = p.poa?.estructura?.partida?.nombre ?? '—';
+                    return (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {codigo} – {partida}
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
 
-          {/* --- Número Documento --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.numeroDocumento`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  N° Documento
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ej: 0001-2025-0001234"
-                    className="h-9 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
+        {/* --- URL Comprobante --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.urlComprobante`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                URL Comprobante *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="https://drive.google.com/..."
+                  className="h-9 text-sm"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
 
-          {/* --- Proveedor --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.proveedor`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Proveedor
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Nombre del proveedor"
-                    className="h-9 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
+        {/* --- Concepto / Detalle --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.concepto`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                Concepto / Detalle *
+              </FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe el gasto realizado (requerido)"
+                  className="min-h-16 resize-none text-sm"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
 
-          {/* --- Partida Presupuestaria --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.partidaId`}
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Partida Presupuestaria *
-                </FormLabel>
-                <Select
-                  value={field.value ? String(field.value) : ''}
-                  onValueChange={(val) => field.onChange(Number(val))}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue placeholder="Selecciona una partida..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {(solicitud?.presupuestos ?? []).map((p) => {
-                      const codigo = p.poa?.codigoPoa ?? '—';
-                      const partida = p.poa?.estructura?.partida?.nombre ?? '—';
-                      return (
-                        <SelectItem key={p.id} value={String(p.id)}>
-                          {codigo} – {partida}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
+        <Separator className="my-2 md:col-span-3" />
 
-          {/* --- URL Comprobante --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.urlComprobante`}
-            render={({ field }) => (
-              <FormItem className="md:col-span-2 lg:col-span-3">
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  URL Comprobante *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="url"
-                    placeholder="https://drive.google.com/..."
-                    className="h-9 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
+        {/* --- Monto Total (bruto pagado) --- */}
+        <FormField
+          control={control}
+          name={`gastos.${index}.montoTotal`}
+          render={({ field }) => (
+            <FormItem className="md:col-span-1">
+              <FormLabel className="text-xs font-bold tracking-wider uppercase">
+                Monto Total Pagado (bruto) Bs. *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="0.00"
+                  inputMode="decimal"
+                  className="h-9 text-sm"
+                  name={field.name}
+                  ref={field.ref}
+                  value={montoTotalInput}
+                  onChange={(e) => {
+                    const sanitized = sanitizeMonetaryInput(e.target.value);
+                    setMontoTotalInput(sanitized);
 
-          {/* --- Concepto / Detalle --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.concepto`}
-            render={({ field }) => (
-              <FormItem className="md:col-span-2 lg:col-span-3">
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Concepto / Detalle *
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Describe el gasto realizado (requerido)"
-                    className="min-h-16 resize-none text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
-        </div>
+                    if (!sanitized || sanitized === '.') {
+                      field.onChange(0);
+                      return;
+                    }
 
-        <Separator className="my-2" />
+                    const parsed = Number.parseFloat(sanitized);
+                    const parsedValue = Number.isFinite(parsed) ? parsed : 0;
+                    field.onChange(parsedValue);
+                    setValue(`gastos.${index}.montoBruto`, parsedValue, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }}
+                  onBlur={() => {
+                    field.onBlur();
+                    if (!montoTotalInput || montoTotalInput === '.') {
+                      setMontoTotalInput('');
+                      return;
+                    }
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {/* --- Monto Total (bruto pagado) --- */}
-          <FormField
-            control={control}
-            name={`gastos.${index}.montoTotal`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-bold tracking-wider uppercase">
-                  Monto Total Pagado (bruto) Bs. *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="0.00"
-                    inputMode="decimal"
-                    className="h-9 text-sm"
-                    name={field.name}
-                    ref={field.ref}
-                    value={montoTotalInput}
-                    onChange={(e) => {
-                      const sanitized = sanitizeMonetaryInput(e.target.value);
-                      setMontoTotalInput(sanitized);
+                    const parsed = Number.parseFloat(montoTotalInput);
+                    if (!Number.isFinite(parsed) || parsed <= 0) {
+                      setMontoTotalInput('');
+                      field.onChange(0);
+                      return;
+                    }
 
-                      if (!sanitized || sanitized === '.') {
-                        field.onChange(0);
-                        return;
-                      }
+                    const rounded = round2(parsed);
+                    setMontoTotalInput(rounded.toFixed(2));
+                    field.onChange(rounded);
+                    setValue(`gastos.${index}.montoBruto`, rounded, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }}
+                />
+              </FormControl>
+              <FormMessage className="text-[10px]" />
+            </FormItem>
+          )}
+        />
 
-                      const parsed = Number.parseFloat(sanitized);
-                      const parsedValue = Number.isFinite(parsed) ? parsed : 0;
-                      field.onChange(parsedValue);
-                      setValue(`gastos.${index}.montoBruto`, parsedValue, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                    }}
-                    onBlur={() => {
-                      field.onBlur();
-                      if (!montoTotalInput || montoTotalInput === '.') {
-                        setMontoTotalInput('');
-                        return;
-                      }
-
-                      const parsed = Number.parseFloat(montoTotalInput);
-                      if (!Number.isFinite(parsed) || parsed <= 0) {
-                        setMontoTotalInput('');
-                        field.onChange(0);
-                        return;
-                      }
-
-                      const rounded = round2(parsed);
-                      setMontoTotalInput(rounded.toFixed(2));
-                      field.onChange(rounded);
-                      setValue(`gastos.${index}.montoBruto`, rounded, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                    }}
-                  />
-                </FormControl>
-                <FormMessage className="text-[10px]" />
-              </FormItem>
-            )}
-          />
-
-          {/* --- Tipo de Retención (solo para RECIBO/BOLETA + GENERAL) --- */}
+        {/* --- Panel de Retenciones y Monto Neto --- */}
+        <div className="bg-muted/50 space-y-2 rounded-lg p-3 text-xs md:col-span-2">
           {showTipoRetencion && (
             <FormField
               control={control}
@@ -631,34 +629,31 @@ function ComprobanteCard({
               )}
             />
           )}
-        </div>
 
-        <FormField
-          control={control}
-          name={`gastos.${index}.montoBruto`}
-          render={({ field }) => (
-            <FormItem className="hidden">
-              <FormControl>
-                <Input type="number" readOnly tabIndex={-1} {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={control}
+            name={`gastos.${index}.montoBruto`}
+            render={({ field }) => (
+              <FormItem className="hidden">
+                <FormControl>
+                  <Input type="number" readOnly tabIndex={-1} {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={control}
-          name={`gastos.${index}.montoImpuestos`}
-          render={({ field }) => (
-            <FormItem className="hidden">
-              <FormControl>
-                <Input type="number" readOnly tabIndex={-1} {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={control}
+            name={`gastos.${index}.montoImpuestos`}
+            render={({ field }) => (
+              <FormItem className="hidden">
+                <FormControl>
+                  <Input type="number" readOnly tabIndex={-1} {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        {/* --- Desglose de Retenciones + Monto Neto (readonly) --- */}
-        <div className="bg-muted/50 space-y-2 rounded-lg p-3 text-xs">
           <div className="flex items-center gap-1.5">
             <Calculator className="text-muted-foreground h-3.5 w-3.5" />
             <span className="text-muted-foreground font-bold tracking-wider uppercase">
