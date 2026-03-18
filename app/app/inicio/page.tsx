@@ -17,6 +17,8 @@ import {
   type DashboardMetrics,
 } from '@/lib/services/dashboard-service';
 import { KpiCards } from '@/components/dashboard/kpi-cards';
+import { RecentMovements } from '@/components/dashboard/recent-movements';
+import { PoaThermometer } from '@/components/dashboard/poa-thermometer';
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -119,13 +121,29 @@ export default function Page() {
           </div>
 
           {isLoadingMetrics ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <Skeleton className="h-28 w-full" />
-              <Skeleton className="h-28 w-full" />
-              <Skeleton className="h-28 w-full" />
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <Skeleton className="h-28 w-full" />
+                <Skeleton className="h-28 w-full" />
+                <Skeleton className="h-28 w-full" />
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <Skeleton className="h-72 w-full" />
+                <Skeleton className="h-72 w-full" />
+              </div>
             </div>
           ) : metrics ? (
-            <KpiCards data={metrics} />
+            <>
+              <KpiCards data={metrics} />
+
+              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <RecentMovements data={metrics.ultimosMovimientos} />
+                {metrics.metricaGerencial ? (
+                  <PoaThermometer data={metrics.metricaGerencial} />
+                ) : null}
+              </div>
+            </>
           ) : (
             <div className="text-amzdesk-helper rounded-md border p-4 text-sm">
               No se pudieron cargar las métricas del dashboard.
