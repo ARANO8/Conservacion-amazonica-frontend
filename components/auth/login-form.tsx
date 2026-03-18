@@ -1,6 +1,7 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -154,11 +155,18 @@ export function LoginForm({
       </div>
 
       {showSplash && (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900">
-          <h2 className="animate-pulse text-5xl font-extrabold tracking-tight text-white md:text-7xl">
-            AMZdesk
-          </h2>
-          <p className="mt-4 text-sm text-slate-300 md:text-base">
+        <div className="bg-background dark:bg-card fixed inset-0 z-[9999] flex flex-col items-center justify-center">
+          <div className="animate-pulse">
+            <Image
+              src="/Logo-AMZ-desk-ok.webp"
+              alt="Logo AMZdesk"
+              width={300}
+              height={100}
+              priority
+              className="h-auto w-[280px] md:w-[320px]"
+            />
+          </div>
+          <p className="text-muted-foreground mt-5 text-sm md:text-base">
             Preparando tu entorno de trabajo...
           </p>
         </div>
