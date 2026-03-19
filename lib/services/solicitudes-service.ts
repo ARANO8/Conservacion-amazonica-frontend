@@ -1,6 +1,11 @@
 import api from '@/lib/api';
 import { CreateSolicitudPayload } from '@/types/solicitud-backend';
 
+interface GetSolicitudesParams {
+  solicitanteId?: string | number;
+  partidaId?: number;
+}
+
 /**
  * Service to handle Solicitudes related API calls.
  * El token Bearer es inyectado automáticamente por el interceptor de `api` (lib/api.ts).
@@ -19,7 +24,7 @@ export const solicitudesService = {
    * Fetches the list of solicitudes (for the requests table).
    * @param params Optional query parameters for filtering.
    */
-  async getSolicitudes(params?: { solicitanteId?: string | number }) {
+  async getSolicitudes(params?: GetSolicitudesParams) {
     const response = await api.get('/solicitudes', { params });
     return response.data;
   },

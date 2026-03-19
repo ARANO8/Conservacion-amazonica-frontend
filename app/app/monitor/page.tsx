@@ -8,16 +8,39 @@ import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Activity } from 'lucide-react';
+import { catalogosService } from '@/services/catalogos.service';
+import { Partida } from '@/types/catalogs';
 
 export default function MonitorPage() {
   const [data, setData] = useState<SolicitudResponse[]>([]);
+  const [partidas, setPartidas] = useState<Partida[]>([]);
+  const [selectedPartidaId, setSelectedPartidaId] = useState<
+    number | undefined
+  >(undefined);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPartidas = async () => {
+      try {
+        const response = await catalogosService.getPartidas();
+        setPartidas(response);
+      } catch {
+        toast.error('No se pudieron cargar las partidas presupuestarias.');
+      }
+    };
+
+    fetchPartidas();
+  }, []);
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
         setLoading(true);
-        const response = await solicitudesService.getSolicitudes();
+        const response = await solicitudesService.getSolicitudes(
+          selectedPartidaId !== undefined
+            ? { partidaId: selectedPartidaId }
+            : undefined
+        );
         setData(response);
       } catch {
         toast.error(
@@ -29,7 +52,7 @@ export default function MonitorPage() {
     };
 
     fetchAll();
-  }, []);
+  }, [selectedPartidaId]);
 
   return (
     <div className="space-y-6 p-6">
@@ -53,7 +76,13 @@ export default function MonitorPage() {
           <Skeleton className="h-[400px] w-full" />
         </div>
       ) : (
-        <DataTable columns={monitorColumns} data={data} />
+        <DataTable
+          columns={monitorColumns}
+          data={data}
+          partidas={partidas}
+          partidaId={selectedPartidaId}
+          onPartidaChange={setSelectedPartidaId}
+        />
       )}
     </div>
   );
