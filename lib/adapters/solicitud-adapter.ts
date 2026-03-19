@@ -73,6 +73,8 @@ export const adaptFormToPayload = (
     lugarViaje: formData.planificacionLugares,
     motivoViaje: formData.planificacionObjetivo,
     descripcion: formData.motivo,
+    urlCuadroComparativo: formData.urlCuadroComparativo || undefined,
+    urlCotizaciones: (formData.urlCotizaciones || []).filter(Boolean),
     planificaciones,
     viaticos,
     gastos,
@@ -252,6 +254,11 @@ export const adaptResponseToFormData = (
     planificacionLugares: response.lugarViaje || '',
     planificacionObjetivo: response.motivoViaje || '',
     motivo: response.descripcion || '',
+    urlCuadroComparativo: response.urlCuadroComparativo || '',
+    urlCotizaciones:
+      response.urlCotizaciones && response.urlCotizaciones.length > 0
+        ? response.urlCotizaciones
+        : [''],
     destinatario: '',
     proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,

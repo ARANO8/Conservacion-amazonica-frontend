@@ -138,11 +138,27 @@ export const formSchema = z.object({
 
   // Confirmación Final
   destinatario: z.string().min(1, 'Debes seleccionar un destinatario'),
+
+  // Respaldos
+  urlCuadroComparativo: z
+    .union([
+      z.string().url('La URL del cuadro comparativo no es válida'),
+      z.literal(''),
+    ])
+    .optional(),
+  urlCotizaciones: z
+    .array(
+      z.union([
+        z.string().url('La URL de la cotización no es válida'),
+        z.literal(''),
+      ])
+    )
+    .optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;
 
-export type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'NOMINA';
+export type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'RESPALDOS' | 'NOMINA';
 
 export const defaultValues: FormData = {
   planificacionLugares: '',
@@ -173,4 +189,6 @@ export const defaultValues: FormData = {
   motivo: '',
   nomina: [],
   destinatario: '',
+  urlCuadroComparativo: '',
+  urlCotizaciones: [''],
 };

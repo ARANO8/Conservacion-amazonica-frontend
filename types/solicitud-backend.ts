@@ -4,6 +4,8 @@ export interface CreateSolicitudPayload {
   lugarViaje: string;
   motivoViaje: string;
   descripcion: string;
+  urlCuadroComparativo?: string;
+  urlCotizaciones?: string[];
   planificaciones: {
     actividad: string;
     fechaInicio: string; // ISO String
@@ -55,6 +57,8 @@ export interface SolicitudResponse {
   motivoViaje: string;
   fechaSolicitud: string;
   descripcion: string;
+  urlCuadroComparativo?: string;
+  urlCotizaciones?: string[];
   fechaCreacion: string; // ISO String
   estado: string;
   montoTotalNeto: string;

@@ -40,6 +40,7 @@ import {
   Landmark,
   Banknote,
   ExternalLink,
+  Paperclip,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
@@ -228,6 +229,64 @@ export default function SolicitudDetailPage() {
               <p className="text-amzdesk-helper mb-1">Descripción adicional:</p>
               <p className="text-amzdesk-helper">{solicitud.descripcion}</p>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Documentos de Respaldo */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Paperclip className="h-5 w-5" />
+            Documentos de Respaldo
+          </CardTitle>
+          <CardDescription className="text-amzdesk-helper">
+            Enlaces adjuntos por el solicitante para respaldo de la solicitud.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {solicitud.urlCuadroComparativo ? (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-fit"
+            >
+              <a
+                href={solicitud.urlCuadroComparativo}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Ver Cuadro Comparativo
+                <ExternalLink className="ml-2 h-3.5 w-3.5" />
+              </a>
+            </Button>
+          ) : (
+            <p className="text-amzdesk-helper">
+              Sin cuadro comparativo adjunto.
+            </p>
+          )}
+
+          {solicitud.urlCotizaciones && solicitud.urlCotizaciones.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {solicitud.urlCotizaciones.map((url, idx) => (
+                <Button
+                  key={`${idx}-${url}`}
+                  asChild
+                  variant="outline"
+                  size="sm"
+                >
+                  <a href={url} target="_blank" rel="noreferrer">
+                    <Paperclip className="mr-2 h-4 w-4" />
+                    Ver Cotización {idx + 1}
+                    <ExternalLink className="ml-2 h-3.5 w-3.5" />
+                  </a>
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-amzdesk-helper">Sin cotizaciones adjuntas.</p>
           )}
         </CardContent>
       </Card>

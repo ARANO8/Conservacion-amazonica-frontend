@@ -147,24 +147,6 @@ export const CreateRendicionSchema = z.object({
     .min(1, 'La fecha de rendición es requerida')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
 
-  // --- Paso 2: RESPALDOS_GENERALES ---
-  /** URL del cuadro comparativo de cotizaciones (opcional) */
-  urlCuadroComparativo: z
-    .union([
-      z.string().url('La URL del cuadro comparativo no es válida'),
-      z.literal(''),
-    ])
-    .optional(),
-  /** URLs de las cotizaciones adjuntas (opcional) */
-  urlCotizaciones: z
-    .array(
-      z.union([
-        z.string().url('La URL de la cotización no es válida'),
-        z.literal(''),
-      ])
-    )
-    .optional(),
-
   // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
 
@@ -190,8 +172,6 @@ export type CreateRendicionInput = z.infer<typeof CreateRendicionSchema>;
 export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
   fechaRendicion: new Date().toISOString().split('T')[0],
-  urlCuadroComparativo: '',
-  urlCotizaciones: [''],
   gastos: [],
   informeGastos: {
     fechaInicio: '',

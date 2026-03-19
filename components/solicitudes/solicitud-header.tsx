@@ -12,7 +12,8 @@ export default function SolicitudHeader({ step }: SolicitudHeaderProps) {
         <h1 className="text-2xl font-bold">
           {step === 'PLANIFICACION' && '1. Planificación'}
           {step === 'SOLICITUD' && '2. Detalle Económico'}
-          {step === 'NOMINA' && '3. Nómina de Terceros'}
+          {step === 'RESPALDOS' && '3. Documentos de Respaldo'}
+          {step === 'NOMINA' && '4. Nómina de Terceros'}
         </h1>
         <div className="bg-muted flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium">
           <span
@@ -37,12 +38,22 @@ export default function SolicitudHeader({ step }: SolicitudHeaderProps) {
           <ChevronRight className="text-muted-foreground h-3 w-3" />
           <span
             className={
+              step === 'RESPALDOS'
+                ? 'text-primary font-bold'
+                : 'text-muted-foreground'
+            }
+          >
+            3. Respaldos
+          </span>
+          <ChevronRight className="text-muted-foreground h-3 w-3" />
+          <span
+            className={
               step === 'NOMINA'
                 ? 'text-primary font-bold'
                 : 'text-muted-foreground'
             }
           >
-            3. Nómina
+            4. Nómina
           </span>
         </div>
       </div>

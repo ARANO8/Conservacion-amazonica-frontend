@@ -128,14 +128,9 @@ export default function RendicionWizard({
     }
 
     if (step === 'RESPALDOS_GENERALES') {
-      const isValid = await form.trigger([
-        'urlCotizaciones',
-        'urlCuadroComparativo',
-      ]);
+      const isValid = await form.trigger(['solicitudId', 'fechaRendicion']);
       if (!isValid) {
-        toast.error(
-          'Revisa las URLs de respaldos generales antes de continuar'
-        );
+        toast.error('Revisa los datos generales antes de continuar');
         return;
       }
       setStep('GASTOS_RESPALDO');

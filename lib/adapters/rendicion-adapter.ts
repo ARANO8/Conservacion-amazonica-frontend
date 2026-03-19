@@ -3,8 +3,6 @@ import { CreateRendicionInput } from '@/types/rendicion-schema';
 export interface CreateRendicionApiPayload {
   solicitudId: number;
   fechaRendicion: string;
-  urlCuadroComparativo?: string;
-  urlCotizaciones: string[];
   gastos: Array<{
     solicitudItemId?: number;
     concepto: string;
@@ -67,7 +65,6 @@ export function adaptCreateRendicionPayload(
     solicitudId: data.solicitudId,
     fechaRendicion:
       toIsoDateString(data.fechaRendicion) ?? new Date().toISOString(),
-    urlCotizaciones: (data.urlCotizaciones ?? []).filter(Boolean),
     gastos: (data.gastos ?? []).map((gasto) => ({
       ...(gasto.solicitudItemId !== undefined && {
         solicitudItemId: gasto.solicitudItemId,
@@ -92,10 +89,6 @@ export function adaptCreateRendicionPayload(
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
-
-  if (data.urlCuadroComparativo) {
-    payload.urlCuadroComparativo = data.urlCuadroComparativo;
-  }
 
   if (data.gastosSinRespaldo && data.gastosSinRespaldo.length > 0) {
     payload.gastosSinRespaldo = data.gastosSinRespaldo.map((gasto) => ({

@@ -9,7 +9,6 @@ import {
   Calendar,
   CheckCircle2,
   ExternalLink,
-  Link2,
   NotebookPen,
   ReceiptText,
 } from 'lucide-react';
@@ -31,7 +30,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -177,7 +175,7 @@ export default function RendicionDetalleBySolicitudPage() {
             Encabezado Financiero
           </CardTitle>
           <CardDescription className="text-amzdesk-helper">
-            Información general de fecha y respaldos documentales.
+            Información general de fecha y montos de la rendición.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -201,55 +199,6 @@ export default function RendicionDetalleBySolicitudPage() {
               <p className="text-amzdesk-monto text-blue-600">
                 {formatMoney(rendicion.saldoLiquido)}
               </p>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-md border p-3">
-              <p className="text-amzdesk-label mb-2 uppercase">
-                Cuadro Comparativo
-              </p>
-              {rendicion.urlCuadroComparativo ? (
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <a
-                    href={rendicion.urlCuadroComparativo}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Abrir Cuadro
-                    <ExternalLink className="ml-2 h-3.5 w-3.5" />
-                  </a>
-                </Button>
-              ) : (
-                <p className="text-amzdesk-helper">No adjunto</p>
-              )}
-            </div>
-
-            <div className="rounded-md border p-3">
-              <p className="text-amzdesk-label mb-2 uppercase">Cotizaciones</p>
-              {rendicion.urlCotizaciones &&
-              rendicion.urlCotizaciones.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {rendicion.urlCotizaciones.map((url, idx) => (
-                    <Button
-                      key={`${idx}-${url}`}
-                      asChild
-                      variant="outline"
-                      size="sm"
-                    >
-                      <a href={url} target="_blank" rel="noreferrer">
-                        Cotización {idx + 1}
-                        <ExternalLink className="ml-2 h-3.5 w-3.5" />
-                      </a>
-                    </Button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-amzdesk-helper">No adjuntas</p>
-              )}
             </div>
           </div>
         </CardContent>

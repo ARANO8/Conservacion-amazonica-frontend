@@ -147,6 +147,8 @@ export interface CreateSolicitudDto {
   lugarViaje: string;
   motivoViaje: string;
   descripcion?: string;
+  urlCuadroComparativo?: string;
+  urlCotizaciones?: string[];
   planificaciones?: CreatePlanificacionDto[];
   viaticos?: CreateViaticoDto[];
   gastos?: CreateGastoDto[];
@@ -165,6 +167,8 @@ export interface Solicitud {
   lugarViaje: string;
   motivoViaje: string;
   descripcion?: string;
+  urlCuadroComparativo?: string;
+  urlCotizaciones?: string[];
   estado: 'PENDIENTE' | 'APROBADO' | 'OBSERVADO' | 'RECHAZADO' | 'DESEMBOLSADO';
   montoTotalNeto: number;
   montoTotalPresupuestado: number;
