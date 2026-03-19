@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { monitorColumns } from './columns';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { DataTable } from './data-table';
@@ -12,12 +13,19 @@ import { catalogosService } from '@/services/catalogos.service';
 import { Partida } from '@/types/catalogs';
 
 export default function MonitorPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [data, setData] = useState<SolicitudResponse[]>([]);
   const [partidas, setPartidas] = useState<Partida[]>([]);
-  const [selectedPartidaId, setSelectedPartidaId] = useState<
-    number | undefined
-  >(undefined);
   const [loading, setLoading] = useState(true);
+
+  const partidaIdParam = searchParams.get('partidaId');
+  const selectedPartidaId =
+    partidaIdParam && !Number.isNaN(Number(partidaIdParam))
+      ? Number(partidaIdParam)
+      : undefined;
 
   useEffect(() => {
     const fetchPartidas = async () => {
@@ -54,6 +62,22 @@ export default function MonitorPage() {
     fetchAll();
   }, [selectedPartidaId]);
 
+  const handlePartidaChange = (partidaId?: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (partidaId !== undefined) {
+      params.set('partidaId', String(partidaId));
+    } else {
+      params.delete('partidaId');
+    }
+
+    const nextUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname;
+
+    router.replace(nextUrl, { scroll: false });
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div>
@@ -81,7 +105,7 @@ export default function MonitorPage() {
           data={data}
           partidas={partidas}
           partidaId={selectedPartidaId}
-          onPartidaChange={setSelectedPartidaId}
+          onPartidaChange={handlePartidaChange}
         />
       )}
     </div>
