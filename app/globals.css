@@ -96,6 +96,24 @@
   }
 }
 
+@layer components {
+  .text-amzdesk-label {
+    @apply text-foreground text-sm font-medium;
+  }
+
+  .text-amzdesk-helper {
+    @apply text-sm text-slate-600 dark:text-slate-400;
+  }
+
+  .text-amzdesk-monto {
+    @apply text-base font-semibold text-slate-900 dark:text-slate-50;
+  }
+
+  .text-amzdesk-table-header {
+    @apply text-sm font-bold tracking-wide text-slate-800 uppercase dark:text-slate-200;
+  }
+}
+
 @theme inline {
   --font-sans: var(--font-sans);
   --color-sidebar-ring: hsl(var(--sidebar-ring));

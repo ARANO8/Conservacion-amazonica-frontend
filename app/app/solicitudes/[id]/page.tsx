@@ -40,6 +40,7 @@ import {
   Landmark,
   Banknote,
   ExternalLink,
+  Paperclip,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
@@ -109,7 +110,7 @@ export default function SolicitudDetailPage() {
   if (!solicitud) {
     return (
       <div className="flex flex-col items-center justify-center p-12">
-        <p className="text-muted-foreground">
+        <p className="text-foreground">
           No se encontró la solicitud solicitada.
         </p>
         <Button asChild variant="link" className="mt-4">
@@ -136,7 +137,7 @@ export default function SolicitudDetailPage() {
               </h1>
               <EstadoBadge estado={solicitud.estado} />
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-amzdesk-helper">
               {canApprove
                 ? 'Revisa los detalles antes de tomar una decisión.'
                 : 'Detalles de tu solicitud.'}
@@ -151,14 +152,14 @@ export default function SolicitudDetailPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Solicitante</CardTitle>
+            <CardTitle className="text-amzdesk-label">Solicitante</CardTitle>
             <User className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold">
+            <div className="text-amzdesk-monto">
               {solicitud.usuarioEmisor?.nombreCompleto || 'Sin asignar'}
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-amzdesk-helper">
               {solicitud.usuarioEmisor?.cargo ||
                 solicitud.usuarioEmisor?.email ||
                 ''}
@@ -168,18 +169,18 @@ export default function SolicitudDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-amzdesk-label">
               Periodo del Viaje
             </CardTitle>
             <Calendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold">
+            <div className="text-amzdesk-monto">
               {solicitud.fechaInicio
                 ? `${formatDateShort(solicitud.fechaInicio)} - ${formatDateShort(solicitud.fechaFin || solicitud.fechaInicio)}`
                 : formatDateShort(solicitud.fechaSolicitud)}
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-amzdesk-helper">
               Solicitado: {formatDateShort(solicitud.fechaSolicitud)}
             </p>
           </CardContent>
@@ -187,11 +188,11 @@ export default function SolicitudDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Destino</CardTitle>
+            <CardTitle className="text-amzdesk-label">Destino</CardTitle>
             <MapPin className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold">
+            <div className="text-amzdesk-monto">
               {solicitud.lugarViaje || '-'}
             </div>
           </CardContent>
@@ -199,14 +200,14 @@ export default function SolicitudDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monto Total</CardTitle>
+            <CardTitle className="text-amzdesk-label">Monto Total</CardTitle>
             <DollarSign className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold text-emerald-600">
+            <div className="text-amzdesk-monto text-emerald-600">
               {formatMoney(solicitud.montoTotalNeto)}
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-amzdesk-helper">
               Presupuestado: {formatMoney(solicitud.montoTotalPresupuestado)}
             </p>
           </CardContent>
@@ -225,11 +226,67 @@ export default function SolicitudDetailPage() {
           <p className="font-medium">{solicitud.motivoViaje}</p>
           {solicitud.descripcion && (
             <div>
-              <p className="text-muted-foreground mb-1 text-sm">
-                Descripción adicional:
-              </p>
-              <p className="text-sm">{solicitud.descripcion}</p>
+              <p className="text-amzdesk-helper mb-1">Descripción adicional:</p>
+              <p className="text-amzdesk-helper">{solicitud.descripcion}</p>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Documentos de Respaldo */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Paperclip className="h-5 w-5" />
+            Documentos de Respaldo
+          </CardTitle>
+          <CardDescription className="text-amzdesk-helper">
+            Enlaces adjuntos por el solicitante para respaldo de la solicitud.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {solicitud.urlCuadroComparativo ? (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-fit"
+            >
+              <a
+                href={solicitud.urlCuadroComparativo}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Ver Cuadro Comparativo
+                <ExternalLink className="ml-2 h-3.5 w-3.5" />
+              </a>
+            </Button>
+          ) : (
+            <p className="text-amzdesk-helper">
+              Sin cuadro comparativo adjunto.
+            </p>
+          )}
+
+          {solicitud.urlCotizaciones && solicitud.urlCotizaciones.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {solicitud.urlCotizaciones.map((url, idx) => (
+                <Button
+                  key={`${idx}-${url}`}
+                  asChild
+                  variant="outline"
+                  size="sm"
+                >
+                  <a href={url} target="_blank" rel="noreferrer">
+                    <Paperclip className="mr-2 h-4 w-4" />
+                    Ver Cotización {idx + 1}
+                    <ExternalLink className="ml-2 h-3.5 w-3.5" />
+                  </a>
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-amzdesk-helper">Sin cotizaciones adjuntas.</p>
           )}
         </CardContent>
       </Card>
@@ -241,7 +298,7 @@ export default function SolicitudDetailPage() {
             <ClipboardList className="h-5 w-5" />
             Planificación
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-amzdesk-helper">
             Cronograma de actividades programadas
           </CardDescription>
         </CardHeader>
@@ -250,11 +307,21 @@ export default function SolicitudDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Actividad</TableHead>
-                  <TableHead>Periodo</TableHead>
-                  <TableHead className="text-center">Días</TableHead>
-                  <TableHead className="text-center">Personal Inst.</TableHead>
-                  <TableHead className="text-center">Terceros</TableHead>
+                  <TableHead className="text-amzdesk-table-header">
+                    Actividad
+                  </TableHead>
+                  <TableHead className="text-amzdesk-table-header">
+                    Periodo
+                  </TableHead>
+                  <TableHead className="text-amzdesk-table-header text-center">
+                    Días
+                  </TableHead>
+                  <TableHead className="text-amzdesk-table-header text-center">
+                    Personal Inst.
+                  </TableHead>
+                  <TableHead className="text-amzdesk-table-header text-center">
+                    Terceros
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -281,7 +348,7 @@ export default function SolicitudDetailPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground py-4 text-center">
+            <p className="text-amzdesk-helper py-4 text-center">
               Sin actividades planificadas registradas.
             </p>
           )}
@@ -296,7 +363,7 @@ export default function SolicitudDetailPage() {
               <Wallet className="h-5 w-5" />
               Desglose Financiero por Partida
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-amzdesk-helper">
               Resumen detallado de viáticos y comprobantes agrupados por su
               respectiva partida presupuestaria.
             </CardDescription>
@@ -304,11 +371,11 @@ export default function SolicitudDetailPage() {
           <CardContent>
             <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-3">
               <div>
-                <p className="font-medium">
+                <p className="text-amzdesk-label">
                   {'Código POA: ' + solicitud.presupuestos[0]?.poa?.codigoPoa ||
                     'Sin código POA'}
                 </p>
-                <p className="font-medium">
+                <p className="text-amzdesk-label">
                   {'Proyecto: ' +
                     solicitud.presupuestos[0]?.poa?.estructura?.proyecto
                       ?.nombre}
@@ -357,8 +424,12 @@ export default function SolicitudDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nombre Completo</TableHead>
-                  <TableHead>Procedencia / Institución</TableHead>
+                  <TableHead className="text-amzdesk-table-header">
+                    Nombre Completo
+                  </TableHead>
+                  <TableHead className="text-amzdesk-table-header">
+                    Procedencia / Institución
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -371,7 +442,7 @@ export default function SolicitudDetailPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground py-2 text-sm italic">
+            <p className="text-amzdesk-helper py-2 italic">
               No hay participantes externos registrados en esta solicitud.
             </p>
           )}
@@ -389,16 +460,14 @@ export default function SolicitudDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-col gap-1">
-              <p className="text-muted-foreground text-sm">
-                Código de desembolso
-              </p>
-              <p className="font-semibold">
+              <p className="text-amzdesk-helper">Código de desembolso</p>
+              <p className="text-amzdesk-monto">
                 {solicitud.codigoDesembolso || '-'}
               </p>
             </div>
             {solicitud.urlComprobante && (
               <div className="flex flex-col gap-1">
-                <p className="text-muted-foreground text-sm">Comprobante</p>
+                <p className="text-amzdesk-helper">Comprobante</p>
                 <Button
                   asChild
                   variant="outline"
@@ -425,16 +494,16 @@ export default function SolicitudDetailPage() {
         <CardContent className="pt-6">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <p className="text-muted-foreground text-sm">Total liquido</p>
-              <p className="text-2xl font-bold text-emerald-600">
+              <p className="text-amzdesk-helper">Total liquido</p>
+              <p className="text-amzdesk-monto text-2xl text-emerald-600">
                 {formatMoney(solicitud.montoTotalNeto)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-muted-foreground text-sm">
+              <p className="text-amzdesk-helper">
                 Total Presupuestado (Incl. Impuestos)
               </p>
-              <p className="text-2xl font-bold">
+              <p className="text-amzdesk-monto text-2xl">
                 {formatMoney(solicitud.montoTotalPresupuestado)}
               </p>
             </div>

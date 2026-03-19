@@ -4,6 +4,8 @@ export interface CreateSolicitudPayload {
   lugarViaje: string;
   motivoViaje: string;
   descripcion: string;
+  urlCuadroComparativo?: string;
+  urlCotizaciones?: string[];
   planificaciones: {
     actividad: string;
     fechaInicio: string; // ISO String
@@ -39,6 +41,7 @@ export interface CreateSolicitudPayload {
     poaId: number;
     region: string;
     destino: string;
+    tipoDocumento: string;
     personas: number;
     noches: number;
     cantidadUnitaria: number;
@@ -54,6 +57,8 @@ export interface SolicitudResponse {
   motivoViaje: string;
   fechaSolicitud: string;
   descripcion: string;
+  urlCuadroComparativo?: string;
+  urlCotizaciones?: string[];
   fechaCreacion: string; // ISO String
   estado: string;
   montoTotalNeto: string;
@@ -180,6 +185,7 @@ export interface SolicitudResponse {
       id: number;
       region: string;
       destino: string;
+      tipoDocumento?: string;
       personas: number;
       noches: number;
       cantidadUnitaria: number | string;
@@ -197,6 +203,7 @@ export interface SolicitudResponse {
     id: number;
     region: string;
     destino: string;
+    tipoDocumento?: string;
     personas: number;
     noches: number;
     cantidadUnitaria: number | string;

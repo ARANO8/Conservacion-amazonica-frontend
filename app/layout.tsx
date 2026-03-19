@@ -8,8 +8,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'AMZ desk | Conservacion Amazonica',
-  description: 'Sistema de Gestión de Solicitudes',
+  title: 'AMZdesk | Conservacion Amazonica',
+  description: 'AMZdesk, sistema de gestion de solicitudes.',
   icons: {
     icon: '/Logo-AMZ-desk-ok.webp',
   },

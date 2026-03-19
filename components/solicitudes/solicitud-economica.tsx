@@ -816,9 +816,9 @@ function FuenteCard({
         <div className="bg-primary/5 flex items-center justify-between rounded-t-xl border-b px-4 py-2">
           <div className="text-primary flex items-center gap-2">
             <Check className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">Partida Seleccionada</span>
+            <span className="text-sm font-medium">Partida Seleccionada</span>
           </div>
-          <Badge variant="secondary" className="font-mono text-xs">
+          <Badge variant="secondary" className="font-mono text-sm">
             POA: {poaId}
           </Badge>
         </div>
@@ -832,7 +832,7 @@ function FuenteCard({
             name={`fuentesSeleccionadas.${index}.grupoId`}
             render={({ field }) => (
               <Field>
-                <FieldLabel className="text-[10px] font-bold tracking-wider uppercase">
+                <FieldLabel className="text-sm font-bold tracking-wider uppercase">
                   Grupo
                 </FieldLabel>
                 <Select
@@ -870,7 +870,7 @@ function FuenteCard({
             name={`fuentesSeleccionadas.${index}.partidaId`}
             render={({ field }) => (
               <Field>
-                <FieldLabel className="text-[10px] font-bold tracking-wider uppercase">
+                <FieldLabel className="text-sm font-bold tracking-wider uppercase">
                   Partida
                 </FieldLabel>
                 <Select
@@ -903,7 +903,7 @@ function FuenteCard({
 
           {/* ÍTEM / ACTIVIDAD (VISUALIZACIÓN CON POACARD) */}
           <div className="col-span-full space-y-3">
-            <FieldLabel className="text-[10px] font-bold tracking-wider uppercase">
+            <FieldLabel className="text-sm font-bold tracking-wider uppercase">
               Seleccionar Ítem / Actividad de Presupuesto
             </FieldLabel>
 
@@ -981,7 +981,7 @@ function FuenteCard({
                     );
                   })
                 ) : (
-                  <div className="text-muted-foreground col-span-full py-4 text-center text-xs italic">
+                  <div className="text-foreground col-span-full py-4 text-center text-sm italic">
                     {selectedPartidaId
                       ? 'No hay items disponibles para esta partida.'
                       : 'Seleccione Grupo y Partida para ver los items disponibles.'}
@@ -1010,10 +1010,10 @@ function FuenteCard({
         <div className="flex flex-wrap items-center gap-6">
           {/* 1. Límite POA */}
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
+            <span className="text-foreground text-sm font-bold tracking-tight uppercase">
               Límite POA
             </span>
-            <span className="text-muted-foreground text-sm font-medium">
+            <span className="text-foreground text-sm font-medium">
               {isLocked ? formatMoney(Number(limit) || 0) : '---'}
             </span>
           </div>
@@ -1022,10 +1022,10 @@ function FuenteCard({
 
           {/* 2. Solicitado (Neto) */}
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
+            <span className="text-foreground text-sm font-bold tracking-tight uppercase">
               Subtotal Liquido
             </span>
-            <span className="text-muted-foreground text-sm font-medium">
+            <span className="text-foreground text-sm font-medium">
               {isLocked ? formatMoney(resumenFinanciero.neto) : '---'}
             </span>
           </div>
@@ -1034,7 +1034,7 @@ function FuenteCard({
 
           {/* 3. Solicitado (Bruto) */}
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
+            <span className="text-foreground text-sm font-bold tracking-tight uppercase">
               Subtotal Presupuestado (Incl. Impuestos)
             </span>
             <span className="text-foreground text-base font-bold">
@@ -1046,7 +1046,7 @@ function FuenteCard({
 
           {/* 4. Saldo Disponible */}
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
+            <span className="text-foreground text-sm font-bold tracking-tight uppercase">
               Saldo Disponible
             </span>
             <span

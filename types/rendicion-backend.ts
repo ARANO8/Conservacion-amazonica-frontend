@@ -117,8 +117,6 @@ export interface RendicionResponse {
   montoRespaldado: string; // Decimal as string (sum of gastos montoTotal)
   saldoLiquido: string; // Decimal as string (desembolso - montoRespaldado)
   estado: EstadoRendicion;
-  urlCuadroComparativo?: string | null;
-  urlCotizaciones?: string[];
   observaciones?: string;
   createdAt?: string; // ISO timestamp
   updatedAt?: string; // ISO timestamp

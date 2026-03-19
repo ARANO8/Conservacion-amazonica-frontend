@@ -27,15 +27,29 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Partida } from '@/types/catalogs';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  partidas: Partida[];
+  partidaId?: number;
+  onPartidaChange: (partidaId?: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  partidas,
+  partidaId,
+  onPartidaChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -60,7 +74,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center gap-2 py-4">
+      <div className="flex flex-col gap-2 py-4 md:flex-row md:items-center">
         <Input
           placeholder="Filtrar por solicitante..."
           value={
@@ -69,7 +83,7 @@ export function DataTable<TData, TValue>({
           onChange={(event) =>
             table.getColumn('solicitante')?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="w-full md:max-w-sm"
         />
         <Input
           placeholder="Filtrar por Código..."
@@ -82,7 +96,7 @@ export function DataTable<TData, TValue>({
               .getColumn('codigoSolicitud')
               ?.setFilterValue(event.target.value)
           }
-          className="max-w-[200px]"
+          className="w-full md:max-w-[200px]"
         />
         <Input
           placeholder="Filtrar por estado..."
@@ -90,8 +104,28 @@ export function DataTable<TData, TValue>({
           onChange={(event) =>
             table.getColumn('estado')?.setFilterValue(event.target.value)
           }
-          className="max-w-[180px]"
+          className="w-full md:max-w-[180px]"
         />
+        <Select
+          value={partidaId !== undefined ? String(partidaId) : 'ALL'}
+          onValueChange={(value) =>
+            onPartidaChange(value === 'ALL' ? undefined : Number(value))
+          }
+        >
+          <SelectTrigger className="w-full md:max-w-[280px]">
+            <SelectValue placeholder="Filtrar por Partida..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todas las partidas</SelectItem>
+            {partidas.map((partida) => (
+              <SelectItem key={partida.id} value={String(partida.id)}>
+                {partida.codigo
+                  ? `${partida.codigo} - ${partida.nombre}`
+                  : partida.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="bg-card rounded-md border">
         <Table>

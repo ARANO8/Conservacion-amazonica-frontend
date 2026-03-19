@@ -136,6 +136,7 @@ export default function SolicitudHospedajes({
                 poaId: 0,
                 region: '',
                 destino: '',
+                tipoDocumento: 'RECIBO',
                 personas: 1,
                 noches: 1,
                 cantidadUnitaria: 0,
@@ -178,6 +179,10 @@ function HospedajeCard({
     control,
     name: `hospedajes.${index}.cantidadUnitaria`,
   });
+  const tipoDocumento = useWatch({
+    control,
+    name: `hospedajes.${index}.tipoDocumento`,
+  });
 
   const costoTotal =
     useWatch({ control, name: `hospedajes.${index}.costoTotal` }) || 0;
@@ -191,12 +196,16 @@ function HospedajeCard({
 
     const costoTotal = pers * noch * unit;
 
-    // Acrecentamiento Combinado (100% - 13% IVA - 3% IT = 84%)
-    // Monto Bruto = Líquido / 0.84
-    const montoBruto = costoTotal / 0.84;
+    let ivaCalculado = 0;
+    let itCalculado = 0;
 
-    const ivaCalculado = montoBruto * 0.13;
-    const itCalculado = montoBruto * 0.03;
+    if ((tipoDocumento || 'RECIBO') === 'RECIBO') {
+      // Acrecentamiento Combinado (100% - 13% IVA - 3% IT = 84%)
+      // Monto Bruto = Líquido / 0.84
+      const montoBruto = costoTotal / 0.84;
+      ivaCalculado = montoBruto * 0.13;
+      itCalculado = montoBruto * 0.03;
+    }
 
     setValue(
       `hospedajes.${index}.costoTotal`,
@@ -204,7 +213,7 @@ function HospedajeCard({
     );
     setValue(`hospedajes.${index}.iva`, parseFloat(ivaCalculado.toFixed(2)));
     setValue(`hospedajes.${index}.it`, parseFloat(itCalculado.toFixed(2)));
-  }, [personas, noches, cantidadUnitaria, index, setValue]);
+  }, [personas, noches, cantidadUnitaria, tipoDocumento, index, setValue]);
 
   useEffect(() => {
     calcularTotales();
@@ -377,6 +386,37 @@ function HospedajeCard({
             )}
           />
 
+          {/* TIPO DOCUMENTO */}
+          <FormField
+            control={control}
+            name={`hospedajes.${index}.tipoDocumento`}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel>Tipo Documento</FieldLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || 'RECIBO'}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    <SelectItem value="RECIBO">Recibo</SelectItem>
+                    <SelectItem value="FACTURA">Factura</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </Field>
+            )}
+          />
+
           {/* PERSONAS */}
           <FormField
             control={control}
@@ -435,7 +475,7 @@ function HospedajeCard({
               },
             }}
             render={({ field, fieldState }) => (
-              <Field className="flex flex-col justify-center">
+              <Field className="col-span-1 flex flex-col justify-center md:col-span-3">
                 <div className="mb-2 flex items-center justify-between">
                   <FieldLabel className="mb-0">
                     Tarifa Unitaria (Bs.)
@@ -445,7 +485,7 @@ function HospedajeCard({
                       <Input
                         type="number"
                         step="0.01"
-                        className="h-7 w-24 px-2 py-0 text-right text-xs font-semibold"
+                        className="h-7 w-24 px-2 py-0 text-right text-sm font-semibold"
                         value={field.value || ''}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -483,14 +523,14 @@ function HospedajeCard({
                       className="w-full disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     {selectedRegion && !fieldState.error && (
-                      <div className="text-muted-foreground flex w-full justify-between text-[15px]">
+                      <div className="text-foreground flex w-full justify-between text-sm">
                         <span>Mín: {rangoMin}</span>
                         <span>Máx: {rangoMax}</span>
                       </div>
                     )}
                   </div>
                 </FormControl>
-                <FormMessage className="mt-1 text-[10px] leading-tight" />
+                <FormMessage className="mt-1 text-sm leading-tight" />
               </Field>
             )}
           />
@@ -501,10 +541,10 @@ function HospedajeCard({
       <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-4 border-t p-3 px-4">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-[10px] uppercase">
+            <span className="text-foreground text-sm uppercase">
               TOTAL LÍQUIDO A RECIBIR
             </span>
-            <span className="text-xs font-medium">
+            <span className="text-sm font-semibold">
               {formatMoney(Number(costoTotal))}
             </span>
           </div>
@@ -512,7 +552,7 @@ function HospedajeCard({
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
 
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-bold uppercase">
+            <span className="text-foreground text-sm font-bold uppercase">
               TOTAL PRESUPUESTADO (Incl. Impuestos)
             </span>
             <span className="text-primary text-sm font-bold">
@@ -524,19 +564,15 @@ function HospedajeCard({
 
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IVA 13%
-              </span>
-              <span className="text-xs font-medium">
+              <span className="text-foreground text-sm uppercase">IVA 13%</span>
+              <span className="text-sm font-semibold">
                 {formatMoney(Number(iva))}
               </span>
             </div>
 
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                IT 3%
-              </span>
-              <span className="text-xs font-medium">
+              <span className="text-foreground text-sm uppercase">IT 3%</span>
+              <span className="text-sm font-semibold">
                 {formatMoney(Number(it))}
               </span>
             </div>

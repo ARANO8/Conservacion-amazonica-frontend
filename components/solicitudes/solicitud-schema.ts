@@ -5,7 +5,7 @@ export const formSchema = z.object({
   // Campos de Planificación (Paso 1)
   planificacionLugares: z
     .string()
-    .min(1, 'Lugar/es del viaje y/o taller es/son requerido/s'),
+    .min(1, 'El lugar de la actividad es requerido'),
   planificacionObjetivo: z.string().min(1, 'El objetivo es requerido'),
   actividades: z
     .array(
@@ -105,6 +105,7 @@ export const formSchema = z.object({
         poaId: z.number().min(1, 'Debes seleccionar una partida'),
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
+        tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
         personas: z.number().min(1, 'Mínimo 1 persona'),
         noches: z.number().min(1, 'Mínimo 1 noche'),
         cantidadUnitaria: z.number().min(0.01, 'La tarifa debe ser mayor a 0'),
@@ -137,11 +138,27 @@ export const formSchema = z.object({
 
   // Confirmación Final
   destinatario: z.string().min(1, 'Debes seleccionar un destinatario'),
+
+  // Respaldos
+  urlCuadroComparativo: z
+    .union([
+      z.string().url('La URL del cuadro comparativo no es válida'),
+      z.literal(''),
+    ])
+    .optional(),
+  urlCotizaciones: z
+    .array(
+      z.union([
+        z.string().url('La URL de la cotización no es válida'),
+        z.literal(''),
+      ])
+    )
+    .optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;
 
-export type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'NOMINA';
+export type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'RESPALDOS' | 'NOMINA';
 
 export const defaultValues: FormData = {
   planificacionLugares: '',
@@ -172,4 +189,6 @@ export const defaultValues: FormData = {
   motivo: '',
   nomina: [],
   destinatario: '',
+  urlCuadroComparativo: '',
+  urlCotizaciones: [''],
 };
