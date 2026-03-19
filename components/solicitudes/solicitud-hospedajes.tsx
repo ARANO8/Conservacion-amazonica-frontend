@@ -475,7 +475,7 @@ function HospedajeCard({
               },
             }}
             render={({ field, fieldState }) => (
-              <Field className="flex flex-col justify-center">
+              <Field className="col-span-1 flex flex-col justify-center md:col-span-3">
                 <div className="mb-2 flex items-center justify-between">
                   <FieldLabel className="mb-0">
                     Tarifa Unitaria (Bs.)
