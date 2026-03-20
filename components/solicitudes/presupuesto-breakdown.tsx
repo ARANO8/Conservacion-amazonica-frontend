@@ -63,6 +63,9 @@ export function PresupuestoBreakdown({ partidas }: PresupuestoBreakdownProps) {
                       const isHospedaje = item.nombre
                         .toLowerCase()
                         .includes('hospedaje');
+                      const hospedajeTitle = isHospedaje
+                        ? (item.detalle || item.nombre).toUpperCase()
+                        : item.nombre;
 
                       return (
                         <div
@@ -81,9 +84,9 @@ export function PresupuestoBreakdown({ partidas }: PresupuestoBreakdownProps) {
                             </div>
                             <div className="flex flex-col">
                               <span className="font-semibold uppercase">
-                                {item.nombre}
+                                {hospedajeTitle}
                               </span>
-                              {item.detalle && (
+                              {item.detalle && !isHospedaje && (
                                 <span className="text-muted-foreground text-[9px] uppercase">
                                   {item.detalle}
                                 </span>
