@@ -2,6 +2,7 @@ import { CreateRendicionInput } from '@/types/rendicion-schema';
 
 export interface CreateRendicionApiPayload {
   solicitudId: number;
+  aprobadorActualId: number;
   fechaRendicion: string;
   gastos: Array<{
     solicitudItemId?: number;
@@ -63,6 +64,7 @@ export function adaptCreateRendicionPayload(
 ): CreateRendicionApiPayload {
   const payload: CreateRendicionApiPayload = {
     solicitudId: data.solicitudId,
+    aprobadorActualId: data.aprobadorActualId,
     fechaRendicion:
       toIsoDateString(data.fechaRendicion) ?? new Date().toISOString(),
     gastos: (data.gastos ?? []).map((gasto) => ({

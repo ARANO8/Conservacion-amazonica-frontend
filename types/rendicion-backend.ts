@@ -11,9 +11,40 @@ import type { SolicitudResponse } from './solicitud-backend';
 
 export enum EstadoRendicion {
   PENDIENTE = 'PENDIENTE',
+  APROBADO = 'APROBADO',
+  OBSERVADO = 'OBSERVADO',
+  RECHAZADO = 'RECHAZADO',
   APROBADA = 'APROBADA',
   OBSERVADA = 'OBSERVADA',
   RECHAZADA = 'RECHAZADA',
+}
+
+export enum TipoAccionHistorial {
+  CREADO = 'CREADO',
+  APROBADO = 'APROBADO',
+  OBSERVADO = 'OBSERVADO',
+  DERIVADO = 'DERIVADO',
+  RECHAZADO = 'RECHAZADO',
+}
+
+export interface HistorialUsuario {
+  id: number;
+  nombreCompleto: string;
+  rol?: string;
+  cargo?: string;
+}
+
+export interface HistorialAprobacionResponse {
+  id: number;
+  accion: TipoAccionHistorial;
+  comentario?: string | null;
+  fecha: string;
+  usuarioId: number;
+  derivadoAId?: number | null;
+  solicitudId?: number | null;
+  rendicionId?: number | null;
+  usuario?: HistorialUsuario;
+  derivadoA?: HistorialUsuario | null;
 }
 
 export enum EstadoGastoRendicion {
@@ -113,6 +144,7 @@ export interface InformeGastosResponse {
 export interface RendicionResponse {
   id: number;
   solicitudId: number;
+  aprobadorActualId?: number | null;
   fechaRendicion: string; // ISO date or DateTime
   montoRespaldado: string; // Decimal as string (sum of gastos montoTotal)
   saldoLiquido: string; // Decimal as string (desembolso - montoRespaldado)
@@ -123,9 +155,11 @@ export interface RendicionResponse {
 
   // Relations
   solicitud: SolicitudResponse;
+  aprobadorActual?: HistorialUsuario | null;
   gastosRendicion: GastoRendicionResponse[];
   declaracionesJuradas: DeclaracionJuradaResponse[];
   informeGastos?: InformeGastosResponse | null;
+  historialAprobaciones?: HistorialAprobacionResponse[];
 
   // Legacy aliases for convenience (not from backend, added by frontend)
   gastos?: GastoRendicionResponse[];

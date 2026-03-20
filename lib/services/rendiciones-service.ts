@@ -5,6 +5,15 @@ import {
   type CreateRendicionApiPayload,
 } from '@/lib/adapters/rendicion-adapter';
 
+export interface AprobarRendicionPayload {
+  comentario?: string;
+  derivadoAId?: number;
+}
+
+export interface ObservarRendicionPayload {
+  comentario: string;
+}
+
 /**
  * Service to handle Rendiciones (accountability reports) API calls.
  * El token Bearer es inyectado automáticamente por el interceptor de `api` (lib/api.ts).
@@ -53,6 +62,22 @@ export const rendicionesService = {
    */
   async getRendicionBySolicitud(solicitudId: string | number) {
     const response = await api.get(`/rendiciones/solicitud/${solicitudId}`);
+    return response.data;
+  },
+
+  async aprobarRendicion(
+    id: string | number,
+    payload: AprobarRendicionPayload
+  ) {
+    const response = await api.post(`/rendiciones/${id}/aprobar`, payload);
+    return response.data;
+  },
+
+  async observarRendicion(
+    id: string | number,
+    payload: ObservarRendicionPayload
+  ) {
+    const response = await api.post(`/rendiciones/${id}/observar`, payload);
     return response.data;
   },
 };

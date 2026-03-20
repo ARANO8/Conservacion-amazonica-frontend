@@ -25,6 +25,7 @@ import {
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import { adaptCreateRendicionPayload } from '@/lib/adapters/rendicion-adapter';
+import { Usuario } from '@/types/catalogs';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormField,
@@ -53,12 +54,18 @@ import Paso4Informe from './paso4-informe';
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
   solicitudes: SolicitudResponse[];
+  /** Usuarios activos para seleccionar aprobador inicial */
+  usuarios: Usuario[];
+  /** Usuario autenticado */
+  currentUserId?: number;
   /** ID de solicitud pre-seleccionada (desde query params) */
   preSelectedSolicitudId?: number | null;
 }
 
 export default function RendicionWizard({
   solicitudes,
+  usuarios,
+  currentUserId,
   preSelectedSolicitudId,
 }: RendicionWizardProps) {
   const router = useRouter();
@@ -105,8 +112,8 @@ export default function RendicionWizard({
         const today = new Date().toISOString().split('T')[0];
         form.setValue('fechaRendicion', today);
 
-        // Con solicitud pre-seleccionada, saltar al paso de respaldos generales.
-        setStep('RESPALDOS_GENERALES');
+        // Mantenerse en selección para elegir aprobador inmediato.
+        setStep('SELECCION');
       }
     }
   }, [preSelectedSolicitudId, solicitudes, form]);
@@ -117,9 +124,13 @@ export default function RendicionWizard({
 
   const handleNext = async () => {
     if (step === 'SELECCION') {
-      const isValid = await form.trigger(['solicitudId', 'fechaRendicion']);
+      const isValid = await form.trigger([
+        'solicitudId',
+        'fechaRendicion',
+        'aprobadorActualId',
+      ]);
       if (!isValid) {
-        toast.error('Selecciona una solicitud antes de continuar');
+        toast.error('Completa solicitud, fecha y aprobador para continuar');
         return;
       }
       setStep('RESPALDOS_GENERALES');
@@ -128,7 +139,11 @@ export default function RendicionWizard({
     }
 
     if (step === 'RESPALDOS_GENERALES') {
-      const isValid = await form.trigger(['solicitudId', 'fechaRendicion']);
+      const isValid = await form.trigger([
+        'solicitudId',
+        'fechaRendicion',
+        'aprobadorActualId',
+      ]);
       if (!isValid) {
         toast.error('Revisa los datos generales antes de continuar');
         return;
@@ -291,7 +306,12 @@ export default function RendicionWizard({
         {/* Área de contenido — crece para ocupar el espacio disponible */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {step === 'SELECCION' && (
-            <Paso1Seleccion form={form} solicitudes={solicitudes} />
+            <Paso1Seleccion
+              form={form}
+              solicitudes={solicitudes}
+              usuarios={usuarios}
+              currentUserId={currentUserId}
+            />
           )}
 
           {step === 'RESPALDOS_GENERALES' && <Paso2Respaldos />}

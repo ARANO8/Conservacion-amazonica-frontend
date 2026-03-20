@@ -38,6 +38,32 @@ export default function RendicionDetailPage() {
     fetchRendicion();
   }, [id, router]);
 
+  useEffect(() => {
+    const handleRendicionUpdated = () => {
+      if (!id) return;
+
+      const fetchUpdated = async () => {
+        try {
+          setLoading(true);
+          const data = await rendicionesService.getRendicionById(id);
+          setRendicion(data);
+        } catch {
+          toast.error('No se pudo refrescar la rendición.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      void fetchUpdated();
+    };
+
+    window.addEventListener('rendicion-updated', handleRendicionUpdated);
+
+    return () => {
+      window.removeEventListener('rendicion-updated', handleRendicionUpdated);
+    };
+  }, [id]);
+
   if (loading) {
     return (
       <div className="space-y-6">
