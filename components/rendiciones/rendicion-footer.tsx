@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ChevronLeft, PenLine } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PenLine } from 'lucide-react';
 
 import { formatMoney } from '@/lib/utils';
 import {
@@ -50,7 +50,9 @@ export default function RendicionFooter({
   const saldo = montoAnticipado - totalRendido;
   const isLastStep = step === 'INFORME_GASTOS';
   const isFirstStep = step === 'SELECCION';
-  const showFinancialSummary = step === 'INFORME_GASTOS' && montoAnticipado > 0;
+  const showFinancialSummary =
+    (step === 'GASTOS_RESPALDO' || step === 'INFORME_GASTOS') &&
+    montoAnticipado > 0;
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">
@@ -136,7 +138,10 @@ export default function RendicionFooter({
                 <PenLine className="ml-2 h-4 w-4" />
               </>
             ) : (
-              'Siguiente'
+              <>
+                Siguiente
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </>
             )}
           </Button>
         </div>

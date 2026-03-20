@@ -20,7 +20,10 @@ export type EstadoGasto = z.infer<typeof EstadoGastoEnum>;
 export const TipoDeclaracionEnum = z.enum(['COMPLETA', 'PARCIAL', 'NEGATIVA']);
 export type TipoDeclaracion = z.infer<typeof TipoDeclaracionEnum>;
 
-export type WizardStepRendicion = 'SELECCION' | 'INFORME_GASTOS';
+export type WizardStepRendicion =
+  | 'SELECCION'
+  | 'GASTOS_RESPALDO'
+  | 'INFORME_GASTOS';
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -51,8 +54,11 @@ export const GastoRendicionSchema = z.object({
   estado: EstadoGastoEnum.optional(),
   /** ID del presupuesto (partida POA) al que se imputa este gasto */
   partidaId: z.number().min(1, 'Debes seleccionar una partida presupuestaria'),
-  /** URL del comprobante digital adjunto */
-  urlComprobante: z.string().url('La URL del comprobante no es válida'),
+  /** URL de respaldo documental (opcional en esta etapa) */
+  urlComprobante: z
+    .string()
+    .url('La URL del comprobante no es válida')
+    .optional(),
   /**
    * Sub-categoría de retención — sólo aplica para RECIBO/BOLETA en gastos GENERALES.
    * Determina el factor de retención: BIEN=0.92, SERVICIO=0.84, ALQUILER=0.84.

@@ -54,6 +54,7 @@ import {
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
+import Paso2Gastos from './paso2-gastos';
 import Paso4Informe from './paso4-informe';
 
 interface RendicionWizardProps {
@@ -94,6 +95,15 @@ export default function RendicionWizard({
   const canConfirmSubmit =
     confirmaDatosVeridicos === true && aceptaPoliticaDevolucion === true;
 
+  // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
+  const watchedSolicitudId = useWatch({
+    control: form.control,
+    name: 'solicitudId',
+  });
+
+  const solicitudSeleccionada =
+    solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
+
   // Efecto para pre-seleccionar una solicitud si se proporciona el ID
   useEffect(() => {
     if (preSelectedSolicitudId && solicitudes.length > 0) {
@@ -122,13 +132,27 @@ export default function RendicionWizard({
         toast.error('Debes seleccionar una solicitud para continuar');
         return;
       }
+      setStep('GASTOS_RESPALDO');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (step === 'GASTOS_RESPALDO') {
+      const isValid = await form.trigger(['gastos', 'gastosSinRespaldo']);
+      if (!isValid) {
+        toast.error('Revisa los gastos antes de continuar');
+        return;
+      }
       setStep('INFORME_GASTOS');
       window.scrollTo(0, 0);
       return;
     }
 
     if (step === 'INFORME_GASTOS') {
-      const isValid = await form.trigger(['informeGastos']);
+      const isValid = await form.trigger([
+        'informeGastos',
+        'aprobadorActualId',
+      ]);
       if (!isValid) {
         toast.error('Completa el informe de gastos antes de finalizar');
         return;
@@ -138,8 +162,11 @@ export default function RendicionWizard({
   };
 
   const handleBack = () => {
-    if (step === 'INFORME_GASTOS') {
+    if (step === 'GASTOS_RESPALDO') {
       setStep('SELECCION');
+      window.scrollTo(0, 0);
+    } else if (step === 'INFORME_GASTOS') {
+      setStep('GASTOS_RESPALDO');
       window.scrollTo(0, 0);
     }
   };
@@ -264,6 +291,10 @@ export default function RendicionWizard({
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {step === 'SELECCION' && (
             <Paso1Seleccion form={form} solicitudes={solicitudes} />
+          )}
+
+          {step === 'GASTOS_RESPALDO' && (
+            <Paso2Gastos solicitud={solicitudSeleccionada} />
           )}
 
           {step === 'INFORME_GASTOS' && <Paso4Informe />}

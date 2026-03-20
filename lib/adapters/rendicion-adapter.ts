@@ -18,7 +18,7 @@ export interface CreateRendicionApiPayload {
     montoNeto: number;
     estado?: 'PENDIENTE' | 'COMPROBADO' | 'RECHAZADO';
     partidaId: number;
-    urlComprobante: string;
+    urlComprobante?: string;
     tipoRetencion?: 'BIEN' | 'SERVICIO' | 'ALQUILER';
   }>;
   gastosSinRespaldo?: Array<{
@@ -86,7 +86,7 @@ export function adaptCreateRendicionPayload(
       montoNeto: Number(gasto.montoNeto),
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
-      urlComprobante: gasto.urlComprobante,
+      ...(gasto.urlComprobante ? { urlComprobante: gasto.urlComprobante } : {}),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
