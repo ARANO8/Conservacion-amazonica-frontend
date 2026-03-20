@@ -141,6 +141,10 @@ export const CreateRendicionSchema = z.object({
   // --- Paso 1: SELECCION ---
   /** ID de la SolicitudResponse que se está rindiendo */
   solicitudId: z.number().min(1, 'Debes seleccionar una solicitud'),
+  /** Usuario aprobador inmediato de la rendición */
+  aprobadorActualId: z
+    .number()
+    .min(1, 'Debes seleccionar un aprobador inmediato'),
   /** Fecha en que se realiza la rendición (ISO date string YYYY-MM-DD) */
   fechaRendicion: z
     .string()
@@ -171,6 +175,7 @@ export type CreateRendicionInput = z.infer<typeof CreateRendicionSchema>;
 
 export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
+  aprobadorActualId: 0,
   fechaRendicion: new Date().toISOString().split('T')[0],
   gastos: [],
   informeGastos: {

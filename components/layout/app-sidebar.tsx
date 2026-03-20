@@ -124,6 +124,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: FileText,
     },
     {
+      title: 'Mis Rendiciones',
+      url: '/app/rendiciones',
+      icon: FileText,
+    },
+    {
       title: 'Notificaciones',
       url: '/app/aprobaciones',
       icon: Bell,

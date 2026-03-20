@@ -1,10 +1,20 @@
 'use client';
 
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Check,
+  ChevronsUpDown,
+  ShieldCheck,
+  Workflow,
+} from 'lucide-react';
 import type {
   RendicionResponse,
   EstadoRendicion,
@@ -13,6 +23,34 @@ import { formatMoney, formatDate } from '@/lib/utils';
 import { RendicionGastosSection } from '@/components/rendiciones/rendicion-gastos-section';
 import { RendicionDeclaracionSection } from '@/components/rendiciones/rendicion-declaracion-section';
 import { RendicionSolicitudSection } from '@/components/rendiciones/rendicion-solicitud-section';
+import { useAuthStore } from '@/store/auth-store';
+import { catalogosService } from '@/services/catalogos.service';
+import { Usuario } from '@/types/catalogs';
+import { rendicionesService } from '@/lib/services/rendiciones-service';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { AuditTimeline } from '@/components/shared/audit-timeline';
 
 interface RendicionDetailClientProps {
   rendicion: RendicionResponse;
@@ -20,6 +58,9 @@ interface RendicionDetailClientProps {
 
 const ESTADO_COLORS: Record<EstadoRendicion, string> = {
   PENDIENTE: 'bg-yellow-100 text-yellow-800',
+  APROBADO: 'bg-green-100 text-green-800',
+  OBSERVADO: 'bg-orange-100 text-orange-800',
+  RECHAZADO: 'bg-red-100 text-red-800',
   APROBADA: 'bg-green-100 text-green-800',
   OBSERVADA: 'bg-orange-100 text-orange-800',
   RECHAZADA: 'bg-red-100 text-red-800',
@@ -29,6 +70,116 @@ export function RendicionDetailClient({
   rendicion,
 }: RendicionDetailClientProps) {
   const router = useRouter();
+  const { user } = useAuthStore();
+
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [observeOpen, setObserveOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [derivadoAId, setDerivadoAId] = useState<string>('');
+  const [comentarioAprobar, setComentarioAprobar] = useState('');
+  const [comentarioObservar, setComentarioObservar] = useState('');
+
+  const currentUserId = user?.id ? Number(user.id) : null;
+  const currentUserRol = user?.rol;
+  const isTesorero = currentUserRol === 'TESORERO';
+  const isAdmin = currentUserRol === 'ADMIN';
+
+  const puedeAccionar = useMemo(() => {
+    if (!currentUserId) return false;
+    if (isAdmin || isTesorero) return rendicion.estado === 'PENDIENTE';
+    return (
+      rendicion.estado === 'PENDIENTE' &&
+      Number(rendicion.aprobadorActualId) === currentUserId
+    );
+  }, [currentUserId, isAdmin, isTesorero, rendicion]);
+
+  const usuariosFiltrados = useMemo(
+    () => usuarios.filter((u) => Number(u.id) !== currentUserId),
+    [usuarios, currentUserId]
+  );
+
+  const openApproveDialog = async () => {
+    if (!isTesorero) {
+      try {
+        const data = await catalogosService.getUsuarios();
+        setUsuarios(data);
+      } catch {
+        toast.error('No se pudo cargar la lista de usuarios para derivación.');
+        return;
+      }
+    }
+
+    setApproveOpen(true);
+  };
+
+  const handleAprobar = async () => {
+    if (!isTesorero && !derivadoAId) {
+      toast.error('Debes seleccionar al siguiente usuario para derivar.');
+      return;
+    }
+
+    try {
+      setLoadingAction(true);
+      await rendicionesService.aprobarRendicion(rendicion.id, {
+        comentario: comentarioAprobar || undefined,
+        ...(isTesorero ? {} : { derivadoAId: Number(derivadoAId) }),
+      });
+
+      toast.success(
+        isTesorero
+          ? 'Rendición aprobada de forma final.'
+          : 'Rendición derivada correctamente.'
+      );
+      setApproveOpen(false);
+      window.dispatchEvent(new CustomEvent('rendicion-updated'));
+    } catch (error: unknown) {
+      let message = 'No se pudo procesar la aprobación.';
+      if (axios.isAxiosError(error)) {
+        const backendMessage = error.response?.data?.message;
+        if (Array.isArray(backendMessage)) {
+          message = backendMessage.join('. ');
+        } else if (typeof backendMessage === 'string') {
+          message = backendMessage;
+        }
+      }
+      toast.error(message);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const handleObservar = async () => {
+    if (!comentarioObservar.trim()) {
+      toast.error('El comentario es obligatorio para observar la rendición.');
+      return;
+    }
+
+    try {
+      setLoadingAction(true);
+      await rendicionesService.observarRendicion(rendicion.id, {
+        comentario: comentarioObservar.trim(),
+      });
+
+      toast.success('Rendición observada correctamente.');
+      setObserveOpen(false);
+      window.dispatchEvent(new CustomEvent('rendicion-updated'));
+    } catch (error: unknown) {
+      let message = 'No se pudo observar la rendición.';
+      if (axios.isAxiosError(error)) {
+        const backendMessage = error.response?.data?.message;
+        if (Array.isArray(backendMessage)) {
+          message = backendMessage.join('. ');
+        } else if (typeof backendMessage === 'string') {
+          message = backendMessage;
+        }
+      }
+      toast.error(message);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -47,6 +198,30 @@ export function RendicionDetailClient({
           {rendicion.estado}
         </Badge>
       </div>
+
+      {puedeAccionar && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row">
+            <Button
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => void openApproveDialog()}
+              disabled={loadingAction}
+            >
+              <CheckCircle className="mr-2 h-4 w-4" />
+              {isTesorero ? 'Aprobación Final' : 'Aprobar y Derivar'}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50"
+              onClick={() => setObserveOpen(true)}
+              disabled={loadingAction}
+            >
+              <AlertCircle className="mr-2 h-4 w-4" />
+              Observar
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Info Card */}
       <Card>
@@ -117,12 +292,167 @@ export function RendicionDetailClient({
         </Card>
       )}
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Workflow className="h-5 w-5" />
+            Historial de Auditoría
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AuditTimeline historial={rendicion.historialAprobaciones ?? []} />
+        </CardContent>
+      </Card>
+
       {/* Footer Actions */}
       <div className="flex gap-2">
         <Button variant="outline" onClick={() => router.back()}>
           Volver
         </Button>
       </div>
+
+      <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isTesorero ? 'Aprobación Final' : 'Aprobar y Derivar'}
+            </DialogTitle>
+            <DialogDescription>
+              {isTesorero
+                ? 'Esta acción cerrará la rendición y afectará el monto ejecutado del POA.'
+                : 'Aprueba esta revisión y deriva manualmente al siguiente responsable.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {!isTesorero && (
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={popoverOpen}
+                    className={`w-full justify-between font-normal ${
+                      !derivadoAId ? 'text-muted-foreground' : ''
+                    }`}
+                  >
+                    {derivadoAId
+                      ? usuariosFiltrados.find(
+                          (u) => String(u.id) === String(derivadoAId)
+                        )?.nombreCompleto || 'Seleccionar usuario...'
+                      : 'Seleccionar siguiente usuario...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0"
+                  align="start"
+                >
+                  <Command>
+                    <CommandInput placeholder="Buscar usuario..." />
+                    <CommandList>
+                      <CommandEmpty>No se encontró usuario.</CommandEmpty>
+                      <CommandGroup>
+                        {usuariosFiltrados.map((u) => (
+                          <CommandItem
+                            key={u.id}
+                            value={u.nombreCompleto}
+                            onSelect={() => {
+                              setDerivadoAId(String(u.id));
+                              setPopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                String(u.id) === String(derivadoAId)
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              }`}
+                            />
+                            {u.nombreCompleto}
+                            {u.cargo ? ` - ${u.cargo}` : ''}
+                            {u.rol ? ` (${u.rol})` : ''}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            )}
+
+            {isTesorero && (
+              <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                <p className="flex items-center gap-2 font-medium">
+                  <ShieldCheck className="h-4 w-4" />
+                  Esta aprobación ejecutará el impacto presupuestario en POA.
+                </p>
+              </div>
+            )}
+
+            <Textarea
+              placeholder="Comentario (opcional)"
+              value={comentarioAprobar}
+              onChange={(e) => setComentarioAprobar(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setApproveOpen(false)}
+              disabled={loadingAction}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => void handleAprobar()}
+              disabled={loadingAction}
+            >
+              {loadingAction ? 'Procesando...' : 'Confirmar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={observeOpen} onOpenChange={setObserveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Observar Rendición</DialogTitle>
+            <DialogDescription>
+              Registra una observación para devolver la rendición al creador.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2">
+            <Textarea
+              placeholder="Comentario obligatorio"
+              value={comentarioObservar}
+              onChange={(e) => setComentarioObservar(e.target.value)}
+              className="min-h-[120px]"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setObserveOpen(false)}
+              disabled={loadingAction}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void handleObservar()}
+              disabled={loadingAction}
+            >
+              {loadingAction ? 'Procesando...' : 'Enviar Observación'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

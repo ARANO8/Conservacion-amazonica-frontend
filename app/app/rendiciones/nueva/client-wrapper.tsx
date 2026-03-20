@@ -9,6 +9,8 @@ import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { RendicionWizard } from '@/components/rendiciones';
 import { useAuthStore } from '@/store/auth-store';
+import { catalogosService } from '@/services/catalogos.service';
+import { Usuario } from '@/types/catalogs';
 
 /**
  * Client Component: Carga las solicitudes desembolsadas del usuario
@@ -22,6 +24,7 @@ export function NuevaRendicionClientWrapper() {
   const solicitudIdParam = searchParams.get('solicitudId');
 
   const [solicitudes, setSolicitudes] = useState<SolicitudResponse[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [preSelectedSolicitudId, setPreSelectedSolicitudId] = useState<
     number | null
@@ -35,8 +38,11 @@ export function NuevaRendicionClientWrapper() {
       try {
         setLoading(true);
         // Obtener todas las solicitudes sin filtro inicial
-        const todas: SolicitudResponse[] =
-          await solicitudesService.getSolicitudes();
+        const [todas, usuariosActivos]: [SolicitudResponse[], Usuario[]] =
+          await Promise.all([
+            solicitudesService.getSolicitudes(),
+            catalogosService.getUsuarios(),
+          ]);
 
         // Filtrar: solo las del usuario autenticado que ya fueron desembolsadas
         const desembolsadas = todas.filter((s) => {
@@ -51,6 +57,7 @@ export function NuevaRendicionClientWrapper() {
         });
 
         setSolicitudes(desembolsadas);
+        setUsuarios(usuariosActivos);
 
         // Si se proporcionó un solicitudId en los params, pre-seleccionarlo
         if (solicitudIdParam) {
@@ -93,6 +100,8 @@ export function NuevaRendicionClientWrapper() {
   ) : (
     <RendicionWizard
       solicitudes={solicitudes}
+      usuarios={usuarios}
+      currentUserId={user?.id ? Number(user.id) : undefined}
       preSelectedSolicitudId={preSelectedSolicitudId}
     />
   );

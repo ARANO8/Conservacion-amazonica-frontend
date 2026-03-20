@@ -4,6 +4,16 @@ import {
   adaptCreateRendicionPayload,
   type CreateRendicionApiPayload,
 } from '@/lib/adapters/rendicion-adapter';
+import { RendicionResponse } from '@/types/rendicion-backend';
+
+export interface AprobarRendicionPayload {
+  comentario?: string;
+  derivadoAId?: number;
+}
+
+export interface ObservarRendicionPayload {
+  comentario: string;
+}
 
 /**
  * Service to handle Rendiciones (accountability reports) API calls.
@@ -37,6 +47,11 @@ export const rendicionesService = {
     return response.data;
   },
 
+  async getMisRendiciones() {
+    const response = await api.get<RendicionResponse[]>('/rendiciones');
+    return response.data;
+  },
+
   /**
    * Fetches rendiciones by solicitud ID.
    * @param solicitudId The ID of the solicitud.
@@ -53,6 +68,22 @@ export const rendicionesService = {
    */
   async getRendicionBySolicitud(solicitudId: string | number) {
     const response = await api.get(`/rendiciones/solicitud/${solicitudId}`);
+    return response.data;
+  },
+
+  async aprobarRendicion(
+    id: string | number,
+    payload: AprobarRendicionPayload
+  ) {
+    const response = await api.post(`/rendiciones/${id}/aprobar`, payload);
+    return response.data;
+  },
+
+  async observarRendicion(
+    id: string | number,
+    payload: ObservarRendicionPayload
+  ) {
+    const response = await api.post(`/rendiciones/${id}/observar`, payload);
     return response.data;
   },
 };
