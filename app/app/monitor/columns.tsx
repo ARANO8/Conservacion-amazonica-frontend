@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, FileDown } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { EstadoBadge } from '@/components/shared/estado-badge';
@@ -65,6 +65,28 @@ export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
     cell: ({ row }) => (
       <EstadoBadge estado={(row.original.estado as string) || ''} />
     ),
+  },
+  {
+    id: 'descargar_pdf',
+    header: 'Descargar',
+    cell: ({ row }) => {
+      const solicitudId = row.original.id;
+
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          title="Descargar Solicitud (PDF)"
+          className="w-[110px]"
+          onClick={() =>
+            window.open(`/api/solicitudes/${solicitudId}/pdf`, '_blank')
+          }
+        >
+          <FileDown className="mr-2 h-4 w-4" />
+          PDF
+        </Button>
+      );
+    },
   },
   {
     id: 'verDetalle',
