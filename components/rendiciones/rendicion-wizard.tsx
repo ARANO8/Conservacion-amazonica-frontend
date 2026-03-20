@@ -43,12 +43,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
-import Paso2Respaldos from './paso2-respaldos';
-import Paso2Gastos from './paso2-gastos';
 import Paso4Informe from './paso4-informe';
 
 interface RendicionWizardProps {
@@ -78,11 +83,6 @@ export default function RendicionWizard({
     defaultValues: defaultRendicionValues,
   });
 
-  // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
-  const watchedSolicitudId = useWatch({
-    control: form.control,
-    name: 'solicitudId',
-  });
   const [confirmaDatosVeridicos, aceptaPoliticaDevolucion] = useWatch({
     control: form.control,
     name: [
@@ -93,9 +93,6 @@ export default function RendicionWizard({
 
   const canConfirmSubmit =
     confirmaDatosVeridicos === true && aceptaPoliticaDevolucion === true;
-
-  const solicitudSeleccionada =
-    solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
 
   // Efecto para pre-seleccionar una solicitud si se proporciona el ID
   useEffect(() => {
@@ -108,11 +105,7 @@ export default function RendicionWizard({
         // Pre-llenar el formulario con la solicitud seleccionada
         form.setValue('solicitudId', preSelectedSolicitudId);
 
-        // También set la fecha de rendición a hoy (o dejar el default)
-        const today = new Date().toISOString().split('T')[0];
-        form.setValue('fechaRendicion', today);
-
-        // Mantenerse en selección para elegir aprobador inmediato.
+        // Mantenerse en selección para completar datos base.
         setStep('SELECCION');
       }
     }
@@ -124,39 +117,9 @@ export default function RendicionWizard({
 
   const handleNext = async () => {
     if (step === 'SELECCION') {
-      const isValid = await form.trigger([
-        'solicitudId',
-        'fechaRendicion',
-        'aprobadorActualId',
-      ]);
+      const isValid = await form.trigger(['solicitudId']);
       if (!isValid) {
-        toast.error('Completa solicitud, fecha y aprobador para continuar');
-        return;
-      }
-      setStep('RESPALDOS_GENERALES');
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    if (step === 'RESPALDOS_GENERALES') {
-      const isValid = await form.trigger([
-        'solicitudId',
-        'fechaRendicion',
-        'aprobadorActualId',
-      ]);
-      if (!isValid) {
-        toast.error('Revisa los datos generales antes de continuar');
-        return;
-      }
-      setStep('GASTOS_RESPALDO');
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    if (step === 'GASTOS_RESPALDO') {
-      const isValid = await form.trigger(['gastos', 'gastosSinRespaldo']);
-      if (!isValid) {
-        toast.error('Revisa los gastos antes de continuar');
+        toast.error('Debes seleccionar una solicitud para continuar');
         return;
       }
       setStep('INFORME_GASTOS');
@@ -175,14 +138,8 @@ export default function RendicionWizard({
   };
 
   const handleBack = () => {
-    if (step === 'RESPALDOS_GENERALES') {
+    if (step === 'INFORME_GASTOS') {
       setStep('SELECCION');
-      window.scrollTo(0, 0);
-    } else if (step === 'GASTOS_RESPALDO') {
-      setStep('RESPALDOS_GENERALES');
-      window.scrollTo(0, 0);
-    } else if (step === 'INFORME_GASTOS') {
-      setStep('GASTOS_RESPALDO');
       window.scrollTo(0, 0);
     }
   };
@@ -306,18 +263,7 @@ export default function RendicionWizard({
         {/* Área de contenido — crece para ocupar el espacio disponible */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {step === 'SELECCION' && (
-            <Paso1Seleccion
-              form={form}
-              solicitudes={solicitudes}
-              usuarios={usuarios}
-              currentUserId={currentUserId}
-            />
-          )}
-
-          {step === 'RESPALDOS_GENERALES' && <Paso2Respaldos />}
-
-          {step === 'GASTOS_RESPALDO' && (
-            <Paso2Gastos solicitud={solicitudSeleccionada} />
+            <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
 
           {step === 'INFORME_GASTOS' && <Paso4Informe />}
@@ -348,6 +294,43 @@ export default function RendicionWizard({
             </DialogHeader>
 
             <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="aprobadorActualId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-bold tracking-wider uppercase">
+                      Aprobador Inmediato *
+                    </FormLabel>
+                    <Select
+                      value={field.value ? String(field.value) : ''}
+                      onValueChange={(value) => field.onChange(Number(value))}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecciona un aprobador..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {usuarios
+                          .filter((usuario) => usuario.id !== currentUserId)
+                          .map((usuario) => (
+                            <SelectItem
+                              key={usuario.id}
+                              value={String(usuario.id)}
+                            >
+                              {usuario.nombreCompleto}
+                              {usuario.cargo ? ` — ${usuario.cargo}` : ''}
+                              {usuario.rol ? ` (${usuario.rol})` : ''}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-[10px]" />
+                  </FormItem>
+                )}
+              />
+
               <div className="bg-card rounded-lg border p-4">
                 <FormField
                   control={form.control}
@@ -433,7 +416,11 @@ export default function RendicionWizard({
               </Button>
               <Button
                 type="button"
-                disabled={isSubmitting || !canConfirmSubmit}
+                disabled={
+                  isSubmitting ||
+                  !canConfirmSubmit ||
+                  !form.getValues('aprobadorActualId')
+                }
                 onClick={() => {
                   void submitRendicion();
                 }}

@@ -20,11 +20,7 @@ export type EstadoGasto = z.infer<typeof EstadoGastoEnum>;
 export const TipoDeclaracionEnum = z.enum(['COMPLETA', 'PARCIAL', 'NEGATIVA']);
 export type TipoDeclaracion = z.infer<typeof TipoDeclaracionEnum>;
 
-export type WizardStepRendicion =
-  | 'SELECCION'
-  | 'RESPALDOS_GENERALES'
-  | 'GASTOS_RESPALDO'
-  | 'INFORME_GASTOS';
+export type WizardStepRendicion = 'SELECCION' | 'INFORME_GASTOS';
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -145,11 +141,6 @@ export const CreateRendicionSchema = z.object({
   aprobadorActualId: z
     .number()
     .min(1, 'Debes seleccionar un aprobador inmediato'),
-  /** Fecha en que se realiza la rendición (ISO date string YYYY-MM-DD) */
-  fechaRendicion: z
-    .string()
-    .min(1, 'La fecha de rendición es requerida')
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
 
   // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
@@ -176,7 +167,6 @@ export type CreateRendicionInput = z.infer<typeof CreateRendicionSchema>;
 export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
   aprobadorActualId: 0,
-  fechaRendicion: new Date().toISOString().split('T')[0],
   gastos: [],
   informeGastos: {
     fechaInicio: '',

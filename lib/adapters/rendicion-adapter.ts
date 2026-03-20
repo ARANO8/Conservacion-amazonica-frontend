@@ -65,8 +65,7 @@ export function adaptCreateRendicionPayload(
   const payload: CreateRendicionApiPayload = {
     solicitudId: data.solicitudId,
     aprobadorActualId: data.aprobadorActualId,
-    fechaRendicion:
-      toIsoDateString(data.fechaRendicion) ?? new Date().toISOString(),
+    fechaRendicion: new Date().toISOString(),
     gastos: (data.gastos ?? []).map((gasto) => ({
       ...(gasto.solicitudItemId !== undefined && {
         solicitudItemId: gasto.solicitudItemId,
