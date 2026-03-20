@@ -3,11 +3,12 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, FileDown } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { EstadoBadge } from '@/components/shared/estado-badge';
 import { formatDateShort } from '@/lib/utils';
+import { DownloadPdfButton } from '@/components/solicitudes/download-pdf-button';
 
 /**
  * Columnas para el Monitor de Solicitudes (solo lectura).
@@ -69,24 +70,12 @@ export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
   {
     id: 'descargar_pdf',
     header: 'Descargar',
-    cell: ({ row }) => {
-      const solicitudId = row.original.id;
-
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          title="Descargar Solicitud (PDF)"
-          className="w-[110px]"
-          onClick={() =>
-            window.open(`/api/solicitudes/${solicitudId}/pdf`, '_blank')
-          }
-        >
-          <FileDown className="mr-2 h-4 w-4" />
-          PDF
-        </Button>
-      );
-    },
+    cell: ({ row }) => (
+      <DownloadPdfButton
+        solicitudId={row.original.id}
+        codigoSolicitud={row.original.codigoSolicitud}
+      />
+    ),
   },
   {
     id: 'verDetalle',
