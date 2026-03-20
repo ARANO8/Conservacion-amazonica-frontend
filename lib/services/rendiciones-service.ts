@@ -4,6 +4,7 @@ import {
   adaptCreateRendicionPayload,
   type CreateRendicionApiPayload,
 } from '@/lib/adapters/rendicion-adapter';
+import { RendicionResponse } from '@/types/rendicion-backend';
 
 export interface AprobarRendicionPayload {
   comentario?: string;
@@ -43,6 +44,11 @@ export const rendicionesService = {
    */
   async getRendicionById(id: string | number) {
     const response = await api.get(`/rendiciones/${id}`);
+    return response.data;
+  },
+
+  async getMisRendiciones() {
+    const response = await api.get<RendicionResponse[]>('/rendiciones');
     return response.data;
   },
 
