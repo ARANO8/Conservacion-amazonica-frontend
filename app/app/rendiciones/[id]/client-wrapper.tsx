@@ -84,16 +84,14 @@ export function RendicionDetailClient({
   const currentUserId = user?.id ? Number(user.id) : null;
   const currentUserRol = user?.rol;
   const isTesorero = currentUserRol === 'TESORERO';
-  const isAdmin = currentUserRol === 'ADMIN';
 
   const puedeAccionar = useMemo(() => {
     if (!currentUserId) return false;
-    if (isAdmin || isTesorero) return rendicion.estado === 'PENDIENTE';
     return (
       rendicion.estado === 'PENDIENTE' &&
       Number(rendicion.aprobadorActualId) === currentUserId
     );
-  }, [currentUserId, isAdmin, isTesorero, rendicion]);
+  }, [currentUserId, rendicion]);
 
   const usuariosFiltrados = useMemo(
     () => usuarios.filter((u) => Number(u.id) !== currentUserId),
