@@ -47,9 +47,13 @@ export const rendicionesService = {
     return response.data;
   },
 
-  async getMisRendiciones() {
+  async getRendiciones() {
     const response = await api.get<RendicionResponse[]>('/rendiciones');
     return response.data;
+  },
+
+  async getMisRendiciones() {
+    return this.getRendiciones();
   },
 
   /**
@@ -84,6 +88,13 @@ export const rendicionesService = {
     payload: ObservarRendicionPayload
   ) {
     const response = await api.post(`/rendiciones/${id}/observar`, payload);
+    return response.data;
+  },
+
+  async downloadPdf(id: string | number) {
+    const response = await api.get(`/rendiciones/${id}/pdf`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 };

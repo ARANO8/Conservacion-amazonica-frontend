@@ -22,6 +22,7 @@ const routeNameMap: Record<string, string> = {
   aprobaciones: 'Aprobaciones',
   auditoria: 'Auditoria',
   monitor: 'Monitor',
+  'monitor-rendiciones': 'Monitor Rendiciones',
   rendiciones: 'Rendiciones',
   reportes: 'Reportes',
   configuracion: 'Configuración',

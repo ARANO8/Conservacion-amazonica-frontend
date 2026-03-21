@@ -97,7 +97,9 @@ export default function AuditoriaPage() {
   const [historial, setHistorial] = useState<AuditTimelineEvent[]>([]);
 
   const canAccessAuditCenter =
-    user?.rol === 'ADMIN' || user?.rol === 'TESORERO';
+    user?.rol === 'ADMIN' ||
+    user?.rol === 'TESORERO' ||
+    user?.rol === 'AUDITOR';
 
   useEffect(() => {
     const fetchSolicitudes = async () => {

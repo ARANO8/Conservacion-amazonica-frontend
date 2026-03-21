@@ -10,6 +10,7 @@ import {
   Home,
   LayoutGrid,
   LifeBuoy,
+  Receipt,
   Send,
   Shield,
 } from 'lucide-react';
@@ -97,8 +98,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
 
   const userRole = user?.rol as Role | undefined;
-  const canViewMonitor = userRole === 'ADMIN' || userRole === 'TESORERO';
-  const canViewAuditCenter = userRole === 'ADMIN' || userRole === 'TESORERO';
+  const canViewMonitor =
+    userRole === 'ADMIN' || userRole === 'TESORERO' || userRole === 'AUDITOR';
+  const canViewAuditCenter =
+    userRole === 'ADMIN' || userRole === 'TESORERO' || userRole === 'AUDITOR';
   const formularioItems = buildFormularioItems(userRole);
 
   const navSecondary = [
@@ -150,6 +153,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Monitor Solicitudes',
             url: '/app/monitor',
             icon: LayoutGrid,
+          },
+          {
+            title: 'Monitor Rendiciones',
+            url: '/app/monitor-rendiciones',
+            icon: Receipt,
           },
           {
             title: 'Analítica',
