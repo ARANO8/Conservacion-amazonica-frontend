@@ -1,6 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { formatMoney, formatDate } from '@/lib/utils';
 import type { GastoRendicionResponse } from '@/types/rendicion-backend';
 
@@ -32,81 +40,73 @@ export function RendicionGastosSection({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {gastos.map((gasto) => (
-            <div key={gasto.id} className="rounded-lg border p-4">
-              <div className="mb-3">
-                <div>
-                  <h3 className="font-semibold">{gasto.concepto}</h3>
-                  {gasto.detalle && (
-                    <p className="text-muted-foreground text-sm">
-                      {gasto.detalle}
+        <div className="w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-amzdesk-table-header">
+                  Concepto
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header">
+                  Documento
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header">
+                  Proveedor
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header">
+                  Fecha
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header text-right">
+                  Monto Total (Bruto)
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header text-right">
+                  Retención / Impuestos
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header text-right">
+                  Efectivo Pagado
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {gastos.map((gasto) => (
+                <TableRow key={gasto.id}>
+                  <TableCell>
+                    <p className="font-medium">{gasto.concepto || '-'}</p>
+                    {gasto.detalle && (
+                      <p className="text-muted-foreground text-xs">
+                        {gasto.detalle}
+                      </p>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <p className="font-medium">{gasto.tipoDocumento}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {gasto.numeroDocumento || gasto.nroDocumento || 'S/N'}
                     </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Tipo de Documento</p>
-                  <p className="font-medium">{gasto.tipoDocumento}</p>
-                </div>
-                {(gasto.numeroDocumento || gasto.nroDocumento) && (
-                  <div>
-                    <p className="text-muted-foreground">Número de Documento</p>
-                    <p className="font-medium">
-                      {gasto.numeroDocumento || gasto.nroDocumento}
-                    </p>
-                  </div>
-                )}
-                {gasto.proveedor && (
-                  <div>
-                    <p className="text-muted-foreground">Proveedor</p>
-                    <p className="font-medium">{gasto.proveedor}</p>
-                  </div>
-                )}
-                {gasto.fechaDocumento && (
-                  <div>
-                    <p className="text-muted-foreground">Fecha de Documento</p>
-                    <p className="font-medium">
-                      {formatDate(gasto.fechaDocumento)}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-3">
-                <div>
-                  <p className="text-muted-foreground text-sm">
-                    Monto Total (Bruto)
-                  </p>
-                  <p className="text-lg font-semibold">
+                  </TableCell>
+                  <TableCell>{gasto.proveedor || '-'}</TableCell>
+                  <TableCell>
+                    {gasto.fechaDocumento
+                      ? formatDate(gasto.fechaDocumento)
+                      : '-'}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
                     {formatMoney(
                       toNumber(
                         gasto.montoTotal ?? gasto.montoBruto ?? gasto.monto
                       )
                     )}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-sm">
-                    Retencion / Impuestos
-                  </p>
-                  <p className="text-lg font-semibold text-orange-600">
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-orange-600">
                     {formatMoney(toNumber(gasto.montoImpuestos))}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-sm">
-                    Efectivo Pagado
-                  </p>
-                  <p className="text-lg font-semibold text-green-600">
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-emerald-600">
                     {formatMoney(toNumber(gasto.montoNeto ?? gasto.monto))}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>

@@ -6,13 +6,18 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   AlertCircle,
   ArrowLeft,
+  Banknote,
+  Calendar,
   CheckCircle,
   Check,
   ChevronsUpDown,
+  DollarSign,
   ShieldCheck,
+  Wallet,
   Workflow,
 } from 'lucide-react';
 import type {
@@ -213,97 +218,96 @@ export function RendicionDetailClient({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Rendición de Fondos</h1>
-            <p className="text-muted-foreground">ID: {rendicion.id}</p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight">
+                Rendición #{rendicion.id}
+              </h1>
+              <Badge className={ESTADO_COLORS[rendicion.estado]}>
+                {rendicion.estado}
+              </Badge>
+            </div>
+            <p className="text-amzdesk-helper">
+              Revisa los detalles antes de tomar una decisión.
+            </p>
           </div>
         </div>
-        <Badge className={ESTADO_COLORS[rendicion.estado]}>
-          {rendicion.estado}
-        </Badge>
       </div>
 
-      {puedeAccionar && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row">
-            <Button
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-              onClick={() => void openApproveDialog()}
-              disabled={loadingAction}
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {isTesorero ? 'Aprobación Final' : 'Aprobar y Derivar'}
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50"
-              onClick={() => setObserveOpen(true)}
-              disabled={loadingAction}
-            >
-              <AlertCircle className="mr-2 h-4 w-4" />
-              Observar
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <Separator />
 
       {/* Main Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Resumen de Rendición</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <div>
-            <p className="text-muted-foreground text-sm font-medium">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-amzdesk-label">
               Fecha de Rendición
-            </p>
-            <p className="mt-1 text-lg font-semibold">
+            </CardTitle>
+            <Calendar className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-amzdesk-monto">
               {formatDate(rendicion.fechaRendicion)}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-sm font-medium">
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-amzdesk-label">
               Dinero Recibido
-            </p>
-            <p className="mt-1 text-lg font-semibold text-green-600">
+            </CardTitle>
+            <DollarSign className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-amzdesk-monto text-emerald-600">
               {formatMoney(montoRecibido)}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-sm font-medium">
-              Efectivo Ejecutado (Suma Netos)
-            </p>
-            <p className="mt-1 text-lg font-semibold text-blue-600">
+            </div>
+            <p className="text-amzdesk-helper">Según solicitud desembolsada</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-amzdesk-label">
+              Efectivo Ejecutado
+            </CardTitle>
+            <Wallet className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-amzdesk-monto text-blue-600">
               {formatMoney(totalEfectivoPagado)}
+            </div>
+            <p className="text-amzdesk-helper">
+              Suma netos | Bruto: {formatMoney(rendicion.montoRespaldado)}
             </p>
-            <p className="text-muted-foreground mt-1 text-xs">
-              Respaldado bruto: {formatMoney(rendicion.montoRespaldado)}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-sm font-medium">
-              Saldo Líquido
-            </p>
-            <p
-              className={`mt-1 text-lg font-semibold ${
-                saldoLiquido > 0 ? 'text-green-600' : 'text-red-600'
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-amzdesk-label">Saldo Líquido</CardTitle>
+            <Banknote className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div
+              className={`text-amzdesk-monto ${
+                saldoLiquido > 0 ? 'text-emerald-600' : 'text-red-600'
               }`}
             >
               {formatMoney(saldoLiquido)}
-            </p>
-            <p className="text-muted-foreground mt-1 text-xs">
-              Recibido - Efectivo pagado
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+            <p className="text-amzdesk-helper">Recibido - Efectivo pagado</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Solicitud Section */}
       <RendicionSolicitudSection solicitud={rendicion.solicitud} />
@@ -394,12 +398,39 @@ export function RendicionDetailClient({
         </CardContent>
       </Card>
 
-      {/* Footer Actions */}
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={() => router.back()}>
-          Volver
-        </Button>
-      </div>
+      <Separator />
+
+      {puedeAccionar && (
+        <div className="bg-background sticky bottom-0 border-t py-4">
+          <div className="mx-auto max-w-2xl">
+            <div className="flex w-full flex-col gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                className={`flex-1 ${
+                  isTesorero
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+                onClick={() => void openApproveDialog()}
+                disabled={loadingAction}
+              >
+                <CheckCircle className="mr-2 h-5 w-5" />
+                {isTesorero ? 'Aprobación Final' : 'Aprobar / Derivar'}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="flex-1 border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950"
+                onClick={() => setObserveOpen(true)}
+                disabled={loadingAction}
+              >
+                <AlertCircle className="mr-2 h-5 w-5" />
+                Observar / Devolver
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
         <DialogContent>
