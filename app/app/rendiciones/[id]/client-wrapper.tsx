@@ -66,6 +66,15 @@ const ESTADO_COLORS: Record<EstadoRendicion, string> = {
   RECHAZADA: 'bg-red-100 text-red-800',
 };
 
+function toNumber(value: string | number | null | undefined): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
 export function RendicionDetailClient({
   rendicion,
 }: RendicionDetailClientProps) {
@@ -92,6 +101,30 @@ export function RendicionDetailClient({
       Number(rendicion.aprobadorActualId) === currentUserId
     );
   }, [currentUserId, rendicion]);
+
+  const gastosRegistrados = useMemo(
+    () => rendicion.gastosRendicion ?? rendicion.gastos ?? [],
+    [rendicion.gastosRendicion, rendicion.gastos]
+  );
+
+  const totalEfectivoPagado = useMemo(
+    () =>
+      gastosRegistrados.reduce(
+        (acc, gasto) => acc + toNumber(gasto.montoNeto),
+        0
+      ),
+    [gastosRegistrados]
+  );
+
+  const montoRecibido = useMemo(
+    () => toNumber(rendicion.solicitud?.montoTotalNeto),
+    [rendicion.solicitud?.montoTotalNeto]
+  );
+
+  const saldoLiquido = useMemo(
+    () => montoRecibido - totalEfectivoPagado,
+    [montoRecibido, totalEfectivoPagado]
+  );
 
   const usuariosFiltrados = useMemo(
     () => usuarios.filter((u) => Number(u.id) !== currentUserId),
@@ -226,7 +259,7 @@ export function RendicionDetailClient({
         <CardHeader>
           <CardTitle className="text-lg">Resumen de Rendición</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <p className="text-muted-foreground text-sm font-medium">
               Fecha de Rendición
@@ -237,10 +270,21 @@ export function RendicionDetailClient({
           </div>
           <div>
             <p className="text-muted-foreground text-sm font-medium">
-              Monto Respaldado
+              Dinero Recibido
             </p>
             <p className="mt-1 text-lg font-semibold text-green-600">
-              {formatMoney(rendicion.montoRespaldado)}
+              {formatMoney(montoRecibido)}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-sm font-medium">
+              Efectivo Ejecutado (Suma Netos)
+            </p>
+            <p className="mt-1 text-lg font-semibold text-blue-600">
+              {formatMoney(totalEfectivoPagado)}
+            </p>
+            <p className="text-muted-foreground mt-1 text-xs">
+              Respaldado bruto: {formatMoney(rendicion.montoRespaldado)}
             </p>
           </div>
           <div>
@@ -249,12 +293,13 @@ export function RendicionDetailClient({
             </p>
             <p
               className={`mt-1 text-lg font-semibold ${
-                parseFloat(rendicion.saldoLiquido) > 0
-                  ? 'text-blue-600'
-                  : 'text-red-600'
+                saldoLiquido > 0 ? 'text-green-600' : 'text-red-600'
               }`}
             >
-              {formatMoney(rendicion.saldoLiquido)}
+              {formatMoney(saldoLiquido)}
+            </p>
+            <p className="text-muted-foreground mt-1 text-xs">
+              Recibido - Efectivo pagado
             </p>
           </div>
         </CardContent>
@@ -264,9 +309,56 @@ export function RendicionDetailClient({
       <RendicionSolicitudSection solicitud={rendicion.solicitud} />
 
       {/* Gastos Section */}
-      {rendicion.gastosRendicion && rendicion.gastosRendicion.length > 0 && (
-        <RendicionGastosSection gastos={rendicion.gastosRendicion} />
+      {gastosRegistrados.length > 0 && (
+        <RendicionGastosSection gastos={gastosRegistrados} />
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">
+            Informe de Actividades / Gastos
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {rendicion.informeGastos ? (
+            <>
+              <p className="text-sm">
+                Periodo: {formatDate(rendicion.informeGastos.fechaInicio)} -{' '}
+                {formatDate(rendicion.informeGastos.fechaFin)}
+              </p>
+              {rendicion.informeGastos.actividades?.length ? (
+                <div className="space-y-2">
+                  {rendicion.informeGastos.actividades.map(
+                    (actividad, index) => (
+                      <div key={actividad.id} className="rounded-md border p-3">
+                        <p className="text-sm font-semibold">
+                          Actividad #{index + 1}
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          Fecha: {formatDate(actividad.fecha)}
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          Lugar: {actividad.lugar}
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          Persona / Institucion: {actividad.personaInstitucion}
+                        </p>
+                        <p className="mt-2 text-sm whitespace-pre-wrap">
+                          {actividad.actividadesRealizadas}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">Sin informe.</p>
+              )}
+            </>
+          ) : (
+            <p className="text-muted-foreground text-sm">Sin informe.</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Declaración Jurada Section */}
       {rendicion.declaracionesJuradas &&

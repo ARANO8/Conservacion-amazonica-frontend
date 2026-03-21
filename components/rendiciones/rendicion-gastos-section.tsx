@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { formatMoney, formatDate } from '@/lib/utils';
 import type { GastoRendicionResponse } from '@/types/rendicion-backend';
 
@@ -9,11 +8,14 @@ interface RendicionGastosSectionProps {
   gastos: GastoRendicionResponse[];
 }
 
-const ESTADO_GASTO_COLORS = {
-  PENDIENTE: 'bg-yellow-100 text-yellow-800',
-  COMPROBADO: 'bg-green-100 text-green-800',
-  RECHAZADO: 'bg-red-100 text-red-800',
-};
+function toNumber(value: string | number | null | undefined): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
 
 export function RendicionGastosSection({
   gastos,
@@ -33,7 +35,7 @@ export function RendicionGastosSection({
         <div className="space-y-4">
           {gastos.map((gasto) => (
             <div key={gasto.id} className="rounded-lg border p-4">
-              <div className="mb-3 flex items-start justify-between">
+              <div className="mb-3">
                 <div>
                   <h3 className="font-semibold">{gasto.concepto}</h3>
                   {gasto.detalle && (
@@ -42,15 +44,6 @@ export function RendicionGastosSection({
                     </p>
                   )}
                 </div>
-                <Badge
-                  className={
-                    (gasto.estado
-                      ? ESTADO_GASTO_COLORS[gasto.estado]
-                      : undefined) || 'bg-gray-100 text-gray-800'
-                  }
-                >
-                  {gasto.estado || 'SIN ESTADO'}
-                </Badge>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -82,17 +75,33 @@ export function RendicionGastosSection({
                 )}
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-4 border-t pt-4">
+              <div className="mt-4 grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-3">
                 <div>
-                  <p className="text-muted-foreground text-sm">Monto Neto</p>
+                  <p className="text-muted-foreground text-sm">
+                    Monto Total (Bruto)
+                  </p>
                   <p className="text-lg font-semibold">
-                    {formatMoney(gasto.montoNeto ?? gasto.monto ?? 0)}
+                    {formatMoney(
+                      toNumber(
+                        gasto.montoTotal ?? gasto.montoBruto ?? gasto.monto
+                      )
+                    )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-sm">Monto Total</p>
+                  <p className="text-muted-foreground text-sm">
+                    Retencion / Impuestos
+                  </p>
+                  <p className="text-lg font-semibold text-orange-600">
+                    {formatMoney(toNumber(gasto.montoImpuestos))}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-sm">
+                    Efectivo Pagado
+                  </p>
                   <p className="text-lg font-semibold text-green-600">
-                    {formatMoney(gasto.montoTotal ?? gasto.monto ?? 0)}
+                    {formatMoney(toNumber(gasto.montoNeto ?? gasto.monto))}
                   </p>
                 </div>
               </div>
