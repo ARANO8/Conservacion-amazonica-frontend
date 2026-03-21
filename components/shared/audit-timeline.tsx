@@ -7,18 +7,50 @@ import {
   FilePlus,
   XCircle,
 } from 'lucide-react';
-import {
-  HistorialAprobacionResponse,
-  TipoAccionHistorial,
-} from '@/types/rendicion-backend';
-import { formatDateShort } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface AuditTimelineProps {
-  historial: HistorialAprobacionResponse[];
+  historial: AuditTimelineEvent[];
 }
 
-function getAccionUi(accion: TipoAccionHistorial) {
-  if (accion === TipoAccionHistorial.CREADO) {
+type AuditAccion =
+  | 'CREADO'
+  | 'DERIVADO'
+  | 'APROBADO'
+  | 'OBSERVADO'
+  | 'RECHAZADO';
+
+interface AuditUsuario {
+  id: number;
+  nombreCompleto: string;
+  rol?: string;
+  cargo?: string;
+}
+
+export interface AuditTimelineEvent {
+  id: number;
+  accion: AuditAccion | string;
+  comentario?: string | null;
+  fecha: string;
+  usuarioId: number;
+  derivadoAId?: number | null;
+  solicitudId?: number | null;
+  rendicionId?: number | null;
+  usuario?: AuditUsuario | null;
+  derivadoA?: AuditUsuario | null;
+}
+
+function formatAuditDateTime(value: string): string {
+  try {
+    return format(parseISO(value), 'dd/MM/yyyy HH:mm', { locale: es });
+  } catch {
+    return value;
+  }
+}
+
+function getAccionUi(accion: string) {
+  if (accion === 'CREADO') {
     return {
       label: 'Creado',
       icon: FilePlus,
@@ -26,7 +58,7 @@ function getAccionUi(accion: TipoAccionHistorial) {
     };
   }
 
-  if (accion === TipoAccionHistorial.DERIVADO) {
+  if (accion === 'DERIVADO') {
     return {
       label: 'Derivado',
       icon: ArrowRight,
@@ -34,7 +66,7 @@ function getAccionUi(accion: TipoAccionHistorial) {
     };
   }
 
-  if (accion === TipoAccionHistorial.APROBADO) {
+  if (accion === 'APROBADO') {
     return {
       label: 'Aprobado',
       icon: CheckCircle,
@@ -42,7 +74,7 @@ function getAccionUi(accion: TipoAccionHistorial) {
     };
   }
 
-  if (accion === TipoAccionHistorial.OBSERVADO) {
+  if (accion === 'OBSERVADO') {
     return {
       label: 'Observado',
       icon: AlertCircle,
@@ -89,7 +121,7 @@ export function AuditTimeline({ historial }: AuditTimelineProps) {
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold uppercase">{ui.label}</p>
                 <p className="text-muted-foreground text-xs">
-                  {formatDateShort(evento.fecha)}
+                  {formatAuditDateTime(evento.fecha)}
                 </p>
               </div>
 

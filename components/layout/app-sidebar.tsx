@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   LifeBuoy,
   Send,
+  Shield,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
@@ -97,6 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const userRole = user?.rol as Role | undefined;
   const canViewMonitor = userRole === 'ADMIN' || userRole === 'TESORERO';
+  const canViewAuditCenter = userRole === 'ADMIN' || userRole === 'TESORERO';
   const formularioItems = buildFormularioItems(userRole);
 
   const navSecondary = [
@@ -133,6 +135,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: '/app/aprobaciones',
       icon: Bell,
     },
+    ...(canViewAuditCenter
+      ? [
+          {
+            title: 'Centro de Auditoria',
+            url: '/app/auditoria',
+            icon: Shield,
+          },
+        ]
+      : []),
     ...(canViewMonitor
       ? [
           {

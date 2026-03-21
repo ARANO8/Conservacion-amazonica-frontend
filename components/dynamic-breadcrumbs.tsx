@@ -20,6 +20,7 @@ const routeNameMap: Record<string, string> = {
   nueva: 'Nueva',
   editar: 'Editar',
   aprobaciones: 'Aprobaciones',
+  auditoria: 'Auditoria',
   monitor: 'Monitor',
   rendiciones: 'Rendiciones',
   reportes: 'Reportes',
