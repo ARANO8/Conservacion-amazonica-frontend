@@ -149,10 +149,7 @@ export default function RendicionWizard({
     }
 
     if (step === 'INFORME_GASTOS') {
-      const isValid = await form.trigger([
-        'informeGastos',
-        'aprobadorActualId',
-      ]);
+      const isValid = await form.trigger(['informeGastos']);
       if (!isValid) {
         // El toast ahora será mostrado solo por handleInvalidSubmit
         // si hay errores reales en la validación de Zod
