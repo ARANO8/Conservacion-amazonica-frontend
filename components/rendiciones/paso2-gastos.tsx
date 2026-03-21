@@ -490,6 +490,7 @@ function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) {
                   placeholder="https://drive.google.com/... (si aplica)"
                   className="h-9 text-sm"
                   {...field}
+                  value={field.value ?? ''}
                 />
               </FormControl>
               <FormMessage className="text-sm" />
@@ -760,6 +761,7 @@ export default function Paso2Gastos({
       detalle: '',
       partidaId: 0,
       tipoRetencion: 'SERVICIO',
+      urlComprobante: '',
     });
   };
 
