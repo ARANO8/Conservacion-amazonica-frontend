@@ -154,7 +154,8 @@ export default function RendicionWizard({
         'aprobadorActualId',
       ]);
       if (!isValid) {
-        toast.error('Completa el informe de gastos antes de finalizar');
+        // El toast ahora será mostrado solo por handleInvalidSubmit
+        // si hay errores reales en la validación de Zod
         return;
       }
       setIsModalOpen(true);
@@ -228,7 +229,13 @@ export default function RendicionWizard({
         errorMessage = 'Revisa los términos y condiciones antes de continuar';
       }
     } else if (firstErrorField === 'informeGastos') {
-      errorMessage = 'Completa el informe de gastos antes de continuar';
+      // Extraer el error específico del informe si existe
+      const informeError = errors.informeGastos as FieldError | undefined;
+      if (informeError?.message) {
+        errorMessage = informeError.message;
+      } else {
+        errorMessage = 'Revisa el informe de gastos antes de continuar';
+      }
     } else if (firstErrorField) {
       const fieldError = errors[firstErrorField as keyof typeof errors] as
         | FieldError
