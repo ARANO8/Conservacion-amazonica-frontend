@@ -18,7 +18,6 @@ import {
   DollarSign,
   ShieldCheck,
   Wallet,
-  Workflow,
 } from 'lucide-react';
 import type {
   RendicionResponse,
@@ -55,7 +54,6 @@ import {
 } from '@/components/ui/command';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { AuditTimeline } from '@/components/shared/audit-timeline';
 
 interface RendicionDetailClientProps {
   rendicion: RendicionResponse;
@@ -385,18 +383,6 @@ export function RendicionDetailClient({
           </CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Workflow className="h-5 w-5" />
-            Historial de Auditoría
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AuditTimeline historial={rendicion.historialAprobaciones ?? []} />
-        </CardContent>
-      </Card>
 
       <Separator />
 
