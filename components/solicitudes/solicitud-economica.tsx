@@ -189,7 +189,7 @@ export default function SolicitudEconomica({
         }
 
         hasHydratedInitialPoaRef.current = true;
-      } catch (_error) {
+      } catch {
         toast.error('Error al cargar POA');
       } finally {
         setIsLoadingStructure(false);

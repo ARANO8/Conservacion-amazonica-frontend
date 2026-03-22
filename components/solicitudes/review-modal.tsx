@@ -28,7 +28,6 @@ import {
   AlertTriangle,
   Check,
   ChevronsUpDown,
-  Landmark,
 } from 'lucide-react';
 import { Concepto, TipoGasto, Usuario } from '@/types/catalogs';
 import { cn } from '@/lib/utils';

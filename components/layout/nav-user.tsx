@@ -31,6 +31,15 @@ import { useNotificacionesStore } from '@/store/useNotificacionesStore';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+function getAvatarUrl(name: string): string {
+  const params = new URLSearchParams({
+    name,
+    background: 'random',
+  });
+
+  return `https://ui-avatars.com/api/?${params.toString()}`;
+}
+
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, logout } = useAuthStore();
@@ -73,6 +82,8 @@ export function NavUser() {
 
   if (!user) return null; // O mostrar un placeholder/skeleton
 
+  const avatarUrl = getAvatarUrl(user.nombreCompleto);
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -83,10 +94,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={`https://ui-avatars.com/api/?name=${user.nombreCompleto}&background=random`}
-                  alt={user.nombreCompleto}
-                />
+                <AvatarImage src={avatarUrl} alt={user.nombreCompleto} />
                 <AvatarFallback className="rounded-lg">
                   {user.nombreCompleto.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -109,10 +117,7 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={`https://ui-avatars.com/api/?name=${user.nombreCompleto}&background=random`}
-                    alt={user.nombreCompleto}
-                  />
+                  <AvatarImage src={avatarUrl} alt={user.nombreCompleto} />
                   <AvatarFallback className="rounded-lg">
                     {user.nombreCompleto.substring(0, 2).toUpperCase()}
                   </AvatarFallback>

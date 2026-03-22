@@ -40,8 +40,6 @@ export function PoaCard({
     .filter(Boolean)
     .join(' - ');
 
-  const labelPoa = item.codigoPoa || 'Presupuesto';
-
   return (
     <div
       onClick={() =>
