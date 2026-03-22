@@ -10,7 +10,6 @@ import {
   Home,
   LayoutGrid,
   LifeBuoy,
-  Receipt,
   Send,
   Shield,
   Users,
@@ -90,14 +89,14 @@ function buildFormularioItems(rol?: Role) {
     items.push({ title: 'Solicitud', url: '/app/solicitudes/nueva' });
   }
 
-  // Nueva rendición: disponible para perfiles operativos
+  // Rendición: disponible para perfiles operativos
   if (
     rol === 'USUARIO' ||
     rol === 'TESORERO' ||
     rol === 'EJECUTIVO' ||
     rol === 'ADMIN'
   ) {
-    items.push({ title: 'Nueva Rendición', url: '/app/rendiciones/nueva' });
+    items.push({ title: 'Rendición', url: '/app/rendiciones/nueva' });
   }
 
   return items;
@@ -177,14 +176,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ...(canViewMonitor
       ? [
           {
-            title: 'Monitor Solicitudes',
-            url: '/app/monitor',
+            title: 'Monitores',
+            url: '#',
             icon: LayoutGrid,
-          },
-          {
-            title: 'Monitor Rendiciones',
-            url: '/app/monitor-rendiciones',
-            icon: Receipt,
+            items: [
+              { title: 'Solicitudes', url: '/app/monitor' },
+              { title: 'Rendiciones', url: '/app/monitor-rendiciones' },
+            ],
           },
           {
             title: 'Analítica',
