@@ -11,15 +11,32 @@ import { toast } from 'sonner';
 import { Activity } from 'lucide-react';
 import { catalogosService } from '@/services/catalogos.service';
 import { Partida } from '@/types/catalogs';
+import { useAuthStore } from '@/store/auth-store';
+
+const MONITOR_ALLOWED_ROLES = new Set([
+  'ADMIN',
+  'EJECUTIVO',
+  'TESORERO',
+  'CONTADOR',
+]);
 
 export default function MonitorPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user } = useAuthStore();
 
   const [data, setData] = useState<SolicitudResponse[]>([]);
   const [partidas, setPartidas] = useState<Partida[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const canAccessMonitor = user ? MONITOR_ALLOWED_ROLES.has(user.rol) : false;
+
+  useEffect(() => {
+    if (user && !canAccessMonitor) {
+      router.replace('/app/inicio');
+    }
+  }, [canAccessMonitor, router, user]);
 
   const partidaIdParam = searchParams.get('partidaId');
   const selectedPartidaId =
@@ -28,6 +45,10 @@ export default function MonitorPage() {
       : undefined;
 
   useEffect(() => {
+    if (!canAccessMonitor) {
+      return;
+    }
+
     const fetchPartidas = async () => {
       try {
         const response = await catalogosService.getPartidas();
@@ -37,10 +58,14 @@ export default function MonitorPage() {
       }
     };
 
-    fetchPartidas();
-  }, []);
+    void fetchPartidas();
+  }, [canAccessMonitor]);
 
   useEffect(() => {
+    if (!canAccessMonitor) {
+      return;
+    }
+
     const fetchAll = async () => {
       try {
         setLoading(true);
@@ -59,8 +84,12 @@ export default function MonitorPage() {
       }
     };
 
-    fetchAll();
-  }, [selectedPartidaId]);
+    void fetchAll();
+  }, [canAccessMonitor, selectedPartidaId]);
+
+  if (!canAccessMonitor) {
+    return null;
+  }
 
   const handlePartidaChange = (partidaId?: number) => {
     const params = new URLSearchParams(searchParams.toString());

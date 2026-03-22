@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { History, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,7 @@ function normalizeRendicionHistorial(
 }
 
 export default function AuditoriaPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const [modulo, setModulo] = useState<ModuloAuditoria>('SOLICITUDES');
   const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
@@ -103,6 +105,16 @@ export default function AuditoriaPage() {
     user?.rol === 'TESORERO';
 
   useEffect(() => {
+    if (user && !canAccessAuditCenter) {
+      router.replace('/app/inicio');
+    }
+  }, [canAccessAuditCenter, router, user]);
+
+  useEffect(() => {
+    if (!canAccessAuditCenter) {
+      return;
+    }
+
     const fetchSolicitudes = async () => {
       try {
         setLoadingSolicitudes(true);
@@ -118,9 +130,13 @@ export default function AuditoriaPage() {
     };
 
     void fetchSolicitudes();
-  }, []);
+  }, [canAccessAuditCenter]);
 
   useEffect(() => {
+    if (!canAccessAuditCenter) {
+      return;
+    }
+
     const fetchRendiciones = async () => {
       try {
         setLoadingRendiciones(true);
@@ -134,7 +150,7 @@ export default function AuditoriaPage() {
     };
 
     void fetchRendiciones();
-  }, []);
+  }, [canAccessAuditCenter]);
 
   useEffect(() => {
     setHistorial([]);
@@ -217,20 +233,7 @@ export default function AuditoriaPage() {
   };
 
   if (!canAccessAuditCenter) {
-    return (
-      <div className="space-y-6 p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Centro de Auditoria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              No cuentas con permisos para acceder al Centro de Auditoria.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return null;
   }
 
   return (

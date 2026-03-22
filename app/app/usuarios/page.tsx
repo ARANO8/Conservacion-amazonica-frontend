@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, ShieldAlert, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Plus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/store/auth-store';
 import {
@@ -21,6 +21,7 @@ import { UsuarioFormModal } from './usuario-form-modal';
 type FormMode = 'create' | 'edit';
 
 export default function UsuariosPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
 
   const [usuarios, setUsuarios] = useState<UsuarioListItem[]>([]);
@@ -34,6 +35,12 @@ export default function UsuariosPage() {
     useState<UsuarioListItem | null>(null);
 
   const isAdmin = user?.rol === 'ADMIN';
+
+  useEffect(() => {
+    if (user && !isAdmin) {
+      router.replace('/app/inicio');
+    }
+  }, [isAdmin, router, user]);
 
   const loadUsuarios = async () => {
     try {
@@ -122,23 +129,7 @@ export default function UsuariosPage() {
   );
 
   if (user && !isAdmin) {
-    return (
-      <div className="space-y-6 p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-amber-600" />
-              Acceso Denegado
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              Solo usuarios con rol ADMIN pueden acceder a Gestion de Usuarios.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return null;
   }
 
   return (

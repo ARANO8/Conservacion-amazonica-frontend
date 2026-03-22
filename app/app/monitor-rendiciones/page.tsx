@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Activity } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,6 +9,14 @@ import { rendicionesService } from '@/lib/services/rendiciones-service';
 import type { RendicionResponse } from '@/types/rendicion-backend';
 import { monitorRendicionesColumns, type RendicionMonitorRow } from './columns';
 import { DataTable } from './data-table';
+import { useAuthStore } from '@/store/auth-store';
+
+const MONITOR_ALLOWED_ROLES = new Set([
+  'ADMIN',
+  'EJECUTIVO',
+  'TESORERO',
+  'CONTADOR',
+]);
 
 function toNumber(value: string | number | null | undefined): number {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -19,10 +28,25 @@ function toNumber(value: string | number | null | undefined): number {
 }
 
 export default function MonitorRendicionesPage() {
+  const router = useRouter();
+  const { user } = useAuthStore();
+
   const [data, setData] = useState<RendicionResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const canAccessMonitor = user ? MONITOR_ALLOWED_ROLES.has(user.rol) : false;
+
   useEffect(() => {
+    if (user && !canAccessMonitor) {
+      router.replace('/app/inicio');
+    }
+  }, [canAccessMonitor, router, user]);
+
+  useEffect(() => {
+    if (!canAccessMonitor) {
+      return;
+    }
+
     const fetchRendiciones = async () => {
       try {
         setLoading(true);
@@ -38,9 +62,13 @@ export default function MonitorRendicionesPage() {
     };
 
     void fetchRendiciones();
-  }, []);
+  }, [canAccessMonitor]);
 
   const monitorRows = useMemo<RendicionMonitorRow[]>(() => {
+    if (!canAccessMonitor) {
+      return [];
+    }
+
     return data.map((rendicion) => {
       const gastos = rendicion.gastosRendicion ?? rendicion.gastos ?? [];
       const totalEfectivoPagado = gastos.reduce(
@@ -60,7 +88,11 @@ export default function MonitorRendicionesPage() {
         saldoLiquidoCalculado: montoRecibido - totalEfectivoPagado,
       };
     });
-  }, [data]);
+  }, [canAccessMonitor, data]);
+
+  if (!canAccessMonitor) {
+    return null;
+  }
 
   return (
     <div className="space-y-6 p-6">
