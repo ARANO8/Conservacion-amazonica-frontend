@@ -13,6 +13,7 @@ import {
   Receipt,
   Send,
   Shield,
+  Users,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
@@ -102,6 +103,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     userRole === 'ADMIN' || userRole === 'TESORERO' || userRole === 'AUDITOR';
   const canViewAuditCenter =
     userRole === 'ADMIN' || userRole === 'TESORERO' || userRole === 'AUDITOR';
+  const canManageUsers = userRole === 'ADMIN';
   const formularioItems = buildFormularioItems(userRole);
 
   const navSecondary = [
@@ -144,6 +146,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Centro de Auditoria',
             url: '/app/auditoria',
             icon: Shield,
+          },
+        ]
+      : []),
+    ...(canManageUsers
+      ? [
+          {
+            title: 'Gestion de Usuarios',
+            url: '/app/usuarios',
+            icon: Users,
           },
         ]
       : []),
