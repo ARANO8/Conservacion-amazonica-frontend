@@ -83,6 +83,7 @@ function buildFormularioItems(rol?: Role) {
   if (
     rol === 'USUARIO' ||
     rol === 'TESORERO' ||
+    rol === 'CONTADOR' ||
     rol === 'EJECUTIVO' ||
     rol === 'ADMIN'
   ) {
@@ -93,6 +94,7 @@ function buildFormularioItems(rol?: Role) {
   if (
     rol === 'USUARIO' ||
     rol === 'TESORERO' ||
+    rol === 'CONTADOR' ||
     rol === 'EJECUTIVO' ||
     rol === 'ADMIN'
   ) {
@@ -111,11 +113,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const canViewMonitor =
     userRole === 'ADMIN' ||
     userRole === 'EJECUTIVO' ||
+    userRole === 'CONTADOR' ||
     userRole === 'TESORERO' ||
     userRole === 'AUDITOR';
   const canViewAuditCenter =
     userRole === 'ADMIN' ||
     userRole === 'EJECUTIVO' ||
+    userRole === 'CONTADOR' ||
     userRole === 'TESORERO' ||
     userRole === 'AUDITOR';
   const canManageUsers = userRole === 'ADMIN';

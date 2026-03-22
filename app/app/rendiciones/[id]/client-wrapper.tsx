@@ -95,7 +95,7 @@ export function RendicionDetailClient({
 
   const currentUserId = user?.id ? Number(user.id) : null;
   const currentUserRol = user?.rol;
-  const isTesorero = currentUserRol === 'TESORERO';
+  const isContador = currentUserRol === 'CONTADOR';
 
   const puedeAccionar = useMemo(() => {
     if (!currentUserId) return false;
@@ -135,7 +135,7 @@ export function RendicionDetailClient({
   );
 
   const openApproveDialog = async () => {
-    if (!isTesorero) {
+    if (!isContador) {
       try {
         const data = await catalogosService.getUsuarios();
         setUsuarios(data);
@@ -149,8 +149,8 @@ export function RendicionDetailClient({
   };
 
   const handleAprobar = async () => {
-    if (!isTesorero && !derivadoAId) {
-      toast.error('Debes seleccionar al siguiente usuario para derivar.');
+    if (!isContador && !derivadoAId) {
+      toast.error('Debes seleccionar al siguiente aprobador o contador.');
       return;
     }
 
@@ -158,12 +158,12 @@ export function RendicionDetailClient({
       setLoadingAction(true);
       await rendicionesService.aprobarRendicion(rendicion.id, {
         comentario: comentarioAprobar || undefined,
-        ...(isTesorero ? {} : { derivadoAId: Number(derivadoAId) }),
+        ...(isContador ? {} : { derivadoAId: Number(derivadoAId) }),
       });
 
       toast.success(
-        isTesorero
-          ? 'Rendición aprobada de forma final.'
+        isContador
+          ? 'Rendición aprobada y finalizada correctamente.'
           : 'Rendición derivada correctamente.'
       );
       setApproveOpen(false);
@@ -391,7 +391,7 @@ export function RendicionDetailClient({
               <Button
                 size="lg"
                 className={`flex-1 ${
-                  isTesorero
+                  isContador
                     ? 'bg-blue-600 hover:bg-blue-700'
                     : 'bg-emerald-600 hover:bg-emerald-700'
                 }`}
@@ -399,7 +399,9 @@ export function RendicionDetailClient({
                 disabled={loadingAction}
               >
                 <CheckCircle className="mr-2 h-5 w-5" />
-                {isTesorero ? 'Aprobación Final' : 'Aprobar / Derivar'}
+                {isContador
+                  ? 'Aprobar y Finalizar Rendición'
+                  : 'Aprobar / Derivar'}
               </Button>
               <Button
                 size="lg"
@@ -420,17 +422,19 @@ export function RendicionDetailClient({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {isTesorero ? 'Aprobación Final' : 'Aprobar y Derivar'}
+              {isContador
+                ? 'Aprobar y Finalizar Rendición'
+                : 'Aprobar y Derivar'}
             </DialogTitle>
             <DialogDescription>
-              {isTesorero
-                ? 'Esta acción cerrará la rendición y afectará el monto ejecutado del POA.'
-                : 'Aprueba esta revisión y deriva manualmente al siguiente responsable.'}
+              {isContador
+                ? 'Esta acción cerrará la rendición de forma definitiva y ejecutará el impacto presupuestario del POA.'
+                : 'Aprueba esta revisión y deriva manualmente al siguiente aprobador o contador.'}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            {!isTesorero && (
+            {!isContador && (
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -445,7 +449,7 @@ export function RendicionDetailClient({
                       ? usuariosFiltrados.find(
                           (u) => String(u.id) === String(derivadoAId)
                         )?.nombreCompleto || 'Seleccionar usuario...'
-                      : 'Seleccionar siguiente usuario...'}
+                      : 'Seleccionar siguiente aprobador / contador...'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -486,11 +490,12 @@ export function RendicionDetailClient({
               </Popover>
             )}
 
-            {isTesorero && (
+            {isContador && (
               <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
                 <p className="flex items-center gap-2 font-medium">
                   <ShieldCheck className="h-4 w-4" />
-                  Esta aprobación ejecutará el impacto presupuestario en POA.
+                  Solo el rol CONTADOR puede cerrar definitivamente la
+                  rendición.
                 </p>
               </div>
             )}

@@ -40,7 +40,7 @@ const createUsuarioSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio'),
   email: z.string().email('Ingresa un email valido'),
   password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
-  rol: z.enum(['ADMIN', 'EJECUTIVO', 'TESORERO', 'USUARIO']),
+  rol: z.enum(['ADMIN', 'EJECUTIVO', 'CONTADOR', 'TESORERO', 'USUARIO']),
   cargo: z.string().optional(),
 });
 
@@ -54,7 +54,7 @@ const updateUsuarioSchema = z.object({
       (value) => !value || value.length === 0 || value.length >= 6,
       'La contrasena debe tener al menos 6 caracteres'
     ),
-  rol: z.enum(['ADMIN', 'EJECUTIVO', 'TESORERO', 'USUARIO']),
+  rol: z.enum(['ADMIN', 'EJECUTIVO', 'CONTADOR', 'TESORERO', 'USUARIO']),
   cargo: z.string().optional(),
 });
 
@@ -75,16 +75,18 @@ interface UsuarioFormModalProps {
 const ROLE_OPTIONS = [
   { value: 'ADMIN', label: 'ADMIN' },
   { value: 'EJECUTIVO', label: 'EJECUTIVO' },
+  { value: 'CONTADOR', label: 'CONTADOR' },
   { value: 'TESORERO', label: 'TESORERO' },
   { value: 'USUARIO', label: 'EMISOR' },
 ] as const;
 
 function mapRoleToFormRole(
   role: string | undefined
-): 'ADMIN' | 'EJECUTIVO' | 'TESORERO' | 'USUARIO' {
+): 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO' {
   if (
     role === 'ADMIN' ||
     role === 'EJECUTIVO' ||
+    role === 'CONTADOR' ||
     role === 'TESORERO' ||
     role === 'USUARIO'
   ) {

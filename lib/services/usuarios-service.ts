@@ -3,6 +3,7 @@ import api from '@/lib/api';
 export type UsuarioRol =
   | 'ADMIN'
   | 'EJECUTIVO'
+  | 'CONTADOR'
   | 'TESORERO'
   | 'USUARIO'
   | 'APROBADOR'
@@ -23,7 +24,7 @@ export interface CreateUsuarioInput {
   nombre: string;
   email: string;
   password: string;
-  rol: 'ADMIN' | 'EJECUTIVO' | 'TESORERO' | 'USUARIO';
+  rol: 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
   cargo?: string;
 }
 
@@ -31,7 +32,7 @@ export interface UpdateUsuarioInput {
   nombre: string;
   email: string;
   password?: string;
-  rol: 'ADMIN' | 'EJECUTIVO' | 'TESORERO' | 'USUARIO';
+  rol: 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
   cargo?: string;
 }
 
@@ -39,7 +40,7 @@ interface UsuarioPayload {
   nombreCompleto?: string;
   email?: string;
   password?: string;
-  rol?: 'ADMIN' | 'EJECUTIVO' | 'TESORERO' | 'USUARIO';
+  rol?: 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
   cargo?: string;
 }
 

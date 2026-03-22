@@ -41,6 +41,11 @@ const ROLE_BADGES: Record<string, RoleBadgeConfig> = {
     className:
       'border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
   },
+  CONTADOR: {
+    label: 'CONTADOR',
+    className:
+      'border-cyan-300 bg-cyan-100 text-cyan-800 dark:border-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300',
+  },
   EJECUTIVO: {
     label: 'EJECUTIVO',
     className:
