@@ -6,7 +6,7 @@ import {
   BarChart3,
   Bell,
   ClipboardPlus,
-  FileText,
+  Files,
   Home,
   LayoutGrid,
   LifeBuoy,
@@ -141,14 +141,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Home,
     },
     {
-      title: 'Mis Solicitudes',
-      url: '/app/solicitudes',
-      icon: FileText,
-    },
-    {
-      title: 'Mis Rendiciones',
-      url: '/app/rendiciones',
-      icon: FileText,
+      title: 'Mis Tramites',
+      url: '#',
+      icon: Files,
+      items: [
+        { title: 'Solicitudes', url: '/app/solicitudes' },
+        { title: 'Rendiciones', url: '/app/rendiciones' },
+      ],
     },
     {
       title: 'Notificaciones',
