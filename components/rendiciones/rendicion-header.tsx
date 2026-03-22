@@ -14,7 +14,7 @@ const STEPS: { key: WizardStepRendicion; label: string; short: string }[] = [
   },
   {
     key: 'INFORME_GASTOS',
-    label: '3. Informe de Gastos',
+    label: '3. Informe',
     short: '3. Informe',
   },
 ];

@@ -317,9 +317,7 @@ export function RendicionDetailClient({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">
-            Informe de Actividades / Gastos
-          </CardTitle>
+          <CardTitle className="text-lg">Informe</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {rendicion.informeGastos ? (

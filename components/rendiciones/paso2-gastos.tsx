@@ -475,19 +475,19 @@ function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) {
           )}
         />
 
-        {/* --- URL Respaldo (opcional) --- */}
+        {/* --- Comprobante / Orden de Compra (opcional) --- */}
         <FormField
           control={control}
           name={`gastos.${index}.urlComprobante`}
           render={({ field }) => (
             <FormItem className="md:col-span-3">
               <FormLabel className="text-sm font-bold tracking-wider uppercase">
-                URL Respaldo (Opcional)
+                Comprobante / Orden de Compra (URL)
               </FormLabel>
               <FormControl>
                 <Input
                   type="url"
-                  placeholder="https://drive.google.com/... (si aplica)"
+                  placeholder="Enlace al comprobante u orden de compra (opcional)"
                   className="h-9 text-sm"
                   {...field}
                   value={field.value ?? ''}

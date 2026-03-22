@@ -231,7 +231,7 @@ export default function RendicionWizard({
       if (informeError?.message) {
         errorMessage = informeError.message;
       } else {
-        errorMessage = 'Revisa el informe de gastos antes de continuar';
+        errorMessage = 'Revisa el informe antes de continuar';
       }
     } else if (firstErrorField) {
       const fieldError = errors[firstErrorField as keyof typeof errors] as
