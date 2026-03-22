@@ -1,5 +1,6 @@
 import api from '@/lib/api';
 import { CreateSolicitudPayload } from '@/types/solicitud-backend';
+import type { SolicitudResponse } from '@/types/solicitud-backend';
 
 interface GetSolicitudesParams {
   solicitanteId?: string | number;
@@ -25,7 +26,9 @@ export const solicitudesService = {
    * @param params Optional query parameters for filtering.
    */
   async getSolicitudes(params?: GetSolicitudesParams) {
-    const response = await api.get('/solicitudes', { params });
+    const response = await api.get<SolicitudResponse[]>('/solicitudes', {
+      params,
+    });
     return response.data;
   },
 
@@ -34,7 +37,7 @@ export const solicitudesService = {
    * @param id The ID of the solicitud to fetch.
    */
   async getSolicitudById(id: string | number) {
-    const response = await api.get(`/solicitudes/${id}`);
+    const response = await api.get<SolicitudResponse>(`/solicitudes/${id}`);
     return response.data;
   },
 

@@ -118,9 +118,8 @@ export default function AuditoriaPage() {
     const fetchSolicitudes = async () => {
       try {
         setLoadingSolicitudes(true);
-        const data = (await solicitudesService.getSolicitudes()) as
-          | SolicitudResponse[]
-          | undefined;
+        const data: SolicitudResponse[] | undefined =
+          await solicitudesService.getSolicitudes();
         setSolicitudes(data ?? []);
       } catch {
         toast.error('No se pudieron cargar las solicitudes para auditoria.');
@@ -204,9 +203,8 @@ export default function AuditoriaPage() {
     try {
       setLoadingDetalle(true);
       setSelectedSolicitudId(solicitudId);
-      const detalle = (await solicitudesService.getSolicitudById(
-        solicitudId
-      )) as SolicitudResponse;
+      const detalle: SolicitudResponse =
+        await solicitudesService.getSolicitudById(solicitudId);
       setHistorial(normalizeSolicitudHistorial(detalle.historialAprobaciones));
     } catch {
       toast.error(

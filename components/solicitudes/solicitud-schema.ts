@@ -1,5 +1,71 @@
 import { z } from 'zod';
 
+const proyectoSchema = z.object({
+  id: z.number(),
+  nombre: z.string(),
+  cuentaBancaria: z
+    .object({
+      id: z.number(),
+      nombre: z.string(),
+      numeroCuenta: z.string(),
+      banco: z.string(),
+      moneda: z.string().optional(),
+      tipoCuenta: z.string().optional(),
+    })
+    .optional(),
+});
+
+const grupoSchema = z.object({
+  id: z.number(),
+  nombre: z.string(),
+  codigo: z.string().optional(),
+});
+
+const partidaSchema = z.object({
+  id: z.number(),
+  nombre: z.string(),
+  codigo: z.string().optional(),
+});
+
+const actividadSchema = z.object({
+  id: z.number().optional(),
+  nombre: z.string().optional(),
+  detalleDescripcion: z.string().optional(),
+});
+
+const codigoPresupuestarioSchema = z.object({
+  id: z.number().optional(),
+  nombre: z.string().optional(),
+  codigo: z.string().optional(),
+  codigoCompleto: z.string().optional(),
+  descripcion: z.string().optional(),
+});
+
+const poaSchema = z.object({
+  id: z.number(),
+  codigoPoa: z.string(),
+  cantidad: z.number().optional(),
+  costoUnitario: z.number().optional(),
+  costoTotal: z.number().or(z.string()).optional(),
+  saldoDisponible: z.number().or(z.string()).optional(),
+  montoComprometido: z.number().or(z.string()).optional(),
+  tieneCompromisos: z.boolean().optional(),
+  proyectoId: z.number().optional(),
+  grupoId: z.number().optional(),
+  partidaId: z.number().optional(),
+  actividadId: z.number().optional(),
+  codigoPresupuestarioId: z.number().optional(),
+  actividad: actividadSchema.optional(),
+  codigoPresupuestario: codigoPresupuestarioSchema.optional(),
+  estructura: z
+    .object({
+      proyecto: proyectoSchema.optional(),
+      grupo: grupoSchema.optional(),
+      partida: partidaSchema.optional(),
+    })
+    .optional(),
+});
+
 // Esquema Zod
 export const formSchema = z.object({
   // Campos de Planificación (Paso 1)
@@ -33,7 +99,7 @@ export const formSchema = z.object({
         partidaId: z.union([z.string(), z.number()]).optional(),
         codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
         poaId: z.number().nullable().optional(),
-        poa: z.any().optional(), // Store the full POA for display/rehydration
+        poa: poaSchema.optional(),
         montoReservado: z.number().optional(),
         montoPresupuestado: z.number().optional(),
         saldoDisponible: z.number().optional(),
