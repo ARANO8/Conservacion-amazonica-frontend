@@ -7,8 +7,7 @@ export type UsuarioRol =
   | 'TESORERO'
   | 'USUARIO'
   | 'APROBADOR'
-  | 'EMISOR'
-  | 'AUDITOR';
+  | 'EMISOR';
 
 export interface UsuarioListItem {
   id: number;

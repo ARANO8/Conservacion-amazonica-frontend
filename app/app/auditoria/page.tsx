@@ -100,8 +100,7 @@ export default function AuditoriaPage() {
     user?.rol === 'ADMIN' ||
     user?.rol === 'EJECUTIVO' ||
     user?.rol === 'CONTADOR' ||
-    user?.rol === 'TESORERO' ||
-    user?.rol === 'AUDITOR';
+    user?.rol === 'TESORERO';
 
   useEffect(() => {
     const fetchSolicitudes = async () => {

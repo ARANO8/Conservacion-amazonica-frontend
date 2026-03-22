@@ -114,14 +114,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     userRole === 'ADMIN' ||
     userRole === 'EJECUTIVO' ||
     userRole === 'CONTADOR' ||
-    userRole === 'TESORERO' ||
-    userRole === 'AUDITOR';
+    userRole === 'TESORERO';
   const canViewAuditCenter =
     userRole === 'ADMIN' ||
     userRole === 'EJECUTIVO' ||
     userRole === 'CONTADOR' ||
-    userRole === 'TESORERO' ||
-    userRole === 'AUDITOR';
+    userRole === 'TESORERO';
   const canManageUsers = userRole === 'ADMIN';
   const formularioItems = buildFormularioItems(userRole);
 

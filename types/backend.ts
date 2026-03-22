@@ -3,13 +3,7 @@
  * Generated from backend-spec.json
  */
 
-export type Role =
-  | 'ADMIN'
-  | 'EJECUTIVO'
-  | 'CONTADOR'
-  | 'TESORERO'
-  | 'AUDITOR'
-  | 'USUARIO';
+export type Role = 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
 
 export interface Usuario {
   id: string;
