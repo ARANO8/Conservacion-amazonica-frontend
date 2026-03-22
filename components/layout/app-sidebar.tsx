@@ -80,13 +80,23 @@ const FEEDBACK_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(FE
 function buildFormularioItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
-  // Solicitud: USUARIO, TESORERO y ADMIN pueden crear solicitudes
-  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
+  // Solicitud: USUARIO, TESORERO, EJECUTIVO y ADMIN pueden crear solicitudes
+  if (
+    rol === 'USUARIO' ||
+    rol === 'TESORERO' ||
+    rol === 'EJECUTIVO' ||
+    rol === 'ADMIN'
+  ) {
     items.push({ title: 'Solicitud', url: '/app/solicitudes/nueva' });
   }
 
-  // Nueva rendición: disponible para los tres roles
-  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
+  // Nueva rendición: disponible para perfiles operativos
+  if (
+    rol === 'USUARIO' ||
+    rol === 'TESORERO' ||
+    rol === 'EJECUTIVO' ||
+    rol === 'ADMIN'
+  ) {
     items.push({ title: 'Nueva Rendición', url: '/app/rendiciones/nueva' });
   }
 
@@ -100,9 +110,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const userRole = user?.rol as Role | undefined;
   const canViewMonitor =
-    userRole === 'ADMIN' || userRole === 'TESORERO' || userRole === 'AUDITOR';
+    userRole === 'ADMIN' ||
+    userRole === 'EJECUTIVO' ||
+    userRole === 'TESORERO' ||
+    userRole === 'AUDITOR';
   const canViewAuditCenter =
-    userRole === 'ADMIN' || userRole === 'TESORERO' || userRole === 'AUDITOR';
+    userRole === 'ADMIN' ||
+    userRole === 'EJECUTIVO' ||
+    userRole === 'TESORERO' ||
+    userRole === 'AUDITOR';
   const canManageUsers = userRole === 'ADMIN';
   const formularioItems = buildFormularioItems(userRole);
 

@@ -98,6 +98,7 @@ export default function AuditoriaPage() {
 
   const canAccessAuditCenter =
     user?.rol === 'ADMIN' ||
+    user?.rol === 'EJECUTIVO' ||
     user?.rol === 'TESORERO' ||
     user?.rol === 'AUDITOR';
 
