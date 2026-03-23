@@ -38,6 +38,7 @@ import {
   ClipboardList,
   Wallet,
   Users,
+  Landmark,
   Info,
   ExternalLink,
   Paperclip,
@@ -45,6 +46,7 @@ import {
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapResponseToBreakdown } from '@/lib/mappers/breakdown-mapper';
+import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
 import { formatMoney, formatDateShort } from '@/lib/utils';
 
 export default function AprobacionDetailPage() {
@@ -56,13 +58,6 @@ export default function AprobacionDetailPage() {
   const breakdownPartidas = React.useMemo(() => {
     return solicitud ? mapResponseToBreakdown(solicitud) : [];
   }, [solicitud]);
-
-  const cuentaBancaria =
-    solicitud?.presupuestos?.[0]?.poa?.estructura?.proyecto?.cuentaBancaria;
-
-  const cuentaBancariaDetalle = cuentaBancaria
-    ? `${cuentaBancaria.banco || 'Banco no especificado'} - ${cuentaBancaria.numeroCuenta || 'S/N'}${cuentaBancaria.moneda ? ` (${cuentaBancaria.moneda})` : ''}`
-    : 'No asignada';
 
   const id = params.id as string;
 
@@ -376,16 +371,32 @@ export default function AprobacionDetailPage() {
                     solicitud.presupuestos[0]?.poa?.estructura?.proyecto
                       ?.nombre}
                 </p>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  <span className="font-medium">Cuenta Bancaria: </span>
-                  {cuentaBancariaDetalle}
-                </p>
               </div>
               <Badge variant="outline">POA</Badge>
             </div>
           </CardContent>
           <CardContent>
             <PresupuestoBreakdown partidas={breakdownPartidas} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Cuenta Bancaria */}
+      {solicitud.presupuestos && solicitud.presupuestos.length > 0 && (
+        <Card className="mt-6 rounded-lg border p-4">
+          <CardHeader className="mb-4 p-0">
+            <CardTitle className="flex items-center gap-2 font-semibold">
+              <Landmark className="h-5 w-5" />
+              Información Bancaria del Proyecto
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <CuentaBancariaCard
+              cuentaBancaria={
+                solicitud.presupuestos[0]?.poa?.estructura?.proyecto
+                  ?.cuentaBancaria
+              }
+            />
           </CardContent>
         </Card>
       )}
