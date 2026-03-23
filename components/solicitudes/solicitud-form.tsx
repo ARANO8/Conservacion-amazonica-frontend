@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Field,
@@ -151,7 +151,10 @@ export default function SolicitudForm({
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialValues || defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      ...initialValues,
+    },
   });
 
   const {
@@ -162,6 +165,10 @@ export default function SolicitudForm({
   usePreventNavigation(!isSubmitSuccessful);
 
   const watchActividades = form.watch('actividades');
+
+  const logValidationErrors = () => {
+    console.error('Errores de validación Zod:', form.formState.errors);
+  };
 
   const handleNext = async () => {
     if (step === 'PLANIFICACION') {
@@ -174,6 +181,7 @@ export default function SolicitudForm({
         setStep('SOLICITUD');
         window.scrollTo(0, 0);
       } else {
+        logValidationErrors();
         toast.error('Corrige los errores en la planificación');
       }
       return;
@@ -271,6 +279,7 @@ export default function SolicitudForm({
         setStep('RESPALDOS');
         window.scrollTo(0, 0);
       } else {
+        logValidationErrors();
         toast.error('Corrige los errores en el detalle económico');
       }
       return;
@@ -285,6 +294,7 @@ export default function SolicitudForm({
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
+        logValidationErrors();
         toast.error('Corrige los errores en los documentos de respaldo');
       }
       return;
@@ -295,6 +305,7 @@ export default function SolicitudForm({
       if (isValid) {
         setIsReviewModalOpen(true);
       } else {
+        logValidationErrors();
         const errors = form.formState.errors;
         if (errors.nomina) {
           // Obtener el primer mensaje de error para mostrarlo
@@ -363,7 +374,8 @@ export default function SolicitudForm({
     }
   };
 
-  const onError = () => {
+  const onError = (errors: FieldErrors<FormData>) => {
+    console.error('Errores de validación Zod:', errors);
     toast.error('Corrige los errores marcados en rojo.');
   };
 

@@ -259,7 +259,7 @@ export const adaptResponseToFormData = (
       response.urlCotizaciones && response.urlCotizaciones.length > 0
         ? response.urlCotizaciones
         : [''],
-    destinatario: '',
+    destinatario: response.aprobadorId ? String(response.aprobadorId) : '',
     proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,
     presupuestosIds: fuentesSeleccionadas
