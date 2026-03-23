@@ -375,7 +375,21 @@ export default function SolicitudForm({
   };
 
   const onError = (errors: FieldErrors<FormData>) => {
-    console.error('Errores de validación Zod:', errors);
+    const rawValues = form.getValues();
+    const parsed = formSchema.safeParse(rawValues);
+
+    if (!parsed.success) {
+      console.error(
+        '🔥 ZOD EXACT ERRORS:',
+        JSON.stringify(parsed.error.format(), null, 2)
+      );
+    } else {
+      console.error(
+        '🔥 RHF ERRORS (Stringified):',
+        JSON.stringify(errors, null, 2)
+      );
+    }
+
     toast.error('Corrige los errores marcados en rojo.');
   };
 

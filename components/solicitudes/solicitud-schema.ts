@@ -89,22 +89,31 @@ export const formSchema = z.object({
   // Campos visuales de Solicitud (Paso 2)
   interino: z.boolean().optional(),
   proyecto: z.union([z.string(), z.number()]).optional(),
-  presupuestosIds: z
-    .array(z.number())
-    .min(1, 'Debes seleccionar al menos un presupuesto'),
+  presupuestosIds: z.preprocess((value) => {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value
+      .map((item) => Number(item))
+      .filter((item) => !Number.isNaN(item));
+  }, z.array(z.number())),
   fuentesSeleccionadas: z
-    .array(
-      z.object({
-        grupoId: z.union([z.string(), z.number()]).optional(),
-        partidaId: z.union([z.string(), z.number()]).optional(),
-        codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
-        poaId: z.number().nullable().optional(),
-        poa: poaSchema.optional(),
-        montoReservado: z.number().optional(),
-        montoPresupuestado: z.number().optional(),
-        saldoDisponible: z.number().optional(),
-        isLocked: z.boolean().optional(),
-      })
+    .preprocess(
+      (value) => (Array.isArray(value) ? value : []),
+      z.array(
+        z.object({
+          grupoId: z.union([z.string(), z.number()]).optional(),
+          partidaId: z.union([z.string(), z.number()]).optional(),
+          codigoPresupuestarioId: z.union([z.string(), z.number()]).optional(),
+          poaId: z.number().nullable().optional(),
+          poa: poaSchema.optional(),
+          montoReservado: z.number().optional(),
+          montoPresupuestado: z.number().optional(),
+          saldoDisponible: z.number().optional(),
+          isLocked: z.boolean().optional(),
+        })
+      )
     )
     .optional(),
   grupo: z.union([z.string(), z.number()]).optional(),
@@ -128,7 +137,13 @@ export const formSchema = z.object({
         costoUnitario: z.number().optional(),
         cantidadPersonas: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
-        solicitudPresupuestoId: z.number(),
+        solicitudPresupuestoId: z.preprocess(
+          (value) =>
+            value === null || value === undefined || value === ''
+              ? undefined
+              : Number(value),
+          z.number().optional()
+        ),
         liquidoPagable: z
           .number()
           .min(0.01, 'El monto debe ser mayor a 0')
@@ -142,7 +157,13 @@ export const formSchema = z.object({
   items: z
     .array(
       z.object({
-        solicitudPresupuestoId: z.number(),
+        solicitudPresupuestoId: z.preprocess(
+          (value) =>
+            value === null || value === undefined || value === ''
+              ? undefined
+              : Number(value),
+          z.number().optional()
+        ),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).optional(),
         tipoGastoId: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
@@ -168,7 +189,13 @@ export const formSchema = z.object({
     .array(
       z.object({
         id: z.number().optional(),
-        poaId: z.number().min(1, 'Debes seleccionar una partida'),
+        poaId: z.preprocess(
+          (value) =>
+            value === null || value === undefined || value === ''
+              ? undefined
+              : Number(value),
+          z.number().min(1, 'Debes seleccionar una partida').optional()
+        ),
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
@@ -203,21 +230,38 @@ export const formSchema = z.object({
     .optional(),
 
   // Confirmación Final
-  destinatario: z.string().min(1, 'Debes seleccionar un destinatario'),
+  destinatario: z.preprocess(
+    (value) => (value === null || value === undefined ? '' : value),
+    z.string().optional()
+  ),
 
   // Respaldos
   urlCuadroComparativo: z
-    .union([
-      z.string().url('La URL del cuadro comparativo no es válida'),
-      z.literal(''),
-    ])
-    .optional(),
-  urlCotizaciones: z
-    .array(
+    .preprocess(
+      (value) => (value === null || value === undefined ? '' : value),
       z.union([
-        z.string().url('La URL de la cotización no es válida'),
+        z.string().url('La URL del cuadro comparativo no es válida'),
         z.literal(''),
       ])
+    )
+    .optional(),
+  urlCotizaciones: z
+    .preprocess(
+      (value) => {
+        if (!Array.isArray(value)) {
+          return [];
+        }
+
+        return value.map((item) =>
+          item === null || item === undefined ? '' : item
+        );
+      },
+      z.array(
+        z.union([
+          z.string().url('La URL de la cotización no es válida'),
+          z.literal(''),
+        ])
+      )
     )
     .optional(),
 });
