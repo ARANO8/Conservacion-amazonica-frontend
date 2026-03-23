@@ -63,6 +63,56 @@ function normalizeInitialSelections(
       return undefined;
     }
 
+    const normalizedCuentaBancaria =
+      poa.estructura?.proyecto?.cuentaBancaria &&
+      typeof poa.estructura.proyecto.cuentaBancaria.id === 'number' &&
+      typeof poa.estructura.proyecto.cuentaBancaria.nombre === 'string' &&
+      typeof poa.estructura.proyecto.cuentaBancaria.numeroCuenta === 'string' &&
+      typeof poa.estructura.proyecto.cuentaBancaria.banco === 'string'
+        ? {
+            id: poa.estructura.proyecto.cuentaBancaria.id,
+            nombre: poa.estructura.proyecto.cuentaBancaria.nombre,
+            numeroCuenta: poa.estructura.proyecto.cuentaBancaria.numeroCuenta,
+            banco: poa.estructura.proyecto.cuentaBancaria.banco,
+            moneda: poa.estructura.proyecto.cuentaBancaria.moneda ?? undefined,
+            tipoCuenta:
+              poa.estructura.proyecto.cuentaBancaria.tipoCuenta ?? undefined,
+          }
+        : undefined;
+
+    const normalizedProyecto = poa.estructura?.proyecto
+      ? {
+          id: poa.estructura.proyecto.id,
+          nombre: poa.estructura.proyecto.nombre,
+          cuentaBancaria: normalizedCuentaBancaria,
+        }
+      : undefined;
+
+    const normalizedGrupo = poa.estructura?.grupo
+      ? {
+          id: poa.estructura.grupo.id,
+          nombre: poa.estructura.grupo.nombre,
+          codigo: poa.estructura.grupo.codigo,
+        }
+      : undefined;
+
+    const normalizedPartida = poa.estructura?.partida
+      ? {
+          id: poa.estructura.partida.id,
+          nombre: poa.estructura.partida.nombre,
+          codigo: poa.estructura.partida.codigo,
+        }
+      : undefined;
+
+    const normalizedEstructura =
+      normalizedProyecto || normalizedGrupo || normalizedPartida
+        ? {
+            proyecto: normalizedProyecto,
+            grupo: normalizedGrupo,
+            partida: normalizedPartida,
+          }
+        : undefined;
+
     return {
       id: poa.id,
       codigoPoa: poa.codigoPoa,
@@ -101,7 +151,7 @@ function normalizeInitialSelections(
             descripcion: poa.codigoPresupuestario.descripcion,
           }
         : undefined,
-      estructura: poa.estructura,
+      estructura: normalizedEstructura,
     };
   };
 

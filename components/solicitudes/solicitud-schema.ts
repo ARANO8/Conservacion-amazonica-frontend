@@ -5,14 +5,15 @@ const proyectoSchema = z.object({
   nombre: z.string(),
   cuentaBancaria: z
     .object({
-      id: z.number(),
-      nombre: z.string(),
-      numeroCuenta: z.string(),
-      banco: z.string(),
-      moneda: z.string().optional(),
-      tipoCuenta: z.string().optional(),
+      id: z.coerce.number().optional().nullable(),
+      nombre: z.string().optional().nullable(),
+      numeroCuenta: z.string().optional().nullable(),
+      banco: z.string().optional().nullable(),
+      moneda: z.string().optional().nullable(),
+      tipoCuenta: z.string().optional().nullable(),
     })
-    .optional(),
+    .optional()
+    .nullable(),
 });
 
 const grupoSchema = z.object({
@@ -42,19 +43,19 @@ const codigoPresupuestarioSchema = z.object({
 });
 
 const poaSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
   codigoPoa: z.string(),
-  cantidad: z.number().optional(),
-  costoUnitario: z.number().optional(),
-  costoTotal: z.number().or(z.string()).optional(),
-  saldoDisponible: z.number().or(z.string()).optional(),
-  montoComprometido: z.number().or(z.string()).optional(),
+  cantidad: z.coerce.number().optional(),
+  costoUnitario: z.coerce.number().optional(),
+  costoTotal: z.coerce.number().optional(),
+  saldoDisponible: z.coerce.number().optional(),
+  montoComprometido: z.coerce.number().optional(),
   tieneCompromisos: z.boolean().optional(),
-  proyectoId: z.number().optional(),
-  grupoId: z.number().optional(),
-  partidaId: z.number().optional(),
-  actividadId: z.number().optional(),
-  codigoPresupuestarioId: z.number().optional(),
+  proyectoId: z.coerce.number().optional(),
+  grupoId: z.coerce.number().optional(),
+  partidaId: z.coerce.number().optional(),
+  actividadId: z.coerce.number().optional(),
+  codigoPresupuestarioId: z.coerce.number().optional(),
   actividad: actividadSchema.optional(),
   codigoPresupuestario: codigoPresupuestarioSchema.optional(),
   estructura: z
@@ -127,16 +128,16 @@ export const formSchema = z.object({
   viaticos: z
     .array(
       z.object({
-        id: z.number().optional(),
+        id: z.coerce.number().optional(),
         planificacionIndexes: z.array(z.number()).default([]).optional(),
         ciudad: z.string().optional(),
         destino: z.string().optional(),
         tipoDestino: z.enum(['INSTITUCIONAL', 'TERCEROS']).optional(),
-        dias: z.number().min(0.1).optional(),
-        conceptoId: z.number().optional(),
-        costoUnitario: z.number().optional(),
-        cantidadPersonas: z.number().optional(),
-        montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
+        dias: z.coerce.number().min(0.1).optional(),
+        conceptoId: z.coerce.number().optional(),
+        costoUnitario: z.coerce.number().optional(),
+        cantidadPersonas: z.coerce.number().optional(),
+        montoNeto: z.coerce.number().min(0.01, 'El monto debe ser mayor a 0'),
         solicitudPresupuestoId: z.preprocess(
           (value) =>
             value === null || value === undefined || value === ''
@@ -144,7 +145,7 @@ export const formSchema = z.object({
               : Number(value),
           z.number().optional()
         ),
-        liquidoPagable: z
+        liquidoPagable: z.coerce
           .number()
           .min(0.01, 'El monto debe ser mayor a 0')
           .optional(),
@@ -188,7 +189,7 @@ export const formSchema = z.object({
   hospedajes: z
     .array(
       z.object({
-        id: z.number().optional(),
+        id: z.coerce.number().optional(),
         poaId: z.preprocess(
           (value) =>
             value === null || value === undefined || value === ''
@@ -199,12 +200,14 @@ export const formSchema = z.object({
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
-        personas: z.number().min(1, 'Mínimo 1 persona'),
-        noches: z.number().min(1, 'Mínimo 1 noche'),
-        cantidadUnitaria: z.number().min(0.01, 'La tarifa debe ser mayor a 0'),
-        costoTotal: z.number().min(0, 'El costo total debe ser válido'),
-        iva: z.number().optional(),
-        it: z.number().optional(),
+        personas: z.coerce.number().min(1, 'Mínimo 1 persona'),
+        noches: z.coerce.number().min(1, 'Mínimo 1 noche'),
+        cantidadUnitaria: z.coerce
+          .number()
+          .min(0.01, 'La tarifa debe ser mayor a 0'),
+        costoTotal: z.coerce.number().min(0, 'El costo total debe ser válido'),
+        iva: z.coerce.number().optional(),
+        it: z.coerce.number().optional(),
       })
     )
     .optional(),

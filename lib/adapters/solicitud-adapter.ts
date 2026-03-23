@@ -142,6 +142,8 @@ export const adaptResponseToFormData = (
     const poaConSaldoVirtual = p.poa
       ? {
           ...p.poa,
+          id: Number(p.poa.id),
+          costoTotal: Number(p.poa.costoTotal || 0),
           saldoDisponible: saldoVirtualFixed,
           // Recalculamos si hay compromisos de TERCEROS
           tieneCompromisos: saldoVirtualFixed < limiteTotalPOA - 0.05,
