@@ -58,6 +58,7 @@ export function useCatalogos(): UseCatalogosReturn {
         setUsuarios(usuariosData);
         setPoaCodes(poaCodesData);
       } catch (err) {
+        console.error('🔥 Error cargando catálogos en Detalle:', err);
         toast.error('Error al cargar los catálogos');
         setError(err);
       } finally {
