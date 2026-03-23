@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExternalLink } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -65,6 +66,9 @@ export function RendicionGastosSection({
                 <TableHead className="text-amzdesk-table-header text-right">
                   Efectivo Pagado
                 </TableHead>
+                <TableHead className="text-amzdesk-table-header">
+                  Comprobante
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -102,6 +106,23 @@ export function RendicionGastosSection({
                   </TableCell>
                   <TableCell className="text-right font-semibold text-emerald-600">
                     {formatMoney(toNumber(gasto.montoNeto ?? gasto.monto))}
+                  </TableCell>
+                  <TableCell>
+                    {gasto.urlComprobante ? (
+                      <a
+                        href={gasto.urlComprobante}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                      >
+                        Ver Comprobante
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Sin adjunto
+                      </span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
