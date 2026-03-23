@@ -1,5 +1,6 @@
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { CreateSolicitudPayload } from '@/types/solicitud-backend';
+import type { CuentaBancaria } from '@/types/backend';
 
 /**
  * Adapta los datos del formulario (Zod) al formato que espera el el backend.
@@ -92,6 +93,36 @@ import { SolicitudResponse } from '@/types/solicitud-backend';
 export const adaptResponseToFormData = (
   response: SolicitudResponse
 ): Partial<FormData> => {
+  const normalizeCuentaBancaria = (
+    cuentaBancaria: unknown
+  ): CuentaBancaria | undefined => {
+    if (!cuentaBancaria || typeof cuentaBancaria !== 'object') {
+      return undefined;
+    }
+
+    const raw = cuentaBancaria as Record<string, unknown>;
+
+    const numeroCuenta =
+      typeof raw.numeroCuenta === 'string' ? raw.numeroCuenta : '';
+    const banco = typeof raw.banco === 'string' ? raw.banco : '';
+    const nombreRaw = typeof raw.nombre === 'string' ? raw.nombre : '';
+
+    if (!numeroCuenta && !banco && !nombreRaw) {
+      return undefined;
+    }
+
+    return {
+      id: typeof raw.id === 'number' ? raw.id : Number(raw.id) || 0,
+      nombre:
+        nombreRaw.trim().length > 0 ? nombreRaw : banco || 'Cuenta bancaria',
+      numeroCuenta,
+      banco,
+      moneda: typeof raw.moneda === 'string' ? raw.moneda : undefined,
+      tipoCuenta:
+        typeof raw.tipoCuenta === 'string' ? raw.tipoCuenta : undefined,
+    };
+  };
+
   // 1. Mapeo de Planificaciones
   const actividades = (response.planificaciones || []).map((p) => ({
     actividadProgramada: p.actividadProgramada,
@@ -139,12 +170,29 @@ export const adaptResponseToFormData = (
 
     // Inyectamos el saldo virtual en el objeto POA para que los componentes de UI (PoaCard)
     // lo visualicen correctamente y validen el "Saldo Comprometido" con el valor restaurado.
+    const proyectoConCuentaBancaria = p.poa?.estructura?.proyecto
+      ? {
+          ...p.poa.estructura.proyecto,
+          cuentaBancaria: normalizeCuentaBancaria(
+            p.poa.estructura.proyecto.cuentaBancaria
+          ),
+        }
+      : undefined;
+
+    const estructuraConCuentaBancaria = p.poa?.estructura
+      ? {
+          ...p.poa.estructura,
+          proyecto: proyectoConCuentaBancaria,
+        }
+      : undefined;
+
     const poaConSaldoVirtual = p.poa
       ? {
           ...p.poa,
           id: Number(p.poa.id),
           costoTotal: Number(p.poa.costoTotal || 0),
           saldoDisponible: saldoVirtualFixed,
+          estructura: estructuraConCuentaBancaria,
           // Recalculamos si hay compromisos de TERCEROS
           tieneCompromisos: saldoVirtualFixed < limiteTotalPOA - 0.05,
         }
@@ -257,10 +305,9 @@ export const adaptResponseToFormData = (
     planificacionObjetivo: response.motivoViaje || '',
     motivo: response.descripcion || '',
     urlCuadroComparativo: response.urlCuadroComparativo || '',
-    urlCotizaciones:
-      response.urlCotizaciones && response.urlCotizaciones.length > 0
-        ? response.urlCotizaciones
-        : [''],
+    urlCotizaciones: Array.isArray(response.urlCotizaciones)
+      ? response.urlCotizaciones.filter((url): url is string => !!url)
+      : [],
     destinatario: response.aprobadorId ? String(response.aprobadorId) : '',
     proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,
