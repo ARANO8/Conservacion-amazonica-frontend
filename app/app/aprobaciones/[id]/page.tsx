@@ -57,6 +57,13 @@ export default function AprobacionDetailPage() {
     return solicitud ? mapResponseToBreakdown(solicitud) : [];
   }, [solicitud]);
 
+  const cuentaBancaria =
+    solicitud?.presupuestos?.[0]?.poa?.estructura?.proyecto?.cuentaBancaria;
+
+  const cuentaBancariaDetalle = cuentaBancaria
+    ? `${cuentaBancaria.banco || 'Banco no especificado'} - ${cuentaBancaria.numeroCuenta || 'S/N'}${cuentaBancaria.moneda ? ` (${cuentaBancaria.moneda})` : ''}`
+    : 'No asignada';
+
   const id = params.id as string;
 
   useEffect(() => {
@@ -368,6 +375,10 @@ export default function AprobacionDetailPage() {
                   {'Proyecto: ' +
                     solicitud.presupuestos[0]?.poa?.estructura?.proyecto
                       ?.nombre}
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  <span className="font-medium">Cuenta Bancaria: </span>
+                  {cuentaBancariaDetalle}
                 </p>
               </div>
               <Badge variant="outline">POA</Badge>
