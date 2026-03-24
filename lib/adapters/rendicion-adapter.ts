@@ -1,4 +1,5 @@
 import { CreateRendicionInput } from '@/types/rendicion-schema';
+import { RendicionResponse } from '@/types/rendicion-backend';
 
 export interface CreateRendicionApiPayload {
   solicitudId: number;
@@ -46,6 +47,20 @@ export interface CreateRendicionApiPayload {
   observaciones?: string;
 }
 
+/**
+ * Payload para actualizar una rendición observada.
+ * Similar a CreateRendicionApiPayload pero sin solicitudId (ya está vinculada).
+ */
+export interface UpdateRendicionApiPayload {
+  aprobadorActualId: number;
+  fechaRendicion?: string;
+  gastos?: CreateRendicionApiPayload['gastos'];
+  gastosSinRespaldo?: CreateRendicionApiPayload['gastosSinRespaldo'];
+  informeGastos?: CreateRendicionApiPayload['informeGastos'];
+  declaracionJurada?: CreateRendicionApiPayload['declaracionJurada'];
+  observaciones?: string;
+}
+
 function toIsoDateString(value?: string | Date | null): string | undefined {
   if (!value) return undefined;
 
@@ -64,6 +79,171 @@ export function adaptCreateRendicionPayload(
 ): CreateRendicionApiPayload {
   const payload: CreateRendicionApiPayload = {
     solicitudId: data.solicitudId,
+    aprobadorActualId: data.aprobadorActualId,
+    fechaRendicion: new Date().toISOString(),
+    gastos: (data.gastos ?? []).map((gasto) => ({
+      ...(gasto.solicitudItemId !== undefined && {
+        solicitudItemId: gasto.solicitudItemId,
+      }),
+      concepto: gasto.concepto,
+      ...(gasto.detalle ? { detalle: gasto.detalle } : {}),
+      tipoDocumento: gasto.tipoDocumento,
+      ...(gasto.numeroDocumento
+        ? { numeroDocumento: gasto.numeroDocumento }
+        : {}),
+      ...(gasto.proveedor ? { proveedor: gasto.proveedor } : {}),
+      ...(toIsoDateString(gasto.fechaDocumento)
+        ? { fechaDocumento: toIsoDateString(gasto.fechaDocumento) }
+        : {}),
+      montoBruto: Number(gasto.montoBruto ?? gasto.montoTotal),
+      montoImpuestos: Number(gasto.montoImpuestos ?? 0),
+      montoTotal: Number(gasto.montoTotal),
+      montoNeto: Number(gasto.montoNeto),
+      ...(gasto.estado ? { estado: gasto.estado } : {}),
+      partidaId: Number(gasto.partidaId),
+      ...(gasto.urlComprobante ? { urlComprobante: gasto.urlComprobante } : {}),
+      ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
+    })),
+  };
+
+  if (data.gastosSinRespaldo && data.gastosSinRespaldo.length > 0) {
+    payload.gastosSinRespaldo = data.gastosSinRespaldo.map((gasto) => ({
+      ...(toIsoDateString(gasto.fechaGasto)
+        ? { fechaGasto: toIsoDateString(gasto.fechaGasto) }
+        : {}),
+      detalle: gasto.detalle,
+      monto: Number(gasto.monto),
+    }));
+  }
+
+  if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
+    payload.informeGastos = {
+      fechaInicio:
+        toIsoDateString(data.informeGastos.fechaInicio) ??
+        new Date().toISOString(),
+      fechaFin:
+        toIsoDateString(data.informeGastos.fechaFin) ??
+        new Date().toISOString(),
+      actividades: data.informeGastos.actividades.map((actividad) => ({
+        fecha: toIsoDateString(actividad.fecha) ?? new Date().toISOString(),
+        lugar: actividad.lugar,
+        personaInstitucion: actividad.personaInstitucion,
+        actividadesRealizadas: actividad.actividadesRealizadas,
+      })),
+    };
+  }
+
+  if (data.declaracionJurada) {
+    payload.declaracionJurada = {
+      confirmaDatosVeridicos: data.declaracionJurada.confirmaDatosVeridicos,
+      aceptaPoliticaDevolucion: data.declaracionJurada.aceptaPoliticaDevolucion,
+      ...(data.declaracionJurada.tipoDeclaracion
+        ? { tipoDeclaracion: data.declaracionJurada.tipoDeclaracion }
+        : {}),
+      ...(typeof data.declaracionJurada.montoADevolver === 'number'
+        ? { montoADevolver: Number(data.declaracionJurada.montoADevolver) }
+        : {}),
+      ...(data.declaracionJurada.observaciones
+        ? { observaciones: data.declaracionJurada.observaciones }
+        : {}),
+    };
+  }
+
+  if (data.observaciones) {
+    payload.observaciones = data.observaciones;
+  }
+
+  return payload;
+}
+
+/**
+ * Adapter que transforma la respuesta del backend (RendicionResponse)
+ * al formato del formulario frontend (CreateRendicionInput).
+ * Se usa para prellenar el formulario en modo edición.
+ */
+export function adaptRendicionResponseToFormData(
+  rendicion: RendicionResponse
+): Partial<CreateRendicionInput> {
+  const formData: Partial<CreateRendicionInput> = {
+    solicitudId: rendicion.solicitudId,
+    aprobadorActualId: 0, // El usuario debe elegir nuevamente
+    observaciones: rendicion.observaciones ?? '',
+
+    // Gastos con respaldo
+    gastos: (rendicion.gastosRendicion ?? []).map((gasto) => ({
+      solicitudItemId: undefined, // No se guarda en backend
+      concepto: gasto.concepto ?? gasto.detalle ?? '',
+      detalle: gasto.detalle ?? '',
+      tipoDocumento: (gasto.tipoDocumento ?? 'FACTURA') as
+        | 'FACTURA'
+        | 'RECIBO'
+        | 'BOLETA',
+      numeroDocumento: gasto.nroDocumento ?? gasto.numeroDocumento ?? '',
+      proveedor: gasto.proveedor ?? '',
+      fechaDocumento: gasto.fecha ?? gasto.fechaDocumento ?? '',
+      montoBruto: Number(gasto.montoBruto ?? gasto.monto ?? 0),
+      montoImpuestos: Number(gasto.montoImpuestos ?? 0),
+      montoTotal: Number(
+        gasto.montoBruto ?? gasto.montoTotal ?? gasto.monto ?? 0
+      ),
+      montoNeto: Number(gasto.montoNeto ?? 0),
+      estado: (gasto.estado ?? 'PENDIENTE') as
+        | 'PENDIENTE'
+        | 'COMPROBADO'
+        | 'RECHAZADO',
+      partidaId: gasto.partidaId ?? 0,
+      urlComprobante: gasto.urlComprobante ?? '',
+      tipoRetencion: undefined, // No se guarda en backend
+    })),
+
+    // Gastos sin respaldo (declaraciones juradas)
+    gastosSinRespaldo: (rendicion.declaracionesJuradas ?? []).map((dj) => ({
+      fechaGasto: dj.fecha ?? '',
+      detalle: dj.detalle ?? '',
+      monto: Number(dj.monto ?? 0),
+    })),
+
+    // Informe de gastos
+    informeGastos: rendicion.informeGastos
+      ? {
+          fechaInicio: rendicion.informeGastos.fechaInicio ?? '',
+          fechaFin: rendicion.informeGastos.fechaFin ?? '',
+          actividades: (rendicion.informeGastos.actividades ?? []).map(
+            (act) => ({
+              fecha: act.fecha ?? '',
+              lugar: act.lugar ?? '',
+              personaInstitucion: act.personaInstitucion ?? '',
+              actividadesRealizadas: act.actividadesRealizadas ?? '',
+            })
+          ),
+        }
+      : {
+          fechaInicio: '',
+          fechaFin: '',
+          actividades: [],
+        },
+
+    // Declaración jurada (resetear para que el usuario confirme de nuevo)
+    declaracionJurada: {
+      tipoDeclaracion: undefined,
+      confirmaDatosVeridicos: false,
+      aceptaPoliticaDevolucion: false,
+      montoADevolver: undefined,
+      observaciones: '',
+    },
+  };
+
+  return formData;
+}
+
+/**
+ * Adapter para actualizar una rendición observada.
+ * Similar a adaptCreateRendicionPayload pero sin solicitudId.
+ */
+export function adaptUpdateRendicionPayload(
+  data: CreateRendicionInput
+): UpdateRendicionApiPayload {
+  const payload: UpdateRendicionApiPayload = {
     aprobadorActualId: data.aprobadorActualId,
     fechaRendicion: new Date().toISOString(),
     gastos: (data.gastos ?? []).map((gasto) => ({

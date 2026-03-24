@@ -60,27 +60,42 @@ export function NavUser() {
 
   /**
    * Resuelve la URL de destino para una notificación.
-   * Para RENDICION_PENDIENTE usa urlDestino si apunta a rendiciones,
-   * sino fallback a /app/rendiciones/:rendicionId si existe.
+   * Para RENDICION_PENDIENTE usa urlDestino si apunta a rendiciones.
+   * Para RENDICION_OBSERVADA redirige a /editar (página de corrección).
    */
   const resolveNotificationUrl = (
     notification: (typeof notificaciones)[0]
   ): string => {
-    // Si tiene urlDestino válido que apunta a rendiciones, usarlo directamente
-    if (
-      notification.urlDestino &&
-      notification.urlDestino.startsWith('/app/rendiciones/')
-    ) {
-      return notification.urlDestino;
+    // Para RENDICION_OBSERVADA, siempre ir a la página de edición
+    if (notification.tipo === 'RENDICION_OBSERVADA') {
+      // Si ya tiene urlDestino que apunta a /editar, usarlo
+      if (
+        notification.urlDestino &&
+        notification.urlDestino.includes('/editar')
+      ) {
+        return notification.urlDestino;
+      }
+      // Resolver por rendicion.id y construir URL de edición
+      const rendicionId = notification.solicitud?.rendicion?.id;
+      if (rendicionId) {
+        return `/app/rendiciones/${rendicionId}/editar`;
+      }
+      // Fallback si no hay rendicion.id
+      return '/app/rendiciones';
     }
 
-    // Para RENDICION_PENDIENTE legacy (sin urlDestino correcto), resolver por rendicion.id
+    // Para RENDICION_PENDIENTE, usar urlDestino si apunta a rendiciones
     if (notification.tipo === 'RENDICION_PENDIENTE') {
+      if (
+        notification.urlDestino &&
+        notification.urlDestino.startsWith('/app/rendiciones/')
+      ) {
+        return notification.urlDestino;
+      }
       const rendicionId = notification.solicitud?.rendicion?.id;
       if (rendicionId) {
         return `/app/rendiciones/${rendicionId}`;
       }
-      // Fallback: si no hay rendicion.id, ir a bandeja
       return '/app/aprobaciones';
     }
 

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
   AlertCircle,
+  Info,
   ArrowLeft,
   Banknote,
   Calendar,
@@ -54,6 +55,7 @@ import {
 } from '@/components/ui/command';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface RendicionDetailClientProps {
   rendicion: RendicionResponse;
@@ -384,7 +386,7 @@ export function RendicionDetailClient({
 
       <Separator />
 
-      {puedeAccionar && (
+      {puedeAccionar ? (
         <div className="bg-background sticky bottom-0 border-t py-4">
           <div className="mx-auto max-w-2xl">
             <div className="flex w-full flex-col gap-3 sm:flex-row">
@@ -416,6 +418,17 @@ export function RendicionDetailClient({
             </div>
           </div>
         </div>
+      ) : (
+        <Alert className="border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+          <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle className="text-amber-800 dark:text-amber-300">
+            Rendición ya atendida
+          </AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-400">
+            Ya se tomó una decisión sobre esta rendición o fue reasignada. Las
+            acciones están deshabilitadas.
+          </AlertDescription>
+        </Alert>
       )}
 
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>

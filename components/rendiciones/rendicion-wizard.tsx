@@ -24,7 +24,10 @@ import {
 } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
-import { adaptCreateRendicionPayload } from '@/lib/adapters/rendicion-adapter';
+import {
+  adaptCreateRendicionPayload,
+  adaptUpdateRendicionPayload,
+} from '@/lib/adapters/rendicion-adapter';
 import { Usuario } from '@/types/catalogs';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -66,6 +69,12 @@ interface RendicionWizardProps {
   currentUserId?: number;
   /** ID de solicitud pre-seleccionada (desde query params) */
   preSelectedSolicitudId?: number | null;
+  /** Modo edición: si true, el wizard está editando una rendición observada */
+  isEditMode?: boolean;
+  /** ID de la rendición a editar (solo en modo edición) */
+  rendicionId?: string;
+  /** Valores iniciales del formulario (solo en modo edición) */
+  initialValues?: Partial<CreateRendicionInput>;
 }
 
 export default function RendicionWizard({
@@ -73,15 +82,27 @@ export default function RendicionWizard({
   usuarios,
   currentUserId,
   preSelectedSolicitudId,
+  isEditMode = false,
+  rendicionId,
+  initialValues,
 }: RendicionWizardProps) {
   const router = useRouter();
-  const [step, setStep] = useState<WizardStepRendicion>('SELECCION');
+  // En modo edición, empezar directamente en gastos (la solicitud ya está fija)
+  const [step, setStep] = useState<WizardStepRendicion>(
+    isEditMode ? 'GASTOS_RESPALDO' : 'SELECCION'
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Combinar valores por defecto con valores iniciales en modo edición
+  const mergedDefaultValues: CreateRendicionInput = {
+    ...defaultRendicionValues,
+    ...(initialValues as Partial<CreateRendicionInput>),
+  };
+
   const form = useForm<CreateRendicionInput>({
     resolver: zodResolver(CreateRendicionSchema),
-    defaultValues: defaultRendicionValues,
+    defaultValues: mergedDefaultValues,
   });
 
   const [confirmaDatosVeridicos, aceptaPoliticaDevolucion] = useWatch({
@@ -114,12 +135,13 @@ export default function RendicionWizard({
       if (solicitudExiste) {
         // Pre-llenar el formulario con la solicitud seleccionada
         form.setValue('solicitudId', preSelectedSolicitudId);
-
-        // Mantenerse en selección para completar datos base.
-        setStep('SELECCION');
+        // En modo edición no regresamos al paso de selección
+        if (!isEditMode) {
+          setStep('SELECCION');
+        }
       }
     }
-  }, [preSelectedSolicitudId, solicitudes, form]);
+  }, [preSelectedSolicitudId, solicitudes, form, isEditMode]);
 
   // ------------------------------------------------------------------
   // Navegación entre pasos con validación por campo
@@ -161,8 +183,13 @@ export default function RendicionWizard({
 
   const handleBack = () => {
     if (step === 'GASTOS_RESPALDO') {
-      setStep('SELECCION');
-      window.scrollTo(0, 0);
+      // En modo edición, no se puede volver a selección (solicitud fija)
+      if (isEditMode) {
+        router.push('/app/rendiciones');
+      } else {
+        setStep('SELECCION');
+        window.scrollTo(0, 0);
+      }
     } else if (step === 'INFORME_GASTOS') {
       setStep('GASTOS_RESPALDO');
       window.scrollTo(0, 0);
@@ -178,15 +205,25 @@ export default function RendicionWizard({
     setIsSubmitting(true);
     try {
       const formData = form.getValues();
-      const payload = adaptCreateRendicionPayload(formData);
 
-      await rendicionesService.submitRendicion(payload);
+      if (isEditMode && rendicionId) {
+        // Modo edición: usar endpoint PATCH
+        const payload = adaptUpdateRendicionPayload(formData);
+        await rendicionesService.submitUpdateRendicion(rendicionId, payload);
+        toast.success('Rendición corregida y reenviada correctamente');
+      } else {
+        // Modo creación: usar endpoint POST
+        const payload = adaptCreateRendicionPayload(formData);
+        await rendicionesService.submitRendicion(payload);
+        toast.success('Rendición enviada correctamente');
+      }
 
-      toast.success('Rendición enviada correctamente');
       setIsModalOpen(false);
       router.push('/app/solicitudes');
     } catch (error: unknown) {
-      let message = 'Error al enviar la rendición.';
+      let message = isEditMode
+        ? 'Error al actualizar la rendición.'
+        : 'Error al enviar la rendición.';
 
       if (axios.isAxiosError(error)) {
         const backendMessage = error.response?.data?.message;
@@ -312,6 +349,7 @@ export default function RendicionWizard({
           loading={isSubmitting}
           form={form}
           solicitudes={solicitudes}
+          isEditMode={isEditMode}
         />
 
         <Dialog
@@ -460,7 +498,11 @@ export default function RendicionWizard({
                   void submitRendicion();
                 }}
               >
-                {isSubmitting ? 'Enviando...' : 'Confirmar y Enviar Rendición'}
+                {isSubmitting
+                  ? 'Enviando...'
+                  : isEditMode
+                    ? 'Confirmar y Reenviar Rendición'
+                    : 'Confirmar y Enviar Rendición'}
               </Button>
             </DialogFooter>
           </DialogContent>

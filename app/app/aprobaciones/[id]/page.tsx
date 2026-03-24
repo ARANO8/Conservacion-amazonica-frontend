@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/auth-store';
 import {
   ArrowLeft,
   Calendar,
@@ -52,6 +53,7 @@ import { formatMoney, formatDateShort } from '@/lib/utils';
 export default function AprobacionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuthStore();
   const [solicitud, setSolicitud] = useState<SolicitudResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,6 +120,20 @@ export default function AprobacionDetailPage() {
       </div>
     );
   }
+
+  const currentUserId = user?.id ? Number(user.id) : null;
+  const aprobadorActualId = Number(
+    solicitud.aprobadorActualId ??
+      solicitud.aprobadorId ??
+      solicitud.aprobador?.id
+  );
+
+  const esAprobadorActual =
+    currentUserId !== null && Number.isFinite(aprobadorActualId)
+      ? aprobadorActualId === currentUserId
+      : false;
+
+  const puedeAccionar = solicitud.estado === 'PENDIENTE' && esAprobadorActual;
 
   return (
     <div className="space-y-6 p-6">
@@ -460,8 +476,8 @@ export default function AprobacionDetailPage() {
 
       <Separator />
 
-      {/* Action Buttons — solo cuando la solicitud sigue pendiente de acción */}
-      {solicitud.estado === 'PENDIENTE' ? (
+      {/* Action Buttons — solo cuando la solicitud sigue pendiente y el usuario es aprobador actual */}
+      {puedeAccionar ? (
         <div className="bg-background sticky bottom-0 border-t py-4">
           <div className="mx-auto max-w-2xl">
             <InboxActions request={solicitud} mode="buttons" />
@@ -471,12 +487,11 @@ export default function AprobacionDetailPage() {
         <Alert className="border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
           <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           <AlertTitle className="text-amber-800 dark:text-amber-300">
-            Solicitud ya procesada
+            Solicitud ya atendida
           </AlertTitle>
           <AlertDescription className="text-amber-700 dark:text-amber-400">
-            Esta solicitud ya fue procesada y se encuentra en estado:{' '}
-            <span className="font-semibold">{solicitud.estado}</span>. No se
-            pueden realizar más acciones desde esta vista.
+            Ya se tomó una decisión sobre esta solicitud o fue reasignada. Las
+            acciones están deshabilitadas.
           </AlertDescription>
         </Alert>
       )}

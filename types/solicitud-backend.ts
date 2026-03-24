@@ -86,6 +86,7 @@ export interface SolicitudResponse {
   usuarioEmisorId?: number | string;
   usuarioId?: number | string;
   aprobadorId?: number;
+  aprobadorActualId?: number | string;
   usuarioEmisor?: {
     id: number | string;
     nombreCompleto: string;

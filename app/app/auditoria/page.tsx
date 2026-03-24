@@ -139,7 +139,7 @@ export default function AuditoriaPage() {
     const fetchRendiciones = async () => {
       try {
         setLoadingRendiciones(true);
-        const data = await rendicionesService.getMisRendiciones();
+        const data = await rendicionesService.getRendiciones();
         setRendiciones(data ?? []);
       } catch {
         toast.error('No se pudieron cargar las rendiciones para auditoria.');

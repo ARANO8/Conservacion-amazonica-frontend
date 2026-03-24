@@ -8,7 +8,8 @@ export type TipoNotificacion =
   | 'SOLICITUD_DERIVADA'
   | 'SOLICITUD_APROBADA'
   | 'SOLICITUD_OBSERVADA'
-  | 'RENDICION_PENDIENTE';
+  | 'RENDICION_PENDIENTE'
+  | 'RENDICION_OBSERVADA';
 
 export interface NotificacionBackend {
   id: number;

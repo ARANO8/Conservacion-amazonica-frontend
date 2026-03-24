@@ -9,7 +9,8 @@ export interface Notificacion {
     | 'SOLICITUD_DERIVADA'
     | 'SOLICITUD_APROBADA'
     | 'SOLICITUD_OBSERVADA'
-    | 'RENDICION_PENDIENTE';
+    | 'RENDICION_PENDIENTE'
+    | 'RENDICION_OBSERVADA';
   leida: boolean;
   urlDestino?: string;
   createdAt: string;
