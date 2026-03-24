@@ -79,10 +79,23 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     id: 'rendicion',
     header: 'Rendición',
     cell: ({ row }) => {
-      const tienneRendicion = !!row.original.rendicion;
+      const tieneRendicion = !!row.original.rendicion;
       const esDesembolsado = row.original.estado === 'DESEMBOLSADO';
       const esEjecutado = row.original.estado === 'EJECUTADO';
 
+      // Prioridad 1: Si ya tiene rendición, mostrar botón "Ver Rendición"
+      if (tieneRendicion || esEjecutado) {
+        return (
+          <Button asChild variant="secondary" size="sm">
+            <Link href={`/app/rendiciones/detalle/${row.original.id}`}>
+              <FileText className="mr-2 h-4 w-4" />
+              Ver Rendición
+            </Link>
+          </Button>
+        );
+      }
+
+      // Prioridad 2: Si está desembolsado y NO tiene rendición, permitir crear
       if (esDesembolsado) {
         return (
           <Button asChild variant="outline" size="sm">
@@ -91,17 +104,6 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
             >
               <Plus className="mr-2 h-4 w-4" />
               Crear
-            </Link>
-          </Button>
-        );
-      }
-
-      if (esEjecutado || tienneRendicion) {
-        return (
-          <Button asChild variant="secondary" size="sm">
-            <Link href={`/app/rendiciones/detalle/${row.original.id}`}>
-              <FileText className="mr-2 h-4 w-4" />
-              Ver Rendición
             </Link>
           </Button>
         );

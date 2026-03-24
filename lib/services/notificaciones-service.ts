@@ -20,6 +20,9 @@ export interface Notificacion {
     id: number;
     codigoSolicitud: string;
     estado: string;
+    rendicion?: {
+      id: number;
+    } | null;
   };
 }
 

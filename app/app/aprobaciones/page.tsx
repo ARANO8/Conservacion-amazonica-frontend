@@ -46,6 +46,39 @@ function sanitizeUrl(url: string | null | undefined): string {
     .replace(/^\/dashboard\//, '/app/');
 }
 
+/**
+ * Resuelve la URL de destino para una notificación.
+ * Para RENDICION_PENDIENTE usa urlDestino si apunta a rendiciones,
+ * sino fallback a /app/rendiciones/:rendicionId si existe.
+ */
+function resolveNotificationUrl(notification: NotificacionBackend): string {
+  // Si tiene urlDestino válido que apunta a rendiciones, usarlo directamente
+  if (
+    notification.urlDestino &&
+    notification.urlDestino.startsWith('/app/rendiciones/')
+  ) {
+    return notification.urlDestino;
+  }
+
+  // Para RENDICION_PENDIENTE legacy (sin urlDestino correcto), resolver por rendicion.id
+  if (notification.tipo === 'RENDICION_PENDIENTE') {
+    const rendicionId = notification.solicitud?.rendicion?.id;
+    if (rendicionId) {
+      return `/app/rendiciones/${rendicionId}`;
+    }
+    // Fallback: si no hay rendicion.id, ir a bandeja
+    return '#';
+  }
+
+  // Para otros tipos, usar urlDestino o construir URL de aprobaciones
+  const rawUrl =
+    notification.urlDestino ??
+    (notification.solicitudId
+      ? `/app/aprobaciones/${notification.solicitudId}`
+      : null);
+  return sanitizeUrl(rawUrl);
+}
+
 function NotificationCard({
   notification,
   onRead,
@@ -53,12 +86,7 @@ function NotificationCard({
   notification: NotificacionBackend;
   onRead: (id: number) => void;
 }) {
-  const rawUrl =
-    notification.urlDestino ??
-    (notification.solicitudId
-      ? `/app/aprobaciones/${notification.solicitudId}`
-      : null);
-  const href = sanitizeUrl(rawUrl);
+  const href = resolveNotificationUrl(notification);
 
   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
     addSuffix: true,

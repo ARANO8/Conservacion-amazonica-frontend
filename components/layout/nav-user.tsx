@@ -58,6 +58,41 @@ export function NavUser() {
       .replace(/^\/dashboard\//, '/app/');
   };
 
+  /**
+   * Resuelve la URL de destino para una notificación.
+   * Para RENDICION_PENDIENTE usa urlDestino si apunta a rendiciones,
+   * sino fallback a /app/rendiciones/:rendicionId si existe.
+   */
+  const resolveNotificationUrl = (
+    notification: (typeof notificaciones)[0]
+  ): string => {
+    // Si tiene urlDestino válido que apunta a rendiciones, usarlo directamente
+    if (
+      notification.urlDestino &&
+      notification.urlDestino.startsWith('/app/rendiciones/')
+    ) {
+      return notification.urlDestino;
+    }
+
+    // Para RENDICION_PENDIENTE legacy (sin urlDestino correcto), resolver por rendicion.id
+    if (notification.tipo === 'RENDICION_PENDIENTE') {
+      const rendicionId = notification.solicitud?.rendicion?.id;
+      if (rendicionId) {
+        return `/app/rendiciones/${rendicionId}`;
+      }
+      // Fallback: si no hay rendicion.id, ir a bandeja
+      return '/app/aprobaciones';
+    }
+
+    // Para otros tipos, usar urlDestino o construir URL de aprobaciones
+    const rawUrl =
+      notification.urlDestino ??
+      (notification.solicitudId
+        ? `/app/aprobaciones/${notification.solicitudId}`
+        : null);
+    return sanitizeUrl(rawUrl);
+  };
+
   const handleNotificationClick = async (
     notification: (typeof notificaciones)[0]
   ) => {
@@ -65,14 +100,8 @@ export function NavUser() {
     if (!notification.leida) {
       await markAsRead(notification.id);
     }
-    // Navegar: usar urlDestino (sanitizado) si está definido,
-    // sino construir la URL de detalle de aprobaciones
-    const rawUrl =
-      notification.urlDestino ??
-      (notification.solicitudId
-        ? `/app/aprobaciones/${notification.solicitudId}`
-        : null);
-    router.push(sanitizeUrl(rawUrl));
+    // Navegar a la URL resuelta
+    router.push(resolveNotificationUrl(notification));
   };
 
   // Últimas 3 notificaciones no leídas

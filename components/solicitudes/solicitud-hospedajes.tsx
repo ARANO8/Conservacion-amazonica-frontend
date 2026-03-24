@@ -59,6 +59,9 @@ export const HOSPEDAJE_DICT = {
   },
 } as const;
 
+// Constante para identificar la opción internacional
+const REGION_INTERNACIONAL = 'Internacional';
+
 type RegionKeys = keyof typeof HOSPEDAJE_DICT;
 
 interface SolicitudHospedajesProps {
@@ -171,7 +174,7 @@ function HospedajeCard({
   const selectedRegion = useWatch({
     control,
     name: `hospedajes.${index}.region`,
-  }) as RegionKeys | '';
+  }) as RegionKeys | typeof REGION_INTERNACIONAL | '';
 
   const personas = useWatch({ control, name: `hospedajes.${index}.personas` });
   const noches = useWatch({ control, name: `hospedajes.${index}.noches` });
@@ -188,6 +191,11 @@ function HospedajeCard({
     useWatch({ control, name: `hospedajes.${index}.costoTotal` }) || 0;
   const iva = useWatch({ control, name: `hospedajes.${index}.iva` }) || 0;
   const it = useWatch({ control, name: `hospedajes.${index}.it` }) || 0;
+
+  // Flag para detectar si es región internacional (permite entrada manual de destino y tarifa)
+  const isInternacionalMode =
+    selectedRegion === REGION_INTERNACIONAL ||
+    (selectedRegion !== '' && !(selectedRegion in HOSPEDAJE_DICT));
 
   const calcularTotales = useCallback(() => {
     const pers = Number(personas) || 0;
@@ -220,11 +228,20 @@ function HospedajeCard({
   }, [calcularTotales]);
 
   const destinosDisponibles = selectedRegion
-    ? HOSPEDAJE_DICT[selectedRegion]?.destinos || []
+    ? HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.destinos || []
     : [];
 
-  const rangoMin = selectedRegion ? HOSPEDAJE_DICT[selectedRegion]?.min : 0;
-  const rangoMax = selectedRegion ? HOSPEDAJE_DICT[selectedRegion]?.max : 0;
+  // Para internacional no hay rangos; para regiones del diccionario sí
+  const rangoMin = isInternacionalMode
+    ? 0
+    : selectedRegion
+      ? HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.min
+      : 0;
+  const rangoMax = isInternacionalMode
+    ? 0
+    : selectedRegion
+      ? HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.max
+      : 0;
 
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
@@ -303,13 +320,25 @@ function HospedajeCard({
                     field.onChange(val);
                     setValue(`hospedajes.${index}.destino`, ''); // Reset destino on region change
 
-                    // Set default price based on region to avoid validation errors
-                    const minPrice =
-                      HOSPEDAJE_DICT[val as RegionKeys]?.min || 0;
-                    setValue(`hospedajes.${index}.cantidadUnitaria`, minPrice, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    });
+                    // Para internacional no seteamos precio mínimo; para otras regiones sí
+                    if (val === REGION_INTERNACIONAL) {
+                      setValue(`hospedajes.${index}.cantidadUnitaria`, 0, {
+                        shouldValidate: false,
+                        shouldDirty: true,
+                      });
+                    } else {
+                      // Set default price based on region to avoid validation errors
+                      const minPrice =
+                        HOSPEDAJE_DICT[val as RegionKeys]?.min || 0;
+                      setValue(
+                        `hospedajes.${index}.cantidadUnitaria`,
+                        minPrice,
+                        {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        }
+                      );
+                    }
 
                     trigger(`hospedajes.${index}.cantidadUnitaria`); // Re-validate
                   }}
@@ -331,6 +360,9 @@ function HospedajeCard({
                         {reg}
                       </SelectItem>
                     ))}
+                    <SelectItem value={REGION_INTERNACIONAL}>
+                      {REGION_INTERNACIONAL}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -345,12 +377,18 @@ function HospedajeCard({
             render={({ field }) => (
               <Field>
                 <FieldLabel>Destino</FieldLabel>
-                {selectedRegion && HOSPEDAJE_DICT[selectedRegion]?.editable ? (
-                  // Input de texto para regiones editables
+                {isInternacionalMode ||
+                (selectedRegion &&
+                  HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.editable) ? (
+                  // Input de texto para regiones editables o internacional
                   <FormControl>
                     <Input
                       type="text"
-                      placeholder="Escribir destino"
+                      placeholder={
+                        isInternacionalMode
+                          ? 'Escribir destino internacional'
+                          : 'Escribir destino'
+                      }
                       {...field}
                       disabled={!selectedRegion}
                     />
@@ -465,6 +503,14 @@ function HospedajeCard({
               validate: (value) => {
                 if (!selectedRegion) return true;
                 const numValue = Number(value);
+                // Para internacional solo validamos que sea mayor a 0
+                if (isInternacionalMode) {
+                  if (numValue <= 0) {
+                    return 'La tarifa debe ser mayor a 0.';
+                  }
+                  return true;
+                }
+                // Para regiones del diccionario validamos el rango
                 if (
                   numValue < (rangoMin ?? 0) ||
                   numValue > (rangoMax ?? Infinity)
@@ -485,13 +531,27 @@ function HospedajeCard({
                       <Input
                         type="number"
                         step="0.01"
-                        className="h-7 w-24 px-2 py-0 text-right text-sm font-semibold"
+                        className={
+                          isInternacionalMode
+                            ? 'h-9 w-40 px-2 py-0 text-right text-sm font-semibold'
+                            : 'h-7 w-24 px-2 py-0 text-right text-sm font-semibold'
+                        }
+                        placeholder={
+                          isInternacionalMode
+                            ? 'Ingresar tarifa manualmente'
+                            : ''
+                        }
                         value={field.value || ''}
                         onChange={(e) => {
                           const val = e.target.value;
                           field.onChange(val === '' ? '' : Number(val));
                         }}
                         onBlur={(e) => {
+                          // Para internacional no clampeamos al rango
+                          if (isInternacionalMode) {
+                            trigger(`hospedajes.${index}.cantidadUnitaria`);
+                            return;
+                          }
                           const val = Number(e.target.value);
                           if (
                             !e.target.value ||
@@ -509,26 +569,34 @@ function HospedajeCard({
                   )}
                 </div>
                 <FormControl>
-                  <div className="flex flex-col gap-2">
-                    <Slider
-                      disabled={!selectedRegion}
-                      min={rangoMin || 0}
-                      max={rangoMax || 100}
-                      step={0.5}
-                      value={[Number(field.value) || rangoMin || 0]}
-                      onValueChange={(vals) => {
-                        field.onChange(vals[0]);
-                        trigger(`hospedajes.${index}.cantidadUnitaria`);
-                      }}
-                      className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                    {selectedRegion && !fieldState.error && (
-                      <div className="text-foreground flex w-full justify-between text-sm">
-                        <span>Mín: {rangoMin}</span>
-                        <span>Máx: {rangoMax}</span>
-                      </div>
-                    )}
-                  </div>
+                  {/* Slider solo para regiones del diccionario, no para internacional */}
+                  {!isInternacionalMode ? (
+                    <div className="flex flex-col gap-2">
+                      <Slider
+                        disabled={!selectedRegion}
+                        min={rangoMin || 0}
+                        max={rangoMax || 100}
+                        step={0.5}
+                        value={[Number(field.value) || rangoMin || 0]}
+                        onValueChange={(vals) => {
+                          field.onChange(vals[0]);
+                          trigger(`hospedajes.${index}.cantidadUnitaria`);
+                        }}
+                        className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                      {selectedRegion && !fieldState.error && (
+                        <div className="text-foreground flex w-full justify-between text-sm">
+                          <span>Mín: {rangoMin}</span>
+                          <span>Máx: {rangoMax}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-sm italic">
+                      Ingrese la tarifa manualmente para hospedaje
+                      internacional.
+                    </p>
+                  )}
                 </FormControl>
                 <FormMessage className="mt-1 text-sm leading-tight" />
               </Field>
