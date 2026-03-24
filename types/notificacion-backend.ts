@@ -8,7 +8,8 @@ export type TipoNotificacion =
   | 'SOLICITUD_DERIVADA'
   | 'SOLICITUD_APROBADA'
   | 'SOLICITUD_OBSERVADA'
-  | 'RENDICION_PENDIENTE';
+  | 'RENDICION_PENDIENTE'
+  | 'RENDICION_OBSERVADA';
 
 export interface NotificacionBackend {
   id: number;
@@ -27,6 +28,10 @@ export interface NotificacionBackend {
     codigoSolicitud: string;
     descripcion?: string | null;
     estado?: string;
+    // Rendición asociada (para resolver URLs de notificaciones RENDICION_PENDIENTE)
+    rendicion?: {
+      id: number;
+    } | null;
   } | null;
 }
 

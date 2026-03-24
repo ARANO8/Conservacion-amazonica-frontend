@@ -2,7 +2,9 @@ import api from '@/lib/api';
 import { CreateRendicionInput } from '@/types/rendicion-schema';
 import {
   adaptCreateRendicionPayload,
+  adaptUpdateRendicionPayload,
   type CreateRendicionApiPayload,
+  type UpdateRendicionApiPayload,
 } from '@/lib/adapters/rendicion-adapter';
 import { RendicionResponse } from '@/types/rendicion-backend';
 
@@ -39,6 +41,31 @@ export const rendicionesService = {
   },
 
   /**
+   * Actualiza una rendición observada y la reenvía a revisión.
+   * Solo se puede usar para rendiciones en estado OBSERVADO.
+   * @param id El ID de la rendición a actualizar.
+   * @param payload El payload ya adaptado para el backend.
+   */
+  async submitUpdateRendicion(
+    id: string | number,
+    payload: UpdateRendicionApiPayload
+  ) {
+    const response = await api.patch(`/rendiciones/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * Actualiza una rendición observada usando los datos del formulario.
+   * Adapta automáticamente el payload al formato del backend.
+   * @param id El ID de la rendición a actualizar.
+   * @param payload Los datos del formulario de rendición.
+   */
+  async updateRendicion(id: string | number, payload: CreateRendicionInput) {
+    const adaptedPayload = adaptUpdateRendicionPayload(payload);
+    return this.submitUpdateRendicion(id, adaptedPayload);
+  },
+
+  /**
    * Fetches a single rendición by ID.
    * @param id The ID of the rendición.
    */
@@ -47,8 +74,19 @@ export const rendicionesService = {
     return response.data;
   },
 
-  async getMisRendiciones() {
+  async getRendiciones() {
     const response = await api.get<RendicionResponse[]>('/rendiciones');
+    return response.data;
+  },
+
+  /**
+   * Obtiene únicamente las rendiciones creadas por el usuario actual.
+   * (Para "Mis Trámites > Rendiciones")
+   */
+  async getMisRendiciones() {
+    const response = await api.get<RendicionResponse[]>(
+      '/rendiciones/mis-rendiciones'
+    );
     return response.data;
   },
 
@@ -84,6 +122,13 @@ export const rendicionesService = {
     payload: ObservarRendicionPayload
   ) {
     const response = await api.post(`/rendiciones/${id}/observar`, payload);
+    return response.data;
+  },
+
+  async downloadPdf(id: string | number) {
+    const response = await api.get(`/rendiciones/${id}/pdf`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 };

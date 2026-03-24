@@ -44,16 +44,17 @@ export function NuevaRendicionClientWrapper() {
             catalogosService.getUsuarios(),
           ]);
 
-        // Filtrar: solo las del usuario autenticado que ya fueron desembolsadas
+        // Filtrar: solo las del usuario autenticado que están desembolsadas y NO tienen rendición
         const desembolsadas = todas.filter((s) => {
           const esDesembolsado = s.estado === 'DESEMBOLSADO';
+          const noTieneRendicion = !s.rendicion;
           const esDelUsuario =
             String(s.usuarioEmisorId) === String(user.id) ||
             String(s.usuarioId) === String(user.id) ||
             String(s.usuario?.id) === String(user.id) ||
             String(s.usuarioEmisor?.id) === String(user.id);
 
-          return esDesembolsado && esDelUsuario;
+          return esDesembolsado && noTieneRendicion && esDelUsuario;
         });
 
         setSolicitudes(desembolsadas);
@@ -67,15 +68,25 @@ export function NuevaRendicionClientWrapper() {
           if (solicitudExiste) {
             setPreSelectedSolicitudId(idParam);
           } else {
-            toast.warning(
-              'La solicitud especificada no está disponible o no ha sido desembolsada.'
+            // Verificar si la solicitud existe pero ya tiene rendición
+            const solicitudConRendicion = todas.find(
+              (s) => s.id === idParam && s.rendicion
             );
+            if (solicitudConRendicion) {
+              toast.error(
+                'Esta solicitud ya tiene una rendición asociada. No es posible crear otra.'
+              );
+            } else {
+              toast.warning(
+                'La solicitud especificada no está disponible o no ha sido desembolsada.'
+              );
+            }
           }
         }
 
         if (desembolsadas.length === 0) {
           toast.info(
-            'No hay solicitudes desembolsadas para rendir. Verifica que exista una solicitud en estado "Desembolsado".'
+            'No hay solicitudes disponibles para rendir. Verifica que exista una solicitud en estado "Desembolsado" sin rendición asociada.'
           );
         }
       } catch (error: unknown) {

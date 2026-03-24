@@ -6,11 +6,13 @@ import {
   BarChart3,
   Bell,
   ClipboardPlus,
-  FileText,
+  Files,
   Home,
   LayoutGrid,
   LifeBuoy,
   Send,
+  Shield,
+  Users,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/ui/nav-main';
@@ -77,14 +79,26 @@ const FEEDBACK_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(FE
 function buildFormularioItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
-  // Solicitud: USUARIO, TESORERO y ADMIN pueden crear solicitudes
-  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
+  // Solicitud: USUARIO, TESORERO, EJECUTIVO y ADMIN pueden crear solicitudes
+  if (
+    rol === 'USUARIO' ||
+    rol === 'TESORERO' ||
+    rol === 'CONTADOR' ||
+    rol === 'EJECUTIVO' ||
+    rol === 'ADMIN'
+  ) {
     items.push({ title: 'Solicitud', url: '/app/solicitudes/nueva' });
   }
 
-  // Nueva rendición: disponible para los tres roles
-  if (rol === 'USUARIO' || rol === 'TESORERO' || rol === 'ADMIN') {
-    items.push({ title: 'Nueva Rendición', url: '/app/rendiciones/nueva' });
+  // Rendición: disponible para perfiles operativos
+  if (
+    rol === 'USUARIO' ||
+    rol === 'TESORERO' ||
+    rol === 'CONTADOR' ||
+    rol === 'EJECUTIVO' ||
+    rol === 'ADMIN'
+  ) {
+    items.push({ title: 'Rendición', url: '/app/rendiciones/nueva' });
   }
 
   return items;
@@ -96,7 +110,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
 
   const userRole = user?.rol as Role | undefined;
-  const canViewMonitor = userRole === 'ADMIN' || userRole === 'TESORERO';
+  const canViewMonitor =
+    userRole === 'ADMIN' ||
+    userRole === 'EJECUTIVO' ||
+    userRole === 'CONTADOR' ||
+    userRole === 'TESORERO';
+  const canViewAuditCenter =
+    userRole === 'ADMIN' ||
+    userRole === 'EJECUTIVO' ||
+    userRole === 'CONTADOR' ||
+    userRole === 'TESORERO';
+  const canManageUsers = userRole === 'ADMIN';
   const formularioItems = buildFormularioItems(userRole);
 
   const navSecondary = [
@@ -119,26 +143,47 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Home,
     },
     {
-      title: 'Mis Solicitudes',
-      url: '/app/solicitudes',
-      icon: FileText,
-    },
-    {
-      title: 'Mis Rendiciones',
-      url: '/app/rendiciones',
-      icon: FileText,
+      title: 'Mis Tramites',
+      url: '#',
+      icon: Files,
+      items: [
+        { title: 'Solicitudes', url: '/app/solicitudes' },
+        { title: 'Rendiciones', url: '/app/rendiciones' },
+      ],
     },
     {
       title: 'Notificaciones',
       url: '/app/aprobaciones',
       icon: Bell,
     },
+    ...(canViewAuditCenter
+      ? [
+          {
+            title: 'Centro de Auditoria',
+            url: '/app/auditoria',
+            icon: Shield,
+          },
+        ]
+      : []),
+    ...(canManageUsers
+      ? [
+          {
+            title: 'Gestion de Usuarios',
+            url: '/app/usuarios',
+            icon: Users,
+          },
+        ]
+      : []),
     ...(canViewMonitor
       ? [
           {
-            title: 'Monitor Solicitudes',
-            url: '/app/monitor',
+            title: 'Monitores',
+            url: '#',
             icon: LayoutGrid,
+            items: [
+              { title: 'Solicitudes', url: '/app/monitor' },
+              { title: 'Rendiciones', url: '/app/monitor-rendiciones' },
+            ],
           },
           {
             title: 'Analítica',

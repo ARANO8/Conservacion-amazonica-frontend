@@ -33,7 +33,7 @@ export const catalogosService = {
   },
 
   getUsuarios: async (): Promise<Usuario[]> => {
-    const { data } = await api.get<Usuario[]>('/usuarios');
+    const { data } = await api.get<Usuario[]>('/usuarios/lookup/activos');
     return data;
   },
 

@@ -1,5 +1,6 @@
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { CreateSolicitudPayload } from '@/types/solicitud-backend';
+import type { CuentaBancaria } from '@/types/backend';
 
 /**
  * Adapta los datos del formulario (Zod) al formato que espera el el backend.
@@ -12,6 +13,19 @@ export const adaptFormToPayload = (
   formData: FormData,
   aprobadorId: number
 ): CreateSolicitudPayload => {
+  const normalizedPoaIds = (formData.presupuestosIds || [])
+    .map((poaId) => Number(poaId))
+    .filter((poaId) => Number.isFinite(poaId) && poaId > 0);
+
+  const resolvePoaId = (candidate: unknown): number | null => {
+    const parsed = Number(candidate);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return null;
+    }
+
+    return parsed;
+  };
+
   // 1. Mapeo de Planificaciones (Actividades)
   const planificaciones = formData.actividades.map((act) => ({
     actividad: act.actividadProgramada,
@@ -23,29 +37,51 @@ export const adaptFormToPayload = (
   }));
 
   // 2. Mapeo de Viáticos
-  const viaticos = (formData.viaticos || []).map((v) => ({
-    planificacionIndexes: Array.isArray(v.planificacionIndexes)
-      ? v.planificacionIndexes.map(Number)
-      : [],
-    conceptoId: Number(v.conceptoId) || 0,
-    tipoDestino: v.tipoDestino || 'INSTITUCIONAL',
-    dias: Number(v.dias) || 0,
-    cantidadPersonas: Number(v.cantidadPersonas) || 0,
-    montoNeto: Number(v.liquidoPagable) || 0,
-    montoPresupuestado: Number(v.montoNeto) || 0,
-    poaId: Number(v.solicitudPresupuestoId) || 0,
-  }));
+  const viaticos = (formData.viaticos || [])
+    .map((v) => {
+      const poaId = resolvePoaId(v.solicitudPresupuestoId);
+      const conceptoId = Number(v.conceptoId);
+
+      if (!poaId || !Number.isFinite(conceptoId) || conceptoId <= 0) {
+        return null;
+      }
+
+      return {
+        planificacionIndexes: Array.isArray(v.planificacionIndexes)
+          ? v.planificacionIndexes.map(Number)
+          : [],
+        conceptoId,
+        tipoDestino: v.tipoDestino || 'INSTITUCIONAL',
+        dias: Number(v.dias) || 0,
+        cantidadPersonas: Number(v.cantidadPersonas) || 0,
+        montoNeto: Number(v.liquidoPagable) || 0,
+        montoPresupuestado: Number(v.montoNeto) || 0,
+        poaId,
+      };
+    })
+    .filter((viatico): viatico is NonNullable<typeof viatico> => !!viatico);
 
   // 3. Mapeo de Gastos (items)
-  const gastos = (formData.items || []).map((item) => ({
-    poaId: Number(item.solicitudPresupuestoId) || 0,
-    tipoGastoId: Number(item.tipoGastoId) || 0,
-    tipoDocumento: item.tipoDocumento || 'FACTURA',
-    cantidad: Number(item.cantidad) || 1,
-    montoNeto: Number(item.liquidoPagable) || 0,
-    montoPresupuestado: Number(item.montoNeto) || 0,
-    detalle: item.detalle || '',
-  }));
+  const gastos = (formData.items || [])
+    .map((item) => {
+      const poaId = resolvePoaId(item.solicitudPresupuestoId);
+      const tipoGastoId = Number(item.tipoGastoId);
+
+      if (!poaId || !Number.isFinite(tipoGastoId) || tipoGastoId <= 0) {
+        return null;
+      }
+
+      return {
+        poaId,
+        tipoGastoId,
+        tipoDocumento: item.tipoDocumento || 'FACTURA',
+        cantidad: Number(item.cantidad) || 1,
+        montoNeto: Number(item.liquidoPagable) || 0,
+        montoPresupuestado: Number(item.montoNeto) || 0,
+        detalle: item.detalle || '',
+      };
+    })
+    .filter((gasto): gasto is NonNullable<typeof gasto> => !!gasto);
 
   // 4. Mapeo de Nómina
   const nominasTerceros = (formData.nomina || []).map((n) => ({
@@ -54,21 +90,33 @@ export const adaptFormToPayload = (
   }));
 
   // 5. Mapeo de Hospedajes
-  const hospedajes = (formData.hospedajes || []).map((h) => ({
-    poaId: Number(h.poaId) || 0,
-    region: h.region || '',
-    destino: h.destino || '',
-    tipoDocumento: h.tipoDocumento || 'RECIBO',
-    personas: Number(h.personas) || 1,
-    noches: Number(h.noches) || 1,
-    cantidadUnitaria: Number(h.cantidadUnitaria) || 0,
-    costoTotal: Number(h.costoTotal) || 0,
-    iva: Number(h.iva) || 0,
-    it: Number(h.it) || 0,
-  }));
+  const hospedajes = (formData.hospedajes || [])
+    .map((h) => {
+      const poaId = resolvePoaId(h.poaId);
+
+      if (!poaId) {
+        return null;
+      }
+
+      return {
+        poaId,
+        region: h.region || '',
+        destino: h.destino || '',
+        tipoDocumento: h.tipoDocumento || 'RECIBO',
+        personas: Number(h.personas) || 1,
+        noches: Number(h.noches) || 1,
+        cantidadUnitaria: Number(h.cantidadUnitaria) || 0,
+        costoTotal: Number(h.costoTotal) || 0,
+        iva: Number(h.iva) || 0,
+        it: Number(h.it) || 0,
+      };
+    })
+    .filter(
+      (hospedaje): hospedaje is NonNullable<typeof hospedaje> => !!hospedaje
+    );
 
   return {
-    poaIds: formData.presupuestosIds || [],
+    poaIds: normalizedPoaIds,
     aprobadorId: aprobadorId,
     lugarViaje: formData.planificacionLugares,
     motivoViaje: formData.planificacionObjetivo,
@@ -92,6 +140,36 @@ import { SolicitudResponse } from '@/types/solicitud-backend';
 export const adaptResponseToFormData = (
   response: SolicitudResponse
 ): Partial<FormData> => {
+  const normalizeCuentaBancaria = (
+    cuentaBancaria: unknown
+  ): CuentaBancaria | undefined => {
+    if (!cuentaBancaria || typeof cuentaBancaria !== 'object') {
+      return undefined;
+    }
+
+    const raw = cuentaBancaria as Record<string, unknown>;
+
+    const numeroCuenta =
+      typeof raw.numeroCuenta === 'string' ? raw.numeroCuenta : '';
+    const banco = typeof raw.banco === 'string' ? raw.banco : '';
+    const nombreRaw = typeof raw.nombre === 'string' ? raw.nombre : '';
+
+    if (!numeroCuenta && !banco && !nombreRaw) {
+      return undefined;
+    }
+
+    return {
+      id: typeof raw.id === 'number' ? raw.id : Number(raw.id) || 0,
+      nombre:
+        nombreRaw.trim().length > 0 ? nombreRaw : banco || 'Cuenta bancaria',
+      numeroCuenta,
+      banco,
+      moneda: typeof raw.moneda === 'string' ? raw.moneda : undefined,
+      tipoCuenta:
+        typeof raw.tipoCuenta === 'string' ? raw.tipoCuenta : undefined,
+    };
+  };
+
   // 1. Mapeo de Planificaciones
   const actividades = (response.planificaciones || []).map((p) => ({
     actividadProgramada: p.actividadProgramada,
@@ -139,10 +217,29 @@ export const adaptResponseToFormData = (
 
     // Inyectamos el saldo virtual en el objeto POA para que los componentes de UI (PoaCard)
     // lo visualicen correctamente y validen el "Saldo Comprometido" con el valor restaurado.
+    const proyectoConCuentaBancaria = p.poa?.estructura?.proyecto
+      ? {
+          ...p.poa.estructura.proyecto,
+          cuentaBancaria: normalizeCuentaBancaria(
+            p.poa.estructura.proyecto.cuentaBancaria
+          ),
+        }
+      : undefined;
+
+    const estructuraConCuentaBancaria = p.poa?.estructura
+      ? {
+          ...p.poa.estructura,
+          proyecto: proyectoConCuentaBancaria,
+        }
+      : undefined;
+
     const poaConSaldoVirtual = p.poa
       ? {
           ...p.poa,
+          id: Number(p.poa.id),
+          costoTotal: Number(p.poa.costoTotal || 0),
           saldoDisponible: saldoVirtualFixed,
+          estructura: estructuraConCuentaBancaria,
           // Recalculamos si hay compromisos de TERCEROS
           tieneCompromisos: saldoVirtualFixed < limiteTotalPOA - 0.05,
         }
@@ -255,11 +352,10 @@ export const adaptResponseToFormData = (
     planificacionObjetivo: response.motivoViaje || '',
     motivo: response.descripcion || '',
     urlCuadroComparativo: response.urlCuadroComparativo || '',
-    urlCotizaciones:
-      response.urlCotizaciones && response.urlCotizaciones.length > 0
-        ? response.urlCotizaciones
-        : [''],
-    destinatario: '',
+    urlCotizaciones: Array.isArray(response.urlCotizaciones)
+      ? response.urlCotizaciones.filter((url): url is string => !!url)
+      : [],
+    destinatario: response.aprobadorId ? String(response.aprobadorId) : '',
     proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,
     presupuestosIds: fuentesSeleccionadas

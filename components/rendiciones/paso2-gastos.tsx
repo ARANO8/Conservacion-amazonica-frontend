@@ -119,7 +119,7 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
         </h3>
       </div>
       <p className="text-foreground text-sm">
-        Cada comprobante debe imputarse a una de estas partidas. El monto
+        Cada gasto registrado debe imputarse a una de estas partidas. El monto
         mostrado es el subtotal presupuestado aprobado por línea.
       </p>
 
@@ -230,22 +230,17 @@ function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-componente: ComprobanteCard (scoped useWatch + useEffect per card)
+// Sub-componente: GastoCard (scoped useWatch + useEffect per card)
 // ---------------------------------------------------------------------------
 
-interface ComprobanteCardProps {
+interface GastoCardProps {
   index: number;
   solicitud: SolicitudResponse | null;
   onRemove: () => void;
   form: UseFormReturn<CreateRendicionInput>;
 }
 
-function ComprobanteCard({
-  index,
-  solicitud,
-  onRemove,
-  form,
-}: ComprobanteCardProps) {
+function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) {
   const { control, setValue } = form;
 
   // Watch the fields that affect tax calculation
@@ -331,7 +326,7 @@ function ComprobanteCard({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-sm font-semibold">
-            Comprobante #{index + 1}
+            Registro de Gasto #{index + 1}
           </CardTitle>
           <Button
             type="button"
@@ -341,7 +336,7 @@ function ComprobanteCard({
             className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0"
           >
             <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Eliminar comprobante</span>
+            <span className="sr-only">Eliminar registro de gasto</span>
           </Button>
         </div>
       </CardHeader>
@@ -480,21 +475,22 @@ function ComprobanteCard({
           )}
         />
 
-        {/* --- URL Comprobante --- */}
+        {/* --- Comprobante / Orden de Compra (opcional) --- */}
         <FormField
           control={control}
           name={`gastos.${index}.urlComprobante`}
           render={({ field }) => (
             <FormItem className="md:col-span-3">
               <FormLabel className="text-sm font-bold tracking-wider uppercase">
-                URL Comprobante *
+                Comprobante / Orden de Compra (URL)
               </FormLabel>
               <FormControl>
                 <Input
                   type="url"
-                  placeholder="https://drive.google.com/..."
+                  placeholder="Enlace al comprobante u orden de compra (opcional)"
                   className="h-9 text-sm"
                   {...field}
+                  value={field.value ?? ''}
                 />
               </FormControl>
               <FormMessage className="text-sm" />
@@ -764,8 +760,8 @@ export default function Paso2Gastos({
       proveedor: '',
       detalle: '',
       partidaId: 0,
-      urlComprobante: '',
       tipoRetencion: 'SERVICIO',
+      urlComprobante: '',
     });
   };
 
@@ -798,11 +794,10 @@ export default function Paso2Gastos({
 
   return (
     <FieldSet>
-      <FieldLegend>Detalle de Comprobantes y Respaldo Documental</FieldLegend>
+      <FieldLegend>Rendición de Gastos Ejecutados</FieldLegend>
       <p className="text-foreground mb-6 text-sm">
-        Registra cada comprobante con su documento respaldo (Factura, Recibo o
-        Boleta). El monto neto se calcula automáticamente según el tipo de
-        documento y la partida presupuestaria.
+        Registra cada gasto ejecutado (factura, recibo o boleta) y su partida
+        presupuestaria. En esta etapa el respaldo documental es opcional.
       </p>
 
       <PartidasAprobadas solicitud={solicitud} gastos={gastos} />
@@ -812,17 +807,17 @@ export default function Paso2Gastos({
         {gastosFields.length === 0 ? (
           <div className="bg-muted/50 rounded-lg border-2 border-dashed p-6 text-center">
             <p className="text-foreground text-sm font-medium">
-              No hay comprobantes agregados aún
+              No hay gastos agregados aún
             </p>
             <p className="text-foreground mt-1 text-sm">
-              Presiona el botón de abajo para empezar a registrar tus
-              comprobantes.
+              Presiona el botón de abajo para empezar a registrar los gastos
+              ejecutados.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {gastosFields.map((field, index) => (
-              <ComprobanteCard
+              <GastoCard
                 key={field.id}
                 index={index}
                 solicitud={solicitud}
@@ -839,7 +834,7 @@ export default function Paso2Gastos({
                 className="border-dashed"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Agregar Comprobante
+                Agregar Gasto
               </Button>
             </div>
           </div>
@@ -854,7 +849,7 @@ export default function Paso2Gastos({
               className="border-dashed"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Agregar Comprobante
+              Agregar Gasto
             </Button>
           </div>
         )}
@@ -1049,7 +1044,7 @@ export default function Paso2Gastos({
           <CardContent className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-foreground font-medium">
-                Total con Respaldo (Comprobantes):
+                Total Registrado (Gastos):
               </span>
               <span className="font-bold">
                 {formatMoney(totalMontoTotal)} Bs.
@@ -1071,7 +1066,7 @@ export default function Paso2Gastos({
               </span>
             </div>
             <div className="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2 text-sm dark:bg-black/10">
-              <span className="font-bold">Comprobantes:</span>
+              <span className="font-bold">Registros de Gasto:</span>
               <Badge variant="secondary">{gastosFields.length}</Badge>
             </div>
           </CardContent>

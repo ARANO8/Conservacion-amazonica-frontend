@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/command';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Briefcase, Plus, Check, ChevronsUpDown } from 'lucide-react';
+import { Trash2, Briefcase, Plus, ChevronsUpDown } from 'lucide-react';
 import { FieldLegend, FieldSet } from '@/components/ui/field';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
 import { formatMoney, normalizeString } from '@/lib/utils';

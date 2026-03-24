@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { EstadoBadge } from '@/components/shared/estado-badge';
 import { formatDateShort } from '@/lib/utils';
+import { DownloadPdfButton } from '@/components/solicitudes/download-pdf-button';
 
 /**
  * Columnas para el Monitor de Solicitudes (solo lectura).
@@ -64,6 +65,16 @@ export const monitorColumns: ColumnDef<SolicitudResponse>[] = [
     header: 'Estado',
     cell: ({ row }) => (
       <EstadoBadge estado={(row.original.estado as string) || ''} />
+    ),
+  },
+  {
+    id: 'descargar_pdf',
+    header: 'Descargar',
+    cell: ({ row }) => (
+      <DownloadPdfButton
+        solicitudId={row.original.id}
+        codigoSolicitud={row.original.codigoSolicitud}
+      />
     ),
   },
   {

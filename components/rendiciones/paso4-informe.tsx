@@ -104,7 +104,7 @@ export default function Paso4Informe() {
 
   return (
     <FieldSet>
-      <FieldLegend>Anexo 7: Informe de Gastos</FieldLegend>
+      <FieldLegend>Anexo 7: Informe</FieldLegend>
       <p className="text-foreground mb-6 text-sm">
         Registra el rango del viaje y detalla la bitácora de actividades
         realizadas.

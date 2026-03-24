@@ -8,19 +8,14 @@ const STEPS: { key: WizardStepRendicion; label: string; short: string }[] = [
     short: '1. Selección',
   },
   {
-    key: 'RESPALDOS_GENERALES',
-    label: '2. Respaldos Generales',
-    short: '2. Respaldos',
-  },
-  {
     key: 'GASTOS_RESPALDO',
-    label: '3. Gastos y Comprobantes',
-    short: '3. Gastos',
+    label: '2. Rendición de Gastos',
+    short: '2. Gastos',
   },
   {
     key: 'INFORME_GASTOS',
-    label: '4. Informe de Gastos',
-    short: '4. Informe',
+    label: '3. Informe',
+    short: '3. Informe',
   },
 ];
 

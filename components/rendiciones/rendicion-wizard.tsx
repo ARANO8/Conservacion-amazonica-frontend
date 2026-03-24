@@ -24,7 +24,10 @@ import {
 } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
-import { adaptCreateRendicionPayload } from '@/lib/adapters/rendicion-adapter';
+import {
+  adaptCreateRendicionPayload,
+  adaptUpdateRendicionPayload,
+} from '@/lib/adapters/rendicion-adapter';
 import { Usuario } from '@/types/catalogs';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -43,11 +46,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
-import Paso2Respaldos from './paso2-respaldos';
 import Paso2Gastos from './paso2-gastos';
 import Paso4Informe from './paso4-informe';
 
@@ -60,6 +69,12 @@ interface RendicionWizardProps {
   currentUserId?: number;
   /** ID de solicitud pre-seleccionada (desde query params) */
   preSelectedSolicitudId?: number | null;
+  /** Modo edición: si true, el wizard está editando una rendición observada */
+  isEditMode?: boolean;
+  /** ID de la rendición a editar (solo en modo edición) */
+  rendicionId?: string;
+  /** Valores iniciales del formulario (solo en modo edición) */
+  initialValues?: Partial<CreateRendicionInput>;
 }
 
 export default function RendicionWizard({
@@ -67,22 +82,29 @@ export default function RendicionWizard({
   usuarios,
   currentUserId,
   preSelectedSolicitudId,
+  isEditMode = false,
+  rendicionId,
+  initialValues,
 }: RendicionWizardProps) {
   const router = useRouter();
-  const [step, setStep] = useState<WizardStepRendicion>('SELECCION');
+  // En modo edición, empezar directamente en gastos (la solicitud ya está fija)
+  const [step, setStep] = useState<WizardStepRendicion>(
+    isEditMode ? 'GASTOS_RESPALDO' : 'SELECCION'
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Combinar valores por defecto con valores iniciales en modo edición
+  const mergedDefaultValues: CreateRendicionInput = {
+    ...defaultRendicionValues,
+    ...(initialValues as Partial<CreateRendicionInput>),
+  };
+
   const form = useForm<CreateRendicionInput>({
     resolver: zodResolver(CreateRendicionSchema),
-    defaultValues: defaultRendicionValues,
+    defaultValues: mergedDefaultValues,
   });
 
-  // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
-  const watchedSolicitudId = useWatch({
-    control: form.control,
-    name: 'solicitudId',
-  });
   const [confirmaDatosVeridicos, aceptaPoliticaDevolucion] = useWatch({
     control: form.control,
     name: [
@@ -93,6 +115,12 @@ export default function RendicionWizard({
 
   const canConfirmSubmit =
     confirmaDatosVeridicos === true && aceptaPoliticaDevolucion === true;
+
+  // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
+  const watchedSolicitudId = useWatch({
+    control: form.control,
+    name: 'solicitudId',
+  });
 
   const solicitudSeleccionada =
     solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
@@ -107,16 +135,13 @@ export default function RendicionWizard({
       if (solicitudExiste) {
         // Pre-llenar el formulario con la solicitud seleccionada
         form.setValue('solicitudId', preSelectedSolicitudId);
-
-        // También set la fecha de rendición a hoy (o dejar el default)
-        const today = new Date().toISOString().split('T')[0];
-        form.setValue('fechaRendicion', today);
-
-        // Mantenerse en selección para elegir aprobador inmediato.
-        setStep('SELECCION');
+        // En modo edición no regresamos al paso de selección
+        if (!isEditMode) {
+          setStep('SELECCION');
+        }
       }
     }
-  }, [preSelectedSolicitudId, solicitudes, form]);
+  }, [preSelectedSolicitudId, solicitudes, form, isEditMode]);
 
   // ------------------------------------------------------------------
   // Navegación entre pasos con validación por campo
@@ -124,28 +149,9 @@ export default function RendicionWizard({
 
   const handleNext = async () => {
     if (step === 'SELECCION') {
-      const isValid = await form.trigger([
-        'solicitudId',
-        'fechaRendicion',
-        'aprobadorActualId',
-      ]);
+      const isValid = await form.trigger(['solicitudId']);
       if (!isValid) {
-        toast.error('Completa solicitud, fecha y aprobador para continuar');
-        return;
-      }
-      setStep('RESPALDOS_GENERALES');
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    if (step === 'RESPALDOS_GENERALES') {
-      const isValid = await form.trigger([
-        'solicitudId',
-        'fechaRendicion',
-        'aprobadorActualId',
-      ]);
-      if (!isValid) {
-        toast.error('Revisa los datos generales antes de continuar');
+        toast.error('Debes seleccionar una solicitud para continuar');
         return;
       }
       setStep('GASTOS_RESPALDO');
@@ -167,7 +173,8 @@ export default function RendicionWizard({
     if (step === 'INFORME_GASTOS') {
       const isValid = await form.trigger(['informeGastos']);
       if (!isValid) {
-        toast.error('Completa el informe de gastos antes de finalizar');
+        // El toast ahora será mostrado solo por handleInvalidSubmit
+        // si hay errores reales en la validación de Zod
         return;
       }
       setIsModalOpen(true);
@@ -175,12 +182,14 @@ export default function RendicionWizard({
   };
 
   const handleBack = () => {
-    if (step === 'RESPALDOS_GENERALES') {
-      setStep('SELECCION');
-      window.scrollTo(0, 0);
-    } else if (step === 'GASTOS_RESPALDO') {
-      setStep('RESPALDOS_GENERALES');
-      window.scrollTo(0, 0);
+    if (step === 'GASTOS_RESPALDO') {
+      // En modo edición, no se puede volver a selección (solicitud fija)
+      if (isEditMode) {
+        router.push('/app/rendiciones');
+      } else {
+        setStep('SELECCION');
+        window.scrollTo(0, 0);
+      }
     } else if (step === 'INFORME_GASTOS') {
       setStep('GASTOS_RESPALDO');
       window.scrollTo(0, 0);
@@ -196,15 +205,25 @@ export default function RendicionWizard({
     setIsSubmitting(true);
     try {
       const formData = form.getValues();
-      const payload = adaptCreateRendicionPayload(formData);
 
-      await rendicionesService.submitRendicion(payload);
+      if (isEditMode && rendicionId) {
+        // Modo edición: usar endpoint PATCH
+        const payload = adaptUpdateRendicionPayload(formData);
+        await rendicionesService.submitUpdateRendicion(rendicionId, payload);
+        toast.success('Rendición corregida y reenviada correctamente');
+      } else {
+        // Modo creación: usar endpoint POST
+        const payload = adaptCreateRendicionPayload(formData);
+        await rendicionesService.submitRendicion(payload);
+        toast.success('Rendición enviada correctamente');
+      }
 
-      toast.success('Rendición enviada correctamente');
       setIsModalOpen(false);
       router.push('/app/solicitudes');
     } catch (error: unknown) {
-      let message = 'Error al enviar la rendición.';
+      let message = isEditMode
+        ? 'Error al actualizar la rendición.'
+        : 'Error al enviar la rendición.';
 
       if (axios.isAxiosError(error)) {
         const backendMessage = error.response?.data?.message;
@@ -244,7 +263,13 @@ export default function RendicionWizard({
         errorMessage = 'Revisa los términos y condiciones antes de continuar';
       }
     } else if (firstErrorField === 'informeGastos') {
-      errorMessage = 'Completa el informe de gastos antes de continuar';
+      // Extraer el error específico del informe si existe
+      const informeError = errors.informeGastos as FieldError | undefined;
+      if (informeError?.message) {
+        errorMessage = informeError.message;
+      } else {
+        errorMessage = 'Revisa el informe antes de continuar';
+      }
     } else if (firstErrorField) {
       const fieldError = errors[firstErrorField as keyof typeof errors] as
         | FieldError
@@ -306,15 +331,8 @@ export default function RendicionWizard({
         {/* Área de contenido — crece para ocupar el espacio disponible */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {step === 'SELECCION' && (
-            <Paso1Seleccion
-              form={form}
-              solicitudes={solicitudes}
-              usuarios={usuarios}
-              currentUserId={currentUserId}
-            />
+            <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
-
-          {step === 'RESPALDOS_GENERALES' && <Paso2Respaldos />}
 
           {step === 'GASTOS_RESPALDO' && (
             <Paso2Gastos solicitud={solicitudSeleccionada} />
@@ -331,6 +349,7 @@ export default function RendicionWizard({
           loading={isSubmitting}
           form={form}
           solicitudes={solicitudes}
+          isEditMode={isEditMode}
         />
 
         <Dialog
@@ -348,6 +367,43 @@ export default function RendicionWizard({
             </DialogHeader>
 
             <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="aprobadorActualId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-bold tracking-wider uppercase">
+                      Aprobador Inmediato *
+                    </FormLabel>
+                    <Select
+                      value={field.value ? String(field.value) : ''}
+                      onValueChange={(value) => field.onChange(Number(value))}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecciona un aprobador..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {usuarios
+                          .filter((usuario) => usuario.id !== currentUserId)
+                          .map((usuario) => (
+                            <SelectItem
+                              key={usuario.id}
+                              value={String(usuario.id)}
+                            >
+                              {usuario.nombreCompleto}
+                              {usuario.cargo ? ` — ${usuario.cargo}` : ''}
+                              {usuario.rol ? ` (${usuario.rol})` : ''}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-[10px]" />
+                  </FormItem>
+                )}
+              />
+
               <div className="bg-card rounded-lg border p-4">
                 <FormField
                   control={form.control}
@@ -433,12 +489,20 @@ export default function RendicionWizard({
               </Button>
               <Button
                 type="button"
-                disabled={isSubmitting || !canConfirmSubmit}
+                disabled={
+                  isSubmitting ||
+                  !canConfirmSubmit ||
+                  !form.getValues('aprobadorActualId')
+                }
                 onClick={() => {
                   void submitRendicion();
                 }}
               >
-                {isSubmitting ? 'Enviando...' : 'Confirmar y Enviar Rendición'}
+                {isSubmitting
+                  ? 'Enviando...'
+                  : isEditMode
+                    ? 'Confirmar y Reenviar Rendición'
+                    : 'Confirmar y Enviar Rendición'}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -32,7 +32,7 @@ import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
-import { SeleccionPresupuesto, PoaStructureItem } from '@/types/backend';
+import { SeleccionPresupuesto, PoaStructureItem, Poa } from '@/types/backend';
 import {
   formSchema,
   defaultValues,
@@ -53,6 +53,124 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useAuthStore } from '@/store/auth-store';
 
+function normalizeInitialSelections(
+  fuentesSeleccionadas: FormData['fuentesSeleccionadas']
+): SeleccionPresupuesto[] {
+  const normalizePoa = (
+    poa: NonNullable<FormData['fuentesSeleccionadas']>[number]['poa']
+  ): Poa | undefined => {
+    if (!poa) {
+      return undefined;
+    }
+
+    const normalizedCuentaBancaria =
+      poa.estructura?.proyecto?.cuentaBancaria &&
+      typeof poa.estructura.proyecto.cuentaBancaria.id === 'number' &&
+      typeof poa.estructura.proyecto.cuentaBancaria.nombre === 'string' &&
+      typeof poa.estructura.proyecto.cuentaBancaria.numeroCuenta === 'string' &&
+      typeof poa.estructura.proyecto.cuentaBancaria.banco === 'string'
+        ? {
+            id: poa.estructura.proyecto.cuentaBancaria.id,
+            nombre: poa.estructura.proyecto.cuentaBancaria.nombre,
+            numeroCuenta: poa.estructura.proyecto.cuentaBancaria.numeroCuenta,
+            banco: poa.estructura.proyecto.cuentaBancaria.banco,
+            moneda: poa.estructura.proyecto.cuentaBancaria.moneda ?? undefined,
+            tipoCuenta:
+              poa.estructura.proyecto.cuentaBancaria.tipoCuenta ?? undefined,
+          }
+        : undefined;
+
+    const normalizedProyecto = poa.estructura?.proyecto
+      ? {
+          id: poa.estructura.proyecto.id,
+          nombre: poa.estructura.proyecto.nombre,
+          cuentaBancaria: normalizedCuentaBancaria,
+        }
+      : undefined;
+
+    const normalizedGrupo = poa.estructura?.grupo
+      ? {
+          id: poa.estructura.grupo.id,
+          nombre: poa.estructura.grupo.nombre,
+          codigo: poa.estructura.grupo.codigo,
+        }
+      : undefined;
+
+    const normalizedPartida = poa.estructura?.partida
+      ? {
+          id: poa.estructura.partida.id,
+          nombre: poa.estructura.partida.nombre,
+          codigo: poa.estructura.partida.codigo,
+        }
+      : undefined;
+
+    const normalizedEstructura =
+      normalizedProyecto || normalizedGrupo || normalizedPartida
+        ? {
+            proyecto: normalizedProyecto,
+            grupo: normalizedGrupo,
+            partida: normalizedPartida,
+          }
+        : undefined;
+
+    return {
+      id: poa.id,
+      codigoPoa: poa.codigoPoa,
+      cantidad: poa.cantidad ?? 0,
+      costoUnitario: poa.costoUnitario ?? 0,
+      costoTotal: Number(poa.costoTotal ?? 0),
+      saldoDisponible: poa.saldoDisponible,
+      montoComprometido: poa.montoComprometido,
+      tieneCompromisos: poa.tieneCompromisos,
+      proyectoId: poa.proyectoId ?? poa.estructura?.proyecto?.id ?? 0,
+      grupoId: poa.grupoId ?? poa.estructura?.grupo?.id ?? 0,
+      partidaId: poa.partidaId ?? poa.estructura?.partida?.id ?? 0,
+      actividadId: poa.actividadId ?? poa.actividad?.id ?? 0,
+      codigoPresupuestarioId: poa.codigoPresupuestarioId ?? poa.id,
+      actividad: poa.actividad
+        ? {
+            id: poa.actividad.id ?? 0,
+            nombre:
+              poa.actividad.nombre ??
+              poa.actividad.detalleDescripcion ??
+              `Actividad ${poa.actividad.id}`,
+            detalleDescripcion: poa.actividad.detalleDescripcion,
+          }
+        : undefined,
+      codigoPresupuestario: poa.codigoPresupuestario
+        ? {
+            id: poa.codigoPresupuestario.id ?? 0,
+            nombre:
+              poa.codigoPresupuestario.nombre ??
+              poa.codigoPresupuestario.descripcion ??
+              poa.codigoPresupuestario.codigoCompleto ??
+              poa.codigoPresupuestario.codigo ??
+              `Codigo ${poa.codigoPresupuestario.id}`,
+            codigo: poa.codigoPresupuestario.codigo,
+            codigoCompleto: poa.codigoPresupuestario.codigoCompleto,
+            descripcion: poa.codigoPresupuestario.descripcion,
+          }
+        : undefined,
+      estructura: normalizedEstructura,
+    };
+  };
+
+  return (fuentesSeleccionadas ?? [])
+    .filter(
+      (
+        fuente
+      ): fuente is NonNullable<FormData['fuentesSeleccionadas']>[number] & {
+        poaId: number;
+      } => typeof fuente.poaId === 'number'
+    )
+    .map((fuente) => ({
+      poaId: fuente.poaId,
+      poa: normalizePoa(fuente.poa),
+      montoPresupuestado: fuente.montoPresupuestado ?? 0,
+      saldoDisponible: fuente.saldoDisponible ?? 0,
+    }));
+}
+
 interface SolicitudFormProps {
   initialValues?: Partial<FormData>;
   isEditMode?: boolean;
@@ -69,8 +187,7 @@ export default function SolicitudForm({
   const [loading, setLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [misSelecciones, setMisSelecciones] = useState<SeleccionPresupuesto[]>(
-    (initialValues?.fuentesSeleccionadas as unknown as SeleccionPresupuesto[]) ||
-      []
+    normalizeInitialSelections(initialValues?.fuentesSeleccionadas)
   );
   const [selectedPoa, setSelectedPoa] = useState<string>(
     initialValues?.fuentesSeleccionadas?.[0]?.poa?.codigoPoa || ''
@@ -84,7 +201,10 @@ export default function SolicitudForm({
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialValues || defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      ...initialValues,
+    },
   });
 
   const {
@@ -95,6 +215,10 @@ export default function SolicitudForm({
   usePreventNavigation(!isSubmitSuccessful);
 
   const watchActividades = form.watch('actividades');
+
+  const logValidationErrors = () => {
+    console.error('Errores de validación Zod:', form.formState.errors);
+  };
 
   const handleNext = async () => {
     if (step === 'PLANIFICACION') {
@@ -107,6 +231,7 @@ export default function SolicitudForm({
         setStep('SOLICITUD');
         window.scrollTo(0, 0);
       } else {
+        logValidationErrors();
         toast.error('Corrige los errores en la planificación');
       }
       return;
@@ -204,6 +329,7 @@ export default function SolicitudForm({
         setStep('RESPALDOS');
         window.scrollTo(0, 0);
       } else {
+        logValidationErrors();
         toast.error('Corrige los errores en el detalle económico');
       }
       return;
@@ -218,6 +344,7 @@ export default function SolicitudForm({
         setStep('NOMINA');
         window.scrollTo(0, 0);
       } else {
+        logValidationErrors();
         toast.error('Corrige los errores en los documentos de respaldo');
       }
       return;
@@ -228,6 +355,7 @@ export default function SolicitudForm({
       if (isValid) {
         setIsReviewModalOpen(true);
       } else {
+        logValidationErrors();
         const errors = form.formState.errors;
         if (errors.nomina) {
           // Obtener el primer mensaje de error para mostrarlo
@@ -297,6 +425,21 @@ export default function SolicitudForm({
   };
 
   const onError = (errors: FieldErrors<FormData>) => {
+    const rawValues = form.getValues();
+    const parsed = formSchema.safeParse(rawValues);
+
+    if (!parsed.success) {
+      console.error(
+        '🔥 ZOD EXACT ERRORS:',
+        JSON.stringify(parsed.error.format(), null, 2)
+      );
+    } else {
+      console.error(
+        '🔥 RHF ERRORS (Stringified):',
+        JSON.stringify(errors, null, 2)
+      );
+    }
+
     toast.error('Corrige los errores marcados en rojo.');
   };
 

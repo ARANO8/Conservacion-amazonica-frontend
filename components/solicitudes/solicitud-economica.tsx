@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Control,
   useFormContext,
@@ -115,6 +115,7 @@ export default function SolicitudEconomica({
   isEditMode = false,
 }: SolicitudEconomicaProps) {
   const { setValue, watch } = useFormContext<FormData>();
+  const hasHydratedInitialPoaRef = useRef(false);
 
   // Estado "Tree-Walker": Estructura completa del POA seleccionado
   const [isLoadingStructure, setIsLoadingStructure] = useState(false);
@@ -132,9 +133,17 @@ export default function SolicitudEconomica({
   // REHYDRATION LOGIC: Cargar estructura si ya tenemos un POA (ej. en modo edición)
   // Si poaStructure.length > 0 significa que ya está cargado (ej. al volver desde paso 3).
   useEffect(() => {
-    // Si no hay código inicial, ya hay estructura cargada, o estamos cargando → no hacer nada.
-    if (!initialPoaCode || isLoadingStructure || poaStructure.length > 0)
+    if (hasHydratedInitialPoaRef.current) {
       return;
+    }
+
+    // Si no hay código inicial, ya hay estructura cargada, o estamos cargando → no hacer nada.
+    if (!initialPoaCode || isLoadingStructure || poaStructure.length > 0) {
+      if (!initialPoaCode || poaStructure.length > 0) {
+        hasHydratedInitialPoaRef.current = true;
+      }
+      return;
+    }
 
     const fetchStructure = async () => {
       try {
@@ -178,17 +187,24 @@ export default function SolicitudEconomica({
           // 3. Si es CREACIÓN, usamos datos puros
           setPoaStructure(structure);
         }
-      } catch (_error) {
+
+        hasHydratedInitialPoaRef.current = true;
+      } catch {
         toast.error('Error al cargar POA');
       } finally {
         setIsLoadingStructure(false);
       }
     };
 
-    fetchStructure();
-    // DEPENDENCIAS CRÍTICAS: Solo el código y el modo. NO misSelecciones.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPoaCode, isEditMode]);
+    void fetchStructure();
+  }, [
+    initialPoaCode,
+    isEditMode,
+    isLoadingStructure,
+    misSelecciones,
+    poaStructure.length,
+    setPoaStructure,
+  ]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -262,7 +278,7 @@ export default function SolicitudEconomica({
       setIsCleaning(false);
       toast.info('Formulario limpiado para el nuevo contexto.');
     },
-    [setValue, setMisSelecciones]
+    [setMisSelecciones, setPoaStructure, setSelectedPoa, setValue]
   );
 
   /**
@@ -789,8 +805,17 @@ function FuenteCard({
     );
 
     toast.success(`Partida seleccionada: ${formatMoney(monto)}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItemId]);
+  }, [
+    availableItems,
+    codigoPoa,
+    index,
+    isEditMode,
+    isLocked,
+    misSelecciones,
+    selectedItemId,
+    setMisSelecciones,
+    setValue,
+  ]);
 
   const handleRemoveCard = () => {
     if (poaId) {

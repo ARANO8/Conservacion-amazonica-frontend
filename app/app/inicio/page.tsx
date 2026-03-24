@@ -10,21 +10,71 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   dashboardService,
   type DashboardMetrics,
 } from '@/lib/services/dashboard-service';
+import { notificacionesService } from '@/lib/services/notificaciones-service';
 import { KpiCards } from '@/components/dashboard/kpi-cards';
 import { RecentMovements } from '@/components/dashboard/recent-movements';
 import { PoaThermometer } from '@/components/dashboard/poa-thermometer';
+import { useAuthStore } from '@/store/auth-store';
+
+const APPROVER_ROLES = new Set(['ADMIN', 'EJECUTIVO', 'TESORERO', 'CONTADOR']);
 
 export default function Page() {
-  const searchParams = useSearchParams();
-  const isApprover = searchParams.get('role') === 'approver';
+  const { user } = useAuthStore();
+
+  const [isCurrentApprover, setIsCurrentApprover] = useState(false);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+
+  const isApproverByRole = user ? APPROVER_ROLES.has(user.rol) : false;
+  const isApprover = isApproverByRole || isCurrentApprover;
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!user) {
+      setIsCurrentApprover(false);
+      return;
+    }
+
+    if (APPROVER_ROLES.has(user.rol)) {
+      setIsCurrentApprover(false);
+      return;
+    }
+
+    const fetchApprovalAssignments = async () => {
+      try {
+        const notificaciones =
+          await notificacionesService.getMisNotificaciones();
+        if (!mounted) {
+          return;
+        }
+
+        const hasPendingAssignments = notificaciones.some(
+          (notificacion) =>
+            notificacion.tipo === 'SOLICITUD_ASIGNADA' ||
+            notificacion.tipo === 'SOLICITUD_DERIVADA' ||
+            notificacion.tipo === 'RENDICION_PENDIENTE'
+        );
+
+        setIsCurrentApprover(hasPendingAssignments);
+      } catch {
+        if (mounted) {
+          setIsCurrentApprover(false);
+        }
+      }
+    };
+
+    void fetchApprovalAssignments();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
 
   useEffect(() => {
     let mounted = true;
@@ -71,9 +121,7 @@ export default function Page() {
               </CardHeader>
               <CardFooter>
                 <Button asChild>
-                  <Link href="/app/aprobaciones?role=approver">
-                    Ir a Revisión
-                  </Link>
+                  <Link href="/app/aprobaciones">Ir a Revisión</Link>
                 </Button>
               </CardFooter>
             </Card>

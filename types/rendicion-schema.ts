@@ -22,7 +22,6 @@ export type TipoDeclaracion = z.infer<typeof TipoDeclaracionEnum>;
 
 export type WizardStepRendicion =
   | 'SELECCION'
-  | 'RESPALDOS_GENERALES'
   | 'GASTOS_RESPALDO'
   | 'INFORME_GASTOS';
 
@@ -55,8 +54,11 @@ export const GastoRendicionSchema = z.object({
   estado: EstadoGastoEnum.optional(),
   /** ID del presupuesto (partida POA) al que se imputa este gasto */
   partidaId: z.number().min(1, 'Debes seleccionar una partida presupuestaria'),
-  /** URL del comprobante digital adjunto */
-  urlComprobante: z.string().url('La URL del comprobante no es válida'),
+  /** URL de respaldo documental (opcional en esta etapa) */
+  urlComprobante: z
+    .string()
+    .url('La URL del comprobante no es válida')
+    .optional(),
   /**
    * Sub-categoría de retención — sólo aplica para RECIBO/BOLETA en gastos GENERALES.
    * Determina el factor de retención: BIEN=0.92, SERVICIO=0.84, ALQUILER=0.84.
@@ -145,11 +147,6 @@ export const CreateRendicionSchema = z.object({
   aprobadorActualId: z
     .number()
     .min(1, 'Debes seleccionar un aprobador inmediato'),
-  /** Fecha en que se realiza la rendición (ISO date string YYYY-MM-DD) */
-  fechaRendicion: z
-    .string()
-    .min(1, 'La fecha de rendición es requerida')
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
 
   // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
@@ -176,7 +173,6 @@ export type CreateRendicionInput = z.infer<typeof CreateRendicionSchema>;
 export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
   aprobadorActualId: 0,
-  fechaRendicion: new Date().toISOString().split('T')[0],
   gastos: [],
   informeGastos: {
     fechaInicio: '',

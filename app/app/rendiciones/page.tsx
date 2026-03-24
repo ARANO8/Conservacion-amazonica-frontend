@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Eye, Plus } from 'lucide-react';
+import axios from 'axios';
+import { Eye, MoreHorizontal, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
@@ -10,6 +11,14 @@ import { formatDateShort, formatMoney } from '@/lib/utils';
 import { RendicionResponse } from '@/types/rendicion-backend';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -32,6 +41,31 @@ function getEstadoClass(estado: string) {
   return (
     ESTADO_BADGE_CLASS[estado] || 'bg-slate-100 text-slate-800 border-slate-200'
   );
+}
+
+async function handleDownloadPdf(
+  rendicionId: number,
+  fileName: string
+): Promise<void> {
+  try {
+    const blob = await rendicionesService.downloadPdf(rendicionId);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    toast.success('PDF de rendición descargado correctamente.');
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      toast.info('Descarga PDF para rendiciones en preparación.');
+      return;
+    }
+
+    toast.error('No se pudo descargar el PDF de la rendición.');
+  }
 }
 
 export default function MisRendicionesPage() {
@@ -136,12 +170,38 @@ export default function MisRendicionesPage() {
                       </TableCell>
 
                       <TableCell className="text-right">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/app/rendiciones/${rendicion.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver Detalle
-                          </Link>
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Acciones"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link href={`/app/rendiciones/${rendicion.id}`}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver Detalle
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={(event) => {
+                                event.preventDefault();
+                                void handleDownloadPdf(
+                                  rendicion.id,
+                                  codigo || `rendicion-${rendicion.id}`
+                                );
+                              }}
+                            >
+                              Descargar PDF
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   );

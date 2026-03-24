@@ -32,7 +32,7 @@ export default function EditSolicitudPage() {
 
         const formData = adaptResponseToFormData(solicitud);
         setInitialData(formData);
-      } catch (error) {
+      } catch {
         toast.error('Error al cargar la solicitud');
         router.push('/app/solicitudes');
       } finally {

@@ -1,8 +1,7 @@
 'use client';
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +19,16 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/auth-store';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 // Esquema de validación
 const loginSchema = z.object({
@@ -80,7 +89,7 @@ export function LoginForm({
             <div className="flex flex-col items-center gap-2 text-center">
               <h1 className="text-xl font-bold">Bienvenido a AMZ Desk</h1>
               <FieldDescription>
-                No tienes una cuenta? <Link href="/signup">Registrarse</Link>
+                Ingrese sus credenciales para acceder al sistema.
               </FieldDescription>
             </div>
 
@@ -100,12 +109,39 @@ export function LoginForm({
             <Field>
               <div className="flex items-center justify-between">
                 <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-                <Link
-                  href="/forgot-password"
-                  className="text-muted-foreground text-xs underline-offset-4 hover:underline"
-                >
-                  Olvidaste tu contraseña?
-                </Link>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-muted-foreground text-xs underline-offset-4 hover:underline"
+                    >
+                      Olvidaste tu contraseña?
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Restablecer Contraseña</DialogTitle>
+                      <DialogDescription>
+                        Para restablecer su contraseña, por favor contáctese con
+                        el administrador del sistema.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-4">
+                      <Mail className="text-primary h-5 w-5" />
+                      <a
+                        href="mailto:example@gmail.com"
+                        className="text-primary font-medium hover:underline"
+                      >
+                        example@gmail.com
+                      </a>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Entendido</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
               <div className="relative">
                 <Input

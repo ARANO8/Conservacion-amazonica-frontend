@@ -9,13 +9,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -30,7 +23,6 @@ import {
 } from '@/components/ui/command';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { FieldGroup, FieldSet, FieldLegend } from '@/components/ui/field';
 import { EstadoBadge } from '@/components/shared/estado-badge';
@@ -46,7 +38,6 @@ import {
 import { cn, formatMoney, formatDateShort } from '@/lib/utils';
 import { CreateRendicionInput } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
-import { Usuario } from '@/types/catalogs';
 
 // ---------------------------------------------------------------------------
 // Card de resumen de la solicitud seleccionada
@@ -162,24 +153,17 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
 interface Paso1SeleccionProps {
   form: UseFormReturn<CreateRendicionInput>;
   solicitudes: SolicitudResponse[];
-  usuarios: Usuario[];
-  currentUserId?: number;
 }
 
 export default function Paso1Seleccion({
   form,
   solicitudes,
-  usuarios,
-  currentUserId,
 }: Paso1SeleccionProps) {
   const [open, setOpen] = useState(false);
 
   // Watch para reaccionar al cambio de solicitudId y mostrar la card
   const solicitudId = useWatch({ control: form.control, name: 'solicitudId' });
   const solicitudSeleccionada = solicitudes.find((s) => s.id === solicitudId);
-  const aprobadoresDisponibles = usuarios.filter(
-    (usuario) => usuario.id !== currentUserId
-  );
 
   return (
     <FieldSet>
@@ -281,57 +265,6 @@ export default function Paso1Seleccion({
           {solicitudSeleccionada && (
             <SolicitudResumenCard solicitud={solicitudSeleccionada} />
           )}
-
-          {/* ---- Fecha de Rendición (solo lectura — siempre es hoy) ---- */}
-          <FormField
-            control={form.control}
-            name="fechaRendicion"
-            render={({ field }) => (
-              <FormItem>
-                <span className="text-sm font-medium">Fecha de Rendición</span>
-                <FormControl>
-                  <Input
-                    type="date"
-                    readOnly
-                    className="bg-muted cursor-not-allowed"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* ---- Aprobador inmediato ---- */}
-          <FormField
-            control={form.control}
-            name="aprobadorActualId"
-            render={({ field }) => (
-              <FormItem>
-                <span className="text-sm font-medium">Aprobador Inmediato</span>
-                <Select
-                  value={field.value ? String(field.value) : ''}
-                  onValueChange={(value) => field.onChange(Number(value))}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecciona un aprobador..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {aprobadoresDisponibles.map((usuario) => (
-                      <SelectItem key={usuario.id} value={String(usuario.id)}>
-                        {usuario.nombreCompleto}
-                        {usuario.cargo ? ` — ${usuario.cargo}` : ''}
-                        {usuario.rol ? ` (${usuario.rol})` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </FieldGroup>
       )}
     </FieldSet>

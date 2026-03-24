@@ -341,7 +341,7 @@ export default function RendicionDetalleBySolicitudPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <NotebookPen className="h-5 w-5" />
-            Informe de Gastos (Anexo 7)
+            Informe (Anexo 7)
           </CardTitle>
           <CardDescription className="text-amzdesk-helper">
             Rango de viaje y actividades realizadas durante la comisión.
@@ -389,7 +389,7 @@ export default function RendicionDetalleBySolicitudPage() {
             </>
           ) : (
             <p className="text-amzdesk-helper">
-              Esta rendición no incluye informe de gastos.
+              Esta rendición no incluye informe.
             </p>
           )}
         </CardContent>

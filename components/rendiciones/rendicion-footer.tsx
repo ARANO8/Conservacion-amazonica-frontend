@@ -20,6 +20,8 @@ interface RendicionFooterProps {
   loading?: boolean;
   form: UseFormReturn<CreateRendicionInput>;
   solicitudes: SolicitudResponse[];
+  /** Indica si el wizard está en modo edición (rendición observada) */
+  isEditMode?: boolean;
 }
 
 export default function RendicionFooter({
@@ -29,6 +31,7 @@ export default function RendicionFooter({
   loading = false,
   form,
   solicitudes,
+  isEditMode = false,
 }: RendicionFooterProps) {
   const solicitudId = useWatch({ control: form.control, name: 'solicitudId' });
   const gastos = useWatch({ control: form.control, name: 'gastos' });
@@ -49,7 +52,10 @@ export default function RendicionFooter({
 
   const saldo = montoAnticipado - totalRendido;
   const isLastStep = step === 'INFORME_GASTOS';
-  const isFirstStep = step === 'SELECCION';
+  // En modo edición, el primer paso es GASTOS_RESPALDO (no SELECCION)
+  const isFirstStep = isEditMode
+    ? step === 'GASTOS_RESPALDO'
+    : step === 'SELECCION';
   const showFinancialSummary =
     (step === 'GASTOS_RESPALDO' || step === 'INFORME_GASTOS') &&
     montoAnticipado > 0;

@@ -31,6 +31,15 @@ import { useNotificacionesStore } from '@/store/useNotificacionesStore';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+function getAvatarUrl(name: string): string {
+  const params = new URLSearchParams({
+    name,
+    background: 'random',
+  });
+
+  return `https://ui-avatars.com/api/?${params.toString()}`;
+}
+
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, logout } = useAuthStore();
@@ -49,6 +58,56 @@ export function NavUser() {
       .replace(/^\/dashboard\//, '/app/');
   };
 
+  /**
+   * Resuelve la URL de destino para una notificación.
+   * Para RENDICION_PENDIENTE usa urlDestino si apunta a rendiciones.
+   * Para RENDICION_OBSERVADA redirige a /editar (página de corrección).
+   */
+  const resolveNotificationUrl = (
+    notification: (typeof notificaciones)[0]
+  ): string => {
+    // Para RENDICION_OBSERVADA, siempre ir a la página de edición
+    if (notification.tipo === 'RENDICION_OBSERVADA') {
+      // Si ya tiene urlDestino que apunta a /editar, usarlo
+      if (
+        notification.urlDestino &&
+        notification.urlDestino.includes('/editar')
+      ) {
+        return notification.urlDestino;
+      }
+      // Resolver por rendicion.id y construir URL de edición
+      const rendicionId = notification.solicitud?.rendicion?.id;
+      if (rendicionId) {
+        return `/app/rendiciones/${rendicionId}/editar`;
+      }
+      // Fallback si no hay rendicion.id
+      return '/app/rendiciones';
+    }
+
+    // Para RENDICION_PENDIENTE, usar urlDestino si apunta a rendiciones
+    if (notification.tipo === 'RENDICION_PENDIENTE') {
+      if (
+        notification.urlDestino &&
+        notification.urlDestino.startsWith('/app/rendiciones/')
+      ) {
+        return notification.urlDestino;
+      }
+      const rendicionId = notification.solicitud?.rendicion?.id;
+      if (rendicionId) {
+        return `/app/rendiciones/${rendicionId}`;
+      }
+      return '/app/aprobaciones';
+    }
+
+    // Para otros tipos, usar urlDestino o construir URL de aprobaciones
+    const rawUrl =
+      notification.urlDestino ??
+      (notification.solicitudId
+        ? `/app/aprobaciones/${notification.solicitudId}`
+        : null);
+    return sanitizeUrl(rawUrl);
+  };
+
   const handleNotificationClick = async (
     notification: (typeof notificaciones)[0]
   ) => {
@@ -56,14 +115,8 @@ export function NavUser() {
     if (!notification.leida) {
       await markAsRead(notification.id);
     }
-    // Navegar: usar urlDestino (sanitizado) si está definido,
-    // sino construir la URL de detalle de aprobaciones
-    const rawUrl =
-      notification.urlDestino ??
-      (notification.solicitudId
-        ? `/app/aprobaciones/${notification.solicitudId}`
-        : null);
-    router.push(sanitizeUrl(rawUrl));
+    // Navegar a la URL resuelta
+    router.push(resolveNotificationUrl(notification));
   };
 
   // Últimas 3 notificaciones no leídas
@@ -72,6 +125,8 @@ export function NavUser() {
     .slice(0, 3);
 
   if (!user) return null; // O mostrar un placeholder/skeleton
+
+  const avatarUrl = getAvatarUrl(user.nombreCompleto);
 
   return (
     <SidebarMenu>
@@ -83,10 +138,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={`https://ui-avatars.com/api/?name=${user.nombreCompleto}&background=random`}
-                  alt={user.nombreCompleto}
-                />
+                <AvatarImage src={avatarUrl} alt={user.nombreCompleto} />
                 <AvatarFallback className="rounded-lg">
                   {user.nombreCompleto.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -109,10 +161,7 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={`https://ui-avatars.com/api/?name=${user.nombreCompleto}&background=random`}
-                    alt={user.nombreCompleto}
-                  />
+                  <AvatarImage src={avatarUrl} alt={user.nombreCompleto} />
                   <AvatarFallback className="rounded-lg">
                     {user.nombreCompleto.substring(0, 2).toUpperCase()}
                   </AvatarFallback>

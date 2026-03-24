@@ -51,6 +51,26 @@ export interface CreateSolicitudPayload {
   }[];
 }
 
+export interface HistorialUsuarioResumen {
+  id: number;
+  nombreCompleto: string;
+  rol?: string;
+  cargo?: string;
+}
+
+export interface HistorialAprobacionSolicitudResponse {
+  id: number;
+  accion: 'CREADO' | 'APROBADO' | 'OBSERVADO' | 'DERIVADO' | 'RECHAZADO';
+  comentario?: string | null;
+  fecha: string;
+  usuarioId: number;
+  derivadoAId?: number | null;
+  solicitudId?: number | null;
+  rendicionId?: number | null;
+  usuario?: HistorialUsuarioResumen;
+  derivadoA?: HistorialUsuarioResumen | null;
+}
+
 export interface SolicitudResponse {
   id: number;
   codigoSolicitud: string;
@@ -66,6 +86,7 @@ export interface SolicitudResponse {
   usuarioEmisorId?: number | string;
   usuarioId?: number | string;
   aprobadorId?: number;
+  aprobadorActualId?: number | string;
   usuarioEmisor?: {
     id: number | string;
     nombreCompleto: string;
@@ -219,6 +240,7 @@ export interface SolicitudResponse {
   }>;
   codigoDesembolso?: string;
   urlComprobante?: string;
+  historialAprobaciones?: HistorialAprobacionSolicitudResponse[];
   rendicion?: {
     id: number;
     estado: string;

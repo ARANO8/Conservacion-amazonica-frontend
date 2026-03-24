@@ -22,6 +22,7 @@ function tipoLabel(tipo: NotificacionBackend['tipo']): string {
     SOLICITUD_APROBADA: 'Aprobada',
     SOLICITUD_OBSERVADA: 'Observada',
     RENDICION_PENDIENTE: 'Rendición pendiente',
+    RENDICION_OBSERVADA: 'Rendición observada',
   };
   return labels[tipo] ?? tipo;
 }
@@ -30,7 +31,11 @@ function tipoVariant(
   tipo: NotificacionBackend['tipo']
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (tipo === 'SOLICITUD_APROBADA') return 'default';
-  if (tipo === 'SOLICITUD_OBSERVADA' || tipo === 'RENDICION_PENDIENTE')
+  if (
+    tipo === 'SOLICITUD_OBSERVADA' ||
+    tipo === 'RENDICION_PENDIENTE' ||
+    tipo === 'RENDICION_OBSERVADA'
+  )
     return 'destructive';
   return 'secondary';
 }
@@ -46,6 +51,54 @@ function sanitizeUrl(url: string | null | undefined): string {
     .replace(/^\/dashboard\//, '/app/');
 }
 
+/**
+ * Resuelve la URL de destino para una notificación.
+ * Para RENDICION_PENDIENTE usa urlDestino si apunta a rendiciones.
+ * Para RENDICION_OBSERVADA redirige a /editar (página de corrección).
+ */
+function resolveNotificationUrl(notification: NotificacionBackend): string {
+  // Para RENDICION_OBSERVADA, siempre ir a la página de edición
+  if (notification.tipo === 'RENDICION_OBSERVADA') {
+    // Si ya tiene urlDestino que apunta a /editar, usarlo
+    if (
+      notification.urlDestino &&
+      notification.urlDestino.includes('/editar')
+    ) {
+      return notification.urlDestino;
+    }
+    // Resolver por rendicion.id y construir URL de edición
+    const rendicionId = notification.solicitud?.rendicion?.id;
+    if (rendicionId) {
+      return `/app/rendiciones/${rendicionId}/editar`;
+    }
+    // Fallback si no hay rendicion.id
+    return '/app/rendiciones';
+  }
+
+  // Para RENDICION_PENDIENTE, usar urlDestino si apunta a rendiciones
+  if (notification.tipo === 'RENDICION_PENDIENTE') {
+    if (
+      notification.urlDestino &&
+      notification.urlDestino.startsWith('/app/rendiciones/')
+    ) {
+      return notification.urlDestino;
+    }
+    const rendicionId = notification.solicitud?.rendicion?.id;
+    if (rendicionId) {
+      return `/app/rendiciones/${rendicionId}`;
+    }
+    return '#';
+  }
+
+  // Para otros tipos, usar urlDestino o construir URL de aprobaciones
+  const rawUrl =
+    notification.urlDestino ??
+    (notification.solicitudId
+      ? `/app/aprobaciones/${notification.solicitudId}`
+      : null);
+  return sanitizeUrl(rawUrl);
+}
+
 function NotificationCard({
   notification,
   onRead,
@@ -53,12 +106,7 @@ function NotificationCard({
   notification: NotificacionBackend;
   onRead: (id: number) => void;
 }) {
-  const rawUrl =
-    notification.urlDestino ??
-    (notification.solicitudId
-      ? `/app/aprobaciones/${notification.solicitudId}`
-      : null);
-  const href = sanitizeUrl(rawUrl);
+  const href = resolveNotificationUrl(notification);
 
   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
     addSuffix: true,
