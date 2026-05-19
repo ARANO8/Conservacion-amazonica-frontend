@@ -79,6 +79,7 @@ const ROLES_OPERATIVOS: Role[] = [
   'CONTADOR',
   'EJECUTIVO',
   'ADMIN',
+  'VALIDADOR_COMPRAS',
 ];
 
 function esRolOperativo(rol?: Role): boolean {

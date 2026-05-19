@@ -47,6 +47,35 @@ export const cuadrosComparativosService = {
     return response.data;
   },
 
+  async enviarValidacion(id: string | number) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/enviar-validacion`
+    );
+    return response.data;
+  },
+
+  async validar(id: string | number) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/validar`
+    );
+    return response.data;
+  },
+
+  async observar(id: string | number, motivo: string) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/observar`,
+      { motivo }
+    );
+    return response.data;
+  },
+
+  async aprobar(id: string | number) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/aprobar`
+    );
+    return response.data;
+  },
+
   async downloadPdf(id: string | number) {
     const response = await api.get(`/cuadros-comparativos/${id}/pdf`, {
       responseType: 'blob',

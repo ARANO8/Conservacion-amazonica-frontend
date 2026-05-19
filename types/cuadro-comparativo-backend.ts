@@ -61,6 +61,7 @@ export interface CuadroComparativoResponse {
   observaciones: string | null;
   estado: string;
   totalRecomendado: string | null;
+  motivoObservacion: string | null;
   cotizacionRecomendadaId: number | null;
   createdAt: string;
   updatedAt: string;
@@ -73,4 +74,11 @@ export interface CuadroComparativoResponse {
   };
   cotizaciones: CuadroCotizacionResponse[];
   items: CuadroItemResponse[];
+  historialAprobaciones?: {
+    id: number;
+    accion: string;
+    comentario: string | null;
+    fecha: string;
+    usuario?: { id: number; nombreCompleto: string; cargo?: string | null };
+  }[];
 }
