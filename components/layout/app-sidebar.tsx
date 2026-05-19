@@ -112,6 +112,14 @@ function buildComprasItems(rol?: Role) {
   if (esRolOperativo(rol)) {
     items.push({ title: 'Mis Cotizaciones', url: '/app/cotizaciones' });
     items.push({ title: 'Nueva Cotización', url: '/app/cotizaciones/nueva' });
+    items.push({
+      title: 'Cuadros Comparativos',
+      url: '/app/cuadros-comparativos',
+    });
+    items.push({
+      title: 'Nuevo Cuadro Comparativo',
+      url: '/app/cuadros-comparativos/nueva',
+    });
   }
 
   return items;
