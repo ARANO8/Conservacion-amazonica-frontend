@@ -132,7 +132,7 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
                       className={cn(
                         'text-center',
                         c.id === cuadro.cotizacionRecomendadaId &&
-                          'bg-emerald-50'
+                          'bg-emerald-50 dark:bg-emerald-950/50'
                       )}
                     >
                       {c.proveedorNombre}
@@ -162,11 +162,12 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
                             key={c.id}
                             className={cn(
                               'text-right',
-                              ganadora && 'bg-emerald-50 font-medium'
+                              ganadora &&
+                                'bg-emerald-50 font-medium dark:bg-emerald-950/50'
                             )}
                           >
                             {noMenciona ? (
-                              <span className="rounded bg-amber-100 px-1 text-xs text-amber-800 italic">
+                              <span className="rounded bg-amber-100 px-1 text-xs text-amber-800 italic dark:bg-amber-950/60 dark:text-amber-300">
                                 No menciona
                               </span>
                             ) : (
@@ -193,7 +194,7 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
                       className={cn(
                         'text-right',
                         c.id === cuadro.cotizacionRecomendadaId &&
-                          'bg-emerald-100'
+                          'bg-emerald-100 dark:bg-emerald-900/50'
                       )}
                     >
                       {formatMoney(c.total)}
