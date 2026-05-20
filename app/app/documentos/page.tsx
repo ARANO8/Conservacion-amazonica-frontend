@@ -68,7 +68,7 @@ const DOCUMENTOS: Documento[] = [
     version: 'POA 2026',
     año: 2026,
     tipo: 'enlace_externo',
-    url: '#',
+    url: 'https://conservacionamazonica-my.sharepoint.com/:x:/g/personal/galtuzarra_conservacionamazonica_org_bo/IQDUO34urbU3Tq3jJfjOysPKAaRltT1hl8Vs-RGUmx0rBtw?e=UMNxCb',
     icon: TrendingUp,
     destacado: false,
   },
