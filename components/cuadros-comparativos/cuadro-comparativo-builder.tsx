@@ -32,6 +32,8 @@ import { formatMoney, normalizeString } from '@/lib/utils';
 import { cotizacionesService } from '@/lib/services/cotizaciones-service';
 import { cuadrosComparativosService } from '@/lib/services/cuadros-comparativos-service';
 import { adaptCuadroFormToPayload } from '@/lib/adapters/cuadro-comparativo-adapter';
+import { CuadroAnalisis } from '@/components/cuadros-comparativos/cuadro-analisis';
+import type { AnalisisInput } from '@/lib/cuadro-analisis';
 import { cuadroComparativoSchema } from '@/components/cuadros-comparativos/cuadro-comparativo-schema';
 import type { CotizacionResponse } from '@/types/cotizacion-backend';
 import type { CuadroComparativoFormData } from '@/components/cuadros-comparativos/cuadro-comparativo-schema';
@@ -143,6 +145,24 @@ export default function CuadroComparativoBuilder({
       }, 0)
     );
   }, [cols, items]);
+
+  const analisisInput = useMemo<AnalisisInput>(
+    () => ({
+      columnas: cols.map((c) => ({ proveedorNombre: c.proveedorNombre })),
+      items: items.map((item) => ({
+        descripcion: item.descripcion || '(sin descripción)',
+        cantidad: Number(item.cantidad) || 0,
+        precios: cols.map((_, ci) => {
+          const celda = item.precios[ci];
+          return {
+            precioUnitario: Number(celda?.precioUnitario) || 0,
+            noMenciona: celda?.noMenciona ?? true,
+          };
+        }),
+      })),
+    }),
+    [cols, items]
+  );
 
   const toggleCotizacion = (cot: CotizacionResponse) => {
     const idx = cols.findIndex((c) => c.cotizacionId === cot.id);
@@ -598,6 +618,13 @@ export default function CuadroComparativoBuilder({
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {cols.length >= 1 && items.length > 0 && (
+        <CuadroAnalisis
+          input={analisisInput}
+          recomendadaIndex={recomendadaIndex}
+        />
       )}
 
       {cols.length >= 1 && (
