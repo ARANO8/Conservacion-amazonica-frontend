@@ -121,6 +121,14 @@ function buildComprasItems(rol?: Role) {
       title: 'Nuevo Cuadro Comparativo',
       url: '/app/cuadros-comparativos/nueva',
     });
+    items.push({
+      title: 'Órdenes de Compra',
+      url: '/app/ordenes-compra',
+    });
+    items.push({
+      title: 'Nueva Orden de Compra',
+      url: '/app/ordenes-compra/nueva',
+    });
   }
 
   return items;

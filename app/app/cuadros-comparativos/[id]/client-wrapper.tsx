@@ -1,9 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { Pencil, FileDown, Send, Check, X, AlertTriangle } from 'lucide-react';
+import {
+  Pencil,
+  FileDown,
+  Send,
+  Check,
+  X,
+  AlertTriangle,
+  ShoppingCart,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -29,6 +37,8 @@ import {
 } from '@/components/ui/dialog';
 import { cn, formatDate, formatMoney } from '@/lib/utils';
 import { cuadrosComparativosService } from '@/lib/services/cuadros-comparativos-service';
+import { CuadroAnalisis } from '@/components/cuadros-comparativos/cuadro-analisis';
+import type { AnalisisInput } from '@/lib/cuadro-analisis';
 import { useAuthStore } from '@/store/auth-store';
 import type { CuadroComparativoResponse } from '@/types/cuadro-comparativo-backend';
 
@@ -110,6 +120,39 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
       setActionLoading(false);
     }
   };
+
+  const analisisInput = useMemo<AnalisisInput>(() => {
+    if (!cuadro) return { columnas: [], items: [] };
+    const cols = [...cuadro.cotizaciones].sort((a, b) => a.orden - b.orden);
+    return {
+      columnas: cols.map((c) => ({ proveedorNombre: c.proveedorNombre })),
+      items: [...cuadro.items]
+        .sort((a, b) => a.orden - b.orden)
+        .map((item) => {
+          const byCol = new Map(
+            item.precios.map((p) => [p.cuadroCotizacionId, p])
+          );
+          return {
+            descripcion: item.descripcion,
+            cantidad: Number(item.cantidad) || 0,
+            precios: cols.map((c) => {
+              const p = byCol.get(c.id);
+              return {
+                precioUnitario: Number(p?.precioUnitario ?? 0),
+                noMenciona: p?.noMenciona ?? true,
+              };
+            }),
+          };
+        }),
+    };
+  }, [cuadro]);
+
+  const recomendadaIndex = useMemo(() => {
+    if (!cuadro || cuadro.cotizacionRecomendadaId == null) return null;
+    const cols = [...cuadro.cotizaciones].sort((a, b) => a.orden - b.orden);
+    const idx = cols.findIndex((c) => c.id === cuadro.cotizacionRecomendadaId);
+    return idx >= 0 ? idx : null;
+  }, [cuadro]);
 
   if (loading) {
     return (
@@ -232,6 +275,14 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               Observar
             </Button>
           )}
+          {cuadro.estado === 'APROBADO' && (
+            <Button asChild>
+              <Link href={`/app/ordenes-compra/nueva?cuadroId=${cuadro.id}`}>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Crear Orden de Compra
+              </Link>
+            </Button>
+          )}
           <Button variant="outline" onClick={() => void handleDownloadPdf()}>
             <FileDown className="mr-2 h-4 w-4" />
             Descargar PDF
@@ -344,6 +395,11 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      <CuadroAnalisis
+        input={analisisInput}
+        recomendadaIndex={recomendadaIndex}
+      />
 
       <Card>
         <CardHeader>
