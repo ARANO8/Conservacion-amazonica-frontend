@@ -5,6 +5,7 @@ import Image from 'next/image';
 import {
   BarChart3,
   Bell,
+  BookOpen,
   Files,
   Home,
   LayoutGrid,
@@ -216,6 +217,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
         ]
       : []),
+    {
+      title: 'Base Documental',
+      url: '/app/documentos',
+      icon: BookOpen,
+    },
     ...(canViewMonitor
       ? [
           {
