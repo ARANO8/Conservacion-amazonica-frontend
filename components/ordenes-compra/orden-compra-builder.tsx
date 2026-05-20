@@ -607,11 +607,14 @@ export default function OrdenCompraBuilder({
                   </p>
                   <div className="max-h-60 overflow-y-auto">
                     {selectedCuadroForAdd.items
-                      .filter(
-                        (item) =>
-                          item.cotizacionGanadoraId ===
-                          selectedCuadroForAdd.cotizacionRecomendadaId
-                      )
+                      .filter((item) => {
+                        const p = item.precios.find(
+                          (pr) =>
+                            pr.cuadroCotizacionId ===
+                            selectedCuadroForAdd.cotizacionRecomendadaId
+                        );
+                        return p && !p.noMenciona;
+                      })
                       .map((item) => {
                         const precio = item.precios.find(
                           (p) =>
