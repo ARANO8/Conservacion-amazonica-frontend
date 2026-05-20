@@ -48,14 +48,27 @@ interface Props {
 
 const ESTADO_BADGE: Record<string, string> = {
   BORRADOR: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200',
+  EN_REVISION: 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300',
   EN_VALIDACION:
     'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300',
-  EN_REVISION:
+  REVISADO:
+    'bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-300',
+  EN_APROBACION:
     'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300',
   OBSERVADO:
     'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
   APROBADO:
     'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
+};
+
+const ESTADO_LABEL: Record<string, string> = {
+  BORRADOR: 'Borrador',
+  EN_REVISION: 'En revisión (Contador)',
+  EN_VALIDACION: 'En validación (Denis)',
+  REVISADO: 'Validado — pendiente aprobación',
+  EN_APROBACION: 'En aprobación (Directora)',
+  OBSERVADO: 'Observado',
+  APROBADO: 'Aprobado',
 };
 
 export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
@@ -176,15 +189,39 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
 
   const rol = user?.rol;
   const esEmisor = String(cuadro.usuarioEmisorId) === String(user?.id ?? '');
+
+  // PASO 1: Emisor envía al CONTADOR
   const editable =
     esEmisor && (cuadro.estado === 'BORRADOR' || cuadro.estado === 'OBSERVADO');
-  const puedeEnviar = editable;
+  const puedeEnviarRevision = editable;
+
+  // PASO 2: CONTADOR envía a Denis
+  const puedeEnviarValidacion =
+    cuadro.estado === 'EN_REVISION' && (rol === 'CONTADOR' || rol === 'ADMIN');
+
+  // PASO 3: Denis valida y devuelve al CONTADOR
   const puedeValidar =
     cuadro.estado === 'EN_VALIDACION' &&
     (rol === 'VALIDADOR_COMPRAS' || rol === 'ADMIN');
+
+  // PASO 4: CONTADOR envía a Shirley
+  const puedeEnviarAprobacion =
+    cuadro.estado === 'REVISADO' && (rol === 'CONTADOR' || rol === 'ADMIN');
+
+  // PASO 5: Shirley aprueba
   const puedeAprobar =
-    cuadro.estado === 'EN_REVISION' && (rol === 'TESORERO' || rol === 'ADMIN');
-  const puedeObservar = puedeValidar || puedeAprobar;
+    cuadro.estado === 'EN_APROBACION' &&
+    (rol === 'EJECUTIVO' || rol === 'ADMIN');
+
+  // Observar: el revisor activo en cada etapa puede devolver al emisor
+  const puedeObservar =
+    (cuadro.estado === 'EN_REVISION' &&
+      (rol === 'CONTADOR' || rol === 'ADMIN')) ||
+    (cuadro.estado === 'EN_VALIDACION' &&
+      (rol === 'VALIDADOR_COMPRAS' || rol === 'ADMIN')) ||
+    (cuadro.estado === 'REVISADO' && (rol === 'CONTADOR' || rol === 'ADMIN')) ||
+    (cuadro.estado === 'EN_APROBACION' &&
+      (rol === 'EJECUTIVO' || rol === 'ADMIN'));
 
   const confirmObservar = async () => {
     if (motivo.trim().length === 0) {
@@ -210,7 +247,7 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               variant="outline"
               className={cn(ESTADO_BADGE[cuadro.estado])}
             >
-              {cuadro.estado}
+              {ESTADO_LABEL[cuadro.estado] ?? cuadro.estado}
             </Badge>
           </p>
         </div>
@@ -223,13 +260,31 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               </Link>
             </Button>
           )}
-          {puedeEnviar && (
+
+          {/* PASO 1: Emisor → CONTADOR */}
+          {puedeEnviarRevision && (
+            <Button
+              disabled={actionLoading}
+              onClick={() =>
+                void runAction(
+                  () => cuadrosComparativosService.enviarRevision(cuadro.id),
+                  'Cuadro enviado al Contador para revisión.'
+                )
+              }
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Enviar a revisión
+            </Button>
+          )}
+
+          {/* PASO 2: CONTADOR → Denis */}
+          {puedeEnviarValidacion && (
             <Button
               disabled={actionLoading}
               onClick={() =>
                 void runAction(
                   () => cuadrosComparativosService.enviarValidacion(cuadro.id),
-                  'Cuadro enviado a validación.'
+                  'Cuadro enviado a Denis para validación.'
                 )
               }
             >
@@ -237,13 +292,15 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               Enviar a validación
             </Button>
           )}
+
+          {/* PASO 3: Denis valida */}
           {puedeValidar && (
             <Button
               disabled={actionLoading}
               onClick={() =>
                 void runAction(
                   () => cuadrosComparativosService.validar(cuadro.id),
-                  'Cuadro validado. Enviado a revisión.'
+                  'Cuadro validado. Devuelto al Contador.'
                 )
               }
             >
@@ -251,6 +308,24 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               Validar
             </Button>
           )}
+
+          {/* PASO 4: CONTADOR → Shirley */}
+          {puedeEnviarAprobacion && (
+            <Button
+              disabled={actionLoading}
+              onClick={() =>
+                void runAction(
+                  () => cuadrosComparativosService.enviarAprobacion(cuadro.id),
+                  'Cuadro enviado a la Directora para aprobación.'
+                )
+              }
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Enviar a aprobación
+            </Button>
+          )}
+
+          {/* PASO 5: Shirley aprueba */}
           {puedeAprobar && (
             <Button
               disabled={actionLoading}
@@ -265,6 +340,7 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               Aprobar
             </Button>
           )}
+
           {puedeObservar && (
             <Button
               variant="destructive"
@@ -275,6 +351,7 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               Observar
             </Button>
           )}
+
           {cuadro.estado === 'APROBADO' && (
             <Button asChild>
               <Link href={`/app/ordenes-compra/nueva?cuadroId=${cuadro.id}`}>
@@ -283,6 +360,7 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
               </Link>
             </Button>
           )}
+
           <Button variant="outline" onClick={() => void handleDownloadPdf()}>
             <FileDown className="mr-2 h-4 w-4" />
             Descargar PDF

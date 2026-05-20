@@ -47,6 +47,15 @@ export const cuadrosComparativosService = {
     return response.data;
   },
 
+  /** PASO 1: Emisor → CONTADOR */
+  async enviarRevision(id: string | number) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/enviar-revision`
+    );
+    return response.data;
+  },
+
+  /** PASO 2: CONTADOR → Denis (VALIDADOR_COMPRAS) */
   async enviarValidacion(id: string | number) {
     const response = await api.patch<CuadroComparativoResponse>(
       `/cuadros-comparativos/${id}/enviar-validacion`
@@ -54,9 +63,26 @@ export const cuadrosComparativosService = {
     return response.data;
   },
 
+  /** PASO 3: Denis valida → devuelve al CONTADOR */
   async validar(id: string | number) {
     const response = await api.patch<CuadroComparativoResponse>(
       `/cuadros-comparativos/${id}/validar`
+    );
+    return response.data;
+  },
+
+  /** PASO 4: CONTADOR → Shirley (EJECUTIVO) */
+  async enviarAprobacion(id: string | number) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/enviar-aprobacion`
+    );
+    return response.data;
+  },
+
+  /** PASO 5: Shirley aprueba → APROBADO */
+  async aprobar(id: string | number) {
+    const response = await api.patch<CuadroComparativoResponse>(
+      `/cuadros-comparativos/${id}/aprobar`
     );
     return response.data;
   },
@@ -65,13 +91,6 @@ export const cuadrosComparativosService = {
     const response = await api.patch<CuadroComparativoResponse>(
       `/cuadros-comparativos/${id}/observar`,
       { motivo }
-    );
-    return response.data;
-  },
-
-  async aprobar(id: string | number) {
-    const response = await api.patch<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}/aprobar`
     );
     return response.data;
   },
