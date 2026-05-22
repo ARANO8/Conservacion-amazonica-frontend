@@ -112,6 +112,10 @@ function buildComprasItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
   if (esRolOperativo(rol)) {
+    items.push({
+      title: 'Solicitudes de Fondos',
+      url: '/app/solicitudes-compra',
+    });
     items.push({ title: 'Mis Cotizaciones', url: '/app/cotizaciones' });
     items.push({ title: 'Nueva Cotización', url: '/app/cotizaciones/nueva' });
     items.push({

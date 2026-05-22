@@ -1,5 +1,8 @@
 import api from '@/lib/api';
-import { CreateSolicitudPayload } from '@/types/solicitud-backend';
+import {
+  CreateSolicitudPayload,
+  CreateSolicitudCompraPayload,
+} from '@/types/solicitud-backend';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
 
 interface GetSolicitudesParams {
@@ -55,6 +58,22 @@ export const solicitudesService = {
   },
 
   /**
+   * Creates a new Solicitud de Compras/Servicios (COMPRA_SERVICIO).
+   */
+  async createSolicitudCompra(payload: CreateSolicitudCompraPayload) {
+    const response = await api.post<SolicitudResponse>('/solicitudes', payload);
+    return response.data;
+  },
+
+  /**
+   * Fetches solicitudes filtered by tipo=COMPRA_SERVICIO (client-side filter).
+   */
+  async getSolicitudesCompra() {
+    const response = await api.get<SolicitudResponse[]>('/solicitudes');
+    return response.data.filter((s) => s.tipo === 'COMPRA_SERVICIO');
+  },
+
+  /**
    * Desembolsa una solicitud (solo TESORERO).
    * @param id The ID of the solicitud to disburse.
    * @param codigoDesembolso Código de transferencia / comprobante.
@@ -62,11 +81,15 @@ export const solicitudesService = {
   async desembolsar(
     id: number | string,
     codigoDesembolso: string,
-    urlComprobante?: string
+    urlComprobante?: string,
+    banco?: string,
+    fechaDesembolso?: string
   ) {
     const response = await api.patch(`/solicitudes/${id}/desembolsar`, {
       codigoDesembolso,
       ...(urlComprobante ? { urlComprobante } : {}),
+      ...(banco ? { banco } : {}),
+      ...(fechaDesembolso ? { fechaDesembolso } : {}),
     });
     return response.data;
   },
