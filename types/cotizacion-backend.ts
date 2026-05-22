@@ -5,8 +5,11 @@ export interface CreateLineaCotizacionPayload {
   precioUnitario: number;
 }
 
+export type TipoCotizacion = 'PROPIA' | 'EXTERNA';
+
 export interface CreateCotizacionPayload {
   fecha?: string;
+  tipo?: TipoCotizacion;
   proveedorNombre: string;
   proveedorTelefono?: string;
   proveedorDireccion?: string;
@@ -16,6 +19,7 @@ export interface CreateCotizacionPayload {
   duracionCotizacion?: string;
   emiteFactura?: boolean;
   observaciones?: string;
+  adjuntoUrl?: string;
   lineas: CreateLineaCotizacionPayload[];
 }
 
@@ -33,6 +37,7 @@ export interface CotizacionResponse {
   id: number;
   codigoCotizacion: string;
   fecha: string;
+  tipo: TipoCotizacion;
   proveedorNombre: string;
   proveedorTelefono: string | null;
   proveedorDireccion: string | null;
@@ -42,6 +47,7 @@ export interface CotizacionResponse {
   duracionCotizacion: string | null;
   emiteFactura: boolean;
   observaciones: string | null;
+  adjuntoUrl: string | null;
   total: string;
   createdAt: string;
   updatedAt: string;

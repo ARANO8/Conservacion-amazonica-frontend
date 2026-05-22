@@ -6,7 +6,7 @@ import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { Plus, Trash2, Save, Link2, FileText } from 'lucide-react';
 
 import {
   Form,
@@ -22,6 +22,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -50,6 +51,7 @@ function buildDefaults(initialData?: CotizacionFormData): CotizacionFormData {
 
   const hoy = new Date().toISOString().slice(0, 10);
   return {
+    tipo: 'PROPIA',
     fecha: hoy,
     proveedorNombre: '',
     proveedorTelefono: '',
@@ -60,6 +62,7 @@ function buildDefaults(initialData?: CotizacionFormData): CotizacionFormData {
     duracionCotizacion: '',
     emiteFactura: false,
     observaciones: '',
+    adjuntoUrl: '',
     lineas: [{ ...emptyLinea }],
   };
 }
@@ -86,6 +89,9 @@ export default function CotizacionForm({
     control: form.control,
     name: 'lineas',
   });
+
+  const tipo = useWatch({ control: form.control, name: 'tipo' });
+  const isExterna = tipo === 'EXTERNA';
 
   const watchedLineas = useWatch({
     control: form.control,
@@ -129,9 +135,57 @@ export default function CotizacionForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="mx-auto max-w-5xl space-y-6 p-6"
       >
+        {/* Toggle tipo */}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant={!isExterna ? 'default' : 'outline'}
+            className="flex-1"
+            onClick={() =>
+              form.setValue('tipo', 'PROPIA', { shouldValidate: true })
+            }
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Cotización Propia
+          </Button>
+          <Button
+            type="button"
+            variant={isExterna ? 'default' : 'outline'}
+            className="flex-1"
+            onClick={() =>
+              form.setValue('tipo', 'EXTERNA', { shouldValidate: true })
+            }
+          >
+            <Link2 className="mr-2 h-4 w-4" />
+            Cotización Externa
+          </Button>
+        </div>
+
+        {/* Banner modo externa */}
+        {isExterna && (
+          <div className="flex items-start gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-800 dark:bg-sky-950/40">
+            <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
+            <p className="text-sm text-sky-800 dark:text-sky-300">
+              <span className="font-medium">Modo externo:</span> ingresa los
+              datos básicos del proveedor, transcribe los ítems y adjunta la URL
+              del documento original como respaldo. Los campos de condiciones
+              son opcionales.
+            </p>
+          </div>
+        )}
+
+        {/* Datos del proveedor */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Datos del Proveedor</CardTitle>
+            {isExterna && (
+              <Badge
+                variant="outline"
+                className="border-sky-300 bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300"
+              >
+                Externa
+              </Badge>
+            )}
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
@@ -147,25 +201,27 @@ export default function CotizacionForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="proveedorTelefono"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teléfono</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Teléfono del proveedor" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isExterna && (
+              <FormField
+                control={form.control}
+                name="proveedorTelefono"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Teléfono del proveedor" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="proveedorNombre"
               render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Señor(es)</FormLabel>
+                <FormItem className={isExterna ? '' : 'md:col-span-2'}>
+                  <FormLabel>Señor(es) / Proveedor</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Nombre o razón social del proveedor"
@@ -176,39 +232,70 @@ export default function CotizacionForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="proveedorDireccion"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Dirección</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Dirección" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="proveedorCorreo"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Correo Electrónico</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="correo@proveedor.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isExterna && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="proveedorDireccion"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Dirección</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Dirección" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="proveedorCorreo"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Correo Electrónico</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="correo@proveedor.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            {/* URL adjunto — solo visible en modo EXTERNA */}
+            {isExterna && (
+              <FormField
+                control={form.control}
+                name="adjuntoUrl"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>
+                      URL del documento externo{' '}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="https://drive.google.com/... o https://dropbox.com/..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <p className="text-muted-foreground text-xs">
+                      Enlace al PDF, imagen o documento escaneado del proveedor.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </CardContent>
         </Card>
 
+        {/* Ítems */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">
@@ -349,87 +436,117 @@ export default function CotizacionForm({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              Condiciones de la Cotización
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="garantia"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Garantía</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej. 12 meses" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="disponibilidad"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Disponibilidad</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej. Inmediata" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="duracionCotizacion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Duración Cotización</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej. 30 días" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="emiteFactura"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-3 pt-8">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel className="!mt-0">Emite Factura</FormLabel>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="observaciones"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Observaciones</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      rows={3}
-                      placeholder="Observaciones adicionales"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+        {/* Condiciones — solo visibles en modo PROPIA */}
+        {!isExterna && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">
+                Condiciones de la Cotización
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="garantia"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Garantía</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. 12 meses" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="disponibilidad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Disponibilidad</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. Inmediata" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="duracionCotizacion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duración Cotización</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. 30 días" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="emiteFactura"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center gap-3 pt-8">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="!mt-0">Emite Factura</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="observaciones"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Observaciones</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        rows={3}
+                        placeholder="Observaciones adicionales"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Observaciones en modo externa */}
+        {isExterna && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Observaciones</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="observaciones"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        rows={3}
+                        placeholder="Observaciones adicionales sobre esta cotización externa"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         <Separator />
 

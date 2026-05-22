@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { Pencil, FileDown } from 'lucide-react';
+import { Pencil, FileDown, Link2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -98,8 +99,19 @@ export function CotizacionDetalleClientWrapper({
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold">{cotizacion.codigoCotizacion}</h2>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold">{cotizacion.codigoCotizacion}</h2>
+            {cotizacion.tipo === 'EXTERNA' && (
+              <Badge
+                variant="outline"
+                className="border-sky-300 bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300"
+              >
+                <Link2 className="mr-1 h-3 w-3" />
+                Externa
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground text-sm">
             {formatDateShort(cotizacion.fecha)}
           </p>
@@ -111,10 +123,23 @@ export function CotizacionDetalleClientWrapper({
               Editar
             </Link>
           </Button>
-          <Button onClick={() => void handleDownloadPdf()}>
-            <FileDown className="mr-2 h-4 w-4" />
-            Descargar PDF
-          </Button>
+          {cotizacion.tipo === 'EXTERNA' && cotizacion.adjuntoUrl ? (
+            <Button asChild>
+              <a
+                href={cotizacion.adjuntoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Ver documento
+              </a>
+            </Button>
+          ) : (
+            <Button onClick={() => void handleDownloadPdf()}>
+              <FileDown className="mr-2 h-4 w-4" />
+              Descargar PDF
+            </Button>
+          )}
         </div>
       </div>
 
@@ -124,12 +149,41 @@ export function CotizacionDetalleClientWrapper({
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <DatoLinea label="Señor(es)" value={cotizacion.proveedorNombre} />
-          <DatoLinea label="Teléfono" value={cotizacion.proveedorTelefono} />
-          <DatoLinea label="Dirección" value={cotizacion.proveedorDireccion} />
-          <DatoLinea
-            label="Correo Electrónico"
-            value={cotizacion.proveedorCorreo}
-          />
+          {cotizacion.tipo === 'EXTERNA' ? (
+            <div className="md:col-span-2">
+              <p className="text-muted-foreground text-xs uppercase">
+                Documento original
+              </p>
+              {cotizacion.adjuntoUrl ? (
+                <a
+                  href={cotizacion.adjuntoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-0.5 flex items-center gap-1 text-sm break-all text-sky-600 hover:text-sky-700 dark:text-sky-400"
+                >
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                  {cotizacion.adjuntoUrl}
+                </a>
+              ) : (
+                <p className="text-sm">-</p>
+              )}
+            </div>
+          ) : (
+            <>
+              <DatoLinea
+                label="Teléfono"
+                value={cotizacion.proveedorTelefono}
+              />
+              <DatoLinea
+                label="Dirección"
+                value={cotizacion.proveedorDireccion}
+              />
+              <DatoLinea
+                label="Correo Electrónico"
+                value={cotizacion.proveedorCorreo}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -179,28 +233,45 @@ export function CotizacionDetalleClientWrapper({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            Condiciones de la Cotización
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <DatoLinea label="Garantía" value={cotizacion.garantia} />
-          <DatoLinea label="Disponibilidad" value={cotizacion.disponibilidad} />
-          <DatoLinea
-            label="Duración Cotización"
-            value={cotizacion.duracionCotizacion}
-          />
-          <DatoLinea
-            label="Emite Factura"
-            value={cotizacion.emiteFactura ? 'Sí' : 'No'}
-          />
-          <div className="md:col-span-2">
-            <DatoLinea label="Observaciones" value={cotizacion.observaciones} />
-          </div>
-        </CardContent>
-      </Card>
+      {cotizacion.tipo !== 'EXTERNA' ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Condiciones de la Cotización
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <DatoLinea label="Garantía" value={cotizacion.garantia} />
+            <DatoLinea
+              label="Disponibilidad"
+              value={cotizacion.disponibilidad}
+            />
+            <DatoLinea
+              label="Duración Cotización"
+              value={cotizacion.duracionCotizacion}
+            />
+            <DatoLinea
+              label="Emite Factura"
+              value={cotizacion.emiteFactura ? 'Sí' : 'No'}
+            />
+            <div className="md:col-span-2">
+              <DatoLinea
+                label="Observaciones"
+                value={cotizacion.observaciones}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      ) : cotizacion.observaciones ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Observaciones</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">{cotizacion.observaciones}</p>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

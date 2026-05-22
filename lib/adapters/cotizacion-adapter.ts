@@ -12,17 +12,26 @@ const cleanText = (value?: string): string | undefined => {
 export function adaptCotizacionFormToPayload(
   form: CotizacionFormData
 ): CreateCotizacionPayload {
+  const isExterna = form.tipo === 'EXTERNA';
   return {
+    tipo: form.tipo ?? 'PROPIA',
     fecha: form.fecha ? new Date(form.fecha).toISOString() : undefined,
     proveedorNombre: form.proveedorNombre.trim(),
-    proveedorTelefono: cleanText(form.proveedorTelefono),
-    proveedorDireccion: cleanText(form.proveedorDireccion),
-    proveedorCorreo: cleanText(form.proveedorCorreo),
-    garantia: cleanText(form.garantia),
-    disponibilidad: cleanText(form.disponibilidad),
-    duracionCotizacion: cleanText(form.duracionCotizacion),
-    emiteFactura: form.emiteFactura ?? false,
+    proveedorTelefono: isExterna
+      ? undefined
+      : cleanText(form.proveedorTelefono),
+    proveedorDireccion: isExterna
+      ? undefined
+      : cleanText(form.proveedorDireccion),
+    proveedorCorreo: isExterna ? undefined : cleanText(form.proveedorCorreo),
+    garantia: isExterna ? undefined : cleanText(form.garantia),
+    disponibilidad: isExterna ? undefined : cleanText(form.disponibilidad),
+    duracionCotizacion: isExterna
+      ? undefined
+      : cleanText(form.duracionCotizacion),
+    emiteFactura: isExterna ? false : (form.emiteFactura ?? false),
     observaciones: cleanText(form.observaciones),
+    adjuntoUrl: cleanText(form.adjuntoUrl),
     lineas: form.lineas.map((linea) => ({
       cantidad: Number(linea.cantidad) || 0,
       unidad: cleanText(linea.unidad),
@@ -36,6 +45,7 @@ export function adaptCotizacionResponseToForm(
   cotizacion: CotizacionResponse
 ): CotizacionFormData {
   return {
+    tipo: cotizacion.tipo ?? 'PROPIA',
     fecha: cotizacion.fecha ? cotizacion.fecha.slice(0, 10) : '',
     proveedorNombre: cotizacion.proveedorNombre ?? '',
     proveedorTelefono: cotizacion.proveedorTelefono ?? '',
@@ -46,6 +56,7 @@ export function adaptCotizacionResponseToForm(
     duracionCotizacion: cotizacion.duracionCotizacion ?? '',
     emiteFactura: cotizacion.emiteFactura ?? false,
     observaciones: cotizacion.observaciones ?? '',
+    adjuntoUrl: cotizacion.adjuntoUrl ?? '',
     lineas: (cotizacion.lineas ?? []).map((linea) => ({
       cantidad: Number(linea.cantidad) || 0,
       unidad: linea.unidad ?? '',

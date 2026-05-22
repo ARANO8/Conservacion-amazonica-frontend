@@ -10,6 +10,8 @@ import {
   Pencil,
   Trash2,
   FileDown,
+  Link2,
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -43,6 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 async function handleDownloadPdf(id: number, fileName: string): Promise<void> {
@@ -135,6 +138,7 @@ export default function MisCotizacionesPage() {
                 <TableHead>Código</TableHead>
                 <TableHead>Fecha</TableHead>
                 <TableHead>Proveedor</TableHead>
+                <TableHead className="w-[110px]">Tipo</TableHead>
                 <TableHead>Ítems</TableHead>
                 <TableHead className="text-right">Total (Bs)</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -145,7 +149,7 @@ export default function MisCotizacionesPage() {
               {cotizaciones.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="text-muted-foreground h-24 text-center"
                   >
                     No tienes cotizaciones registradas.
@@ -159,6 +163,21 @@ export default function MisCotizacionesPage() {
                     </TableCell>
                     <TableCell>{formatDateShort(cotizacion.fecha)}</TableCell>
                     <TableCell>{cotizacion.proveedorNombre}</TableCell>
+                    <TableCell>
+                      {cotizacion.tipo === 'EXTERNA' ? (
+                        <Badge
+                          variant="outline"
+                          className="border-sky-300 bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300"
+                        >
+                          <Link2 className="mr-1 h-3 w-3" />
+                          Externa
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">
+                          Propia
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>{cotizacion.lineas?.length ?? 0}</TableCell>
                     <TableCell className="text-right font-semibold">
                       {formatMoney(cotizacion.total)}
@@ -191,18 +210,32 @@ export default function MisCotizacionesPage() {
                               Editar
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onSelect={(event) => {
-                              event.preventDefault();
-                              void handleDownloadPdf(
-                                cotizacion.id,
-                                cotizacion.codigoCotizacion
-                              );
-                            }}
-                          >
-                            <FileDown className="mr-2 h-4 w-4" />
-                            Descargar PDF
-                          </DropdownMenuItem>
+                          {cotizacion.tipo === 'EXTERNA' &&
+                          cotizacion.adjuntoUrl ? (
+                            <DropdownMenuItem asChild>
+                              <a
+                                href={cotizacion.adjuntoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Ver documento
+                              </a>
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem
+                              onSelect={(event) => {
+                                event.preventDefault();
+                                void handleDownloadPdf(
+                                  cotizacion.id,
+                                  cotizacion.codigoCotizacion
+                                );
+                              }}
+                            >
+                              <FileDown className="mr-2 h-4 w-4" />
+                              Descargar PDF
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             variant="destructive"

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Plus, Trash2, Save, Download } from 'lucide-react';
+import { Plus, Trash2, Save, Download, Link2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,7 @@ import type { AnalisisInput } from '@/lib/cuadro-analisis';
 import { cuadroComparativoSchema } from '@/components/cuadros-comparativos/cuadro-comparativo-schema';
 import type { CotizacionResponse } from '@/types/cotizacion-backend';
 import type { CuadroComparativoFormData } from '@/components/cuadros-comparativos/cuadro-comparativo-schema';
+import { CotizacionExternaRapidaDialog } from '@/components/cotizaciones/cotizacion-externa-rapida-dialog';
 
 interface Columna {
   cotizacionId: number;
@@ -80,6 +81,7 @@ export default function CuadroComparativoBuilder({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cotizaciones, setCotizaciones] = useState<CotizacionResponse[]>([]);
+  const [rapidaOpen, setRapidaOpen] = useState(false);
   const [cols, setCols] = useState<Columna[]>([]);
   const [items, setItems] = useState<ItemFila[]>([]);
   const [recomendadaIndex, setRecomendadaIndex] = useState<number | null>(null);
@@ -343,6 +345,12 @@ export default function CuadroComparativoBuilder({
     }
   };
 
+  /** Cotización externa creada inline: añade a la lista y la auto-selecciona. */
+  const handleRapidaSuccess = (newCot: CotizacionResponse) => {
+    setCotizaciones((prev) => [...prev, newCot]);
+    toggleCotizacion(newCot);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4 p-6">
@@ -357,20 +365,31 @@ export default function CuadroComparativoBuilder({
   return (
     <div className="space-y-6 p-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">
             1. Selecciona las cotizaciones a comparar
           </CardTitle>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setRapidaOpen(true)}
+          >
+            <Link2 className="mr-2 h-4 w-4" />
+            Cotización externa rápida
+          </Button>
         </CardHeader>
         <CardContent>
           {cotizaciones.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No tienes cotizaciones registradas. Crea cotizaciones primero.
+              No tienes cotizaciones registradas. Crea una cotización propia o
+              agrega una cotización externa rápida con el botón de arriba.
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
               {cotizaciones.map((cot) => {
                 const checked = seleccionadasIds.has(cot.id);
+                const isExterna = cot.tipo === 'EXTERNA';
                 return (
                   <label
                     key={cot.id}
@@ -381,14 +400,32 @@ export default function CuadroComparativoBuilder({
                       onCheckedChange={() => toggleCotizacion(cot)}
                       className="mt-0.5"
                     />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {cot.proveedorNombre}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-medium">
+                          {cot.proveedorNombre}
+                        </p>
+                        {isExterna && (
+                          <span className="shrink-0 rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-medium text-sky-700 dark:bg-sky-950/60 dark:text-sky-300">
+                            Externa
+                          </span>
+                        )}
+                      </div>
                       <p className="text-muted-foreground text-xs">
                         {cot.codigoCotizacion} · {cot.lineas?.length ?? 0} ítems
                         · {formatMoney(cot.total)}
                       </p>
+                      {isExterna && cot.adjuntoUrl && (
+                        <a
+                          href={cot.adjuntoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="block truncate text-[10px] text-sky-600 hover:underline"
+                        >
+                          Ver documento
+                        </a>
+                      )}
                     </div>
                   </label>
                 );
@@ -697,6 +734,12 @@ export default function CuadroComparativoBuilder({
           {isEdit ? 'Guardar cambios' : 'Registrar cuadro comparativo'}
         </Button>
       </div>
+
+      <CotizacionExternaRapidaDialog
+        open={rapidaOpen}
+        onOpenChange={setRapidaOpen}
+        onSuccess={handleRapidaSuccess}
+      />
     </div>
   );
 }
