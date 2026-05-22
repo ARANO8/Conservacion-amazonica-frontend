@@ -153,10 +153,10 @@ export default function SolicitudCompraForm({
       try {
         setLoadingOpts(true);
         const [poasRes, usuariosRes] = await Promise.all([
-          api.get<PoaOption[]>('/poa'),
+          api.get<{ data: PoaOption[] }>('/poa', { params: { limit: 999 } }),
           api.get<UsuarioOption[]>('/usuarios'),
         ]);
-        setPoaOptions(poasRes.data);
+        setPoaOptions(poasRes.data.data ?? []);
         setUsuarioOptions(usuariosRes.data.filter((u) => u.id !== user?.id));
       } catch {
         toast.error('No se pudieron cargar las opciones del formulario.');
