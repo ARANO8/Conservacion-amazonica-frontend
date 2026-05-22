@@ -73,9 +73,13 @@ const emptyItem = {
 
 interface Props {
   solicitudId?: number;
+  initialValues?: Partial<SolicitudCompraFormData>;
 }
 
-export default function SolicitudCompraForm({ solicitudId }: Props) {
+export default function SolicitudCompraForm({
+  solicitudId,
+  initialValues,
+}: Props) {
   const router = useRouter();
   const { user } = useAuthStore();
   const isEdit = typeof solicitudId === 'number';
@@ -87,16 +91,39 @@ export default function SolicitudCompraForm({ solicitudId }: Props) {
   const form = useForm<SolicitudCompraFormData>({
     resolver: zodResolver(solicitudCompraSchema),
     defaultValues: {
-      aprobadorId: 0,
-      poaId: 0,
-      motivoSolicitud: '',
-      proyecto: '',
-      chequeANombreDe: user?.nombreCompleto ?? '',
-      descripcion: '',
-      items: [{ ...emptyItem }],
+      aprobadorId: initialValues?.aprobadorId ?? 0,
+      poaId: initialValues?.poaId ?? 0,
+      motivoSolicitud: initialValues?.motivoSolicitud ?? '',
+      proyecto: initialValues?.proyecto ?? '',
+      chequeANombreDe:
+        initialValues?.chequeANombreDe ?? user?.nombreCompleto ?? '',
+      descripcion: initialValues?.descripcion ?? '',
+      items:
+        initialValues?.items && initialValues.items.length > 0
+          ? initialValues.items
+          : [{ ...emptyItem }],
     },
     mode: 'onBlur',
   });
+
+  useEffect(() => {
+    if (initialValues) {
+      form.reset({
+        aprobadorId: initialValues.aprobadorId ?? 0,
+        poaId: initialValues.poaId ?? 0,
+        motivoSolicitud: initialValues.motivoSolicitud ?? '',
+        proyecto: initialValues.proyecto ?? '',
+        chequeANombreDe:
+          initialValues.chequeANombreDe ?? user?.nombreCompleto ?? '',
+        descripcion: initialValues.descripcion ?? '',
+        items:
+          initialValues.items && initialValues.items.length > 0
+            ? initialValues.items
+            : [{ ...emptyItem }],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -140,31 +167,40 @@ export default function SolicitudCompraForm({ solicitudId }: Props) {
     void fetchOptions();
   }, [user?.id]);
 
+  const buildPayload = (data: SolicitudCompraFormData) => ({
+    tipo: 'COMPRA_SERVICIO' as const,
+    poaIds: [data.poaId],
+    aprobadorId: data.aprobadorId,
+    motivoViaje: data.motivoSolicitud,
+    proyecto: data.proyecto || undefined,
+    chequeANombreDe: data.chequeANombreDe,
+    descripcion: data.descripcion || undefined,
+    gastosCompra: data.items.map((item) => ({
+      descripcion: item.descripcion,
+      cantidad: Number(item.cantidad),
+      uso: item.uso || undefined,
+      costoUnitario: Number(item.costoUnitario),
+      poaId: data.poaId,
+    })),
+    planificaciones: [],
+    viaticos: [],
+    gastos: [],
+    nominasTerceros: [],
+    hospedajes: [],
+  });
+
   const onSubmit = async (data: SolicitudCompraFormData) => {
     try {
-      await solicitudesService.createSolicitudCompra({
-        tipo: 'COMPRA_SERVICIO',
-        poaIds: [data.poaId],
-        aprobadorId: data.aprobadorId,
-        motivoViaje: data.motivoSolicitud,
-        proyecto: data.proyecto || undefined,
-        chequeANombreDe: data.chequeANombreDe,
-        descripcion: data.descripcion || undefined,
-        gastosCompra: data.items.map((item) => ({
-          descripcion: item.descripcion,
-          cantidad: Number(item.cantidad),
-          uso: item.uso || undefined,
-          costoUnitario: Number(item.costoUnitario),
-          poaId: data.poaId,
-        })),
-        planificaciones: [],
-        viaticos: [],
-        gastos: [],
-        nominasTerceros: [],
-        hospedajes: [],
-      });
-
-      toast.success('Solicitud de fondos registrada correctamente.');
+      if (isEdit && solicitudId !== undefined) {
+        await solicitudesService.updateSolicitud(
+          solicitudId,
+          buildPayload(data)
+        );
+        toast.success('Solicitud actualizada correctamente.');
+      } else {
+        await solicitudesService.createSolicitudCompra(buildPayload(data));
+        toast.success('Solicitud de fondos registrada correctamente.');
+      }
       router.push('/app/solicitudes-compra');
       router.refresh();
     } catch (error: unknown) {

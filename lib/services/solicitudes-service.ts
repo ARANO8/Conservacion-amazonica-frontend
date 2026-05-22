@@ -51,7 +51,9 @@ export const solicitudesService = {
    */
   async updateSolicitud(
     id: number | string,
-    payload: Partial<CreateSolicitudPayload>
+    payload:
+      | Partial<CreateSolicitudPayload>
+      | Partial<CreateSolicitudCompraPayload>
   ) {
     const response = await api.patch(`/solicitudes/${id}`, payload);
     return response.data;
