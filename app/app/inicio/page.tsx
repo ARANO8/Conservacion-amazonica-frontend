@@ -20,11 +20,19 @@ import { KpiCards } from '@/components/dashboard/kpi-cards';
 import { RecentMovements } from '@/components/dashboard/recent-movements';
 import { PoaThermometer } from '@/components/dashboard/poa-thermometer';
 import { useAuthStore } from '@/store/auth-store';
+import { useNotificacionesStore } from '@/store/useNotificacionesStore';
 
 const APPROVER_ROLES = new Set(['ADMIN', 'EJECUTIVO', 'TESORERO', 'CONTADOR']);
 
+const ASSIGNMENT_TYPES = new Set([
+  'SOLICITUD_ASIGNADA',
+  'SOLICITUD_DERIVADA',
+  'RENDICION_PENDIENTE',
+]);
+
 export default function Page() {
   const { user } = useAuthStore();
+  const notificacionesStore = useNotificacionesStore();
 
   const [isCurrentApprover, setIsCurrentApprover] = useState(false);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -36,36 +44,34 @@ export default function Page() {
   useEffect(() => {
     let mounted = true;
 
-    if (!user) {
+    if (!user || APPROVER_ROLES.has(user.rol)) {
       setIsCurrentApprover(false);
       return;
     }
 
-    if (APPROVER_ROLES.has(user.rol)) {
-      setIsCurrentApprover(false);
+    // Si el store ya tiene notificaciones cargadas, usar esos datos sin hacer
+    // una llamada extra al servidor
+    if (notificacionesStore.notificaciones.length > 0) {
+      setIsCurrentApprover(
+        notificacionesStore.notificaciones.some((n) =>
+          ASSIGNMENT_TYPES.has(n.tipo)
+        )
+      );
       return;
     }
 
+    // Fallback: llamada al API si el store todavía no tiene datos
     const fetchApprovalAssignments = async () => {
       try {
         const notificaciones =
           await notificacionesService.getMisNotificaciones();
-        if (!mounted) {
-          return;
-        }
-
-        const hasPendingAssignments = notificaciones.some(
-          (notificacion) =>
-            notificacion.tipo === 'SOLICITUD_ASIGNADA' ||
-            notificacion.tipo === 'SOLICITUD_DERIVADA' ||
-            notificacion.tipo === 'RENDICION_PENDIENTE'
-        );
-
-        setIsCurrentApprover(hasPendingAssignments);
-      } catch {
         if (mounted) {
-          setIsCurrentApprover(false);
+          setIsCurrentApprover(
+            notificaciones.some((n) => ASSIGNMENT_TYPES.has(n.tipo))
+          );
         }
+      } catch {
+        if (mounted) setIsCurrentApprover(false);
       }
     };
 
@@ -74,7 +80,7 @@ export default function Page() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user, notificacionesStore.notificaciones]);
 
   useEffect(() => {
     let mounted = true;
