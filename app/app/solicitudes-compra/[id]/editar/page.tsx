@@ -40,6 +40,7 @@ export default function EditarSolicitudCompraPage() {
   const [initialValues, setInitialValues] =
     useState<Partial<SolicitudCompraFormData> | null>(null);
   const [solicitudId, setSolicitudId] = useState<number | null>(null);
+  const [initialPoaCode, setInitialPoaCode] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function EditarSolicitudCompraPage() {
         }
 
         setSolicitudId(solicitud.id);
+        setInitialPoaCode(solicitud.presupuestos?.[0]?.poa?.codigoPoa ?? '');
         setInitialValues(adaptResponseToCompraFormData(solicitud));
       } catch {
         toast.error('No se pudo cargar la solicitud.');
@@ -88,6 +90,7 @@ export default function EditarSolicitudCompraPage() {
     <SolicitudCompraForm
       solicitudId={solicitudId}
       initialValues={initialValues}
+      initialPoaCode={initialPoaCode}
     />
   );
 }
