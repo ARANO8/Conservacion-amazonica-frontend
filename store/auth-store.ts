@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import Cookies from 'js-cookie';
 import api from '../lib/api';
 import { toast } from 'sonner';
 
@@ -14,18 +13,16 @@ export interface User {
 
 interface loginResponse {
   user: User;
-  accessToken: string;
 }
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
 
   login: (credentials: Record<string, string>) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   setError: (error: string | null) => void;
 }
 
@@ -33,7 +30,6 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -46,57 +42,51 @@ export const useAuthStore = create<AuthState>()(
             credentials
           );
 
-          // Backend devuelve accessToken (camelCase)
-          const token = response.data.accessToken;
           const user = response.data.user;
 
-          if (!token || token === 'undefined') {
-            const errorMsg = 'Token no recibido del servidor';
+          if (!user) {
+            const errorMsg = 'Respuesta de login inválida del servidor';
             toast.error(errorMsg);
             throw new Error(errorMsg);
           }
 
-          // Guardar token en cookies
-          Cookies.set('token', token, { expires: 7, path: '/' });
-
+          // El JWT viaja en una cookie httpOnly seteada por el backend.
+          // El frontend NO almacena el token (mitiga robo por XSS).
           set({
             user,
-            token,
             isAuthenticated: true,
             isLoading: false,
           });
         } catch (error) {
-          // El manejo de errores detallado se hará en la UI,
-          // pero aquí guardamos el mensaje genérico o lanzamos el error
-          // para que el componente lo capture.
+          // El manejo de errores detallado se hará en la UI; aquí solo
+          // reseteamos el loading y relanzamos para que la UI lo capture.
           set({ isLoading: false });
           throw error;
         }
       },
 
-      logout: () => {
-        Cookies.remove('token');
-        set({ user: null, token: null, isAuthenticated: false });
+      logout: async () => {
+        try {
+          // Limpia la cookie httpOnly en el backend (JS no puede borrarla).
+          await api.post('/auth/logout');
+        } catch {
+          // best-effort: si falla, igual limpiamos el estado local.
+        }
+        set({ user: null, isAuthenticated: false });
       },
 
       setError: (error) => set({ error }),
     }),
     {
       name: 'auth-storage', // nombre único para localStorage
-      storage: createJSONStorage(() => localStorage), // usar localStorage
+      storage: createJSONStorage(() => localStorage),
+      // Solo se persisten datos no sensibles del usuario para la UI.
+      // La verdad de la sesión es la cookie httpOnly (validada por el
+      // middleware y por el interceptor 401).
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
-      }), // persistir solo estos campos
-      onRehydrateStorage: () => (state) => {
-        // Hidratación adicional: verificar si la cookie de token aún existe
-        const token = Cookies.get('token');
-        if (!token && state) {
-          // Si no hay token en cookie, invalidar la sesión persistida
-          state.logout();
-        }
-      },
+      }),
     }
   )
 );
