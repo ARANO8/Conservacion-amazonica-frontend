@@ -19,8 +19,8 @@ export const solicitudesService = {
    * Sends a new Solicitud to the backend.
    * @param payload The adapted form data for the backend.
    */
-  async createSolicitud(payload: CreateSolicitudPayload) {
-    const response = await api.post('/solicitudes', payload);
+  async createSolicitud(payload: CreateSolicitudPayload, signal?: AbortSignal) {
+    const response = await api.post('/solicitudes', payload, { signal });
     return response.data;
   },
 
@@ -28,9 +28,10 @@ export const solicitudesService = {
    * Fetches the list of solicitudes (for the requests table).
    * @param params Optional query parameters for filtering.
    */
-  async getSolicitudes(params?: GetSolicitudesParams) {
+  async getSolicitudes(params?: GetSolicitudesParams, signal?: AbortSignal) {
     const response = await api.get<SolicitudResponse[]>('/solicitudes', {
       params,
+      signal,
     });
     return response.data;
   },
@@ -39,8 +40,8 @@ export const solicitudesService = {
    * Fetches a single solicitud by ID.
    * @param id The ID of the solicitud to fetch.
    */
-  async getSolicitudById(id: string | number) {
-    const response = await api.get<SolicitudResponse>(`/solicitudes/${id}`);
+  async getSolicitudById(id: string | number, signal?: AbortSignal) {
+    const response = await api.get<SolicitudResponse>(`/solicitudes/${id}`, { signal });
     return response.data;
   },
 
@@ -53,25 +54,26 @@ export const solicitudesService = {
     id: number | string,
     payload:
       | Partial<CreateSolicitudPayload>
-      | Partial<CreateSolicitudCompraPayload>
+      | Partial<CreateSolicitudCompraPayload>,
+    signal?: AbortSignal
   ) {
-    const response = await api.patch(`/solicitudes/${id}`, payload);
+    const response = await api.patch(`/solicitudes/${id}`, payload, { signal });
     return response.data;
   },
 
   /**
    * Creates a new Solicitud de Compras/Servicios (COMPRA_SERVICIO).
    */
-  async createSolicitudCompra(payload: CreateSolicitudCompraPayload) {
-    const response = await api.post<SolicitudResponse>('/solicitudes', payload);
+  async createSolicitudCompra(payload: CreateSolicitudCompraPayload, signal?: AbortSignal) {
+    const response = await api.post<SolicitudResponse>('/solicitudes', payload, { signal });
     return response.data;
   },
 
   /**
    * Fetches solicitudes filtered by tipo=COMPRA_SERVICIO (client-side filter).
    */
-  async getSolicitudesCompra() {
-    const response = await api.get<SolicitudResponse[]>('/solicitudes');
+  async getSolicitudesCompra(signal?: AbortSignal) {
+    const response = await api.get<SolicitudResponse[]>('/solicitudes', { signal });
     return response.data.filter((s) => s.tipo === 'COMPRA_SERVICIO');
   },
 
@@ -85,14 +87,15 @@ export const solicitudesService = {
     codigoDesembolso: string,
     urlComprobante?: string,
     banco?: string,
-    fechaDesembolso?: string
+    fechaDesembolso?: string,
+    signal?: AbortSignal
   ) {
     const response = await api.patch(`/solicitudes/${id}/desembolsar`, {
       codigoDesembolso,
       ...(urlComprobante ? { urlComprobante } : {}),
       ...(banco ? { banco } : {}),
       ...(fechaDesembolso ? { fechaDesembolso } : {}),
-    });
+    }, { signal });
     return response.data;
   },
 
@@ -100,9 +103,10 @@ export const solicitudesService = {
    * Downloads a PDF for a specific solicitud.
    * @param id The ID of the solicitud.
    */
-  async downloadPdf(id: string | number) {
+  async downloadPdf(id: string | number, signal?: AbortSignal) {
     const response = await api.get(`/solicitudes/${id}/pdf`, {
       responseType: 'blob',
+      signal,
     });
     return response.data;
   },
@@ -111,8 +115,8 @@ export const solicitudesService = {
    * Marca una solicitud como EJECUTADA después de una rendición exitosa.
    * @param id The ID of the solicitud to mark as executed.
    */
-  async marcarEjecutada(id: string | number) {
-    const response = await api.patch(`/solicitudes/${id}/ejecutar`, {});
+  async marcarEjecutada(id: string | number, signal?: AbortSignal) {
+    const response = await api.patch(`/solicitudes/${id}/ejecutar`, {}, { signal });
     return response.data;
   },
 };

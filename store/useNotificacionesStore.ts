@@ -126,6 +126,13 @@ export const useNotificacionesStore = create<NotificacionesState>(
       setError: (error: string | null) => {
         set({ error });
       },
+
+      /**
+       * Limpia el estado global de notificaciones.
+       */
+      clear: () => {
+        set({ notificaciones: [], noLeidas: 0, error: null, isLoading: false });
+      },
     };
   }
 );

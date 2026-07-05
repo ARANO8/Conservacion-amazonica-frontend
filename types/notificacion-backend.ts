@@ -49,4 +49,5 @@ export interface NotificacionesState {
   startPolling: (interval?: number) => void;
   stopPolling: () => void;
   setError: (error: string | null) => void;
+  clear: () => void;
 }

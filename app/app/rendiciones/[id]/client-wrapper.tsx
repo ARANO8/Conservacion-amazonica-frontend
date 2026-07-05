@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,9 +29,17 @@ import { RendicionGastosSection } from '@/components/rendiciones/rendicion-gasto
 import { RendicionDeclaracionSection } from '@/components/rendiciones/rendicion-declaracion-section';
 import { RendicionSolicitudSection } from '@/components/rendiciones/rendicion-solicitud-section';
 import { useAuthStore } from '@/store/auth-store';
-import { catalogosService } from '@/services/catalogos.service';
-import { Usuario } from '@/types/catalogs';
+import { catalogosService } from '@/lib/services/catalogos-service';
+import { Usuario, PartidaContable } from '@/types/catalogs';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -94,6 +102,29 @@ export function RendicionDetailClient({
   const [derivadoAId, setDerivadoAId] = useState<string>('');
   const [comentarioAprobar, setComentarioAprobar] = useState('');
   const [comentarioObservar, setComentarioObservar] = useState('');
+  const [partidasContables, setPartidasContables] = useState<PartidaContable[]>([]);
+
+  useEffect(() => {
+    const fetchPartidasContables = async () => {
+      try {
+        const data = await catalogosService.getPartidasContables();
+        setPartidasContables(data);
+      } catch {
+        toast.error('No se pudo cargar el catálogo de partidas contables.');
+      }
+    };
+    void fetchPartidasContables();
+  }, []);
+
+  const handleUpdatePartidaContable = async (gastoId: number, pcId: number | null) => {
+    try {
+      await rendicionesService.updateGastoPartidaContable(gastoId, pcId);
+      toast.success('Partida contable vinculada.');
+      window.dispatchEvent(new CustomEvent('rendicion-updated'));
+    } catch {
+      toast.error('No se pudo vincular la partida contable.');
+    }
+  };
 
   const currentUserId = user?.id ? Number(user.id) : null;
   const currentUserRol = user?.rol;
@@ -135,6 +166,40 @@ export function RendicionDetailClient({
     () => usuarios.filter((u) => Number(u.id) !== currentUserId),
     [usuarios, currentUserId]
   );
+
+  const canEditPartidaContable = puedeAccionar && !isContador;
+
+  const resumenContable = useMemo(() => {
+    const map = new Map<
+      string,
+      { codigo: string; nombre: string; neto: number; impuestos: number; bruto: number }
+    >();
+
+    for (const g of gastosRegistrados) {
+      const code = g.partidaContable?.codigo ?? 'S/C';
+      const name = g.partidaContable?.nombre ?? 'Sin Clasificar';
+
+      const exist = map.get(code);
+      const netoVal = toNumber(g.montoNeto);
+      const impVal = toNumber(g.montoImpuestos);
+      const brutoVal = toNumber(g.montoTotal ?? g.montoBruto ?? g.monto);
+
+      if (exist) {
+        exist.neto += netoVal;
+        exist.impuestos += impVal;
+        exist.bruto += brutoVal;
+      } else {
+        map.set(code, {
+          codigo: code,
+          nombre: name,
+          neto: netoVal,
+          impuestos: impVal,
+          bruto: brutoVal,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.codigo.localeCompare(b.codigo));
+  }, [gastosRegistrados]);
 
   const openApproveDialog = async () => {
     if (!isContador) {
@@ -314,7 +379,56 @@ export function RendicionDetailClient({
 
       {/* Gastos Section */}
       {gastosRegistrados.length > 0 && (
-        <RendicionGastosSection gastos={gastosRegistrados} />
+        <RendicionGastosSection
+          gastos={gastosRegistrados}
+          canEditPartidaContable={canEditPartidaContable}
+          partidasContables={partidasContables}
+          onUpdatePartidaContable={handleUpdatePartidaContable}
+        />
+      )}
+
+      {/* Resumen Cuentas Contables */}
+      {gastosRegistrados.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Resumen de Partidas Contables</CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Agrupación acumulada de los gastos de esta rendición según la partida contable asociada.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-amzdesk-table-header">Código</TableHead>
+                    <TableHead className="text-amzdesk-table-header">Partida Contable</TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">Monto Neto</TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">Retenciones/Impuestos</TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right font-bold">Total (Bruto)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {resumenContable.map((r) => (
+                    <TableRow key={r.codigo}>
+                      <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
+                      <TableCell className="font-semibold text-xs">{r.nombre}</TableCell>
+                      <TableCell className="text-right text-xs font-semibold text-emerald-600">
+                        {formatMoney(r.neto)} Bs.
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-semibold text-orange-600">
+                        {formatMoney(r.impuestos)} Bs.
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-bold text-foreground bg-muted/20">
+                        {formatMoney(r.bruto)} Bs.
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <Card>

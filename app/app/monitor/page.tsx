@@ -9,7 +9,7 @@ import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Activity } from 'lucide-react';
-import { catalogosService } from '@/services/catalogos.service';
+import { catalogosService } from '@/lib/services/catalogos-service';
 import { Partida } from '@/types/catalogs';
 import { useAuthStore } from '@/store/auth-store';
 

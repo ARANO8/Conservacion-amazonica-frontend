@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import api from '../lib/api';
 import { toast } from 'sonner';
+import { useNotificacionesStore } from './useNotificacionesStore';
 
 // Interfaz User estricta (tipado según backend)
 export interface User {
@@ -72,6 +73,8 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // best-effort: si falla, igual limpiamos el estado local.
         }
+        // Limpiar notificaciones de la sesión en el store
+        useNotificacionesStore.getState().clear();
         set({ user: null, isAuthenticated: false });
       },
 

@@ -41,17 +41,18 @@ export const dashboardService = {
   /**
    * Obtiene métricas consolidadas del dashboard para el usuario autenticado.
    */
-  async getDashboardMetrics(): Promise<DashboardMetrics> {
-    const { data } = await api.get<DashboardMetrics>('/dashboard/metrics');
+  async getDashboardMetrics(signal?: AbortSignal): Promise<DashboardMetrics> {
+    const { data } = await api.get<DashboardMetrics>('/dashboard/metrics', { signal });
     return data;
   },
 
   /**
    * Obtiene analítica avanzada para perfiles gerenciales.
    */
-  async getAdvancedAnalytics(): Promise<DashboardAdvancedAnalytics> {
+  async getAdvancedAnalytics(signal?: AbortSignal): Promise<DashboardAdvancedAnalytics> {
     const { data } = await api.get<DashboardAdvancedAnalytics>(
-      '/dashboard/analytics'
+      '/dashboard/analytics',
+      { signal }
     );
     return data;
   },

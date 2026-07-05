@@ -45,3 +45,9 @@ export interface CodigoPresupuestario {
   descripcion?: string;
   codigoCompleto?: string;
 }
+
+export interface PartidaContable {
+  id: number;
+  codigo: string;
+  nombre: string;
+}

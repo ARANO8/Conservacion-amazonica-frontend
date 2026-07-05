@@ -5,11 +5,11 @@ export interface CreateRendicionApiPayload {
   solicitudId: number;
   aprobadorActualId: number;
   fechaRendicion: string;
-  gastos: Array<{
-    solicitudItemId?: number;
-    concepto: string;
-    detalle?: string;
-    tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA';
+    gastos: Array<{
+      solicitudItemId?: number;
+      concepto: string;
+      detalle?: string;
+      tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA' | 'LV' | 'DJ' | 'PPT' | 'PAT' | 'PVT';
     numeroDocumento?: string;
     proveedor?: string;
     fechaDocumento?: string;
@@ -177,7 +177,12 @@ export function adaptRendicionResponseToFormData(
       tipoDocumento: (gasto.tipoDocumento ?? 'FACTURA') as
         | 'FACTURA'
         | 'RECIBO'
-        | 'BOLETA',
+        | 'BOLETA'
+        | 'LV'
+        | 'DJ'
+        | 'PPT'
+        | 'PAT'
+        | 'PVT',
       numeroDocumento: gasto.nroDocumento ?? gasto.numeroDocumento ?? '',
       proveedor: gasto.proveedor ?? '',
       fechaDocumento: gasto.fecha ?? gasto.fechaDocumento ?? '',
@@ -193,7 +198,7 @@ export function adaptRendicionResponseToFormData(
         | 'RECHAZADO',
       partidaId: gasto.partidaId ?? 0,
       urlComprobante: gasto.urlComprobante ?? '',
-      tipoRetencion: undefined, // No se guarda en backend
+      tipoRetencion: (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
     })),
 
     // Gastos sin respaldo (declaraciones juradas)

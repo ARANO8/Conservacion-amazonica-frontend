@@ -200,6 +200,7 @@ export function LoginForm({
               height={100}
               priority
               className="h-auto w-[280px] md:w-[320px]"
+              style={{ height: 'auto' }}
             />
           </div>
           <p className="text-muted-foreground mt-5 text-sm md:text-base">

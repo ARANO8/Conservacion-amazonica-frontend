@@ -96,9 +96,7 @@ function buildViajesItems(rol?: Role) {
 
   if (esRolOperativo(rol)) {
     items.push({ title: 'Mis Solicitudes', url: '/app/solicitudes' });
-    items.push({ title: 'Nueva Solicitud', url: '/app/solicitudes/nueva' });
     items.push({ title: 'Mis Rendiciones', url: '/app/rendiciones' });
-    items.push({ title: 'Nueva Rendición', url: '/app/rendiciones/nueva' });
   }
 
   return items;
@@ -117,22 +115,13 @@ function buildComprasItems(rol?: Role) {
       url: '/app/solicitudes-compra',
     });
     items.push({ title: 'Mis Cotizaciones', url: '/app/cotizaciones' });
-    items.push({ title: 'Nueva Cotización', url: '/app/cotizaciones/nueva' });
     items.push({
       title: 'Cuadros Comparativos',
       url: '/app/cuadros-comparativos',
     });
     items.push({
-      title: 'Nuevo Cuadro Comparativo',
-      url: '/app/cuadros-comparativos/nueva',
-    });
-    items.push({
       title: 'Órdenes de Compra',
       url: '/app/ordenes-compra',
-    });
-    items.push({
-      title: 'Nueva Orden de Compra',
-      url: '/app/ordenes-compra/nueva',
     });
   }
 

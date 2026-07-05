@@ -26,7 +26,7 @@ export function CuentaBancariaCard({
           {cuentaBancaria.banco || 'Banco no especificado'}
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <p className="text-[10px] font-bold tracking-widest text-blue-600/70 uppercase dark:text-blue-400/70">
             Nro. de Cuenta

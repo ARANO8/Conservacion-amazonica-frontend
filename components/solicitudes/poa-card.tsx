@@ -119,7 +119,7 @@ export function PoaCard({
 
       <div className="mt-auto space-y-3">
         {/* Budget Status */}
-        <div className="grid grid-cols-2 gap-2 border-t pt-3">
+        <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2 border-t pt-3">
           <div className="flex flex-col">
             <span className="text-muted-foreground text-[10px] font-bold uppercase">
               Total

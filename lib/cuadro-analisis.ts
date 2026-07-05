@@ -105,12 +105,13 @@ export function analizarCuadro(input: AnalisisInput): CuadroAnalisis {
   // Mejor mezcla por ítem (cada ítem al proveedor más barato que lo cotiza)
   const porItem = items.map((item) => {
     let mejor: { index: number; nombre: string; total: number } | null = null;
-    columnas.forEach((col, ci) => {
+    for (let ci = 0; ci < columnas.length; ci++) {
+      const col = columnas[ci];
       const t = celdaTotal(item.precios[ci], item.cantidad);
       if (t !== null && (mejor === null || t < mejor.total)) {
         mejor = { index: ci, nombre: col.proveedorNombre, total: t };
       }
-    });
+    }
     return {
       descripcion: item.descripcion,
       proveedorNombre: mejor ? mejor.nombre : null,

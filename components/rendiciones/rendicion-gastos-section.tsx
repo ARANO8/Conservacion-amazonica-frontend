@@ -12,9 +12,13 @@ import {
 } from '@/components/ui/table';
 import { formatMoney, formatDate } from '@/lib/utils';
 import type { GastoRendicionResponse } from '@/types/rendicion-backend';
+import type { PartidaContable } from '@/types/catalogs';
 
 interface RendicionGastosSectionProps {
   gastos: GastoRendicionResponse[];
+  canEditPartidaContable?: boolean;
+  partidasContables?: PartidaContable[];
+  onUpdatePartidaContable?: (gastoId: number, partidaContableId: number | null) => Promise<void>;
 }
 
 function toNumber(value: string | number | null | undefined): number {
@@ -28,6 +32,9 @@ function toNumber(value: string | number | null | undefined): number {
 
 export function RendicionGastosSection({
   gastos,
+  canEditPartidaContable = false,
+  partidasContables = [],
+  onUpdatePartidaContable,
 }: RendicionGastosSectionProps) {
   if (!gastos || gastos.length === 0) return null;
 
@@ -53,6 +60,9 @@ export function RendicionGastosSection({
                 </TableHead>
                 <TableHead className="text-amzdesk-table-header">
                   Proveedor
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header">
+                  Partida Contable
                 </TableHead>
                 <TableHead className="text-amzdesk-table-header">
                   Fecha
@@ -89,6 +99,31 @@ export function RendicionGastosSection({
                     </p>
                   </TableCell>
                   <TableCell>{gasto.proveedor || '-'}</TableCell>
+                  <TableCell>
+                    {canEditPartidaContable ? (
+                      <select
+                        value={gasto.partidaContableId ?? ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          void onUpdatePartidaContable?.(gasto.id, val ? Number(val) : null);
+                        }}
+                        className="w-full min-w-[140px] max-w-[200px] bg-background border rounded px-1.5 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                        <option value="">Seleccionar...</option>
+                        {partidasContables.map((pc) => (
+                          <option key={pc.id} value={pc.id}>
+                            {pc.codigo} - {pc.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    ) : gasto.partidaContable ? (
+                      <span className="font-medium text-xs">
+                        {gasto.partidaContable.codigo} - {gasto.partidaContable.nombre}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     {gasto.fechaDocumento
                       ? formatDate(gasto.fechaDocumento)

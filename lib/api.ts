@@ -26,6 +26,23 @@ api.interceptors.response.use(
         window.dispatchEvent(new Event('auth-expired'));
       }
     }
+
+    if (error.response?.status === 429) {
+      if (error.response.data && typeof error.response.data === 'object') {
+        error.response.data.message =
+          'Ha realizado demasiadas peticiones. Por favor, intente de nuevo más tarde.';
+      } else {
+        error.response.data = {
+          message: 'Ha realizado demasiadas peticiones. Por favor, intente de nuevo más tarde.',
+        };
+      }
+    }
+
+    if (error.message === 'Network Error' || error.code === 'ERR_NETWORK' || !error.response) {
+      error.message =
+        'No se pudo establecer conexión con el servidor. Por favor, verifique su conexión a internet o intente más tarde.';
+    }
+
     return Promise.reject(error);
   }
 );
