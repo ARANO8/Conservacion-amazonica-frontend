@@ -65,8 +65,8 @@ function buildPayload(
 }
 
 export const usuariosService = {
-  async getAll(): Promise<UsuarioListItem[]> {
-    const { data } = await api.get<UsuarioListItem[]>('/usuarios');
+  async getAll(signal?: AbortSignal): Promise<UsuarioListItem[]> {
+    const { data } = await api.get<UsuarioListItem[]>('/usuarios', { signal });
     return data;
   },
 

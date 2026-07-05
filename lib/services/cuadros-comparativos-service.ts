@@ -9,95 +9,112 @@ import type {
  * El token Bearer es inyectado automáticamente por el interceptor de `api`.
  */
 export const cuadrosComparativosService = {
-  async createCuadro(payload: CreateCuadroComparativoPayload) {
+  async createCuadro(payload: CreateCuadroComparativoPayload, signal?: AbortSignal) {
     const response = await api.post<CuadroComparativoResponse>(
       '/cuadros-comparativos',
-      payload
+      payload,
+      { signal }
     );
     return response.data;
   },
 
-  async getCuadros() {
+  async getCuadros(signal?: AbortSignal) {
     const response = await api.get<CuadroComparativoResponse[]>(
-      '/cuadros-comparativos'
+      '/cuadros-comparativos',
+      { signal }
     );
     return response.data;
   },
 
-  async getCuadroById(id: string | number) {
+  async getCuadroById(id: string | number, signal?: AbortSignal) {
     const response = await api.get<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}`
+      `/cuadros-comparativos/${id}`,
+      { signal }
     );
     return response.data;
   },
 
   async updateCuadro(
     id: string | number,
-    payload: Partial<CreateCuadroComparativoPayload>
+    payload: Partial<CreateCuadroComparativoPayload>,
+    signal?: AbortSignal
   ) {
     const response = await api.patch<CuadroComparativoResponse>(
       `/cuadros-comparativos/${id}`,
-      payload
+      payload,
+      { signal }
     );
     return response.data;
   },
 
-  async deleteCuadro(id: string | number) {
-    const response = await api.delete(`/cuadros-comparativos/${id}`);
+  async deleteCuadro(id: string | number, signal?: AbortSignal) {
+    const response = await api.delete(`/cuadros-comparativos/${id}`, { signal });
     return response.data;
   },
 
   /** PASO 1: Emisor → CONTADOR */
-  async enviarRevision(id: string | number) {
+  async enviarRevision(id: string | number, signal?: AbortSignal) {
     const response = await api.patch<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}/enviar-revision`
+      `/cuadros-comparativos/${id}/enviar-revision`,
+      null,
+      { signal }
     );
     return response.data;
   },
 
   /** PASO 2: CONTADOR → Denis (VALIDADOR_COMPRAS) */
-  async enviarValidacion(id: string | number) {
+  async enviarValidacion(id: string | number, signal?: AbortSignal) {
     const response = await api.patch<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}/enviar-validacion`
+      `/cuadros-comparativos/${id}/enviar-validacion`,
+      null,
+      { signal }
     );
     return response.data;
   },
 
   /** PASO 3: Denis valida → devuelve al CONTADOR */
-  async validar(id: string | number) {
+  async validar(id: string | number, signal?: AbortSignal) {
     const response = await api.patch<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}/validar`
+      `/cuadros-comparativos/${id}/validar`,
+      null,
+      { signal }
     );
     return response.data;
   },
 
   /** PASO 4: CONTADOR → Shirley (EJECUTIVO) */
-  async enviarAprobacion(id: string | number) {
+  async enviarAprobacion(id: string | number, signal?: AbortSignal) {
     const response = await api.patch<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}/enviar-aprobacion`
+      `/cuadros-comparativos/${id}/enviar-aprobacion`,
+      null,
+      { signal }
     );
     return response.data;
   },
 
   /** PASO 5: Shirley aprueba → APROBADO */
-  async aprobar(id: string | number) {
+  async aprobar(id: string | number, signal?: AbortSignal) {
     const response = await api.patch<CuadroComparativoResponse>(
-      `/cuadros-comparativos/${id}/aprobar`
+      `/cuadros-comparativos/${id}/aprobar`,
+      null,
+      { signal }
     );
     return response.data;
   },
 
-  async observar(id: string | number, motivo: string) {
+  async observar(id: string | number, motivo: string, signal?: AbortSignal) {
     const response = await api.patch<CuadroComparativoResponse>(
       `/cuadros-comparativos/${id}/observar`,
-      { motivo }
+      { motivo },
+      { signal }
     );
     return response.data;
   },
 
-  async downloadPdf(id: string | number) {
+  async downloadPdf(id: string | number, signal?: AbortSignal) {
     const response = await api.get(`/cuadros-comparativos/${id}/pdf`, {
       responseType: 'blob',
+      signal,
     });
     return response.data;
   },

@@ -77,12 +77,13 @@ export default function SolicitudesCompraPage() {
     null
   );
 
-  const fetchData = async () => {
+  const fetchData = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
-      const data = await solicitudesService.getSolicitudesCompra();
+      const data = await solicitudesService.getSolicitudesCompra(signal);
       setSolicitudes(data);
-    } catch {
+    } catch (err) {
+      if (axios.isCancel(err)) return;
       toast.error('No se pudieron cargar las solicitudes de compras.');
     } finally {
       setLoading(false);
@@ -90,7 +91,11 @@ export default function SolicitudesCompraPage() {
   };
 
   useEffect(() => {
-    void fetchData();
+    const controller = new AbortController();
+    void fetchData(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const confirmDelete = async () => {

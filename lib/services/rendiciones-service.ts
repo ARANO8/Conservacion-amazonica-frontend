@@ -25,8 +25,8 @@ export const rendicionesService = {
   /**
    * Envía la rendición ya adaptada al endpoint oficial del backend.
    */
-  async submitRendicion(payload: CreateRendicionApiPayload) {
-    const response = await api.post('/rendiciones', payload);
+  async submitRendicion(payload: CreateRendicionApiPayload, signal?: AbortSignal) {
+    const response = await api.post('/rendiciones', payload, { signal });
     return response.data;
   },
 
@@ -34,10 +34,10 @@ export const rendicionesService = {
    * Creates a new rendición (accountability report) for a solicitud.
    * @param payload The form data with all rendición information.
    */
-  async createRendicion(payload: CreateRendicionInput) {
+  async createRendicion(payload: CreateRendicionInput, signal?: AbortSignal) {
     // Adaptar el payload al formato exacto que espera el backend
     const adaptedPayload = adaptCreateRendicionPayload(payload);
-    return this.submitRendicion(adaptedPayload);
+    return this.submitRendicion(adaptedPayload, signal);
   },
 
   /**
@@ -48,9 +48,10 @@ export const rendicionesService = {
    */
   async submitUpdateRendicion(
     id: string | number,
-    payload: UpdateRendicionApiPayload
+    payload: UpdateRendicionApiPayload,
+    signal?: AbortSignal
   ) {
-    const response = await api.patch(`/rendiciones/${id}`, payload);
+    const response = await api.patch(`/rendiciones/${id}`, payload, { signal });
     return response.data;
   },
 
@@ -60,22 +61,22 @@ export const rendicionesService = {
    * @param id El ID de la rendición a actualizar.
    * @param payload Los datos del formulario de rendición.
    */
-  async updateRendicion(id: string | number, payload: CreateRendicionInput) {
+  async updateRendicion(id: string | number, payload: CreateRendicionInput, signal?: AbortSignal) {
     const adaptedPayload = adaptUpdateRendicionPayload(payload);
-    return this.submitUpdateRendicion(id, adaptedPayload);
+    return this.submitUpdateRendicion(id, adaptedPayload, signal);
   },
 
   /**
    * Fetches a single rendición by ID.
    * @param id The ID of the rendición.
    */
-  async getRendicionById(id: string | number) {
-    const response = await api.get(`/rendiciones/${id}`);
+  async getRendicionById(id: string | number, signal?: AbortSignal) {
+    const response = await api.get(`/rendiciones/${id}`, { signal });
     return response.data;
   },
 
-  async getRendiciones() {
-    const response = await api.get<RendicionResponse[]>('/rendiciones');
+  async getRendiciones(signal?: AbortSignal) {
+    const response = await api.get<RendicionResponse[]>('/rendiciones', { signal });
     return response.data;
   },
 
@@ -83,9 +84,10 @@ export const rendicionesService = {
    * Obtiene únicamente las rendiciones creadas por el usuario actual.
    * (Para "Mis Trámites > Rendiciones")
    */
-  async getMisRendiciones() {
+  async getMisRendiciones(signal?: AbortSignal) {
     const response = await api.get<RendicionResponse[]>(
-      '/rendiciones/mis-rendiciones'
+      '/rendiciones/mis-rendiciones',
+      { signal }
     );
     return response.data;
   },
@@ -94,9 +96,10 @@ export const rendicionesService = {
    * Fetches rendiciones by solicitud ID.
    * @param solicitudId The ID of the solicitud.
    */
-  async getRendicionesBySolicitud(solicitudId: string | number) {
+  async getRendicionesBySolicitud(solicitudId: string | number, signal?: AbortSignal) {
     const response = await api.get(`/rendiciones`, {
       params: { solicitudId },
+      signal,
     });
     return response.data;
   },
@@ -104,30 +107,46 @@ export const rendicionesService = {
   /**
    * Obtiene una rendición a partir del ID de solicitud.
    */
-  async getRendicionBySolicitud(solicitudId: string | number) {
-    const response = await api.get(`/rendiciones/solicitud/${solicitudId}`);
+  async getRendicionBySolicitud(solicitudId: string | number, signal?: AbortSignal) {
+    const response = await api.get(`/rendiciones/solicitud/${solicitudId}`, { signal });
     return response.data;
   },
 
   async aprobarRendicion(
     id: string | number,
-    payload: AprobarRendicionPayload
+    payload: AprobarRendicionPayload,
+    signal?: AbortSignal
   ) {
-    const response = await api.post(`/rendiciones/${id}/aprobar`, payload);
+    const response = await api.post(`/rendiciones/${id}/aprobar`, payload, { signal });
     return response.data;
   },
 
   async observarRendicion(
     id: string | number,
-    payload: ObservarRendicionPayload
+    payload: ObservarRendicionPayload,
+    signal?: AbortSignal
   ) {
-    const response = await api.post(`/rendiciones/${id}/observar`, payload);
+    const response = await api.post(`/rendiciones/${id}/observar`, payload, { signal });
     return response.data;
   },
 
-  async downloadPdf(id: string | number) {
+  async updateGastoPartidaContable(
+    gastoId: number,
+    partidaContableId: number | null,
+    signal?: AbortSignal
+  ) {
+    const response = await api.patch(
+      `/rendiciones/gastos/${gastoId}/partida-contable`,
+      { partidaContableId },
+      { signal }
+    );
+    return response.data;
+  },
+
+  async downloadPdf(id: string | number, signal?: AbortSignal) {
     const response = await api.get(`/rendiciones/${id}/pdf`, {
       responseType: 'blob',
+      signal,
     });
     return response.data;
   },

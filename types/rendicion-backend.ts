@@ -4,6 +4,7 @@
  */
 
 import type { SolicitudResponse } from './solicitud-backend';
+import type { PartidaContable } from './catalogs';
 
 // ---------------------------------------------------------------------------
 // Enums (from backend)
@@ -57,6 +58,11 @@ export enum TipoDocumentoGasto {
   FACTURA = 'FACTURA',
   RECIBO = 'RECIBO',
   BOLETA = 'BOLETA',
+  LV = 'LV',
+  DJ = 'DJ',
+  PPT = 'PPT',
+  PAT = 'PAT',
+  PVT = 'PVT',
 }
 
 // ---------------------------------------------------------------------------
@@ -85,6 +91,9 @@ export interface GastoRendicionResponse {
   montoImpuestos?: string;
   partidaId?: number;
   urlComprobante?: string;
+  tipoRetencion?: string;
+  partidaContableId?: number | null;
+  partidaContable?: PartidaContable | null;
   partida?: {
     id: number;
     poa?: {

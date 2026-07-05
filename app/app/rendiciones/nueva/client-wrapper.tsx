@@ -9,7 +9,7 @@ import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { RendicionWizard } from '@/components/rendiciones';
 import { useAuthStore } from '@/store/auth-store';
-import { catalogosService } from '@/services/catalogos.service';
+import { catalogosService } from '@/lib/services/catalogos-service';
 import { Usuario } from '@/types/catalogs';
 
 /**

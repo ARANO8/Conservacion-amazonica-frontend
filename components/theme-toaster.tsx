@@ -1,14 +1,14 @@
 'use client';
 
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/lib/theme-context';
 import { Toaster } from 'sonner';
 
 export function ThemeToaster() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return (
     <Toaster
-      theme={theme as 'light' | 'dark' | 'system'}
+      theme={resolvedTheme as 'light' | 'dark' | 'system'}
       className="toaster group"
       toastOptions={{
         classNames: {
