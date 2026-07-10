@@ -37,7 +37,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Calculator, Check, ChevronsUpDown } from 'lucide-react';
 import { formatMoney, cn } from '@/lib/utils';
 import {
-  calcularMontoNetoRendicion,
+  calcularMontoBrutoRendicion,
   getCategoriaFromPartida,
   TipoDocRendicion,
   TipoRetencionGeneral,
@@ -91,7 +91,12 @@ interface GastoCardProps {
   form: UseFormReturn<CreateRendicionInput>;
 }
 
-export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) {
+export function GastoCard({
+  index,
+  solicitud,
+  onRemove,
+  form,
+}: GastoCardProps) {
   const { control, setValue } = form;
 
   // Watch the fields that affect tax calculation
@@ -137,13 +142,13 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
 
   // Compute tax result
   const taxResult = useMemo(() => {
-    const bruto =
+    const neto =
       typeof montoTotal === 'number'
         ? montoTotal
         : parseFloat(String(montoTotal ?? 0)) || 0;
 
-    return calcularMontoNetoRendicion(
-      bruto,
+    return calcularMontoBrutoRendicion(
+      neto,
       (tipoDocumento ?? 'FACTURA') as TipoDocRendicion,
       categoria,
       (tipoRetencion ?? 'SERVICIO') as TipoRetencionGeneral
@@ -152,18 +157,15 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
 
   // Sync montoNeto whenever taxResult changes
   useEffect(() => {
-    const montoBruto = round2(taxResult.montoNeto + taxResult.totalRetenciones);
-    const montoImpuestos = round2(taxResult.totalRetenciones);
-
-    setValue(`gastos.${index}.montoBruto`, montoBruto, {
+    setValue(`gastos.${index}.montoBruto`, taxResult.montoBruto, {
       shouldValidate: true,
       shouldDirty: true,
     });
-    setValue(`gastos.${index}.montoImpuestos`, montoImpuestos, {
+    setValue(`gastos.${index}.montoImpuestos`, taxResult.totalRetenciones, {
       shouldValidate: true,
       shouldDirty: true,
     });
-    setValue(`gastos.${index}.montoTotal`, montoBruto, {
+    setValue(`gastos.${index}.montoTotal`, taxResult.montoBruto, {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -171,7 +173,13 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
       shouldValidate: true,
       shouldDirty: true,
     });
-  }, [taxResult.montoNeto, taxResult.totalRetenciones, index, setValue]);
+  }, [
+    taxResult.montoNeto,
+    taxResult.montoBruto,
+    taxResult.totalRetenciones,
+    index,
+    setValue,
+  ]);
 
   return (
     <Card className="w-full border shadow-sm">
@@ -297,8 +305,8 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
           control={control}
           name={`gastos.${index}.partidaId`}
           render={({ field }) => (
-            <FormItem className="md:col-span-1 flex flex-col justify-end">
-              <FormLabel className="text-sm font-bold tracking-wider uppercase mb-2">
+            <FormItem className="flex flex-col justify-end md:col-span-1">
+              <FormLabel className="mb-2 text-sm font-bold tracking-wider uppercase">
                 Partida Presupuestaria *
               </FormLabel>
               <Popover open={openPartida} onOpenChange={setOpenPartida}>
@@ -309,8 +317,8 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
                       role="combobox"
                       aria-expanded={openPartida}
                       className={cn(
-                        "w-full justify-between h-9 text-sm font-normal",
-                        !field.value && "text-muted-foreground"
+                        'h-9 w-full justify-between text-sm font-normal',
+                        !field.value && 'text-muted-foreground'
                       )}
                     >
                       {field.value
@@ -327,7 +335,10 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0"
+                  align="start"
+                >
                   <Command>
                     <CommandInput placeholder="Buscar partida..." />
                     <CommandList>
@@ -335,7 +346,8 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
                       <CommandGroup>
                         {(solicitud?.presupuestos ?? []).map((p) => {
                           const codigo = p.poa?.codigoPoa ?? '—';
-                          const partida = p.poa?.estructura?.partida?.nombre ?? '—';
+                          const partida =
+                            p.poa?.estructura?.partida?.nombre ?? '—';
                           return (
                             <CommandItem
                               key={p.id}
@@ -347,13 +359,19 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
                             >
                               <Check
                                 className={cn(
-                                  "mr-2 h-4 w-4",
-                                  p.id === field.value ? "opacity-100" : "opacity-0"
+                                  'mr-2 h-4 w-4',
+                                  p.id === field.value
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
                                 )}
                               />
                               <div className="flex flex-col">
-                                <span className="font-mono text-xs font-bold text-primary">{codigo}</span>
-                                <span className="text-[10px] text-foreground leading-tight">{partida}</span>
+                                <span className="text-primary font-mono text-xs font-bold">
+                                  {codigo}
+                                </span>
+                                <span className="text-foreground text-[10px] leading-tight">
+                                  {partida}
+                                </span>
                               </div>
                             </CommandItem>
                           );
