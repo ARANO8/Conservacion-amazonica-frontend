@@ -5,6 +5,7 @@ import {
   ArrowRight,
   CheckCircle,
   FilePlus,
+  RefreshCw,
   XCircle,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -19,7 +20,8 @@ type AuditAccion =
   | 'DERIVADO'
   | 'APROBADO'
   | 'OBSERVADO'
-  | 'RECHAZADO';
+  | 'RECHAZADO'
+  | 'CORREGIDO';
 
 interface AuditUsuario {
   id: number;
@@ -79,6 +81,14 @@ function getAccionUi(accion: string) {
       label: 'Observado',
       icon: AlertCircle,
       dotClass: 'bg-amber-100 text-amber-700 border-amber-200',
+    };
+  }
+
+  if (accion === 'CORREGIDO') {
+    return {
+      label: 'Corregido',
+      icon: RefreshCw,
+      dotClass: 'bg-sky-100 text-sky-700 border-sky-200',
     };
   }
 
