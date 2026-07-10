@@ -10,7 +10,15 @@ export interface CreateRendicionApiPayload {
     solicitudItemId?: number;
     concepto: string;
     detalle?: string;
-    tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA';
+    tipoDocumento:
+      | 'FACTURA'
+      | 'RECIBO'
+      | 'BOLETA'
+      | 'LV'
+      | 'DJ'
+      | 'PPT'
+      | 'PAT'
+      | 'PVT';
     numeroDocumento?: string;
     proveedor?: string;
     fechaDocumento?: string;
