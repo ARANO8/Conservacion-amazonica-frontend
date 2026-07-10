@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useWatch, type UseFormReturn } from 'react-hook-form';
-import {
-  FormField,
-  FormItem,
-  FormControl,
-} from '@/components/ui/form';
+import { FormField, FormItem, FormControl } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -31,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Check, ChevronsUpDown } from 'lucide-react';
 import { formatMoney, cn } from '@/lib/utils';
 import {
-  calcularMontoNetoRendicion,
+  calcularMontoBrutoRendicion,
   getCategoriaFromPartida,
   type TipoDocRendicion,
   type TipoRetencionGeneral,
@@ -75,7 +71,11 @@ interface PartidaComboboxProps {
   presupuestos: SolicitudResponse['presupuestos'];
 }
 
-function PartidaCombobox({ value, onChange, presupuestos }: PartidaComboboxProps) {
+function PartidaCombobox({
+  value,
+  onChange,
+  presupuestos,
+}: PartidaComboboxProps) {
   const [open, setOpen] = useState(false);
   const selected = presupuestos?.find((p) => p.id === value);
 
@@ -88,15 +88,16 @@ function PartidaCombobox({ value, onChange, presupuestos }: PartidaComboboxProps
           aria-expanded={open}
           className="h-7 w-full justify-between px-1.5 text-[11px] font-normal"
         >
-          {selected
-            ? `${selected.poa?.codigoPoa ?? '—'}`
-            : 'Seleccionar...'}
+          {selected ? `${selected.poa?.codigoPoa ?? '—'}` : 'Seleccionar...'}
           <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Buscar partida..." className="h-8 text-xs" />
+          <CommandInput
+            placeholder="Buscar partida..."
+            className="h-8 text-xs"
+          />
           <CommandList>
             <CommandEmpty className="text-xs">No se encontró.</CommandEmpty>
             <CommandGroup>
@@ -113,11 +114,11 @@ function PartidaCombobox({ value, onChange, presupuestos }: PartidaComboboxProps
                   <Check
                     className={cn(
                       'mr-2 h-3 w-3',
-                      p.id === value ? 'opacity-100' : 'opacity-0',
+                      p.id === value ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   <div className="flex flex-col">
-                    <span className="font-mono text-[11px] font-bold text-primary">
+                    <span className="text-primary font-mono text-[11px] font-bold">
                       {p.poa?.codigoPoa ?? '—'}
                     </span>
                     <span className="text-muted-foreground text-[10px] leading-tight">
@@ -153,38 +154,43 @@ function GastoRow({
   const [montoInput, setMontoInput] = useState<string>('');
 
   const montoTotal = useWatch({ control, name: `gastos.${index}.montoTotal` });
-  const tipoDocumento = useWatch({ control, name: `gastos.${index}.tipoDocumento` });
+  const tipoDocumento = useWatch({
+    control,
+    name: `gastos.${index}.tipoDocumento`,
+  });
   const partidaId = useWatch({ control, name: `gastos.${index}.partidaId` });
-  const tipoRetencion = useWatch({ control, name: `gastos.${index}.tipoRetencion` });
+  const tipoRetencion = useWatch({
+    control,
+    name: `gastos.${index}.tipoRetencion`,
+  });
 
   const nombrePartida = useMemo(() => {
     const presupuesto = (solicitud?.presupuestos ?? []).find(
-      (p) => p.id === Number(partidaId),
+      (p) => p.id === Number(partidaId)
     );
     return presupuesto?.poa?.estructura?.partida?.nombre ?? null;
   }, [solicitud, partidaId]);
 
   const categoria = useMemo(
     () => getCategoriaFromPartida(nombrePartida),
-    [nombrePartida],
+    [nombrePartida]
   );
 
   const taxResult = useMemo(() => {
-    const bruto =
+    const neto =
       typeof montoTotal === 'number'
         ? montoTotal
         : Number.parseFloat(String(montoTotal ?? 0)) || 0;
-    return calcularMontoNetoRendicion(
-      bruto,
+    return calcularMontoBrutoRendicion(
+      neto,
       (tipoDocumento ?? 'FACTURA') as TipoDocRendicion,
       categoria,
-      (tipoRetencion ?? 'SERVICIO') as TipoRetencionGeneral,
+      (tipoRetencion ?? 'SERVICIO') as TipoRetencionGeneral
     );
   }, [montoTotal, tipoDocumento, categoria, tipoRetencion]);
 
   useEffect(() => {
-    const montoBruto = round2(taxResult.montoNeto + taxResult.totalRetenciones);
-    setValue(`gastos.${index}.montoBruto`, montoBruto, {
+    setValue(`gastos.${index}.montoBruto`, taxResult.montoBruto, {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -192,7 +198,7 @@ function GastoRow({
       shouldValidate: true,
       shouldDirty: true,
     });
-    setValue(`gastos.${index}.montoTotal`, montoBruto, {
+    setValue(`gastos.${index}.montoTotal`, taxResult.montoBruto, {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -200,7 +206,13 @@ function GastoRow({
       shouldValidate: true,
       shouldDirty: true,
     });
-  }, [taxResult.montoNeto, taxResult.totalRetenciones, index, setValue]);
+  }, [
+    taxResult.montoNeto,
+    taxResult.montoBruto,
+    taxResult.totalRetenciones,
+    index,
+    setValue,
+  ]);
 
   const presupuestos = solicitud?.presupuestos ?? [];
 
@@ -210,9 +222,11 @@ function GastoRow({
       const container = e.currentTarget.closest('tr');
       if (!container) return;
       const inputs = container.querySelectorAll<HTMLElement>(
-        'input, select, button[role="combobox"], [tabindex]',
+        'input, select, button[role="combobox"], [tabindex]'
       );
-      const currentIdx = Array.from(inputs).indexOf(e.currentTarget as HTMLElement);
+      const currentIdx = Array.from(inputs).indexOf(
+        e.currentTarget as HTMLElement
+      );
       if (currentIdx < inputs.length - 1) {
         inputs[currentIdx + 1]?.focus();
       } else {
@@ -222,14 +236,14 @@ function GastoRow({
   }
 
   return (
-    <tr className="border-b border-border hover:bg-muted/30">
+    <tr className="border-border hover:bg-muted/30 border-b">
       {/* # */}
-      <td className="px-1.5 py-1 text-center text-[11px] text-muted-foreground w-8">
+      <td className="text-muted-foreground w-8 px-1.5 py-1 text-center text-[11px]">
         {index + 1}
       </td>
 
       {/* Fecha */}
-      <td className="px-1 py-1 w-[105px]">
+      <td className="w-[105px] px-1 py-1">
         <FormField
           control={control}
           name={`gastos.${index}.fechaDocumento`}
@@ -238,7 +252,7 @@ function GastoRow({
               <FormControl>
                 <input
                   type="date"
-                  className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="border-input bg-background focus:ring-primary h-7 w-full rounded border px-1.5 text-xs focus:ring-1 focus:outline-none"
                   value={
                     typeof field.value === 'string'
                       ? field.value
@@ -247,29 +261,29 @@ function GastoRow({
                         : ''
                   }
                   onChange={(e) => field.onChange(e.target.value)}
-onKeyDown={(e) => handleKeyDown(e)}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-    </td>
+                  onKeyDown={(e) => handleKeyDown(e)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </td>
 
-    {/* N° Doc */}
-    <td className="px-1 py-1 w-[110px]">
-      <FormField
-        control={control}
-        name={`gastos.${index}.numeroDocumento`}
-        render={({ field }) => (
-          <FormItem className="space-y-0">
-            <FormControl>
-              <input
-                type="text"
-                className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="0001-2025-..."
-                {...field}
-                value={field.value ?? ''}
-                onKeyDown={(e) => handleKeyDown(e)}
+      {/* N° Doc */}
+      <td className="w-[110px] px-1 py-1">
+        <FormField
+          control={control}
+          name={`gastos.${index}.numeroDocumento`}
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormControl>
+                <input
+                  type="text"
+                  className="border-input bg-background focus:ring-primary h-7 w-full rounded border px-1.5 text-xs focus:ring-1 focus:outline-none"
+                  placeholder="0001-2025-..."
+                  {...field}
+                  value={field.value ?? ''}
+                  onKeyDown={(e) => handleKeyDown(e)}
                 />
               </FormControl>
             </FormItem>
@@ -278,7 +292,7 @@ onKeyDown={(e) => handleKeyDown(e)}
       </td>
 
       {/* Tipo Doc */}
-      <td className="px-1 py-1 w-[100px]">
+      <td className="w-[100px] px-1 py-1">
         <FormField
           control={control}
           name={`gastos.${index}.tipoDocumento`}
@@ -286,7 +300,7 @@ onKeyDown={(e) => handleKeyDown(e)}
             <FormItem className="space-y-0">
               <Select value={field.value} onValueChange={field.onChange}>
                 <FormControl>
-                  <SelectTrigger className="h-7 text-xs px-1.5">
+                  <SelectTrigger className="h-7 px-1.5 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>
@@ -305,7 +319,7 @@ onKeyDown={(e) => handleKeyDown(e)}
 
       {/* Partida (conditional) */}
       {showPartidaColumn && (
-        <td className="px-1 py-1 w-[130px]">
+        <td className="w-[130px] px-1 py-1">
           <FormField
             control={control}
             name={`gastos.${index}.partidaId`}
@@ -325,7 +339,7 @@ onKeyDown={(e) => handleKeyDown(e)}
       )}
 
       {/* Descripción */}
-      <td className="px-1 py-1 min-w-[160px]">
+      <td className="min-w-[160px] px-1 py-1">
         <FormField
           control={control}
           name={`gastos.${index}.concepto`}
@@ -334,7 +348,7 @@ onKeyDown={(e) => handleKeyDown(e)}
               <FormControl>
                 <input
                   type="text"
-                  className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="border-input bg-background focus:ring-primary h-7 w-full rounded border px-1.5 text-xs focus:ring-1 focus:outline-none"
                   placeholder="Descripción..."
                   {...field}
                   value={field.value ?? ''}
@@ -347,12 +361,12 @@ onKeyDown={(e) => handleKeyDown(e)}
       </td>
 
       {/* INGRESOS */}
-      <td className="px-1 py-1 w-[100px] text-right text-xs tabular-nums text-muted-foreground">
+      <td className="text-muted-foreground w-[100px] px-1 py-1 text-right text-xs tabular-nums">
         —
       </td>
 
       {/* EGRESOS */}
-      <td className="px-1 py-1 w-[110px]">
+      <td className="w-[110px] px-1 py-1">
         <FormField
           control={control}
           name={`gastos.${index}.montoTotal`}
@@ -362,9 +376,14 @@ onKeyDown={(e) => handleKeyDown(e)}
                 <input
                   type="text"
                   inputMode="decimal"
-                  className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="border-input bg-background focus:ring-primary h-7 w-full rounded border px-1.5 text-right text-xs focus:ring-1 focus:outline-none"
                   placeholder="0.00"
-                  value={montoInput || (field.value && field.value > 0 ? field.value.toString() : '')}
+                  value={
+                    montoInput ||
+                    (field.value && field.value > 0
+                      ? field.value.toString()
+                      : '')
+                  }
                   onChange={(e) => {
                     const sanitized = sanitizeMonetaryInput(e.target.value);
                     setMontoInput(sanitized);
@@ -399,17 +418,24 @@ onKeyDown={(e) => handleKeyDown(e)}
         />
       </td>
 
+      {/* TOTAL C/ IMP (read-only) */}
+      <td className="w-[100px] px-1 py-1 text-right text-xs tabular-nums">
+        <span className="font-medium">
+          {taxResult.montoBruto > 0 ? formatMoney(taxResult.montoBruto) : '—'}
+        </span>
+      </td>
+
       {/* SALDO */}
-      <td className="px-1 py-1 w-[100px] text-right text-xs tabular-nums">
+      <td className="w-[100px] px-1 py-1 text-right text-xs tabular-nums">
         <span className="font-medium">—</span>
       </td>
 
       {/* Remove */}
-      <td className="px-1 py-1 w-8 text-center">
+      <td className="w-8 px-1 py-1 text-center">
         <button
           type="button"
           onClick={onRemove}
-          className="inline-flex items-center justify-center h-6 w-6 rounded text-destructive hover:bg-destructive/10"
+          className="text-destructive hover:bg-destructive/10 inline-flex h-6 w-6 items-center justify-center rounded"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -435,11 +461,11 @@ export function GastoTable({
 }: GastoTableProps) {
   const montoAvance = useMemo(
     () => Number(solicitud?.montoTotalNeto ?? 0),
-    [solicitud?.montoTotalNeto],
+    [solicitud?.montoTotalNeto]
   );
   const presupuestos = useMemo(
     () => solicitud?.presupuestos ?? [],
-    [solicitud?.presupuestos],
+    [solicitud?.presupuestos]
   );
   const showPartidaColumn = presupuestos.length > 1;
 
@@ -481,49 +507,55 @@ export function GastoTable({
   }, [presupuestos, fields.length, form]);
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-border">
+    <div className="border-border w-full overflow-x-auto rounded-lg border">
       <table className="w-full border-collapse text-xs">
         <thead>
           {/* Header sub-row: MONTO BS spans INGRESOS | EGRESOS | SALDO */}
           <tr className="bg-muted/60">
-            <th className="px-1.5 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground w-8 border-r border-border">
+            <th className="text-muted-foreground border-border w-8 border-r px-1.5 py-1 text-[10px] font-bold tracking-wider uppercase">
               #
             </th>
-            <th className="px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground w-[105px] border-r border-border">
+            <th className="text-muted-foreground border-border w-[105px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">
               Fecha
             </th>
-            <th className="px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground w-[110px] border-r border-border">
+            <th className="text-muted-foreground border-border w-[110px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">
               N° Doc.
             </th>
-            <th className="px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground w-[100px] border-r border-border">
+            <th className="text-muted-foreground border-border w-[100px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">
               Tipo Doc.
             </th>
             {showPartidaColumn && (
-              <th className="px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground w-[130px] border-r border-border">
+              <th className="text-muted-foreground border-border w-[130px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">
                 Partida
               </th>
             )}
-            <th className="px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground min-w-[160px] border-r border-border">
+            <th className="text-muted-foreground border-border min-w-[160px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">
               Descripción
             </th>
             <th
-              colSpan={3}
-              className="px-1 py-1 text-[10px] font-bold tracking-wider uppercase text-center text-muted-foreground border-r border-border"
+              colSpan={4}
+              className="text-muted-foreground border-border border-r px-1 py-1 text-center text-[10px] font-bold tracking-wider uppercase"
             >
               MONTO BS
             </th>
-            <th className="px-1 py-1 w-8 border-r border-border" />
+            <th className="border-border w-8 border-r px-1 py-1" />
           </tr>
           {/* Header sub-row: INGRESOS | EGRESOS | SALDO */}
           <tr className="bg-muted/40">
-            <th colSpan={5 + (showPartidaColumn ? 1 : 0)} className="border-r border-border" />
-            <th className="px-1 py-0.5 text-[10px] font-semibold text-muted-foreground text-right border-r border-border">
+            <th
+              colSpan={5 + (showPartidaColumn ? 1 : 0)}
+              className="border-border border-r"
+            />
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
               INGRESOS
             </th>
-            <th className="px-1 py-0.5 text-[10px] font-semibold text-muted-foreground text-right border-r border-border">
-              EGRESOS
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              MONTO LÍQUIDO
             </th>
-            <th className="px-1 py-0.5 text-[10px] font-semibold text-muted-foreground text-right border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              TOTAL C/ IMP
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
               SALDO
             </th>
             <th colSpan={1} />
@@ -531,45 +563,51 @@ export function GastoTable({
         </thead>
         <tbody>
           {/* FONDO EN AVANCE row */}
-          <tr className="bg-primary/5 border-b border-border font-medium">
-            <td className="px-1.5 py-1 text-center text-[11px] text-muted-foreground border-r border-border">
+          <tr className="bg-primary/5 border-border border-b font-medium">
+            <td className="text-muted-foreground border-border border-r px-1.5 py-1 text-center text-[11px]">
               —
             </td>
-            <td className="px-1 py-1 text-[11px] border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-[11px]">
               {solicitud?.fechaSolicitud
                 ? new Date(solicitud.fechaSolicitud).toLocaleDateString('es-BO')
                 : '—'}
             </td>
-            <td className="px-1 py-1 text-[11px] border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-[11px]">
               {solicitud?.codigoSolicitud ?? '—'}
             </td>
-            <td className="px-1 py-1 text-[11px] border-r border-border">—</td>
+            <td className="border-border border-r px-1 py-1 text-[11px]">—</td>
             {showPartidaColumn && (
-              <td className="px-1 py-1 text-[11px] border-r border-border">—</td>
+              <td className="border-border border-r px-1 py-1 text-[11px]">
+                —
+              </td>
             )}
-            <td className="px-1 py-1 text-[11px] font-semibold border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-[11px] font-semibold">
               FONDO EN AVANCE
             </td>
-            <td className="px-1 py-1 text-[11px] text-right font-bold text-emerald-600 border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] font-bold text-emerald-600">
               {formatMoney(montoAvance)}
             </td>
-            <td className="px-1 py-1 text-[11px] text-right border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
               —
             </td>
-            <td className="px-1 py-1 text-[11px] text-right font-bold border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
+              —
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] font-bold">
               {formatMoney(montoAvance)}
             </td>
-            <td className="px-1 py-1 w-8" />
+            <td className="w-8 px-1 py-1" />
           </tr>
 
           {/* Gasto rows */}
           {fields.length === 0 ? (
             <tr>
               <td
-                colSpan={10 + (showPartidaColumn ? 1 : 0)}
-                className="px-4 py-6 text-center text-xs text-muted-foreground"
+                colSpan={11 + (showPartidaColumn ? 1 : 0)}
+                className="text-muted-foreground px-4 py-6 text-center text-xs"
               >
-                No hay gastos agregados. Presiona &quot;+ Agregar fila&quot; para empezar.
+                No hay gastos agregados. Presiona &quot;+ Agregar fila&quot;
+                para empezar.
               </td>
             </tr>
           ) : (
@@ -588,30 +626,44 @@ export function GastoTable({
         </tbody>
         {/* Footer with totals */}
         <tfoot>
-          <tr className="bg-muted/40 border-t border-border font-semibold">
-            <td colSpan={5 + (showPartidaColumn ? 1 : 0)} className="px-1.5 py-1 text-[11px] text-right">
+          <tr className="bg-muted/40 border-border border-t font-semibold">
+            <td
+              colSpan={5 + (showPartidaColumn ? 1 : 0)}
+              className="px-1.5 py-1 text-right text-[11px]"
+            >
               TOTALES
             </td>
-            <td className="px-1 py-1 text-[11px] text-right text-emerald-600 border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] text-emerald-600">
               {formatMoney(montoAvance)}
             </td>
-            <td className="px-1 py-1 text-[11px] text-right text-red-600 border-r border-border">
-               {formatMoney(
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] text-red-600">
+              {formatMoney(
                 gastosWatch.reduce(
-                  (sum: number, g: { montoTotal?: number }) => sum + Number(g?.montoTotal ?? 0),
-                  0,
-                ),
+                  (sum: number, g: { montoNeto?: number }) =>
+                    sum + Number(g?.montoNeto ?? 0),
+                  0
+                )
               )}
             </td>
-            <td className="px-1 py-1 text-[11px] text-right font-bold border-r border-border">
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] text-orange-600">
+              {formatMoney(
+                gastosWatch.reduce(
+                  (sum: number, g: { montoTotal?: number }) =>
+                    sum + Number(g?.montoTotal ?? 0),
+                  0
+                )
+              )}
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] font-bold">
               {formatMoney(
                 round2(
                   montoAvance -
                     gastosWatch.reduce(
-                      (sum: number, g: { montoTotal?: number }) => sum + Number(g?.montoTotal ?? 0),
-                      0,
-                    ),
-                ),
+                      (sum: number, g: { montoTotal?: number }) =>
+                        sum + Number(g?.montoTotal ?? 0),
+                      0
+                    )
+                )
               )}
             </td>
             <td colSpan={1} />
@@ -626,7 +678,7 @@ export function GastoTable({
           variant="ghost"
           size="sm"
           onClick={handleAgregar}
-          className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground h-7 gap-1 text-xs"
         >
           <Plus className="h-3.5 w-3.5" />
           Agregar fila

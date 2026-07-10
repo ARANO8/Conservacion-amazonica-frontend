@@ -4,7 +4,16 @@ import { z } from 'zod';
 // Enums
 // ---------------------------------------------------------------------------
 
-export const TipoDocumentoGastoEnum = z.enum(['FACTURA', 'RECIBO', 'BOLETA']);
+export const TipoDocumentoGastoEnum = z.enum([
+  'FACTURA',
+  'RECIBO',
+  'BOLETA',
+  'LV',
+  'DJ',
+  'PPT',
+  'PAT',
+  'PVT',
+]);
 export type TipoDocumentoGasto = z.infer<typeof TipoDocumentoGastoEnum>;
 
 /**
