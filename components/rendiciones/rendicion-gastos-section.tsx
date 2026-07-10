@@ -23,11 +23,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { cn, formatMoney, formatDate } from '@/lib/utils';
+import { cn, formatMoney, formatDate, formatDateShort } from '@/lib/utils';
 import { catalogosService } from '@/lib/services/catalogos-service';
 import type { GastoRendicionResponse } from '@/types/rendicion-backend';
 import type { PartidaContable } from '@/types/catalogs';
-import { Check, ChevronsUpDown, ExternalLink, Loader2, Minus, X } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2, Minus, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 
@@ -62,7 +62,7 @@ function EstadoGastoControl({
   };
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-start gap-1">
       <button
         type="button"
         onClick={handleClick}
@@ -73,23 +73,25 @@ function EstadoGastoControl({
               ? 'Click: Desmarcar | Doble click: Observado'
               : 'Click: Desmarcar'
         }
-        className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border transition-colors hover:bg-muted"
+        className="hover:bg-muted mt-0.5 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded border transition-colors"
       >
         {estado === 'correcto' ? (
-          <Check className="h-4 w-4 text-green-600" />
+          <Check className="h-3.5 w-3.5 text-green-600" />
         ) : estado === 'observado' ? (
-          <X className="h-4 w-4 text-red-600" />
+          <X className="h-3.5 w-3.5 text-red-600" />
         ) : (
-          <Minus className="h-4 w-4 text-muted-foreground" />
+          <Minus className="text-muted-foreground h-3.5 w-3.5" />
         )}
       </button>
       {estado === 'observado' && (
-        <Input
-          value={observacion}
-          onChange={(e) => onChange('observado', e.target.value)}
-          placeholder="Escriba la observación..."
-          className="h-7 min-w-[160px] text-xs"
-        />
+        <div className="min-w-0 flex-1">
+          <Input
+            value={observacion}
+            onChange={(e) => onChange('observado', e.target.value)}
+            placeholder="Observación..."
+            className="h-6 text-[10px]"
+          />
+        </div>
       )}
     </div>
   );
@@ -98,7 +100,10 @@ function EstadoGastoControl({
 interface RendicionGastosSectionProps {
   gastos: GastoRendicionResponse[];
   canEditPartidaContable?: boolean;
-  onUpdatePartidaContable?: (gastoId: number, codigo: string | null) => Promise<void>;
+  onUpdatePartidaContable?: (
+    gastoId: number,
+    codigo: string | null
+  ) => Promise<void>;
   partidasPresupuestarias?: Array<{
     id: number;
     poa?: {
@@ -111,9 +116,19 @@ interface RendicionGastosSectionProps {
     };
   }>;
   canEditPartidaPresupuestaria?: boolean;
-  onUpdatePartidaPresupuestaria?: (gastoId: number, partidaId: number | null) => Promise<void>;
-  gastoValidaciones?: Record<number, { estado: EstadoValidacion; observacion: string }>;
-  onGastoValidacionChange?: (gastoId: number, estado: EstadoValidacion, observacion: string) => void;
+  onUpdatePartidaPresupuestaria?: (
+    gastoId: number,
+    partidaId: number | null
+  ) => Promise<void>;
+  gastoValidaciones?: Record<
+    number,
+    { estado: EstadoValidacion; observacion: string }
+  >;
+  onGastoValidacionChange?: (
+    gastoId: number,
+    estado: EstadoValidacion,
+    observacion: string
+  ) => void;
 }
 
 function toNumber(value: string | number | null | undefined): number {
@@ -133,38 +148,51 @@ function PartidaContableCombobox({
   onUpdate: (codigo: string | null) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState<PartidaContable[]>([]);
+  const [allPartidas, setAllPartidas] = useState<PartidaContable[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Cargar todas las partidas una sola vez al abrir el popover
   useEffect(() => {
     if (!open) return;
+    if (allPartidas.length > 0) return;
 
-    setLoading(true);
     const controller = new AbortController();
-    const timer = setTimeout(async () => {
+
+    const fetchAll = async () => {
+      setLoading(true);
       try {
         const results = await catalogosService.searchPartidasContables(
-          searchQuery,
-          controller.signal,
+          '',
+          controller.signal
         );
         if (!controller.signal.aborted) {
-          setSuggestions(results);
+          setAllPartidas(results);
         }
       } catch {
-        // mantener sugerencias actuales en caso de error de red/límite
+        // mantener vacío
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
-    }, 300);
-
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
     };
-  }, [searchQuery, open]);
+
+    fetchAll();
+
+    return () => controller.abort();
+  }, [open, allPartidas.length]);
+
+  // Filtrar localmente: busca sin puntos en el código o por nombre
+  const suggestions = useMemo(() => {
+    if (!searchQuery.trim()) return allPartidas;
+    const query = searchQuery.replace(/\./g, '').toLowerCase();
+    return allPartidas.filter(
+      (p) =>
+        p.codigo.replace(/\./g, '').toLowerCase().includes(query) ||
+        p.nombre.toLowerCase().includes(query)
+    );
+  }, [searchQuery, allPartidas]);
 
   async function handleSelect(pc: PartidaContable) {
     setOpen(false);
@@ -187,19 +215,17 @@ function PartidaContableCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="h-7 w-full max-w-[220px] justify-between px-1.5 text-[11px] font-normal"
+          className="h-6 w-full max-w-[140px] justify-between px-1 text-[10px] font-normal"
         >
-          <span className="truncate">
-            {currentCodigo || 'Seleccionar...'}
-          </span>
+          <span className="truncate">{currentCodigo || 'Seleccionar...'}</span>
           {loading ? (
-            <Loader2 className="ml-1 h-3 w-3 shrink-0 animate-spin opacity-50" />
+            <Loader2 className="ml-0.5 h-2.5 w-2.5 shrink-0 animate-spin opacity-50" />
           ) : (
-            <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-0.5 h-2.5 w-2.5 shrink-0 opacity-50" />
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent className="w-[280px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Buscar partida contable..."
@@ -222,13 +248,11 @@ function PartidaContableCombobox({
                   <Check
                     className={cn(
                       'mr-2 h-3 w-3',
-                      pc.codigo === currentCodigo
-                        ? 'opacity-100'
-                        : 'opacity-0',
+                      pc.codigo === currentCodigo ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   <div className="flex flex-col">
-                    <span className="font-mono text-[11px] font-bold text-primary">
+                    <span className="text-primary font-mono text-[11px] font-bold">
                       {pc.codigo}
                     </span>
                     {pc.nombre && (
@@ -263,7 +287,7 @@ function PartidaPresupuestariaCombobox({
 
   const currentItem = useMemo(
     () => presupuestos?.find((p) => p.id === currentPartidaId) ?? null,
-    [presupuestos, currentPartidaId],
+    [presupuestos, currentPartidaId]
   );
 
   const filtered = useMemo(() => {
@@ -274,8 +298,7 @@ function PartidaPresupuestariaCombobox({
       const codigo = p.poa?.codigoPoa ?? '';
       const nombre = p.poa?.estructura?.partida?.nombre ?? '';
       return (
-        codigo.toLowerCase().includes(q) ||
-        nombre.toLowerCase().includes(q)
+        codigo.toLowerCase().includes(q) || nombre.toLowerCase().includes(q)
       );
     });
   }, [presupuestos, searchQuery]);
@@ -286,9 +309,11 @@ function PartidaPresupuestariaCombobox({
 
   if (readOnly) {
     return currentLabel ? (
-      <span className="font-medium text-xs">{currentLabel}</span>
+      <span className="text-[11px] leading-tight font-medium">
+        {currentLabel}
+      </span>
     ) : (
-      <span className="text-muted-foreground text-xs">—</span>
+      <span className="text-muted-foreground text-[11px]">—</span>
     );
   }
 
@@ -307,15 +332,13 @@ function PartidaPresupuestariaCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="h-7 w-full max-w-[220px] justify-between px-1.5 text-[11px] font-normal"
+          className="h-6 w-full max-w-[140px] justify-between px-1 text-[10px] font-normal"
         >
-          <span className="truncate">
-            {currentLabel || 'Seleccionar...'}
-          </span>
-          <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+          <span className="truncate">{currentLabel || 'Seleccionar...'}</span>
+          <ChevronsUpDown className="ml-0.5 h-2.5 w-2.5 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent className="w-[280px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Buscar partida presupuestaria..."
@@ -335,7 +358,7 @@ function PartidaPresupuestariaCombobox({
                     setOpen(false);
                     void onUpdate(null);
                   }}
-                  className="text-xs text-destructive"
+                  className="text-destructive text-xs"
                 >
                   Desvincular
                 </CommandItem>
@@ -356,13 +379,11 @@ function PartidaPresupuestariaCombobox({
                     <Check
                       className={cn(
                         'mr-2 h-3 w-3',
-                        p.id === currentPartidaId
-                          ? 'opacity-100'
-                          : 'opacity-0',
+                        p.id === currentPartidaId ? 'opacity-100' : 'opacity-0'
                       )}
                     />
                     <div className="flex flex-col">
-                      <span className="font-mono text-[11px] font-bold text-primary">
+                      <span className="text-primary font-mono text-[11px] font-bold">
                         {codigo}
                       </span>
                       {nombre && (
@@ -408,38 +429,29 @@ export function RendicionGastosSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-amzdesk-table-header">
+                <TableHead className="text-amzdesk-table-header w-[200px]">
                   Validación
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header">
-                  Observación
+                <TableHead className="text-amzdesk-table-header min-w-[160px]">
+                  Concepto / Documento
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header">
-                  Concepto
+                <TableHead className="text-amzdesk-table-header w-[150px]">
+                  P. Contable
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header">
-                  Documento
+                <TableHead className="text-amzdesk-table-header w-[150px]">
+                  P. Presupuestaria
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header">
-                  Partida Contable
-                </TableHead>
-                <TableHead className="text-amzdesk-table-header">
-                  Partida Presupuestaria
-                </TableHead>
-                <TableHead className="text-amzdesk-table-header">
+                <TableHead className="text-amzdesk-table-header w-[85px]">
                   Fecha
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header text-right">
-                  Monto Total (Bruto)
+                <TableHead className="text-amzdesk-table-header w-[90px] text-right">
+                  Bruto
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header text-right">
-                  Retención / Impuestos
+                <TableHead className="text-amzdesk-table-header w-[85px] text-right">
+                  Retenc.
                 </TableHead>
-                <TableHead className="text-amzdesk-table-header text-right">
-                  Efectivo Pagado
-                </TableHead>
-                <TableHead className="text-amzdesk-table-header">
-                  Comprobante
+                <TableHead className="text-amzdesk-table-header w-[90px] text-right">
+                  Efectivo
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -449,30 +461,26 @@ export function RendicionGastosSection({
                   <TableCell className="align-middle">
                     <EstadoGastoControl
                       estado={gastoValidaciones[gasto.id]?.estado ?? 'vacio'}
-                      observacion={gastoValidaciones[gasto.id]?.observacion ?? ''}
+                      observacion={
+                        gastoValidaciones[gasto.id]?.observacion ?? ''
+                      }
                       onChange={(estado, observacion) =>
                         onGastoValidacionChange?.(gasto.id, estado, observacion)
                       }
                     />
-                  </TableCell>
-                  <TableCell className="align-middle">
-                    {gastoValidaciones[gasto.id]?.estado === 'observado' ? (
-                      <span className="text-xs text-red-600">
-                        {gastoValidaciones[gasto.id]?.observacion || '(sin detalle)'}
-                      </span>
+                    {gastoValidaciones[gasto.id]?.estado === 'observado' &&
+                    gastoValidaciones[gasto.id]?.observacion ? (
+                      <p className="mt-1 text-[10px] leading-tight text-red-600">
+                        {gastoValidaciones[gasto.id]?.observacion}
+                      </p>
                     ) : null}
                   </TableCell>
                   <TableCell>
-                    <p className="font-medium">{gasto.concepto || '-'}</p>
-                    {gasto.detalle && (
-                      <p className="text-muted-foreground text-xs">
-                        {gasto.detalle}
-                      </p>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <p className="font-medium">{gasto.tipoDocumento}</p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs leading-tight font-medium">
+                      {gasto.concepto || '-'}
+                    </p>
+                    <p className="text-muted-foreground text-[10px] leading-tight">
+                      {gasto.tipoDocumento}{' '}
                       {gasto.numeroDocumento || gasto.nroDocumento || 'S/N'}
                     </p>
                   </TableCell>
@@ -485,11 +493,13 @@ export function RendicionGastosSection({
                         }}
                       />
                     ) : gasto.partidaContable ? (
-                      <span className="font-medium text-xs">
-                        {gasto.partidaContable.codigo} — {gasto.partidaContable.nombre}
+                      <span className="text-[11px] leading-tight font-medium">
+                        {gasto.partidaContable.codigo}
                       </span>
                     ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
+                      <span className="text-muted-foreground text-[11px]">
+                        —
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -497,45 +507,31 @@ export function RendicionGastosSection({
                       presupuestos={partidasPresupuestarias}
                       currentPartidaId={gasto.partidaId ?? null}
                       onUpdate={async (partidaId) => {
-                        await onUpdatePartidaPresupuestaria?.(gasto.id, partidaId);
+                        await onUpdatePartidaPresupuestaria?.(
+                          gasto.id,
+                          partidaId
+                        );
                       }}
                       readOnly={!canEditPartidaPresupuestaria}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-[11px] whitespace-nowrap">
                     {gasto.fecha || gasto.fechaDocumento
-                      ? formatDate((gasto.fecha || gasto.fechaDocumento)!)
+                      ? formatDateShort((gasto.fecha || gasto.fechaDocumento)!)
                       : '-'}
                   </TableCell>
-                  <TableCell className="text-right font-semibold">
+                  <TableCell className="text-right text-[11px] font-medium whitespace-nowrap tabular-nums">
                     {formatMoney(
                       toNumber(
-                        gasto.montoTotal ?? gasto.montoBruto ?? gasto.monto,
-                      ),
+                        gasto.montoTotal ?? gasto.montoBruto ?? gasto.monto
+                      )
                     )}
                   </TableCell>
-                  <TableCell className="text-right font-semibold text-orange-600">
+                  <TableCell className="text-right text-[11px] font-medium whitespace-nowrap text-orange-600 tabular-nums">
                     {formatMoney(toNumber(gasto.montoImpuestos))}
                   </TableCell>
-                  <TableCell className="text-right font-semibold text-emerald-600">
+                  <TableCell className="text-right text-[11px] font-medium whitespace-nowrap text-emerald-600 tabular-nums">
                     {formatMoney(toNumber(gasto.montoNeto ?? gasto.monto))}
-                  </TableCell>
-                  <TableCell>
-                    {gasto.urlComprobante ? (
-                      <a
-                        href={gasto.urlComprobante}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:underline"
-                      >
-                        Ver Comprobante
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">
-                        Sin adjunto
-                      </span>
-                    )}
                   </TableCell>
                 </TableRow>
               ))}

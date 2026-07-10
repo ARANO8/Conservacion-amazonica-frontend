@@ -111,6 +111,11 @@ export const CreateRendicionSchema = z.object({
   // --- Paso 3: GASTOS_RESPALDO ---
   gastos: z.array(GastoRendicionSchema).optional(),
 
+  /** URL obligatoria con los comprobantes digitales adjuntos */
+  comprobanteUrl: z
+    .string()
+    .url('Debes ingresar una URL válida para los comprobantes'),
+
   // --- Paso 4: INFORME_GASTOS ---
   informeGastos: InformeGastosSchema.optional().nullable(),
 
@@ -128,6 +133,7 @@ export const defaultRendicionValues: CreateRendicionInput = {
   solicitudId: 0,
   aprobadorActualId: 0,
   gastos: [],
+  comprobanteUrl: '',
   informeGastos: {
     fechaInicio: '',
     fechaFin: '',

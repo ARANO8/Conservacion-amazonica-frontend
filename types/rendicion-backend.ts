@@ -85,7 +85,6 @@ export interface GastoRendicionResponse {
   montoBruto?: string;
   montoImpuestos?: string;
   partidaId?: number;
-  urlComprobante?: string;
   tipoRetencion?: string;
   partidaContableId?: number | null;
   partidaContable?: PartidaContable | null;
@@ -143,6 +142,7 @@ export interface RendicionResponse {
   saldoLiquido: string; // Decimal as string (desembolso - montoRespaldado)
   estado: EstadoRendicion;
   observaciones?: string;
+  comprobanteUrl?: string;
   createdAt?: string; // ISO timestamp
   updatedAt?: string; // ISO timestamp
 

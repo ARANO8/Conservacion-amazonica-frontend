@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { Eye, MoreHorizontal, Plus } from 'lucide-react';
+import { Eye, FileSpreadsheet, MoreHorizontal, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
@@ -199,6 +199,15 @@ export default function MisRendicionesPage() {
                               }}
                             >
                               Descargar PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={(event) => {
+                                event.preventDefault();
+                                toast.info('Funcionalidad en Proceso');
+                              }}
+                            >
+                              <FileSpreadsheet className="mr-2 h-4 w-4" />
+                              Descargar Excel
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

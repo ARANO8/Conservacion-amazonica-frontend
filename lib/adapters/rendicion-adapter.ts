@@ -5,11 +5,12 @@ export interface CreateRendicionApiPayload {
   solicitudId: number;
   aprobadorActualId: number;
   fechaRendicion: string;
-    gastos: Array<{
-      solicitudItemId?: number;
-      concepto: string;
-      detalle?: string;
-      tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA';
+  comprobanteUrl: string;
+  gastos: Array<{
+    solicitudItemId?: number;
+    concepto: string;
+    detalle?: string;
+    tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA';
     numeroDocumento?: string;
     proveedor?: string;
     fechaDocumento?: string;
@@ -41,6 +42,7 @@ export interface CreateRendicionApiPayload {
 export interface UpdateRendicionApiPayload {
   aprobadorActualId: number;
   fechaRendicion?: string;
+  comprobanteUrl?: string;
   gastos?: CreateRendicionApiPayload['gastos'];
   informeGastos?: CreateRendicionApiPayload['informeGastos'];
   observaciones?: string;
@@ -66,6 +68,7 @@ export function adaptCreateRendicionPayload(
     solicitudId: data.solicitudId,
     aprobadorActualId: data.aprobadorActualId,
     fechaRendicion: new Date().toISOString(),
+    comprobanteUrl: data.comprobanteUrl,
     gastos: (data.gastos ?? []).map((gasto) => ({
       ...(gasto.solicitudItemId !== undefined && {
         solicitudItemId: gasto.solicitudItemId,
@@ -126,6 +129,7 @@ export function adaptRendicionResponseToFormData(
     solicitudId: rendicion.solicitudId,
     aprobadorActualId: 0, // El usuario debe elegir nuevamente
     observaciones: rendicion.observaciones ?? '',
+    comprobanteUrl: rendicion.comprobanteUrl ?? '',
 
     // Gastos con respaldo
     gastos: (rendicion.gastosRendicion ?? []).map((gasto) => ({
@@ -150,7 +154,8 @@ export function adaptRendicionResponseToFormData(
         | 'COMPROBADO'
         | 'RECHAZADO',
       partidaId: gasto.partidaId ?? 0,
-      tipoRetencion: (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
+      tipoRetencion:
+        (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
     })),
 
     // Informe de gastos
@@ -187,6 +192,7 @@ export function adaptUpdateRendicionPayload(
   const payload: UpdateRendicionApiPayload = {
     aprobadorActualId: data.aprobadorActualId,
     fechaRendicion: new Date().toISOString(),
+    comprobanteUrl: data.comprobanteUrl,
     gastos: (data.gastos ?? []).map((gasto) => ({
       ...(gasto.solicitudItemId !== undefined && {
         solicitudItemId: gasto.solicitudItemId,

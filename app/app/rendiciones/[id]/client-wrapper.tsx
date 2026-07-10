@@ -17,6 +17,9 @@ import {
   Check,
   ChevronsUpDown,
   DollarSign,
+  ExternalLink,
+  FileSpreadsheet,
+  FileText,
   ShieldCheck,
   Wallet,
 } from 'lucide-react';
@@ -70,7 +73,7 @@ interface RendicionDetailClientProps {
   rendicion: RendicionResponse;
   onPartidaContableUpdated?: (
     gastoId: number,
-    partidaContable: PartidaContable | null,
+    partidaContable: PartidaContable | null
   ) => void;
 }
 
@@ -109,14 +112,25 @@ export function RendicionDetailClient({
   const [comentarioAprobar, setComentarioAprobar] = useState('');
   const [comentarioObservar, setComentarioObservar] = useState('');
   const [gastoValidaciones, setGastoValidaciones] = useState<
-    Record<number, { estado: 'vacio' | 'correcto' | 'observado'; observacion: string }>
+    Record<
+      number,
+      { estado: 'vacio' | 'correcto' | 'observado'; observacion: string }
+    >
   >({});
 
-  const handleUpdatePartidaContable = async (gastoId: number, codigo: string | null) => {
+  const handleUpdatePartidaContable = async (
+    gastoId: number,
+    codigo: string | null
+  ) => {
     try {
-      const updated = await rendicionesService.updateGastoPartidaContable(gastoId, codigo);
+      const updated = await rendicionesService.updateGastoPartidaContable(
+        gastoId,
+        codigo
+      );
       if (codigo && updated?.partidaContable) {
-        toast.success(`Partida contable "${updated.partidaContable.codigo}" vinculada.`);
+        toast.success(
+          `Partida contable "${updated.partidaContable.codigo}" vinculada.`
+        );
         onPartidaContableUpdated?.(gastoId, updated.partidaContable);
       } else {
         toast.success('Partida contable desvinculada.');
@@ -131,9 +145,15 @@ export function RendicionDetailClient({
     }
   };
 
-  const handleUpdatePartidaPresupuestaria = async (gastoId: number, partidaId: number | null) => {
+  const handleUpdatePartidaPresupuestaria = async (
+    gastoId: number,
+    partidaId: number | null
+  ) => {
     try {
-      const updated = await rendicionesService.updateGastoPartidaPresupuestaria(gastoId, partidaId);
+      const updated = await rendicionesService.updateGastoPartidaPresupuestaria(
+        gastoId,
+        partidaId
+      );
       if (partidaId && updated?.partida) {
         toast.success('Partida presupuestaria vinculada.');
       } else {
@@ -151,14 +171,13 @@ export function RendicionDetailClient({
   const handleGastoValidacionChange = (
     gastoId: number,
     estado: 'vacio' | 'correcto' | 'observado',
-    observacion: string,
+    observacion: string
   ) => {
-    setGastoValidaciones((prev) => ({ ...prev, [gastoId]: { estado, observacion } }));
+    setGastoValidaciones((prev) => ({
+      ...prev,
+      [gastoId]: { estado, observacion },
+    }));
   };
-
-  const hasIncorrectos = Object.values(gastoValidaciones).some(
-    (v) => v.estado === 'observado',
-  );
 
   const currentUserId = user?.id ? Number(user.id) : null;
   const currentUserRol = user?.rol;
@@ -177,6 +196,13 @@ export function RendicionDetailClient({
     [rendicion.gastosRendicion, rendicion.gastos]
   );
 
+  const todosCorrectos = useMemo(() => {
+    if (gastosRegistrados.length === 0) return false;
+    return gastosRegistrados.every(
+      (g) => gastoValidaciones[g.id]?.estado === 'correcto'
+    );
+  }, [gastosRegistrados, gastoValidaciones]);
+
   const totalEfectivoPagado = useMemo(
     () =>
       gastosRegistrados.reduce(
@@ -191,9 +217,10 @@ export function RendicionDetailClient({
     [rendicion.solicitud?.montoTotalNeto]
   );
 
+  // Usar el valor calculado por el backend para consistencia
   const saldoLiquido = useMemo(
-    () => montoRecibido - totalEfectivoPagado,
-    [montoRecibido, totalEfectivoPagado]
+    () => toNumber(rendicion.saldoLiquido),
+    [rendicion.saldoLiquido]
   );
 
   const usuariosFiltrados = useMemo(
@@ -206,18 +233,26 @@ export function RendicionDetailClient({
 
   const partidasPresupuestarias = useMemo(
     () => rendicion.solicitud?.presupuestos ?? [],
-    [rendicion.solicitud],
+    [rendicion.solicitud]
   );
 
   const resumenContable = useMemo(() => {
     const map = new Map<
       string,
-      { codigo: string; nombre: string; neto: number; impuestos: number; bruto: number }
+      {
+        codigo: string;
+        nombre: string;
+        neto: number;
+        impuestos: number;
+        bruto: number;
+        gastos: string[];
+      }
     >();
 
     for (const g of gastosRegistrados) {
       const code = g.partidaContable?.codigo ?? 'S/C';
       const name = g.partidaContable?.nombre ?? 'Sin Clasificar';
+      const label = g.concepto || 'Gasto #' + g.id;
 
       const exist = map.get(code);
       const netoVal = toNumber(g.montoNeto);
@@ -228,6 +263,7 @@ export function RendicionDetailClient({
         exist.neto += netoVal;
         exist.impuestos += impVal;
         exist.bruto += brutoVal;
+        exist.gastos.push(label);
       } else {
         map.set(code, {
           codigo: code,
@@ -235,6 +271,7 @@ export function RendicionDetailClient({
           neto: netoVal,
           impuestos: impVal,
           bruto: brutoVal,
+          gastos: [label],
         });
       }
     }
@@ -251,6 +288,7 @@ export function RendicionDetailClient({
       neto: number;
       impuestos: number;
       bruto: number;
+      gastos: string[];
     };
     const map = new Map<number, Entry>();
     const seenOrder: number[] = [];
@@ -259,6 +297,7 @@ export function RendicionDetailClient({
       const partida = g.partida;
       if (!partida) continue;
       const id = partida.id;
+      const label = g.concepto || 'Gasto #' + g.id;
 
       const exist = map.get(id);
       const netoVal = toNumber(g.montoNeto);
@@ -269,6 +308,7 @@ export function RendicionDetailClient({
         exist.neto += netoVal;
         exist.impuestos += impVal;
         exist.bruto += brutoVal;
+        exist.gastos.push(label);
       } else {
         map.set(id, {
           id,
@@ -279,6 +319,7 @@ export function RendicionDetailClient({
           neto: netoVal,
           impuestos: impVal,
           bruto: brutoVal,
+          gastos: [label],
         });
         seenOrder.push(id);
       }
@@ -389,9 +430,59 @@ export function RendicionDetailClient({
             </p>
           </div>
         </div>
+
+        {/* Acciones de descarga */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.info('Funcionalidad en Proceso')}
+          >
+            <FileText className="mr-1.5 h-4 w-4" />
+            PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.info('Funcionalidad en Proceso')}
+          >
+            <FileSpreadsheet className="mr-1.5 h-4 w-4" />
+            Excel
+          </Button>
+        </div>
       </div>
 
       <Separator />
+
+      {/* Comprobantes Adjuntos */}
+      {rendicion.comprobanteUrl && (
+        <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/20">
+          <ExternalLink className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+              Comprobantes Adjuntos
+            </p>
+            <p className="truncate text-xs text-blue-600 dark:text-blue-400">
+              {rendicion.comprobanteUrl}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50"
+            asChild
+          >
+            <a
+              href={rendicion.comprobanteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="mr-1.5 h-4 w-4" />
+              Ver comprobantes
+            </a>
+          </Button>
+        </div>
+      )}
 
       {/* Main Info Card */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -454,7 +545,11 @@ export function RendicionDetailClient({
             >
               {formatMoney(saldoLiquido)}
             </div>
-            <p className="text-amzdesk-helper">Recibido - Efectivo pagado</p>
+            <p className="text-amzdesk-helper">
+              {montoRecibido > 0
+                ? `Recibido: ${formatMoney(montoRecibido)} | Gastado: ${formatMoney(rendicion.montoRespaldado)}`
+                : 'Recibido - Total respaldado'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -488,9 +583,12 @@ export function RendicionDetailClient({
       {gastosRegistrados.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Resumen de Partidas Contables</CardTitle>
+            <CardTitle className="text-lg">
+              Resumen de Partidas Contables
+            </CardTitle>
             <p className="text-muted-foreground text-sm">
-              Agrupación acumulada de los gastos de esta rendición según la partida contable asociada.
+              Agrupación acumulada de los gastos de esta rendición según la
+              partida contable asociada.
             </p>
           </CardHeader>
           <CardContent>
@@ -498,25 +596,48 @@ export function RendicionDetailClient({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-amzdesk-table-header">Código</TableHead>
-                    <TableHead className="text-amzdesk-table-header">Partida Contable</TableHead>
-                    <TableHead className="text-amzdesk-table-header text-right">Monto Neto</TableHead>
-                    <TableHead className="text-amzdesk-table-header text-right">Retenciones/Impuestos</TableHead>
-                    <TableHead className="text-amzdesk-table-header text-right font-bold">Total (Bruto)</TableHead>
+                    <TableHead className="text-amzdesk-table-header">
+                      Código
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header">
+                      Partida Contable
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header max-w-[200px]">
+                      Gasto(s)
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">
+                      Monto Neto
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">
+                      Retenciones/Impuestos
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right font-bold">
+                      Total (Bruto)
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {resumenContable.map((r) => (
                     <TableRow key={r.codigo}>
-                      <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
-                      <TableCell className="font-semibold text-xs">{r.nombre}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {r.codigo}
+                      </TableCell>
+                      <TableCell className="text-xs font-semibold">
+                        {r.nombre}
+                      </TableCell>
+                      <TableCell
+                        className="text-muted-foreground max-w-[200px] truncate text-xs"
+                        title={r.gastos.join(', ')}
+                      >
+                        {r.gastos.join(', ')}
+                      </TableCell>
                       <TableCell className="text-right text-xs font-semibold text-emerald-600">
                         {formatMoney(r.neto)} Bs.
                       </TableCell>
                       <TableCell className="text-right text-xs font-semibold text-orange-600">
                         {formatMoney(r.impuestos)} Bs.
                       </TableCell>
-                      <TableCell className="text-right text-xs font-bold text-foreground bg-muted/20">
+                      <TableCell className="text-foreground bg-muted/20 text-right text-xs font-bold">
                         {formatMoney(r.bruto)} Bs.
                       </TableCell>
                     </TableRow>
@@ -532,9 +653,12 @@ export function RendicionDetailClient({
       {resumenPresupuestario.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Resumen de Partidas Presupuestarias</CardTitle>
+            <CardTitle className="text-lg">
+              Resumen de Partidas Presupuestarias
+            </CardTitle>
             <p className="text-muted-foreground text-sm">
-              Agrupación acumulada de los gastos según la partida presupuestaria del POA.
+              Agrupación acumulada de los gastos según la partida presupuestaria
+              del POA.
             </p>
           </CardHeader>
           <CardContent>
@@ -542,21 +666,47 @@ export function RendicionDetailClient({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-amzdesk-table-header">Código POA</TableHead>
-                    <TableHead className="text-amzdesk-table-header">Partida Presupuestaria</TableHead>
-                    <TableHead className="text-amzdesk-table-header">Proyecto / Grupo</TableHead>
-                    <TableHead className="text-amzdesk-table-header text-right">Monto Neto</TableHead>
-                    <TableHead className="text-amzdesk-table-header text-right">Retenciones/Impuestos</TableHead>
-                    <TableHead className="text-amzdesk-table-header text-right font-bold">Total (Bruto)</TableHead>
+                    <TableHead className="text-amzdesk-table-header">
+                      Código POA
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header">
+                      Partida Presupuestaria
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header max-w-[200px]">
+                      Gasto(s)
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header">
+                      Proyecto / Grupo
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">
+                      Monto Neto
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">
+                      Retenciones/Impuestos
+                    </TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right font-bold">
+                      Total (Bruto)
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {resumenPresupuestario.map((r) => (
                     <TableRow key={r.id}>
-                      <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
-                      <TableCell className="font-semibold text-xs">{r.nombre}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {[r.proyecto, r.grupo].filter(Boolean).join(' / ') || '—'}
+                      <TableCell className="font-mono text-xs">
+                        {r.codigo}
+                      </TableCell>
+                      <TableCell className="text-xs font-semibold">
+                        {r.nombre}
+                      </TableCell>
+                      <TableCell
+                        className="text-muted-foreground max-w-[200px] truncate text-xs"
+                        title={r.gastos.join(', ')}
+                      >
+                        {r.gastos.join(', ')}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {[r.proyecto, r.grupo].filter(Boolean).join(' / ') ||
+                          '—'}
                       </TableCell>
                       <TableCell className="text-right text-xs font-semibold text-emerald-600">
                         {formatMoney(r.neto)} Bs.
@@ -564,7 +714,7 @@ export function RendicionDetailClient({
                       <TableCell className="text-right text-xs font-semibold text-orange-600">
                         {formatMoney(r.impuestos)} Bs.
                       </TableCell>
-                      <TableCell className="text-right text-xs font-bold text-foreground bg-muted/20">
+                      <TableCell className="text-foreground bg-muted/20 text-right text-xs font-bold">
                         {formatMoney(r.bruto)} Bs.
                       </TableCell>
                     </TableRow>
@@ -649,7 +799,7 @@ export function RendicionDetailClient({
                     : 'bg-emerald-600 hover:bg-emerald-700'
                 }`}
                 onClick={() => void openApproveDialog()}
-                disabled={loadingAction || hasIncorrectos}
+                disabled={loadingAction || !todosCorrectos}
               >
                 <CheckCircle className="mr-2 h-5 w-5" />
                 {isContador
@@ -662,10 +812,12 @@ export function RendicionDetailClient({
                 className="flex-1 border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950"
                 onClick={() => {
                   const texto = gastosRegistrados
-                    .filter((g) => gastoValidaciones[g.id]?.estado === 'observado')
+                    .filter(
+                      (g) => gastoValidaciones[g.id]?.estado === 'observado'
+                    )
                     .map(
                       (g) =>
-                        `• ${g.concepto || 'Gasto #' + g.id}: ${gastoValidaciones[g.id]?.observacion || '(sin detalle)'}`,
+                        `• ${g.concepto || 'Gasto #' + g.id}: ${gastoValidaciones[g.id]?.observacion || '(sin detalle)'}`
                     )
                     .join('\n');
                   setComentarioObservar(texto);

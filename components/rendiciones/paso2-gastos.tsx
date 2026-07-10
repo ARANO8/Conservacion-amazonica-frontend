@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  useFormContext,
-  useFieldArray,
-  useWatch,
-} from 'react-hook-form';
+import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 import {
   FormField,
   FormItem,
@@ -16,9 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { FieldGroup, FieldSet, FieldLegend } from '@/components/ui/field';
-import { Percent } from 'lucide-react';
+import { Percent, Link2 } from 'lucide-react';
 import { CreateRendicionInput } from '@/types/rendicion-schema';
 import { SolicitudResponse } from '@/types/solicitud-backend';
 import { formatMoney } from '@/lib/utils';
@@ -62,6 +59,38 @@ export default function Paso2Gastos({
 
       <PartidasAprobadas solicitud={solicitud} gastos={gastos} />
 
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
+        <div className="flex items-start gap-3">
+          <Link2 className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <div className="min-w-0 flex-1 space-y-1">
+            <h3 className="text-sm font-bold tracking-wider text-blue-800 uppercase dark:text-blue-300">
+              Enlace de Comprobantes <span className="text-destructive">*</span>
+            </h3>
+            <p className="text-xs text-blue-700 dark:text-blue-400">
+              Ingresa la URL (Google Drive, Dropbox, etc.) donde se encuentran
+              todos los comprobantes digitales de esta rendición.
+            </p>
+            <FormField
+              control={control}
+              name="comprobanteUrl"
+              render={({ field }) => (
+                <FormItem className="mt-2">
+                  <FormControl>
+                    <Input
+                      type="url"
+                      placeholder="https://drive.google.com/drive/folders/..."
+                      className="h-9 bg-white text-sm dark:bg-blue-950/40"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
       <FieldGroup className="space-y-6">
         <GastoTable
           fields={gastosFields}
@@ -83,10 +112,7 @@ export default function Paso2Gastos({
             (3%) según el tipo de documento y la categoría de la partida
             presupuestaria.
           </p>
-          <RetencionesTable
-            form={form}
-            solicitud={solicitud}
-          />
+          <RetencionesTable form={form} solicitud={solicitud} />
         </div>
 
         <Separator className="my-6" />

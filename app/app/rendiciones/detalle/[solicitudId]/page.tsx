@@ -4,13 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import {
-  ArrowLeft,
-  Calendar,
-  ExternalLink,
-  NotebookPen,
-  ReceiptText,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, NotebookPen, ReceiptText } from 'lucide-react';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import {
@@ -71,7 +65,6 @@ function normalizeGasto(gasto: GastoRendicionResponse) {
     montoBruto,
     impuestosRetenciones,
     montoNeto,
-    urlComprobante: gasto.urlComprobante,
   };
 }
 
@@ -200,6 +193,33 @@ export default function RendicionDetalleBySolicitudPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {rendicion.comprobanteUrl && (
+            <div className="mb-4 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/20">
+              <div>
+                <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                  Comprobantes Adjuntos
+                </p>
+                <p className="max-w-[400px] truncate text-xs text-blue-600 dark:text-blue-400">
+                  {rendicion.comprobanteUrl}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                asChild
+              >
+                <a
+                  href={rendicion.comprobanteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ReceiptText className="mr-1.5 h-4 w-4" />
+                  Ver comprobantes
+                </a>
+              </Button>
+            </div>
+          )}
           {gastos.length === 0 ? (
             <p className="text-amzdesk-helper">
               No hay gastos registrados en esta rendición.
@@ -230,9 +250,6 @@ export default function RendicionDetalleBySolicitudPage() {
                     <TableHead className="text-amzdesk-table-header text-right">
                       Neto
                     </TableHead>
-                    <TableHead className="text-amzdesk-table-header">
-                      Respaldo
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -252,23 +269,6 @@ export default function RendicionDetalleBySolicitudPage() {
                       </TableCell>
                       <TableCell className="text-amzdesk-monto text-right text-emerald-600">
                         {formatMoney(gasto.montoNeto)}
-                      </TableCell>
-                      <TableCell>
-                        {gasto.urlComprobante ? (
-                          <Button variant="ghost" size="icon" asChild>
-                            <a
-                              href={gasto.urlComprobante}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        ) : (
-                          <span className="text-amzdesk-helper">
-                            Sin enlace
-                          </span>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}

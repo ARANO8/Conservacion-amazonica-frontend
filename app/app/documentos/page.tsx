@@ -72,6 +72,45 @@ const DOCUMENTOS: Documento[] = [
     icon: TrendingUp,
     destacado: false,
   },
+  {
+    id: 'planilla-alimentacion',
+    titulo: 'Planilla de Alimentación',
+    descripcion:
+      'Formulario para el registro y rendición de gastos de alimentación durante comisiones de servicio. Incluye viáticos diarios y detalle de consumos.',
+    categoria: 'financiero',
+    version: 'v2025',
+    año: 2025,
+    tipo: 'pdf_local',
+    url: '/docs/01 PLANILLA DE ALIMENTACIÓN.pdf',
+    icon: FileText,
+    destacado: false,
+  },
+  {
+    id: 'planilla-viaticos-terceros',
+    titulo: 'Planilla de Viáticos para Terceros',
+    descripcion:
+      'Formulario para la solicitud y rendición de viáticos a terceros no vinculados laboralmente a la organización.',
+    categoria: 'financiero',
+    version: 'v2025',
+    año: 2025,
+    tipo: 'pdf_local',
+    url: '/docs/02 PLANILLA VIATICOS TERCEROS.pdf',
+    icon: FileText,
+    destacado: false,
+  },
+  {
+    id: 'planilla-pasajes-terceros',
+    titulo: 'Planilla de Pasajes para Terceros',
+    descripcion:
+      'Formulario para la solicitud y rendición de pasajes aéreos y terrestres para terceros, con detalle de rutas y montos.',
+    categoria: 'financiero',
+    version: 'v2025',
+    año: 2025,
+    tipo: 'pdf_local',
+    url: '/docs/03 PLANILLA PASAJES TERCEROS.pdf',
+    icon: FileText,
+    destacado: false,
+  },
 ];
 
 const CATEGORIA_LABELS: Record<Documento['categoria'], string> = {

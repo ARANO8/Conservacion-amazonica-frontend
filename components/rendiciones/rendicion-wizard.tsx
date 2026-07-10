@@ -28,6 +28,7 @@ import {
   adaptUpdateRendicionPayload,
 } from '@/lib/adapters/rendicion-adapter';
 import { Usuario } from '@/types/catalogs';
+import { AlertCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormField,
@@ -37,6 +38,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
@@ -98,6 +100,11 @@ export default function RendicionWizard({
 
   const solicitudSeleccionada =
     solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
+
+  const observaciones = useWatch({
+    control: form.control,
+    name: 'observaciones',
+  });
 
   // Efecto para pre-seleccionar una solicitud si se proporciona el ID
   useEffect(() => {
@@ -280,6 +287,21 @@ export default function RendicionWizard({
 
         {/* Área de contenido — crece para ocupar el espacio disponible */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
+          {/* Banner de observación (solo en modo edición) */}
+          {isEditMode && observaciones && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-5 w-5" />
+              <AlertTitle>Observación del revisor</AlertTitle>
+              <AlertDescription>
+                <p className="mt-1 text-sm leading-relaxed">{observaciones}</p>
+                <p className="mt-2 text-xs opacity-80">
+                  Corrige los datos señalados y selecciona un aprobador para
+                  reenviar la rendición a revisión.
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {step === 'SELECCION' && (
             <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
