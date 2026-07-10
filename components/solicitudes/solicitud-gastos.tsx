@@ -448,16 +448,6 @@ function GastoCard({
               </FormItem>
             )}
           />
-          <div className="space-y-2">
-            <Label className="text-foreground text-sm font-bold uppercase">
-              TOTAL LÍQUIDO (A Recibir)
-            </Label>
-            <Input
-              value={formatMoney(netoTotal)}
-              readOnly
-              className="bg-muted font-bold"
-            />
-          </div>
         </div>
       </div>
 
@@ -466,26 +456,49 @@ function GastoCard({
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex flex-col">
             <span className="text-foreground text-sm font-bold uppercase">
-              TOTAL PRESUPUESTADO (Incl. Impuestos)
+              TOTAL LÍQUIDO (A Recibir)
             </span>
-            <span className="text-primary text-sm font-bold">
+            <span className="text-primary text-lg font-semibold">
+              {formatMoney(netoTotal || 0)}
+            </span>
+          </div>
+          <div className="bg-border hidden h-10 w-[1px] sm:block" />
+          <div className="flex flex-col">
+            <span className="text-foreground text-sm font-bold uppercase">
+              TOTAL PRESUPUESTADO
+            </span>
+            <span className="text-sm font-bold">
               {formatMoney(montoNeto || 0)}
             </span>
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
           <div className="flex flex-wrap gap-4">
-            <div className="flex flex-col">
-              <span className="text-foreground text-sm uppercase">IVA 13%</span>
-              <span className="text-sm font-semibold">{formatMoney(iva)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-foreground text-sm uppercase">IT 3%</span>
-              <span className="text-sm font-semibold">{formatMoney(it)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-foreground text-sm uppercase">IUE 5%</span>
-              <span className="text-sm font-semibold">{formatMoney(iue)}</span>
-            </div>
+            {iva > 0 && (
+              <div className="flex flex-col">
+                <span className="text-foreground text-sm uppercase">
+                  RC-IVA 13%
+                </span>
+                <span className="text-sm font-semibold">
+                  {formatMoney(iva)}
+                </span>
+              </div>
+            )}
+            {it > 0 && (
+              <div className="flex flex-col">
+                <span className="text-foreground text-sm uppercase">IT 3%</span>
+                <span className="text-sm font-semibold">{formatMoney(it)}</span>
+              </div>
+            )}
+            {iue > 0 && (
+              <div className="flex flex-col">
+                <span className="text-foreground text-sm uppercase">
+                  IUE 5%
+                </span>
+                <span className="text-sm font-semibold">
+                  {formatMoney(iue)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
