@@ -67,7 +67,9 @@ export interface DesgloseTax {
 export interface TaxResult {
   /** Monto líquido que recibe el proveedor / beneficiario (sin retenciones). */
   montoNeto: number;
-  /** Total de retenciones/impuestos aplicados (montoTotal − montoNeto). */
+  /** Monto bruto (total con impuestos incluidos) después del gross-up. */
+  montoBruto: number;
+  /** Total de retenciones/impuestos aplicados (montoBruto − montoNeto). */
   totalRetenciones: number;
   /** Desglose detallado por tipo de retención. */
   desglose: DesgloseTax[];
@@ -96,69 +98,77 @@ export function getCategoriaFromPartida(
 // ---------------------------------------------------------------------------
 
 /**
- * Calcula el monto neto (líquido a proveedor) dado el monto total pagado.
+ * Calcula el monto bruto (total con impuestos) a partir del monto líquido (neto).
+ * Aplica gross-up: montoBruto = montoNeto / factor.
  *
- * Tabla de reglas (clonadas de los módulos de solicitudes):
+ * Tabla de reglas:
  *
- * | TipoDoc         | Categoría            | Factor | Retenciones                        |
- * |-----------------|----------------------|--------|------------------------------------|
- * | FACTURA         | cualquiera           | 1.00   | Sin retención                      |
- * | RECIBO / BOLETA | VIATICO              | 0.87   | RC-IVA 13%                         |
- * | RECIBO / BOLETA | HOSPEDAJE            | 0.84   | IVA 13% + IT 3%                    |
- * | RECIBO / BOLETA | GENERAL + BIEN       | 0.92   | IUE 5% + IT 3%   (= 8% total)     |
- * | RECIBO / BOLETA | GENERAL + SERVICIO   | 0.84   | IUE 12.5% + IT 3% (≈ 16% total)   |
- * | RECIBO / BOLETA | GENERAL + ALQUILER   | 0.84   | IVA 13% + IT 3%  (= 16% total)    |
+ * | TipoDoc              | Factor | Retenciones                        |
+ * |----------------------|--------|------------------------------------|
+ * | FACTURA / DJ / PPT   | 1.00   | Sin retención                      |
+ * | LV / RECIBO+VIATICO  | 0.87   | RC-IVA 13%                         |
+ * | RECIBO+HOSPEDAJE     | 0.84   | IVA 13% + IT 3%                    |
+ * | RECIBO+BIEN          | 0.92   | IUE 5% + IT 3%   (= 8% total)     |
+ * | RECIBO+SERVICIO      | 0.84   | RC-IVA 13% + IT 3% (≈ 16% total)  |
+ * | RECIBO+ALQUILER      | 0.84   | IVA 13% + IT 3%  (= 16% total)    |
+ * | PVT / PAT            | 0.84   | RC-IVA 13% + IT 3% (= 16% total)  |
  *
- * @param montoTotal      Monto bruto pagado (con retenciones incluidas).
+ * @param montoNeto       Monto líquido (neto, sin impuestos).
  * @param tipoDocumento   Tipo de comprobante presentado.
  * @param categoria       Categoría del gasto (derivada del nombre de la partida POA).
  * @param tipoRetencion   Sub-categoría para gastos GENERALES con RECIBO/BOLETA.
  *                        Por defecto 'SERVICIO' (caso más frecuente).
  */
-export function calcularMontoNetoRendicion(
-  montoTotal: number,
+export function calcularMontoBrutoRendicion(
+  montoNeto: number,
   tipoDocumento: TipoDocRendicion,
   categoria: CategoriaGasto,
   tipoRetencion: TipoRetencionGeneral = 'SERVICIO'
 ): TaxResult {
-  const brutoRaw = Number(montoTotal);
-  const bruto = Number.isFinite(brutoRaw) ? round2(brutoRaw) : 0;
+  const neto = Number.isFinite(montoNeto) ? round2(montoNeto) : 0;
 
-  if (bruto <= 0) {
-    return { montoNeto: 0, totalRetenciones: 0, desglose: [] };
+  if (neto <= 0) {
+    return { montoNeto: 0, montoBruto: 0, totalRetenciones: 0, desglose: [] };
   }
 
-  // --- 1. FACTURA, Declaración Jurada (DJ) y Planilla de Pasajes Terceros (PPT) ---
-  // Sin retenciones (Factor 1.00)
+  // --- 1. FACTURA, DJ, PPT --- Sin retenciones (Factor 1.00)
   if (
     tipoDocumento === 'FACTURA' ||
     tipoDocumento === 'DJ' ||
     tipoDocumento === 'PPT'
   ) {
-    return { montoNeto: round2(bruto), totalRetenciones: 0, desglose: [] };
-  }
-
-  // --- 2. Liquidación de Viáticos (LV) ---
-  // Retención 13% RC-IVA (Factor 0.87)
-  if (tipoDocumento === 'LV' || (tipoDocumento === 'RECIBO' && categoria === 'VIATICO')) {
-    const neto = round2(bruto * 0.87);
-    const rcIva = round2(bruto * 0.13);
     return {
       montoNeto: round2(neto),
-      totalRetenciones: round2(bruto - neto),
+      montoBruto: round2(neto),
+      totalRetenciones: 0,
+      desglose: [],
+    };
+  }
+
+  // --- 2. LV / RECIBO+VIATICO --- Factor 0.87 (RC-IVA 13%)
+  if (
+    tipoDocumento === 'LV' ||
+    (tipoDocumento === 'RECIBO' && categoria === 'VIATICO')
+  ) {
+    const total = round2(neto / 0.87);
+    const rcIva = round2(total * 0.13);
+    return {
+      montoNeto: round2(neto),
+      montoBruto: round2(total),
+      totalRetenciones: round2(total - neto),
       desglose: [{ label: 'RC-IVA 13%', porcentaje: 13, monto: round2(rcIva) }],
     };
   }
 
-  // --- 3. Planillas de Viáticos/Alimentación Terceros (PVT / PAT) ---
-  // Retención 13% RC-IVA + 3% IT (Factor 0.84)
+  // --- 3. PVT / PAT --- Factor 0.84 (RC-IVA 13% + IT 3%)
   if (tipoDocumento === 'PVT' || tipoDocumento === 'PAT') {
-    const neto = round2(bruto * 0.84);
-    const rcIva = round2(bruto * 0.13);
-    const it = round2(bruto * 0.03);
+    const total = round2(neto / 0.84);
+    const rcIva = round2(total * 0.13);
+    const it = round2(total * 0.03);
     return {
       montoNeto: round2(neto),
-      totalRetenciones: round2(bruto - neto),
+      montoBruto: round2(total),
+      totalRetenciones: round2(total - neto),
       desglose: [
         { label: 'RC-IVA 13%', porcentaje: 13, monto: round2(rcIva) },
         { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
@@ -166,14 +176,15 @@ export function calcularMontoNetoRendicion(
     };
   }
 
-  // --- 4. Hospedaje ---
+  // --- 4. HOSPEDAJE --- Factor 0.84 (IVA 13% + IT 3%)
   if (categoria === 'HOSPEDAJE') {
-    const neto = round2(bruto * 0.84);
-    const iva = round2(bruto * 0.13);
-    const it = round2(bruto * 0.03);
+    const total = round2(neto / 0.84);
+    const iva = round2(total * 0.13);
+    const it = round2(total * 0.03);
     return {
       montoNeto: round2(neto),
-      totalRetenciones: round2(bruto - neto),
+      montoBruto: round2(total),
+      totalRetenciones: round2(total - neto),
       desglose: [
         { label: 'IVA 13%', porcentaje: 13, monto: round2(iva) },
         { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
@@ -181,15 +192,15 @@ export function calcularMontoNetoRendicion(
     };
   }
 
-  // --- 5. RECIBO o BOLETA generales (según tipoRetencion) ---
+  // --- 5. RECIBO/BOLETA GENERAL + BIEN --- Factor 0.92 (IUE 5% + IT 3%)
   if (tipoRetencion === 'BIEN') {
-    // Retención Compra 8%: IUE 5% + IT 3% (Factor 0.92)
-    const neto = round2(bruto * 0.92);
-    const iue = round2(bruto * 0.05);
-    const it = round2(bruto * 0.03);
+    const total = round2(neto / 0.92);
+    const iue = round2(total * 0.05);
+    const it = round2(total * 0.03);
     return {
       montoNeto: round2(neto),
-      totalRetenciones: round2(bruto - neto),
+      montoBruto: round2(total),
+      totalRetenciones: round2(total - neto),
       desglose: [
         { label: 'IUE 5% (Ret. Compra)', porcentaje: 5, monto: round2(iue) },
         { label: 'IT 3%', porcentaje: 3, monto: round2(it) },
@@ -197,14 +208,15 @@ export function calcularMontoNetoRendicion(
     };
   }
 
-  // ALQUILER o SERVICIO (Factor 0.84 con desglose de 13% RC-IVA/IVA y 3% IT por planilla interna)
-  const neto = round2(bruto * 0.84);
+  // ALQUILER o SERVICIO --- Factor 0.84 (RC-IVA/IVA 13% + IT 3%)
+  const total = round2(neto / 0.84);
   const ivaLabel = tipoRetencion === 'ALQUILER' ? 'IVA 13%' : 'RC-IVA 13%';
-  const ivaMonto = round2(bruto * 0.13);
-  const it = round2(bruto * 0.03);
+  const ivaMonto = round2(total * 0.13);
+  const it = round2(total * 0.03);
   return {
     montoNeto: round2(neto),
-    totalRetenciones: round2(bruto - neto),
+    montoBruto: round2(total),
+    totalRetenciones: round2(total - neto),
     desglose: [
       { label: ivaLabel, porcentaje: 13, monto: round2(ivaMonto) },
       { label: 'IT 3%', porcentaje: 3, monto: round2(it) },

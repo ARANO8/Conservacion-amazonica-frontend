@@ -2,11 +2,7 @@
 
 import { useMemo } from 'react';
 import { useWatch, type UseFormReturn } from 'react-hook-form';
-import {
-  FormField,
-  FormItem,
-  FormControl,
-} from '@/components/ui/form';
+import { FormField, FormItem, FormControl } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -16,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { formatMoney } from '@/lib/utils';
 import {
-  calcularMontoNetoRendicion,
+  calcularMontoBrutoRendicion,
   getCategoriaFromPartida,
   type TipoDocRendicion,
   type TipoRetencionGeneral,
@@ -37,10 +33,7 @@ interface RetencionesTableProps {
   solicitud: SolicitudResponse | null;
 }
 
-export function RetencionesTable({
-  form,
-  solicitud,
-}: RetencionesTableProps) {
+export function RetencionesTable({ form, solicitud }: RetencionesTableProps) {
   const { control } = form;
   const gastosRaw = useWatch({ control, name: 'gastos' });
   const gastos = useMemo(() => gastosRaw ?? [], [gastosRaw]);
@@ -49,7 +42,7 @@ export function RetencionesTable({
     return gastos.map((gasto: Record<string, unknown>, index: number) => {
       const partidaId = Number(gasto?.partidaId ?? 0);
       const presupuesto = (solicitud?.presupuestos ?? []).find(
-        (p) => p.id === partidaId,
+        (p) => p.id === partidaId
       );
       const nombrePartida =
         presupuesto?.poa?.estructura?.partida?.nombre ?? null;
@@ -76,20 +69,20 @@ export function RetencionesTable({
         };
       }
 
-      const result = calcularMontoNetoRendicion(
-        montoTotal,
+      const result = calcularMontoBrutoRendicion(
+        Number(gasto?.montoNeto ?? 0) || montoTotal,
         tipoDocumento as TipoDocRendicion,
         categoria,
-        tipoRetencion as TipoRetencionGeneral,
+        tipoRetencion as TipoRetencionGeneral
       );
 
-      const rcIva = result.desglose.find(
-        (d) => d.label.includes('RC-IVA') || d.label.includes('IVA'),
-      )?.monto ?? 0;
-      const iue = result.desglose.find((d) => d.label.includes('IUE'))?.monto ?? 0;
-      const it = result.desglose.find(
-        (d) => d.label === 'IT 3%',
-      )?.monto ?? 0;
+      const rcIva =
+        result.desglose.find(
+          (d) => d.label.includes('RC-IVA') || d.label.includes('IVA')
+        )?.monto ?? 0;
+      const iue =
+        result.desglose.find((d) => d.label.includes('IUE'))?.monto ?? 0;
+      const it = result.desglose.find((d) => d.label === 'IT 3%')?.monto ?? 0;
 
       return {
         index,
@@ -116,7 +109,7 @@ export function RetencionesTable({
         acc.neto = round2(acc.neto + row.neto);
         return acc;
       },
-      { montoTotal: 0, rcIva: 0, iue: 0, it: 0, totalImpuestos: 0, neto: 0 },
+      { montoTotal: 0, rcIva: 0, iue: 0, it: 0, totalImpuestos: 0, neto: 0 }
     );
   }, [rows]);
 
@@ -126,34 +119,34 @@ export function RetencionesTable({
   if (!hasAnyRows) return null;
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-border">
+    <div className="border-border w-full overflow-x-auto rounded-lg border">
       <table className="w-full border-collapse text-xs">
         <thead>
           <tr className="bg-muted/60">
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-2 py-1 text-[10px] font-bold tracking-wider uppercase">
               #
             </th>
             {showSelectorColumn && (
-              <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground w-[100px] border-r border-border">
+              <th className="text-muted-foreground border-border w-[100px] border-r px-2 py-1 text-[10px] font-bold tracking-wider uppercase">
                 Tipo Ret.
               </th>
             )}
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground text-right border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-2 py-1 text-right text-[10px] font-bold tracking-wider uppercase">
               TOTAL Bs.
             </th>
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground text-right border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-2 py-1 text-right text-[10px] font-bold tracking-wider uppercase">
               RC-IVA 13%
             </th>
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground text-right border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-2 py-1 text-right text-[10px] font-bold tracking-wider uppercase">
               IUE 5%
             </th>
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground text-right border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-2 py-1 text-right text-[10px] font-bold tracking-wider uppercase">
               IT 3%
             </th>
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground text-right border-r border-border">
+            <th className="text-muted-foreground border-border border-r px-2 py-1 text-right text-[10px] font-bold tracking-wider uppercase">
               TOTAL IMP.
             </th>
-            <th className="px-2 py-1 text-[10px] font-bold tracking-wider uppercase text-muted-foreground text-right">
+            <th className="text-muted-foreground px-2 py-1 text-right text-[10px] font-bold tracking-wider uppercase">
               NETO Bs.
             </th>
           </tr>
@@ -162,28 +155,28 @@ export function RetencionesTable({
           {rows.map((row, idx) => {
             if (!row.hasValue && !row.needsSelector)
               return (
-                <tr key={idx} className="border-b border-border opacity-40">
-                  <td className="px-2 py-1 text-[11px] text-center text-muted-foreground border-r border-border">
+                <tr key={idx} className="border-border border-b opacity-40">
+                  <td className="text-muted-foreground border-border border-r px-2 py-1 text-center text-[11px]">
                     {idx + 1}
                   </td>
                   {showSelectorColumn && (
-                    <td className="px-1 py-1 border-r border-border">
+                    <td className="border-border border-r px-1 py-1">
                       <span className="text-muted-foreground">—</span>
                     </td>
                   )}
-                  <td className="px-2 py-1 text-right border-r border-border">
+                  <td className="border-border border-r px-2 py-1 text-right">
                     —
                   </td>
-                  <td className="px-2 py-1 text-right border-r border-border">
+                  <td className="border-border border-r px-2 py-1 text-right">
                     —
                   </td>
-                  <td className="px-2 py-1 text-right border-r border-border">
+                  <td className="border-border border-r px-2 py-1 text-right">
                     —
                   </td>
-                  <td className="px-2 py-1 text-right border-r border-border">
+                  <td className="border-border border-r px-2 py-1 text-right">
                     —
                   </td>
-                  <td className="px-2 py-1 text-right border-r border-border">
+                  <td className="border-border border-r px-2 py-1 text-right">
                     —
                   </td>
                   <td className="px-2 py-1 text-right">—</td>
@@ -193,39 +186,38 @@ export function RetencionesTable({
             return (
               <tr
                 key={idx}
-                className="border-b border-border hover:bg-muted/30"
+                className="border-border hover:bg-muted/30 border-b"
               >
-                <td className="px-2 py-1 text-[11px] text-center text-muted-foreground border-r border-border">
+                <td className="text-muted-foreground border-border border-r px-2 py-1 text-center text-[11px]">
                   {idx + 1}
                 </td>
                 {showSelectorColumn && (
-                  <td className="px-1 py-1 border-r border-border">
+                  <td className="border-border border-r px-1 py-1">
                     {row.needsSelector ? (
-                      <TipoRetencionSelect
-                        form={form}
-                        index={row.index}
-                      />
+                      <TipoRetencionSelect form={form} index={row.index} />
                     ) : (
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-muted-foreground text-[11px]">
                         —
                       </span>
                     )}
                   </td>
                 )}
-                <td className="px-2 py-1 text-right font-medium tabular-nums border-r border-border">
+                <td className="border-border border-r px-2 py-1 text-right font-medium tabular-nums">
                   {formatMoney(row.montoTotal)}
                 </td>
-                <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+                <td className="border-border border-r px-2 py-1 text-right tabular-nums">
                   {row.rcIva > 0 ? formatMoney(row.rcIva) : '—'}
                 </td>
-                <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+                <td className="border-border border-r px-2 py-1 text-right tabular-nums">
                   {row.iue > 0 ? formatMoney(row.iue) : '—'}
                 </td>
-                <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+                <td className="border-border border-r px-2 py-1 text-right tabular-nums">
                   {row.it > 0 ? formatMoney(row.it) : '—'}
                 </td>
-                <td className="px-2 py-1 text-right font-semibold tabular-nums border-r border-border">
-                  {row.totalImpuestos > 0 ? formatMoney(row.totalImpuestos) : '—'}
+                <td className="border-border border-r px-2 py-1 text-right font-semibold tabular-nums">
+                  {row.totalImpuestos > 0
+                    ? formatMoney(row.totalImpuestos)
+                    : '—'}
                 </td>
                 <td className="px-2 py-1 text-right font-bold tabular-nums">
                   {row.neto > 0 ? formatMoney(row.neto) : '—'}
@@ -235,26 +227,24 @@ export function RetencionesTable({
           })}
         </tbody>
         <tfoot>
-          <tr className="bg-muted/40 border-t border-border font-semibold">
-            <td className="px-2 py-1 text-[11px] text-muted-foreground border-r border-border">
+          <tr className="bg-muted/40 border-border border-t font-semibold">
+            <td className="text-muted-foreground border-border border-r px-2 py-1 text-[11px]">
               TOTAL
             </td>
-            {showSelectorColumn && (
-              <td className="border-r border-border" />
-            )}
-            <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+            {showSelectorColumn && <td className="border-border border-r" />}
+            <td className="border-border border-r px-2 py-1 text-right tabular-nums">
               {formatMoney(totals.montoTotal)}
             </td>
-            <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+            <td className="border-border border-r px-2 py-1 text-right tabular-nums">
               {totals.rcIva > 0 ? formatMoney(totals.rcIva) : '—'}
             </td>
-            <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+            <td className="border-border border-r px-2 py-1 text-right tabular-nums">
               {totals.iue > 0 ? formatMoney(totals.iue) : '—'}
             </td>
-            <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+            <td className="border-border border-r px-2 py-1 text-right tabular-nums">
               {totals.it > 0 ? formatMoney(totals.it) : '—'}
             </td>
-            <td className="px-2 py-1 text-right tabular-nums border-r border-border">
+            <td className="border-border border-r px-2 py-1 text-right tabular-nums">
               {totals.totalImpuestos > 0
                 ? formatMoney(totals.totalImpuestos)
                 : '—'}
@@ -285,7 +275,7 @@ function TipoRetencionSelect({
         <FormItem className="space-y-0">
           <Select value={field.value} onValueChange={field.onChange}>
             <FormControl>
-              <SelectTrigger className="h-6 text-[10px] px-1">
+              <SelectTrigger className="h-6 px-1 text-[10px]">
                 <SelectValue />
               </SelectTrigger>
             </FormControl>
