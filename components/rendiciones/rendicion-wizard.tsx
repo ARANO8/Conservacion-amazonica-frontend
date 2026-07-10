@@ -18,7 +18,6 @@ import { toast } from 'sonner';
 import {
   CreateRendicionSchema,
   CreateRendicionInput,
-  DeclaracionJurada,
   defaultRendicionValues,
   WizardStepRendicion,
 } from '@/types/rendicion-schema';
@@ -29,6 +28,7 @@ import {
   adaptUpdateRendicionPayload,
 } from '@/lib/adapters/rendicion-adapter';
 import { Usuario } from '@/types/catalogs';
+import { AlertCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormField,
@@ -37,28 +37,15 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
 import Paso2Gastos from './paso2-gastos';
 import Paso4Informe from './paso4-informe';
+import { RendicionReviewModal } from './rendicion-review-modal';
 
 interface RendicionWizardProps {
   /** Lista de solicitudes en estado DESEMBOLSADO, pasadas desde el padre */
@@ -105,17 +92,6 @@ export default function RendicionWizard({
     defaultValues: mergedDefaultValues,
   });
 
-  const [confirmaDatosVeridicos, aceptaPoliticaDevolucion] = useWatch({
-    control: form.control,
-    name: [
-      'declaracionJurada.confirmaDatosVeridicos',
-      'declaracionJurada.aceptaPoliticaDevolucion',
-    ],
-  }) as [boolean | undefined, boolean | undefined];
-
-  const canConfirmSubmit =
-    confirmaDatosVeridicos === true && aceptaPoliticaDevolucion === true;
-
   // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
   const watchedSolicitudId = useWatch({
     control: form.control,
@@ -124,6 +100,11 @@ export default function RendicionWizard({
 
   const solicitudSeleccionada =
     solicitudes.find((s) => s.id === watchedSolicitudId) ?? null;
+
+  const observaciones = useWatch({
+    control: form.control,
+    name: 'observaciones',
+  });
 
   // Efecto para pre-seleccionar una solicitud si se proporciona el ID
   useEffect(() => {
@@ -160,7 +141,7 @@ export default function RendicionWizard({
     }
 
     if (step === 'GASTOS_RESPALDO') {
-      const isValid = await form.trigger(['gastos', 'gastosSinRespaldo']);
+      const isValid = await form.trigger(['gastos']);
       if (!isValid) {
         toast.error('Revisa los gastos antes de continuar');
         return;
@@ -250,19 +231,7 @@ export default function RendicionWizard({
     const firstErrorField = Object.keys(errors)[0];
     let errorMessage = 'Completa todos los campos requeridos';
 
-    if (firstErrorField === 'declaracionJurada') {
-      const declaracionErrors = errors.declaracionJurada as FieldError & {
-        confirmaDatosVeridicos?: FieldError;
-        aceptaPoliticaDevolucion?: FieldError;
-      };
-      if (declaracionErrors?.confirmaDatosVeridicos?.message) {
-        errorMessage = declaracionErrors.confirmaDatosVeridicos.message;
-      } else if (declaracionErrors?.aceptaPoliticaDevolucion?.message) {
-        errorMessage = declaracionErrors.aceptaPoliticaDevolucion.message;
-      } else {
-        errorMessage = 'Revisa los términos y condiciones antes de continuar';
-      }
-    } else if (firstErrorField === 'informeGastos') {
+    if (firstErrorField === 'informeGastos') {
       // Extraer el error específico del informe si existe
       const informeError = errors.informeGastos as FieldError | undefined;
       if (informeError?.message) {
@@ -306,18 +275,6 @@ export default function RendicionWizard({
     return undefined;
   };
 
-  const declaracionErrors = form.formState.errors.declaracionJurada as Partial<
-    Record<keyof DeclaracionJurada, FieldError>
-  >;
-  const confirmaError = getFieldErrorByPath(
-    form.formState.errors,
-    'declaracionJurada.confirmaDatosVeridicos'
-  );
-  const aceptaError = getFieldErrorByPath(
-    form.formState.errors,
-    'declaracionJurada.aceptaPoliticaDevolucion'
-  );
-
   // ------------------------------------------------------------------
   // Render
   // ------------------------------------------------------------------
@@ -330,6 +287,21 @@ export default function RendicionWizard({
 
         {/* Área de contenido — crece para ocupar el espacio disponible */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
+          {/* Banner de observación (solo en modo edición) */}
+          {isEditMode && observaciones && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-5 w-5" />
+              <AlertTitle>Observación del revisor</AlertTitle>
+              <AlertDescription>
+                <p className="mt-1 text-sm leading-relaxed">{observaciones}</p>
+                <p className="mt-2 text-xs opacity-80">
+                  Corrige los datos señalados y selecciona un aprobador para
+                  reenviar la rendición a revisión.
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {step === 'SELECCION' && (
             <Paso1Seleccion form={form} solicitudes={solicitudes} />
           )}
@@ -352,161 +324,18 @@ export default function RendicionWizard({
           isEditMode={isEditMode}
         />
 
-        <Dialog
-          open={isModalOpen}
+        <RendicionReviewModal
+          isOpen={isModalOpen}
           onOpenChange={(open) => {
             if (!isSubmitting) setIsModalOpen(open);
           }}
-        >
-          <DialogContent className="sm:max-w-[640px]">
-            <DialogHeader>
-              <DialogTitle>Confirmación de Declaración Jurada</DialogTitle>
-              <DialogDescription>
-                Antes de enviar la rendición, confirma los siguientes términos.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="aprobadorActualId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-bold tracking-wider uppercase">
-                      Aprobador Inmediato *
-                    </FormLabel>
-                    <Select
-                      value={field.value ? String(field.value) : ''}
-                      onValueChange={(value) => field.onChange(Number(value))}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecciona un aprobador..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {usuarios
-                          .filter((usuario) => usuario.id !== currentUserId)
-                          .map((usuario) => (
-                            <SelectItem
-                              key={usuario.id}
-                              value={String(usuario.id)}
-                            >
-                              {usuario.nombreCompleto}
-                              {usuario.cargo ? ` — ${usuario.cargo}` : ''}
-                              {usuario.rol ? ` (${usuario.rol})` : ''}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-[10px]" />
-                  </FormItem>
-                )}
-              />
-
-              <div className="bg-card rounded-lg border p-4">
-                <FormField
-                  control={form.control}
-                  name="declaracionJurada.confirmaDatosVeridicos"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value === true}
-                          onCheckedChange={(checked) => {
-                            field.onChange(checked === true);
-                          }}
-                          className="mt-1"
-                        />
-                      </FormControl>
-                      <div className="flex-1">
-                        <FormLabel className="cursor-pointer text-sm leading-relaxed font-semibold">
-                          Declaro bajo juramento que los montos detallados en
-                          esta rendición son verídicos y se realizaron conforme
-                          a lo aprobado en la solicitud.
-                        </FormLabel>
-                        <FormMessage className="mt-2 text-[10px]" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                {confirmaError && (
-                  <p className="text-destructive mt-2 text-xs">
-                    {String(confirmaError.message)}
-                  </p>
-                )}
-              </div>
-
-              <div className="bg-card rounded-lg border p-4">
-                <FormField
-                  control={form.control}
-                  name="declaracionJurada.aceptaPoliticaDevolucion"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value === true}
-                          onCheckedChange={(checked) => {
-                            field.onChange(checked === true);
-                          }}
-                          className="mt-1"
-                        />
-                      </FormControl>
-                      <div className="flex-1">
-                        <FormLabel className="cursor-pointer text-sm leading-relaxed font-semibold">
-                          Acepto la política de devolución de saldos y, en caso
-                          de corresponder, me comprometo a devolver la
-                          diferencia dentro de los plazos establecidos.
-                        </FormLabel>
-                        <FormMessage className="mt-2 text-[10px]" />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                {aceptaError && (
-                  <p className="text-destructive mt-2 text-xs">
-                    {String(aceptaError.message)}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {(declaracionErrors?.confirmaDatosVeridicos ||
-              declaracionErrors?.aceptaPoliticaDevolucion) && (
-              <p className="text-destructive text-xs">
-                Marca ambos checkboxes para confirmar la declaración jurada.
-              </p>
-            )}
-
-            <DialogFooter className="gap-2 sm:gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isSubmitting}
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                disabled={
-                  isSubmitting ||
-                  !canConfirmSubmit ||
-                  !form.getValues('aprobadorActualId')
-                }
-                onClick={() => {
-                  void submitRendicion();
-                }}
-              >
-                {isSubmitting
-                  ? 'Enviando...'
-                  : isEditMode
-                    ? 'Confirmar y Reenviar Rendición'
-                    : 'Confirmar y Enviar Rendición'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          onSubmit={handleValidSubmit}
+          loading={isSubmitting}
+          usuarios={usuarios}
+          solicitud={solicitudSeleccionada}
+          currentUserId={currentUserId}
+          onError={handleInvalidSubmit}
+        />
       </div>
     </FormProvider>
   );

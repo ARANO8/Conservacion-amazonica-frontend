@@ -27,12 +27,7 @@ export default function RootLayout({
       className={cn('dark', outfit.variable)}
     >
       <body className="font-sans antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider defaultTheme="system">
           {children}
           <ThemeToaster />
         </ThemeProvider>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { PartidaContable } from '@/types/catalogs';
 import { RendicionResponse } from '@/types/rendicion-backend';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import { RendicionDetailClient } from './client-wrapper';
@@ -64,6 +65,24 @@ export default function RendicionDetailPage() {
     };
   }, [id]);
 
+  const handlePartidaContableUpdated = useCallback(
+    (gastoId: number, partidaContable: PartidaContable | null) => {
+      setRendicion((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          gastosRendicion: (prev.gastosRendicion ?? []).map((g) =>
+            g.id === gastoId ? { ...g, partidaContable } : g,
+          ),
+          gastos: (prev.gastos ?? []).map((g) =>
+            g.id === gastoId ? { ...g, partidaContable } : g,
+          ),
+        };
+      });
+    },
+    [],
+  );
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -88,5 +107,10 @@ export default function RendicionDetailPage() {
     );
   }
 
-  return <RendicionDetailClient rendicion={rendicion} />;
+  return (
+    <RendicionDetailClient
+      rendicion={rendicion}
+      onPartidaContableUpdated={handlePartidaContableUpdated}
+    />
+  );
 }

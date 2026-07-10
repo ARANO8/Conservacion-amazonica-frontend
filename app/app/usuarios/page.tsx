@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,12 +43,15 @@ export default function UsuariosPage() {
     }
   }, [isAdmin, router, user]);
 
-  const loadUsuarios = async () => {
+  const loadUsuarios = async (signal?: AbortSignal) => {
     try {
       setIsLoading(true);
-      const data = await usuariosService.getAll();
+      const data = await usuariosService.getAll(signal);
       setUsuarios(data);
-    } catch {
+    } catch (err) {
+      if (axios.isCancel(err)) {
+        return;
+      }
       toast.error('No se pudo cargar la gestion de usuarios.');
     } finally {
       setIsLoading(false);
@@ -60,7 +64,12 @@ export default function UsuariosPage() {
       return;
     }
 
-    void loadUsuarios();
+    const controller = new AbortController();
+    void loadUsuarios(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
   }, [isAdmin]);
 
   const openCreateModal = () => {

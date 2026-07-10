@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { History, Search } from 'lucide-react';
+import { History, MessageSquare, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -374,13 +374,14 @@ export default function AuditoriaPage() {
                       <TableHead>ID</TableHead>
                       <TableHead>Codigo Solicitud</TableHead>
                       <TableHead>Estado</TableHead>
+                      <TableHead>Observación</TableHead>
                       <TableHead className="text-right">Accion</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {rendicionesFiltradas.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center">
+                        <TableCell colSpan={5} className="text-center">
                           Sin resultados
                         </TableCell>
                       </TableRow>
@@ -392,6 +393,28 @@ export default function AuditoriaPage() {
                             {rendicion.solicitud?.codigoSolicitud || '-'}
                           </TableCell>
                           <TableCell>{rendicion.estado}</TableCell>
+                          <TableCell className="max-w-[240px]">
+                            {rendicion.estado === 'OBSERVADO' ||
+                            rendicion.estado === 'OBSERVADA' ? (
+                              rendicion.observaciones ? (
+                                <span
+                                  className="line-clamp-2 cursor-default text-xs text-amber-700 dark:text-amber-400"
+                                  title={rendicion.observaciones}
+                                >
+                                  <MessageSquare className="mr-1 inline h-3 w-3 shrink-0 align-text-bottom" />
+                                  {rendicion.observaciones}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">
+                                  —
+                                </span>
+                              )
+                            ) : (
+                              <span className="text-muted-foreground text-xs">
+                                —
+                              </span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-right">
                             <Button
                               size="sm"

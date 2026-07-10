@@ -1,3 +1,37 @@
+export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
+
+export interface GastoCompraResponse {
+  id: number;
+  cantidad: number | string;
+  descripcion: string;
+  uso?: string | null;
+  costoUnitario: number | string;
+  total: number | string;
+  solicitudPresupuestoId: number;
+}
+
+export interface CreateSolicitudCompraPayload {
+  poaIds: number[];
+  aprobadorId: number;
+  tipo: 'COMPRA_SERVICIO';
+  proyecto?: string;
+  motivoViaje: string;
+  chequeANombreDe?: string;
+  descripcion?: string;
+  gastosCompra: {
+    cantidad: number;
+    descripcion: string;
+    uso?: string;
+    costoUnitario: number;
+    poaId: number;
+  }[];
+  planificaciones: [];
+  viaticos: [];
+  gastos: [];
+  nominasTerceros: [];
+  hospedajes: [];
+}
+
 export interface CreateSolicitudPayload {
   poaIds: number[];
   aprobadorId: number;
@@ -74,9 +108,14 @@ export interface HistorialAprobacionSolicitudResponse {
 export interface SolicitudResponse {
   id: number;
   codigoSolicitud: string;
-  motivoViaje: string;
+  tipo?: TipoSolicitud;
+  proyecto?: string | null;
+  chequeANombreDe?: string | null;
+  banco?: string | null;
+  fechaDesembolso?: string | null;
+  motivoViaje?: string | null;
   fechaSolicitud: string;
-  descripcion: string;
+  descripcion?: string | null;
   urlCuadroComparativo?: string;
   urlCotizaciones?: string[];
   fechaCreacion: string; // ISO String
@@ -240,6 +279,7 @@ export interface SolicitudResponse {
   }>;
   codigoDesembolso?: string;
   urlComprobante?: string;
+  gastosCompra?: GastoCompraResponse[];
   historialAprobaciones?: HistorialAprobacionSolicitudResponse[];
   rendicion?: {
     id: number;

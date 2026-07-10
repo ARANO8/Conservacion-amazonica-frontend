@@ -31,25 +31,26 @@ export const notificacionesService = {
   /**
    * Obtiene todas las notificaciones del usuario autenticado
    */
-  async getMisNotificaciones(): Promise<Notificacion[]> {
-    const { data } = await api.get<Notificacion[]>('/notificaciones');
+  async getMisNotificaciones(signal?: AbortSignal): Promise<Notificacion[]> {
+    const { data } = await api.get<Notificacion[]>('/notificaciones', { signal });
     return data;
   },
 
   /**
    * Obtiene solo las notificaciones no leídas
    */
-  async getNotificacionesNoLeidas(): Promise<Notificacion[]> {
-    const { data } = await api.get<Notificacion[]>('/notificaciones/unread');
+  async getNotificacionesNoLeidas(signal?: AbortSignal): Promise<Notificacion[]> {
+    const { data } = await api.get<Notificacion[]>('/notificaciones/unread', { signal });
     return data;
   },
 
   /**
    * Obtiene el conteo de notificaciones no leídas
    */
-  async getCountNotificacionesNoLeidas(): Promise<number> {
+  async getCountNotificacionesNoLeidas(signal?: AbortSignal): Promise<number> {
     const { data } = await api.get<{ count: number }>(
-      '/notificaciones/unread/count'
+      '/notificaciones/unread/count',
+      { signal }
     );
     return data.count;
   },
@@ -57,9 +58,11 @@ export const notificacionesService = {
   /**
    * Marca una notificación como leída
    */
-  async marcarComoLeida(notificacionId: number): Promise<Notificacion> {
+  async marcarComoLeida(notificacionId: number, signal?: AbortSignal): Promise<Notificacion> {
     const { data } = await api.patch<Notificacion>(
-      `/notificaciones/${notificacionId}/read`
+      `/notificaciones/${notificacionId}/read`,
+      {},
+      { signal }
     );
     return data;
   },
@@ -67,14 +70,14 @@ export const notificacionesService = {
   /**
    * Marca todas las notificaciones como leídas
    */
-  async marcarTodasComoLeidas(): Promise<void> {
-    await api.patch('/notificaciones/read-all');
+  async marcarTodasComoLeidas(signal?: AbortSignal): Promise<void> {
+    await api.patch('/notificaciones/read-all', {}, { signal });
   },
 
   /**
    * Elimina una notificación
    */
-  async eliminarNotificacion(notificacionId: number): Promise<void> {
-    await api.delete(`/notificaciones/${notificacionId}`);
+  async eliminarNotificacion(notificacionId: number, signal?: AbortSignal): Promise<void> {
+    await api.delete(`/notificaciones/${notificacionId}`, { signal });
   },
 };

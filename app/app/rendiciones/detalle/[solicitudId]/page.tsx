@@ -4,20 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import {
-  ArrowLeft,
-  Calendar,
-  CheckCircle2,
-  ExternalLink,
-  NotebookPen,
-  ReceiptText,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, NotebookPen, ReceiptText } from 'lucide-react';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import {
   RendicionResponse,
   GastoRendicionResponse,
-  DeclaracionJuradaResponse,
 } from '@/types/rendicion-backend';
 import { formatDateShort, formatMoney } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -73,15 +65,6 @@ function normalizeGasto(gasto: GastoRendicionResponse) {
     montoBruto,
     impuestosRetenciones,
     montoNeto,
-    urlComprobante: gasto.urlComprobante,
-  };
-}
-
-function normalizeDeclaracion(declaracion: DeclaracionJuradaResponse) {
-  return {
-    fecha: declaracion.fecha,
-    detalle: declaracion.detalle,
-    monto: parseNumber(declaracion.monto),
   };
 }
 
@@ -119,11 +102,6 @@ export default function RendicionDetalleBySolicitudPage() {
       (rendicion?.gastos ?? rendicion?.gastosRendicion ?? []).map(
         normalizeGasto
       ),
-    [rendicion]
-  );
-
-  const gastosMenores = useMemo(
-    () => (rendicion?.declaracionesJuradas ?? []).map(normalizeDeclaracion),
     [rendicion]
   );
 
@@ -215,6 +193,33 @@ export default function RendicionDetalleBySolicitudPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {rendicion.comprobanteUrl && (
+            <div className="mb-4 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/20">
+              <div>
+                <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                  Comprobantes Adjuntos
+                </p>
+                <p className="max-w-[400px] truncate text-xs text-blue-600 dark:text-blue-400">
+                  {rendicion.comprobanteUrl}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                asChild
+              >
+                <a
+                  href={rendicion.comprobanteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ReceiptText className="mr-1.5 h-4 w-4" />
+                  Ver comprobantes
+                </a>
+              </Button>
+            </div>
+          )}
           {gastos.length === 0 ? (
             <p className="text-amzdesk-helper">
               No hay gastos registrados en esta rendición.
@@ -245,9 +250,6 @@ export default function RendicionDetalleBySolicitudPage() {
                     <TableHead className="text-amzdesk-table-header text-right">
                       Neto
                     </TableHead>
-                    <TableHead className="text-amzdesk-table-header">
-                      Respaldo
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -268,71 +270,11 @@ export default function RendicionDetalleBySolicitudPage() {
                       <TableCell className="text-amzdesk-monto text-right text-emerald-600">
                         {formatMoney(gasto.montoNeto)}
                       </TableCell>
-                      <TableCell>
-                        {gasto.urlComprobante ? (
-                          <Button variant="ghost" size="icon" asChild>
-                            <a
-                              href={gasto.urlComprobante}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        ) : (
-                          <span className="text-amzdesk-helper">
-                            Sin enlace
-                          </span>
-                        )}
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Gastos Menores</CardTitle>
-          <CardDescription className="text-amzdesk-helper">
-            Registros sin respaldo formal (si aplica).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {gastosMenores.length === 0 ? (
-            <p className="text-amzdesk-helper">
-              No se registraron gastos menores en esta rendición.
-            </p>
-          ) : (
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-amzdesk-table-header">
-                    Fecha
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header">
-                    Detalle
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header text-right">
-                    Monto
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {gastosMenores.map((item, idx) => (
-                  <TableRow key={`${item.detalle}-${idx}`}>
-                    <TableCell>{formatDateShort(item.fecha)}</TableCell>
-                    <TableCell>{item.detalle || '-'}</TableCell>
-                    <TableCell className="text-amzdesk-monto text-right">
-                      {formatMoney(item.monto)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           )}
         </CardContent>
       </Card>
@@ -392,23 +334,6 @@ export default function RendicionDetalleBySolicitudPage() {
               Esta rendición no incluye informe.
             </p>
           )}
-        </CardContent>
-      </Card>
-
-      <Card className="border-emerald-300 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/25">
-        <CardContent className="flex items-center gap-3 pt-6">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-          <div>
-            <p className="text-amzdesk-monto text-emerald-700 dark:text-emerald-300">
-              Declaración Jurada Firmada
-            </p>
-            <p className="text-amzdesk-helper text-emerald-700/80 dark:text-emerald-300/80">
-              La rendición fue registrada con conformidad del responsable.
-            </p>
-          </div>
-          <Badge className="ml-auto bg-emerald-600 text-white hover:bg-emerald-600">
-            Validada
-          </Badge>
         </CardContent>
       </Card>
 

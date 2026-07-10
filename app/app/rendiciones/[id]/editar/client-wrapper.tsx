@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
-import { catalogosService } from '@/services/catalogos.service';
+import { catalogosService } from '@/lib/services/catalogos-service';
 import { adaptRendicionResponseToFormData } from '@/lib/adapters/rendicion-adapter';
 import { RendicionWizard } from '@/components/rendiciones';
 import { useAuthStore } from '@/store/auth-store';

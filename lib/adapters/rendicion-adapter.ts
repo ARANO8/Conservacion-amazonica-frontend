@@ -5,6 +5,7 @@ export interface CreateRendicionApiPayload {
   solicitudId: number;
   aprobadorActualId: number;
   fechaRendicion: string;
+  comprobanteUrl: string;
   gastos: Array<{
     solicitudItemId?: number;
     concepto: string;
@@ -19,13 +20,7 @@ export interface CreateRendicionApiPayload {
     montoNeto: number;
     estado?: 'PENDIENTE' | 'COMPROBADO' | 'RECHAZADO';
     partidaId: number;
-    urlComprobante?: string;
     tipoRetencion?: 'BIEN' | 'SERVICIO' | 'ALQUILER';
-  }>;
-  gastosSinRespaldo?: Array<{
-    fechaGasto?: string;
-    detalle: string;
-    monto: number;
   }>;
   informeGastos?: {
     fechaInicio: string;
@@ -37,13 +32,6 @@ export interface CreateRendicionApiPayload {
       actividadesRealizadas: string;
     }>;
   };
-  declaracionJurada?: {
-    confirmaDatosVeridicos: boolean;
-    aceptaPoliticaDevolucion: boolean;
-    tipoDeclaracion?: 'COMPLETA' | 'PARCIAL' | 'NEGATIVA';
-    montoADevolver?: number;
-    observaciones?: string;
-  };
   observaciones?: string;
 }
 
@@ -54,10 +42,9 @@ export interface CreateRendicionApiPayload {
 export interface UpdateRendicionApiPayload {
   aprobadorActualId: number;
   fechaRendicion?: string;
+  comprobanteUrl?: string;
   gastos?: CreateRendicionApiPayload['gastos'];
-  gastosSinRespaldo?: CreateRendicionApiPayload['gastosSinRespaldo'];
   informeGastos?: CreateRendicionApiPayload['informeGastos'];
-  declaracionJurada?: CreateRendicionApiPayload['declaracionJurada'];
   observaciones?: string;
 }
 
@@ -81,6 +68,7 @@ export function adaptCreateRendicionPayload(
     solicitudId: data.solicitudId,
     aprobadorActualId: data.aprobadorActualId,
     fechaRendicion: new Date().toISOString(),
+    comprobanteUrl: data.comprobanteUrl,
     gastos: (data.gastos ?? []).map((gasto) => ({
       ...(gasto.solicitudItemId !== undefined && {
         solicitudItemId: gasto.solicitudItemId,
@@ -101,20 +89,9 @@ export function adaptCreateRendicionPayload(
       montoNeto: Number(gasto.montoNeto),
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
-      ...(gasto.urlComprobante ? { urlComprobante: gasto.urlComprobante } : {}),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
-
-  if (data.gastosSinRespaldo && data.gastosSinRespaldo.length > 0) {
-    payload.gastosSinRespaldo = data.gastosSinRespaldo.map((gasto) => ({
-      ...(toIsoDateString(gasto.fechaGasto)
-        ? { fechaGasto: toIsoDateString(gasto.fechaGasto) }
-        : {}),
-      detalle: gasto.detalle,
-      monto: Number(gasto.monto),
-    }));
-  }
 
   if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
     payload.informeGastos = {
@@ -130,22 +107,6 @@ export function adaptCreateRendicionPayload(
         personaInstitucion: actividad.personaInstitucion,
         actividadesRealizadas: actividad.actividadesRealizadas,
       })),
-    };
-  }
-
-  if (data.declaracionJurada) {
-    payload.declaracionJurada = {
-      confirmaDatosVeridicos: data.declaracionJurada.confirmaDatosVeridicos,
-      aceptaPoliticaDevolucion: data.declaracionJurada.aceptaPoliticaDevolucion,
-      ...(data.declaracionJurada.tipoDeclaracion
-        ? { tipoDeclaracion: data.declaracionJurada.tipoDeclaracion }
-        : {}),
-      ...(typeof data.declaracionJurada.montoADevolver === 'number'
-        ? { montoADevolver: Number(data.declaracionJurada.montoADevolver) }
-        : {}),
-      ...(data.declaracionJurada.observaciones
-        ? { observaciones: data.declaracionJurada.observaciones }
-        : {}),
     };
   }
 
@@ -168,6 +129,7 @@ export function adaptRendicionResponseToFormData(
     solicitudId: rendicion.solicitudId,
     aprobadorActualId: 0, // El usuario debe elegir nuevamente
     observaciones: rendicion.observaciones ?? '',
+    comprobanteUrl: rendicion.comprobanteUrl ?? '',
 
     // Gastos con respaldo
     gastos: (rendicion.gastosRendicion ?? []).map((gasto) => ({
@@ -192,15 +154,8 @@ export function adaptRendicionResponseToFormData(
         | 'COMPROBADO'
         | 'RECHAZADO',
       partidaId: gasto.partidaId ?? 0,
-      urlComprobante: gasto.urlComprobante ?? '',
-      tipoRetencion: undefined, // No se guarda en backend
-    })),
-
-    // Gastos sin respaldo (declaraciones juradas)
-    gastosSinRespaldo: (rendicion.declaracionesJuradas ?? []).map((dj) => ({
-      fechaGasto: dj.fecha ?? '',
-      detalle: dj.detalle ?? '',
-      monto: Number(dj.monto ?? 0),
+      tipoRetencion:
+        (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
     })),
 
     // Informe de gastos
@@ -222,15 +177,6 @@ export function adaptRendicionResponseToFormData(
           fechaFin: '',
           actividades: [],
         },
-
-    // Declaración jurada (resetear para que el usuario confirme de nuevo)
-    declaracionJurada: {
-      tipoDeclaracion: undefined,
-      confirmaDatosVeridicos: false,
-      aceptaPoliticaDevolucion: false,
-      montoADevolver: undefined,
-      observaciones: '',
-    },
   };
 
   return formData;
@@ -246,6 +192,7 @@ export function adaptUpdateRendicionPayload(
   const payload: UpdateRendicionApiPayload = {
     aprobadorActualId: data.aprobadorActualId,
     fechaRendicion: new Date().toISOString(),
+    comprobanteUrl: data.comprobanteUrl,
     gastos: (data.gastos ?? []).map((gasto) => ({
       ...(gasto.solicitudItemId !== undefined && {
         solicitudItemId: gasto.solicitudItemId,
@@ -266,20 +213,9 @@ export function adaptUpdateRendicionPayload(
       montoNeto: Number(gasto.montoNeto),
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
-      ...(gasto.urlComprobante ? { urlComprobante: gasto.urlComprobante } : {}),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
-
-  if (data.gastosSinRespaldo && data.gastosSinRespaldo.length > 0) {
-    payload.gastosSinRespaldo = data.gastosSinRespaldo.map((gasto) => ({
-      ...(toIsoDateString(gasto.fechaGasto)
-        ? { fechaGasto: toIsoDateString(gasto.fechaGasto) }
-        : {}),
-      detalle: gasto.detalle,
-      monto: Number(gasto.monto),
-    }));
-  }
 
   if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
     payload.informeGastos = {
@@ -295,22 +231,6 @@ export function adaptUpdateRendicionPayload(
         personaInstitucion: actividad.personaInstitucion,
         actividadesRealizadas: actividad.actividadesRealizadas,
       })),
-    };
-  }
-
-  if (data.declaracionJurada) {
-    payload.declaracionJurada = {
-      confirmaDatosVeridicos: data.declaracionJurada.confirmaDatosVeridicos,
-      aceptaPoliticaDevolucion: data.declaracionJurada.aceptaPoliticaDevolucion,
-      ...(data.declaracionJurada.tipoDeclaracion
-        ? { tipoDeclaracion: data.declaracionJurada.tipoDeclaracion }
-        : {}),
-      ...(typeof data.declaracionJurada.montoADevolver === 'number'
-        ? { montoADevolver: Number(data.declaracionJurada.montoADevolver) }
-        : {}),
-      ...(data.declaracionJurada.observaciones
-        ? { observaciones: data.declaracionJurada.observaciones }
-        : {}),
     };
   }
 

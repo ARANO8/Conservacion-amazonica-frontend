@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { LoginForm } from '@/components/auth/login-form';
 import { ApiStatus } from '@/components/auth/api-status';
@@ -18,6 +20,7 @@ export default function LoginPage() {
           height={60}
           priority
           className="mx-auto mb-6"
+          style={{ width: 'auto', height: 'auto' }}
         />
         <LoginForm />
       </div>

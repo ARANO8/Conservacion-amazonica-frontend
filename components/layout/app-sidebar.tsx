@@ -5,13 +5,14 @@ import Image from 'next/image';
 import {
   BarChart3,
   Bell,
-  ClipboardPlus,
+  BookOpen,
   Files,
   Home,
   LayoutGrid,
   LifeBuoy,
   Send,
   Shield,
+  ShoppingCart,
   Users,
 } from 'lucide-react';
 
@@ -73,32 +74,55 @@ const FEEDBACK_BODY = [
 const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(SUPPORT_SUBJECT)}&body=${encodeURIComponent(SUPPORT_BODY)}`;
 const FEEDBACK_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(FEEDBACK_SUBJECT)}&body=${encodeURIComponent(FEEDBACK_BODY)}`;
 
+const ROLES_OPERATIVOS: Role[] = [
+  'USUARIO',
+  'TESORERO',
+  'CONTADOR',
+  'EJECUTIVO',
+  'ADMIN',
+  'VALIDADOR_COMPRAS',
+];
+
+function esRolOperativo(rol?: Role): boolean {
+  return !!rol && ROLES_OPERATIVOS.includes(rol);
+}
+
 /**
- * Construye los sub-ítems del menú "Formularios" según el rol del usuario.
+ * Flujo "Viajes y Viáticos": listas y formularios de solicitudes y
+ * rendiciones (todo lo trabajado hasta ahora pertenece a este flujo).
  */
-function buildFormularioItems(rol?: Role) {
+function buildViajesItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
-  // Solicitud: USUARIO, TESORERO, EJECUTIVO y ADMIN pueden crear solicitudes
-  if (
-    rol === 'USUARIO' ||
-    rol === 'TESORERO' ||
-    rol === 'CONTADOR' ||
-    rol === 'EJECUTIVO' ||
-    rol === 'ADMIN'
-  ) {
-    items.push({ title: 'Solicitud', url: '/app/solicitudes/nueva' });
+  if (esRolOperativo(rol)) {
+    items.push({ title: 'Mis Solicitudes', url: '/app/solicitudes' });
+    items.push({ title: 'Mis Rendiciones', url: '/app/rendiciones' });
   }
 
-  // Rendición: disponible para perfiles operativos
-  if (
-    rol === 'USUARIO' ||
-    rol === 'TESORERO' ||
-    rol === 'CONTADOR' ||
-    rol === 'EJECUTIVO' ||
-    rol === 'ADMIN'
-  ) {
-    items.push({ title: 'Rendición', url: '/app/rendiciones/nueva' });
+  return items;
+}
+
+/**
+ * Flujo "Compras y Servicios": inicia con el formulario de cotización.
+ * Disponible para cualquier usuario autenticado.
+ */
+function buildComprasItems(rol?: Role) {
+  const items: { title: string; url: string }[] = [];
+
+  if (esRolOperativo(rol)) {
+    items.push({
+      title: 'Solicitudes de Fondos',
+      url: '/app/solicitudes-compra',
+    });
+    items.push({ title: 'Mis Cotizaciones', url: '/app/cotizaciones' });
+    items.push({
+      title: 'Cuadros Comparativos',
+      url: '/app/cuadros-comparativos',
+    });
+    items.push({
+      title: 'Órdenes de Compra',
+      url: '/app/ordenes-compra',
+    });
   }
 
   return items;
@@ -121,7 +145,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     userRole === 'CONTADOR' ||
     userRole === 'TESORERO';
   const canManageUsers = userRole === 'ADMIN';
-  const formularioItems = buildFormularioItems(userRole);
+  const viajesItems = buildViajesItems(userRole);
+  const comprasItems = buildComprasItems(userRole);
 
   const navSecondary = [
     {
@@ -142,15 +167,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: '/app/inicio',
       icon: Home,
     },
-    {
-      title: 'Mis Tramites',
-      url: '#',
-      icon: Files,
-      items: [
-        { title: 'Solicitudes', url: '/app/solicitudes' },
-        { title: 'Rendiciones', url: '/app/rendiciones' },
-      ],
-    },
+    ...(viajesItems.length > 0
+      ? [
+          {
+            title: 'Viajes y Viáticos',
+            url: '#',
+            icon: Files,
+            items: viajesItems,
+          },
+        ]
+      : []),
+    ...(comprasItems.length > 0
+      ? [
+          {
+            title: 'Compras y Servicios',
+            url: '#',
+            icon: ShoppingCart,
+            items: comprasItems,
+          },
+        ]
+      : []),
     {
       title: 'Notificaciones',
       url: '/app/aprobaciones',
@@ -174,6 +210,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
         ]
       : []),
+    {
+      title: 'Base Documental',
+      url: '/app/documentos',
+      icon: BookOpen,
+    },
     ...(canViewMonitor
       ? [
           {
@@ -189,16 +230,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Analítica',
             url: '/app/analitica',
             icon: BarChart3,
-          },
-        ]
-      : []),
-    ...(formularioItems.length > 0
-      ? [
-          {
-            title: 'Formularios',
-            url: '#',
-            icon: ClipboardPlus,
-            items: formularioItems,
           },
         ]
       : []),

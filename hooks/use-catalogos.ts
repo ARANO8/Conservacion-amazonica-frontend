@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { catalogosService } from '@/services/catalogos.service';
+import axios from 'axios';
+import { catalogosService } from '@/lib/services/catalogos-service';
 import {
   Concepto,
   Grupo,
@@ -32,6 +33,7 @@ export function useCatalogos(): UseCatalogosReturn {
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchCatalogos = async () => {
       try {
         setIsLoading(true);
@@ -43,12 +45,12 @@ export function useCatalogos(): UseCatalogosReturn {
           usuariosData,
           poaCodesData,
         ] = await Promise.all([
-          catalogosService.getConceptos(),
-          catalogosService.getGrupos(),
-          catalogosService.getPartidas(),
-          catalogosService.getTiposGasto(),
-          catalogosService.getUsuarios(),
-          catalogosService.getPoaLookup(),
+          catalogosService.getConceptos(controller.signal),
+          catalogosService.getGrupos(controller.signal),
+          catalogosService.getPartidas(controller.signal),
+          catalogosService.getTiposGasto(controller.signal),
+          catalogosService.getUsuarios(controller.signal),
+          catalogosService.getPoaLookup(controller.signal),
         ]);
 
         setConceptos(conceptosData);
@@ -58,15 +60,24 @@ export function useCatalogos(): UseCatalogosReturn {
         setUsuarios(usuariosData);
         setPoaCodes(poaCodesData);
       } catch (err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
         console.error('🔥 Error cargando catálogos en Detalle:', err);
         toast.error('Error al cargar los catálogos');
         setError(err);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchCatalogos();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return {

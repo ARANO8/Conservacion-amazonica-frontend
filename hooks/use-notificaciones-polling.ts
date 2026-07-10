@@ -19,17 +19,22 @@ import { useAuthStore } from '@/store/auth-store';
  * ```
  */
 export function useNotificacionesPolling(interval: number = 60000) {
-  const { startPolling, stopPolling } = useNotificacionesStore();
+  const { startPolling, stopPolling, clear, fetchNotificaciones } = useNotificacionesStore();
   const { user } = useAuthStore();
 
   useEffect(() => {
     if (user?.id) {
-      // El servicio REST obtiene el usuario del JWT, no necesita pasar usuarioId
+      // Limpiar notificaciones anteriores y cargar las nuevas inmediatamente
+      clear();
+      void fetchNotificaciones();
       startPolling(interval);
+    } else {
+      clear();
+      stopPolling();
     }
 
     return () => {
       stopPolling();
     };
-  }, [user?.id, startPolling, stopPolling, interval]);
+  }, [user?.id, startPolling, stopPolling, clear, fetchNotificaciones, interval]);
 }
