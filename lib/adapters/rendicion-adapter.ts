@@ -9,7 +9,7 @@ export interface CreateRendicionApiPayload {
       solicitudItemId?: number;
       concepto: string;
       detalle?: string;
-      tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA' | 'LV' | 'DJ' | 'PPT' | 'PAT' | 'PVT';
+      tipoDocumento: 'FACTURA' | 'RECIBO' | 'BOLETA';
     numeroDocumento?: string;
     proveedor?: string;
     fechaDocumento?: string;
@@ -19,13 +19,7 @@ export interface CreateRendicionApiPayload {
     montoNeto: number;
     estado?: 'PENDIENTE' | 'COMPROBADO' | 'RECHAZADO';
     partidaId: number;
-    urlComprobante?: string;
     tipoRetencion?: 'BIEN' | 'SERVICIO' | 'ALQUILER';
-  }>;
-  gastosSinRespaldo?: Array<{
-    fechaGasto?: string;
-    detalle: string;
-    monto: number;
   }>;
   informeGastos?: {
     fechaInicio: string;
@@ -36,13 +30,6 @@ export interface CreateRendicionApiPayload {
       personaInstitucion: string;
       actividadesRealizadas: string;
     }>;
-  };
-  declaracionJurada?: {
-    confirmaDatosVeridicos: boolean;
-    aceptaPoliticaDevolucion: boolean;
-    tipoDeclaracion?: 'COMPLETA' | 'PARCIAL' | 'NEGATIVA';
-    montoADevolver?: number;
-    observaciones?: string;
   };
   observaciones?: string;
 }
@@ -55,9 +42,7 @@ export interface UpdateRendicionApiPayload {
   aprobadorActualId: number;
   fechaRendicion?: string;
   gastos?: CreateRendicionApiPayload['gastos'];
-  gastosSinRespaldo?: CreateRendicionApiPayload['gastosSinRespaldo'];
   informeGastos?: CreateRendicionApiPayload['informeGastos'];
-  declaracionJurada?: CreateRendicionApiPayload['declaracionJurada'];
   observaciones?: string;
 }
 
@@ -101,20 +86,9 @@ export function adaptCreateRendicionPayload(
       montoNeto: Number(gasto.montoNeto),
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
-      ...(gasto.urlComprobante ? { urlComprobante: gasto.urlComprobante } : {}),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
-
-  if (data.gastosSinRespaldo && data.gastosSinRespaldo.length > 0) {
-    payload.gastosSinRespaldo = data.gastosSinRespaldo.map((gasto) => ({
-      ...(toIsoDateString(gasto.fechaGasto)
-        ? { fechaGasto: toIsoDateString(gasto.fechaGasto) }
-        : {}),
-      detalle: gasto.detalle,
-      monto: Number(gasto.monto),
-    }));
-  }
 
   if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
     payload.informeGastos = {
@@ -130,22 +104,6 @@ export function adaptCreateRendicionPayload(
         personaInstitucion: actividad.personaInstitucion,
         actividadesRealizadas: actividad.actividadesRealizadas,
       })),
-    };
-  }
-
-  if (data.declaracionJurada) {
-    payload.declaracionJurada = {
-      confirmaDatosVeridicos: data.declaracionJurada.confirmaDatosVeridicos,
-      aceptaPoliticaDevolucion: data.declaracionJurada.aceptaPoliticaDevolucion,
-      ...(data.declaracionJurada.tipoDeclaracion
-        ? { tipoDeclaracion: data.declaracionJurada.tipoDeclaracion }
-        : {}),
-      ...(typeof data.declaracionJurada.montoADevolver === 'number'
-        ? { montoADevolver: Number(data.declaracionJurada.montoADevolver) }
-        : {}),
-      ...(data.declaracionJurada.observaciones
-        ? { observaciones: data.declaracionJurada.observaciones }
-        : {}),
     };
   }
 
@@ -177,12 +135,7 @@ export function adaptRendicionResponseToFormData(
       tipoDocumento: (gasto.tipoDocumento ?? 'FACTURA') as
         | 'FACTURA'
         | 'RECIBO'
-        | 'BOLETA'
-        | 'LV'
-        | 'DJ'
-        | 'PPT'
-        | 'PAT'
-        | 'PVT',
+        | 'BOLETA',
       numeroDocumento: gasto.nroDocumento ?? gasto.numeroDocumento ?? '',
       proveedor: gasto.proveedor ?? '',
       fechaDocumento: gasto.fecha ?? gasto.fechaDocumento ?? '',
@@ -197,15 +150,7 @@ export function adaptRendicionResponseToFormData(
         | 'COMPROBADO'
         | 'RECHAZADO',
       partidaId: gasto.partidaId ?? 0,
-      urlComprobante: gasto.urlComprobante ?? '',
       tipoRetencion: (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
-    })),
-
-    // Gastos sin respaldo (declaraciones juradas)
-    gastosSinRespaldo: (rendicion.declaracionesJuradas ?? []).map((dj) => ({
-      fechaGasto: dj.fecha ?? '',
-      detalle: dj.detalle ?? '',
-      monto: Number(dj.monto ?? 0),
     })),
 
     // Informe de gastos
@@ -227,15 +172,6 @@ export function adaptRendicionResponseToFormData(
           fechaFin: '',
           actividades: [],
         },
-
-    // Declaración jurada (resetear para que el usuario confirme de nuevo)
-    declaracionJurada: {
-      tipoDeclaracion: undefined,
-      confirmaDatosVeridicos: false,
-      aceptaPoliticaDevolucion: false,
-      montoADevolver: undefined,
-      observaciones: '',
-    },
   };
 
   return formData;
@@ -271,20 +207,9 @@ export function adaptUpdateRendicionPayload(
       montoNeto: Number(gasto.montoNeto),
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
-      ...(gasto.urlComprobante ? { urlComprobante: gasto.urlComprobante } : {}),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
-
-  if (data.gastosSinRespaldo && data.gastosSinRespaldo.length > 0) {
-    payload.gastosSinRespaldo = data.gastosSinRespaldo.map((gasto) => ({
-      ...(toIsoDateString(gasto.fechaGasto)
-        ? { fechaGasto: toIsoDateString(gasto.fechaGasto) }
-        : {}),
-      detalle: gasto.detalle,
-      monto: Number(gasto.monto),
-    }));
-  }
 
   if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
     payload.informeGastos = {
@@ -300,22 +225,6 @@ export function adaptUpdateRendicionPayload(
         personaInstitucion: actividad.personaInstitucion,
         actividadesRealizadas: actividad.actividadesRealizadas,
       })),
-    };
-  }
-
-  if (data.declaracionJurada) {
-    payload.declaracionJurada = {
-      confirmaDatosVeridicos: data.declaracionJurada.confirmaDatosVeridicos,
-      aceptaPoliticaDevolucion: data.declaracionJurada.aceptaPoliticaDevolucion,
-      ...(data.declaracionJurada.tipoDeclaracion
-        ? { tipoDeclaracion: data.declaracionJurada.tipoDeclaracion }
-        : {}),
-      ...(typeof data.declaracionJurada.montoADevolver === 'number'
-        ? { montoADevolver: Number(data.declaracionJurada.montoADevolver) }
-        : {}),
-      ...(data.declaracionJurada.observaciones
-        ? { observaciones: data.declaracionJurada.observaciones }
-        : {}),
     };
   }
 

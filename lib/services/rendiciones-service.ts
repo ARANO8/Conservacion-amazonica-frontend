@@ -130,14 +130,27 @@ export const rendicionesService = {
     return response.data;
   },
 
+  async updateGastoPartidaPresupuestaria(
+    gastoId: number,
+    partidaId: number | null,
+    signal?: AbortSignal
+  ) {
+    const response = await api.patch(
+      `/rendiciones/gastos/${gastoId}/partida-presupuestaria`,
+      { partidaId },
+      { signal }
+    );
+    return response.data;
+  },
+
   async updateGastoPartidaContable(
     gastoId: number,
-    partidaContableId: number | null,
+    codigo: string | null,
     signal?: AbortSignal
   ) {
     const response = await api.patch(
       `/rendiciones/gastos/${gastoId}/partida-contable`,
-      { partidaContableId },
+      { codigo },
       { signal }
     );
     return response.data;

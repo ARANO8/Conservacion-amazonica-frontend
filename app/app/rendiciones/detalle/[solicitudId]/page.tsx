@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import {
   ArrowLeft,
   Calendar,
-  CheckCircle2,
   ExternalLink,
   NotebookPen,
   ReceiptText,
@@ -17,7 +16,6 @@ import { rendicionesService } from '@/lib/services/rendiciones-service';
 import {
   RendicionResponse,
   GastoRendicionResponse,
-  DeclaracionJuradaResponse,
 } from '@/types/rendicion-backend';
 import { formatDateShort, formatMoney } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -77,14 +75,6 @@ function normalizeGasto(gasto: GastoRendicionResponse) {
   };
 }
 
-function normalizeDeclaracion(declaracion: DeclaracionJuradaResponse) {
-  return {
-    fecha: declaracion.fecha,
-    detalle: declaracion.detalle,
-    monto: parseNumber(declaracion.monto),
-  };
-}
-
 export default function RendicionDetalleBySolicitudPage() {
   const params = useParams();
   const router = useRouter();
@@ -119,11 +109,6 @@ export default function RendicionDetalleBySolicitudPage() {
       (rendicion?.gastos ?? rendicion?.gastosRendicion ?? []).map(
         normalizeGasto
       ),
-    [rendicion]
-  );
-
-  const gastosMenores = useMemo(
-    () => (rendicion?.declaracionesJuradas ?? []).map(normalizeDeclaracion),
     [rendicion]
   );
 
@@ -296,49 +281,6 @@ export default function RendicionDetalleBySolicitudPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Gastos Menores</CardTitle>
-          <CardDescription className="text-amzdesk-helper">
-            Registros sin respaldo formal (si aplica).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {gastosMenores.length === 0 ? (
-            <p className="text-amzdesk-helper">
-              No se registraron gastos menores en esta rendición.
-            </p>
-          ) : (
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-amzdesk-table-header">
-                    Fecha
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header">
-                    Detalle
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header text-right">
-                    Monto
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {gastosMenores.map((item, idx) => (
-                  <TableRow key={`${item.detalle}-${idx}`}>
-                    <TableCell>{formatDateShort(item.fecha)}</TableCell>
-                    <TableCell>{item.detalle || '-'}</TableCell>
-                    <TableCell className="text-amzdesk-monto text-right">
-                      {formatMoney(item.monto)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <NotebookPen className="h-5 w-5" />
             Informe (Anexo 7)
@@ -392,23 +334,6 @@ export default function RendicionDetalleBySolicitudPage() {
               Esta rendición no incluye informe.
             </p>
           )}
-        </CardContent>
-      </Card>
-
-      <Card className="border-emerald-300 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/25">
-        <CardContent className="flex items-center gap-3 pt-6">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-          <div>
-            <p className="text-amzdesk-monto text-emerald-700 dark:text-emerald-300">
-              Declaración Jurada Firmada
-            </p>
-            <p className="text-amzdesk-helper text-emerald-700/80 dark:text-emerald-300/80">
-              La rendición fue registrada con conformidad del responsable.
-            </p>
-          </div>
-          <Badge className="ml-auto bg-emerald-600 text-white hover:bg-emerald-600">
-            Validada
-          </Badge>
         </CardContent>
       </Card>
 

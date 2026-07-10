@@ -58,11 +58,6 @@ export enum TipoDocumentoGasto {
   FACTURA = 'FACTURA',
   RECIBO = 'RECIBO',
   BOLETA = 'BOLETA',
-  LV = 'LV',
-  DJ = 'DJ',
-  PPT = 'PPT',
-  PAT = 'PAT',
-  PVT = 'PVT',
 }
 
 // ---------------------------------------------------------------------------
@@ -103,28 +98,17 @@ export interface GastoRendicionResponse {
           id: number;
           nombre: string;
         };
+        proyecto?: {
+          id: number;
+          nombre: string;
+        };
+        grupo?: {
+          id: number;
+          nombre: string;
+        };
       };
     };
   };
-}
-
-// ---------------------------------------------------------------------------
-// Declaración Jurada (Sworn Statement)
-// ---------------------------------------------------------------------------
-
-export interface DeclaracionJuradaResponse {
-  id: number;
-  rendicionId: number;
-  tipoDeclaracion?: 'COMPLETA' | 'PARCIAL' | 'NEGATIVA';
-  confirmaDatosVeridicos?: boolean;
-  aceptaPoliticaDevolucion?: boolean;
-  montoADevolver?: string; // Decimal as string
-  observaciones?: string;
-  fecha?: string;
-  detalle?: string;
-  monto?: string;
-  createdAt?: string; // ISO timestamp
-  updatedAt?: string; // ISO timestamp
 }
 
 export interface ActividadInformeResponse {
@@ -166,13 +150,11 @@ export interface RendicionResponse {
   solicitud: SolicitudResponse;
   aprobadorActual?: HistorialUsuario | null;
   gastosRendicion: GastoRendicionResponse[];
-  declaracionesJuradas: DeclaracionJuradaResponse[];
   informeGastos?: InformeGastosResponse | null;
   historialAprobaciones?: HistorialAprobacionResponse[];
 
   // Legacy aliases for convenience (not from backend, added by frontend)
   gastos?: GastoRendicionResponse[];
-  gastosSinRespaldo?: never;
 }
 
 // ---------------------------------------------------------------------------

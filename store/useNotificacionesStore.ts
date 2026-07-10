@@ -29,7 +29,8 @@ export const useNotificacionesStore = create<NotificacionesState>(
         try {
           const notificaciones =
             await notificacionesService.getMisNotificaciones();
-          set({ notificaciones, isLoading: false });
+          const noLeidas = notificaciones.filter((n) => !n.leida).length;
+          set({ notificaciones, noLeidas, isLoading: false });
         } catch (error) {
           const errorMsg =
             error instanceof Error ? error.message : 'Error desconocido';
@@ -102,11 +103,11 @@ export const useNotificacionesStore = create<NotificacionesState>(
         }
 
         // Fetch inicial
-        get().fetchCountNoLeidas();
+        get().fetchNotificaciones();
 
         // Configurar polling
         pollingInterval = setInterval(() => {
-          get().fetchCountNoLeidas();
+          get().fetchNotificaciones();
         }, interval);
       },
 

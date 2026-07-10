@@ -368,29 +368,6 @@ export function GastoCard({ index, solicitud, onRemove, form }: GastoCardProps) 
           )}
         />
 
-        {/* --- Comprobante / Orden de Compra (opcional) --- */}
-        <FormField
-          control={control}
-          name={`gastos.${index}.urlComprobante`}
-          render={({ field }) => (
-            <FormItem className="md:col-span-3">
-              <FormLabel className="text-sm font-bold tracking-wider uppercase">
-                Comprobante / Orden de Compra (URL)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="Enlace al comprobante u orden de compra (opcional)"
-                  className="h-9 text-sm"
-                  {...field}
-                  value={field.value ?? ''}
-                />
-              </FormControl>
-              <FormMessage className="text-sm" />
-            </FormItem>
-          )}
-        />
-
         {/* --- Concepto / Detalle --- */}
         <FormField
           control={control}

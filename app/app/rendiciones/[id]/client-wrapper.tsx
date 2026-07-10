@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,11 +26,12 @@ import type {
 } from '@/types/rendicion-backend';
 import { formatMoney, formatDate } from '@/lib/utils';
 import { RendicionGastosSection } from '@/components/rendiciones/rendicion-gastos-section';
-import { RendicionDeclaracionSection } from '@/components/rendiciones/rendicion-declaracion-section';
 import { RendicionSolicitudSection } from '@/components/rendiciones/rendicion-solicitud-section';
+import { RendicionPartidasPresupuestarias } from '@/components/rendiciones/rendicion-partidas-presupuestarias';
+import type { SolicitudResponse } from '@/types/solicitud-backend';
 import { useAuthStore } from '@/store/auth-store';
 import { catalogosService } from '@/lib/services/catalogos-service';
-import { Usuario, PartidaContable } from '@/types/catalogs';
+import { Usuario, type PartidaContable } from '@/types/catalogs';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import {
   Table,
@@ -67,6 +68,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface RendicionDetailClientProps {
   rendicion: RendicionResponse;
+  onPartidaContableUpdated?: (
+    gastoId: number,
+    partidaContable: PartidaContable | null,
+  ) => void;
 }
 
 const ESTADO_COLORS: Record<EstadoRendicion, string> = {
@@ -90,6 +95,7 @@ function toNumber(value: string | number | null | undefined): number {
 
 export function RendicionDetailClient({
   rendicion,
+  onPartidaContableUpdated,
 }: RendicionDetailClientProps) {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -102,29 +108,57 @@ export function RendicionDetailClient({
   const [derivadoAId, setDerivadoAId] = useState<string>('');
   const [comentarioAprobar, setComentarioAprobar] = useState('');
   const [comentarioObservar, setComentarioObservar] = useState('');
-  const [partidasContables, setPartidasContables] = useState<PartidaContable[]>([]);
+  const [gastoValidaciones, setGastoValidaciones] = useState<
+    Record<number, { estado: 'vacio' | 'correcto' | 'observado'; observacion: string }>
+  >({});
 
-  useEffect(() => {
-    const fetchPartidasContables = async () => {
-      try {
-        const data = await catalogosService.getPartidasContables();
-        setPartidasContables(data);
-      } catch {
-        toast.error('No se pudo cargar el catálogo de partidas contables.');
-      }
-    };
-    void fetchPartidasContables();
-  }, []);
-
-  const handleUpdatePartidaContable = async (gastoId: number, pcId: number | null) => {
+  const handleUpdatePartidaContable = async (gastoId: number, codigo: string | null) => {
     try {
-      await rendicionesService.updateGastoPartidaContable(gastoId, pcId);
-      toast.success('Partida contable vinculada.');
-      window.dispatchEvent(new CustomEvent('rendicion-updated'));
-    } catch {
-      toast.error('No se pudo vincular la partida contable.');
+      const updated = await rendicionesService.updateGastoPartidaContable(gastoId, codigo);
+      if (codigo && updated?.partidaContable) {
+        toast.success(`Partida contable "${updated.partidaContable.codigo}" vinculada.`);
+        onPartidaContableUpdated?.(gastoId, updated.partidaContable);
+      } else {
+        toast.success('Partida contable desvinculada.');
+        onPartidaContableUpdated?.(gastoId, null);
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof axios.AxiosError && error.response?.data?.message
+          ? error.response.data.message
+          : 'No se pudo vincular la partida contable.';
+      toast.error(message);
     }
   };
+
+  const handleUpdatePartidaPresupuestaria = async (gastoId: number, partidaId: number | null) => {
+    try {
+      const updated = await rendicionesService.updateGastoPartidaPresupuestaria(gastoId, partidaId);
+      if (partidaId && updated?.partida) {
+        toast.success('Partida presupuestaria vinculada.');
+      } else {
+        toast.success('Partida presupuestaria desvinculada.');
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof axios.AxiosError && error.response?.data?.message
+          ? error.response.data.message
+          : 'No se pudo vincular la partida presupuestaria.';
+      toast.error(message);
+    }
+  };
+
+  const handleGastoValidacionChange = (
+    gastoId: number,
+    estado: 'vacio' | 'correcto' | 'observado',
+    observacion: string,
+  ) => {
+    setGastoValidaciones((prev) => ({ ...prev, [gastoId]: { estado, observacion } }));
+  };
+
+  const hasIncorrectos = Object.values(gastoValidaciones).some(
+    (v) => v.estado === 'observado',
+  );
 
   const currentUserId = user?.id ? Number(user.id) : null;
   const currentUserRol = user?.rol;
@@ -168,6 +202,12 @@ export function RendicionDetailClient({
   );
 
   const canEditPartidaContable = puedeAccionar && !isContador;
+  const canEditPartidaPresupuestaria = puedeAccionar && !isContador;
+
+  const partidasPresupuestarias = useMemo(
+    () => rendicion.solicitud?.presupuestos ?? [],
+    [rendicion.solicitud],
+  );
 
   const resumenContable = useMemo(() => {
     const map = new Map<
@@ -198,7 +238,52 @@ export function RendicionDetailClient({
         });
       }
     }
-    return Array.from(map.values()).sort((a, b) => a.codigo.localeCompare(b.codigo));
+    return Array.from(map.values());
+  }, [gastosRegistrados]);
+
+  const resumenPresupuestario = useMemo(() => {
+    type Entry = {
+      id: number;
+      codigo: string;
+      nombre: string;
+      proyecto: string;
+      grupo: string;
+      neto: number;
+      impuestos: number;
+      bruto: number;
+    };
+    const map = new Map<number, Entry>();
+    const seenOrder: number[] = [];
+
+    for (const g of gastosRegistrados) {
+      const partida = g.partida;
+      if (!partida) continue;
+      const id = partida.id;
+
+      const exist = map.get(id);
+      const netoVal = toNumber(g.montoNeto);
+      const impVal = toNumber(g.montoImpuestos);
+      const brutoVal = toNumber(g.montoTotal ?? g.montoBruto ?? g.monto);
+
+      if (exist) {
+        exist.neto += netoVal;
+        exist.impuestos += impVal;
+        exist.bruto += brutoVal;
+      } else {
+        map.set(id, {
+          id,
+          codigo: partida.poa?.codigoPoa ?? '—',
+          nombre: partida.poa?.estructura?.partida?.nombre ?? '',
+          proyecto: partida.poa?.estructura?.proyecto?.nombre ?? '',
+          grupo: partida.poa?.estructura?.grupo?.nombre ?? '',
+          neto: netoVal,
+          impuestos: impVal,
+          bruto: brutoVal,
+        });
+        seenOrder.push(id);
+      }
+    }
+    return seenOrder.map((id) => map.get(id)!).filter(Boolean);
   }, [gastosRegistrados]);
 
   const openApproveDialog = async () => {
@@ -377,13 +462,25 @@ export function RendicionDetailClient({
       {/* Solicitud Section */}
       <RendicionSolicitudSection solicitud={rendicion.solicitud} />
 
+      {/* Partidas Presupuestarias */}
+      {gastosRegistrados.length > 0 && (
+        <RendicionPartidasPresupuestarias
+          solicitud={rendicion.solicitud}
+          gastosRendicion={gastosRegistrados}
+        />
+      )}
+
       {/* Gastos Section */}
       {gastosRegistrados.length > 0 && (
         <RendicionGastosSection
           gastos={gastosRegistrados}
           canEditPartidaContable={canEditPartidaContable}
-          partidasContables={partidasContables}
           onUpdatePartidaContable={handleUpdatePartidaContable}
+          partidasPresupuestarias={partidasPresupuestarias}
+          canEditPartidaPresupuestaria={canEditPartidaPresupuestaria}
+          onUpdatePartidaPresupuestaria={handleUpdatePartidaPresupuestaria}
+          gastoValidaciones={gastoValidaciones}
+          onGastoValidacionChange={handleGastoValidacionChange}
         />
       )}
 
@@ -413,6 +510,54 @@ export function RendicionDetailClient({
                     <TableRow key={r.codigo}>
                       <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
                       <TableCell className="font-semibold text-xs">{r.nombre}</TableCell>
+                      <TableCell className="text-right text-xs font-semibold text-emerald-600">
+                        {formatMoney(r.neto)} Bs.
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-semibold text-orange-600">
+                        {formatMoney(r.impuestos)} Bs.
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-bold text-foreground bg-muted/20">
+                        {formatMoney(r.bruto)} Bs.
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resumen Partidas Presupuestarias */}
+      {resumenPresupuestario.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Resumen de Partidas Presupuestarias</CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Agrupación acumulada de los gastos según la partida presupuestaria del POA.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-amzdesk-table-header">Código POA</TableHead>
+                    <TableHead className="text-amzdesk-table-header">Partida Presupuestaria</TableHead>
+                    <TableHead className="text-amzdesk-table-header">Proyecto / Grupo</TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">Monto Neto</TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right">Retenciones/Impuestos</TableHead>
+                    <TableHead className="text-amzdesk-table-header text-right font-bold">Total (Bruto)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {resumenPresupuestario.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
+                      <TableCell className="font-semibold text-xs">{r.nombre}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {[r.proyecto, r.grupo].filter(Boolean).join(' / ') || '—'}
+                      </TableCell>
                       <TableCell className="text-right text-xs font-semibold text-emerald-600">
                         {formatMoney(r.neto)} Bs.
                       </TableCell>
@@ -476,14 +621,6 @@ export function RendicionDetailClient({
         </CardContent>
       </Card>
 
-      {/* Declaración Jurada Section */}
-      {rendicion.declaracionesJuradas &&
-        rendicion.declaracionesJuradas.length > 0 && (
-          <RendicionDeclaracionSection
-            declaraciones={rendicion.declaracionesJuradas}
-          />
-        )}
-
       {/* Observaciones */}
       {rendicion.observaciones && (
         <Card>
@@ -512,7 +649,7 @@ export function RendicionDetailClient({
                     : 'bg-emerald-600 hover:bg-emerald-700'
                 }`}
                 onClick={() => void openApproveDialog()}
-                disabled={loadingAction}
+                disabled={loadingAction || hasIncorrectos}
               >
                 <CheckCircle className="mr-2 h-5 w-5" />
                 {isContador
@@ -523,7 +660,17 @@ export function RendicionDetailClient({
                 size="lg"
                 variant="outline"
                 className="flex-1 border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950"
-                onClick={() => setObserveOpen(true)}
+                onClick={() => {
+                  const texto = gastosRegistrados
+                    .filter((g) => gastoValidaciones[g.id]?.estado === 'observado')
+                    .map(
+                      (g) =>
+                        `• ${g.concepto || 'Gasto #' + g.id}: ${gastoValidaciones[g.id]?.observacion || '(sin detalle)'}`,
+                    )
+                    .join('\n');
+                  setComentarioObservar(texto);
+                  setObserveOpen(true);
+                }}
                 disabled={loadingAction}
               >
                 <AlertCircle className="mr-2 h-5 w-5" />

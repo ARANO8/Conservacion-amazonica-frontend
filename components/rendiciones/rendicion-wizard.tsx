@@ -18,7 +18,6 @@ import { toast } from 'sonner';
 import {
   CreateRendicionSchema,
   CreateRendicionInput,
-  DeclaracionJurada,
   defaultRendicionValues,
   WizardStepRendicion,
 } from '@/types/rendicion-schema';
@@ -91,17 +90,6 @@ export default function RendicionWizard({
     defaultValues: mergedDefaultValues,
   });
 
-  const [confirmaDatosVeridicos, aceptaPoliticaDevolucion] = useWatch({
-    control: form.control,
-    name: [
-      'declaracionJurada.confirmaDatosVeridicos',
-      'declaracionJurada.aceptaPoliticaDevolucion',
-    ],
-  }) as [boolean | undefined, boolean | undefined];
-
-  const canConfirmSubmit =
-    confirmaDatosVeridicos === true && aceptaPoliticaDevolucion === true;
-
   // Solicitud actualmente seleccionada (para pasar a Paso2Gastos)
   const watchedSolicitudId = useWatch({
     control: form.control,
@@ -146,7 +134,7 @@ export default function RendicionWizard({
     }
 
     if (step === 'GASTOS_RESPALDO') {
-      const isValid = await form.trigger(['gastos', 'gastosSinRespaldo']);
+      const isValid = await form.trigger(['gastos']);
       if (!isValid) {
         toast.error('Revisa los gastos antes de continuar');
         return;
@@ -236,19 +224,7 @@ export default function RendicionWizard({
     const firstErrorField = Object.keys(errors)[0];
     let errorMessage = 'Completa todos los campos requeridos';
 
-    if (firstErrorField === 'declaracionJurada') {
-      const declaracionErrors = errors.declaracionJurada as FieldError & {
-        confirmaDatosVeridicos?: FieldError;
-        aceptaPoliticaDevolucion?: FieldError;
-      };
-      if (declaracionErrors?.confirmaDatosVeridicos?.message) {
-        errorMessage = declaracionErrors.confirmaDatosVeridicos.message;
-      } else if (declaracionErrors?.aceptaPoliticaDevolucion?.message) {
-        errorMessage = declaracionErrors.aceptaPoliticaDevolucion.message;
-      } else {
-        errorMessage = 'Revisa los términos y condiciones antes de continuar';
-      }
-    } else if (firstErrorField === 'informeGastos') {
+    if (firstErrorField === 'informeGastos') {
       // Extraer el error específico del informe si existe
       const informeError = errors.informeGastos as FieldError | undefined;
       if (informeError?.message) {
@@ -291,18 +267,6 @@ export default function RendicionWizard({
 
     return undefined;
   };
-
-  const declaracionErrors = form.formState.errors.declaracionJurada as Partial<
-    Record<keyof DeclaracionJurada, FieldError>
-  >;
-  const confirmaError = getFieldErrorByPath(
-    form.formState.errors,
-    'declaracionJurada.confirmaDatosVeridicos'
-  );
-  const aceptaError = getFieldErrorByPath(
-    form.formState.errors,
-    'declaracionJurada.aceptaPoliticaDevolucion'
-  );
 
   // ------------------------------------------------------------------
   // Render

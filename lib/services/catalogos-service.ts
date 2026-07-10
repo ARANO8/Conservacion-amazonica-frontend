@@ -13,8 +13,11 @@ import {
 } from '@/types/catalogs';
 
 export const catalogosService = {
-  getPartidasContables: async (signal?: AbortSignal): Promise<PartidaContable[]> => {
-    const { data } = await api.get<PartidaContable[]>('/catalogos/partidas-contables', { signal });
+  searchPartidasContables: async (q: string, signal?: AbortSignal): Promise<PartidaContable[]> => {
+    const { data } = await api.get<PartidaContable[]>('/catalogos/partidas-contables/search', {
+      params: { q },
+      signal,
+    });
     return data;
   },
 

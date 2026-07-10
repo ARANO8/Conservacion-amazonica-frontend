@@ -17,9 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Popover,
@@ -87,12 +85,7 @@ export function RendicionReviewModal({
     0
   );
 
-  const totalGastosSinRespaldo = (data.gastosSinRespaldo || []).reduce(
-    (acc: number, g) => acc + (Number(g.monto) || 0),
-    0
-  );
-
-  const granTotalRendido = totalGastos + totalGastosSinRespaldo;
+  const granTotalRendido = totalGastos;
 
   const montoAnticipado = useMemo(() => {
     return solicitud ? Number(solicitud.montoTotalNeto ?? 0) : 0;
@@ -100,16 +93,11 @@ export function RendicionReviewModal({
 
   const saldoLiquido = montoAnticipado - granTotalRendido;
 
-  const [confirmaDatosVeridicos, aceptaPoliticaDevolucion, aprobadorActualId] = watch([
-    'declaracionJurada.confirmaDatosVeridicos',
-    'declaracionJurada.aceptaPoliticaDevolucion',
+  const [aprobadorActualId] = watch([
     'aprobadorActualId',
-  ]) as [boolean | undefined, boolean | undefined, number | undefined];
+  ]) as [number | undefined];
 
-  const canConfirmSubmit =
-    confirmaDatosVeridicos === true &&
-    aceptaPoliticaDevolucion === true &&
-    !!aprobadorActualId;
+  const canConfirmSubmit = !!aprobadorActualId;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -300,54 +288,6 @@ export function RendicionReviewModal({
               />
             </section>
 
-            <Separator />
-
-            {/* 5. Declaración Jurada */}
-            <section className="space-y-3">
-              <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                Declaración Jurada Electrónica
-              </h3>
-              
-              <div className="bg-card rounded-lg border p-3.5 space-y-3 text-xs">
-                <FormField
-                  control={control}
-                  name="declaracionJurada.confirmaDatosVeridicos"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value === true}
-                          onCheckedChange={(checked) => field.onChange(checked === true)}
-                          className="mt-0.5"
-                        />
-                      </FormControl>
-                      <div className="flex-1 leading-normal font-semibold text-foreground">
-                        Declaro bajo juramento que los montos detallados son reales y correspondientes al viaje/compra solicitado.
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={control}
-                  name="declaracionJurada.aceptaPoliticaDevolucion"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value === true}
-                          onCheckedChange={(checked) => field.onChange(checked === true)}
-                          className="mt-0.5"
-                        />
-                      </FormControl>
-                      <div className="flex-1 leading-normal font-semibold text-foreground">
-                        Acepto la política de devolución y me comprometo a reintegrar saldos a favor del proyecto si corresponde.
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </section>
           </div>
         </ScrollArea>
 
