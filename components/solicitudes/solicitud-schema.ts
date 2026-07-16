@@ -79,14 +79,23 @@ export const formSchema = z.object({
       z.object({
         fechaInicio: z.union([z.string(), z.date()]),
         fechaFin: z.union([z.string(), z.date()]),
-        cantDias: z
-          .number({ required_error: 'Días es requerido' })
-          .min(0.5, 'Mínimo 0.5 días'),
+        cantDias: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z
+            .number({ required_error: 'Días es requerido' })
+            .min(0.5, 'Mínimo 0.5 días')
+        ),
         actividadProgramada: z.string().min(1, 'Actividad requerida'),
-        cantInstitucion: z
-          .number({ required_error: 'Pers. Inst. es requerido' })
-          .min(1, 'Debe haber al menos 1 persona institucional'),
-        cantTerceros: z.number().min(0),
+        cantInstitucion: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z
+            .number({ required_error: 'Pers. Inst. es requerido' })
+            .min(1, 'Debe haber al menos 1 persona institucional')
+        ),
+        cantTerceros: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z.number().min(0)
+        ),
       })
     )
     .min(1, 'Debes agregar al menos una actividad'),
@@ -172,14 +181,14 @@ export const formSchema = z.object({
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).optional(),
         tipoGastoId: z.number().optional(),
         montoNeto: z.number().min(0.01, 'El monto debe ser mayor a 0'),
-        cantidad: z
-          .number()
-          .min(1, 'La cantidad debe ser al menos 1')
-          .optional(),
-        costoUnitario: z
-          .number()
-          .min(0.01, 'El costo debe ser mayor a 0')
-          .optional(),
+        cantidad: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z.number().min(1, 'La cantidad debe ser al menos 1').optional()
+        ),
+        costoUnitario: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z.number().min(0.01, 'El costo debe ser mayor a 0').optional()
+        ),
         detalle: z.string().optional(),
         liquidoPagable: z
           .number()
@@ -204,8 +213,14 @@ export const formSchema = z.object({
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
-        personas: z.coerce.number().min(1, 'Mínimo 1 persona'),
-        noches: z.coerce.number().min(1, 'Mínimo 1 noche'),
+        personas: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z.coerce.number().min(1, 'Mínimo 1 persona')
+        ),
+        noches: z.preprocess(
+          (v) => (v === null ? undefined : v),
+          z.coerce.number().min(1, 'Mínimo 1 noche')
+        ),
         cantidadUnitaria: z.coerce
           .number()
           .min(0.01, 'La tarifa debe ser mayor a 0'),

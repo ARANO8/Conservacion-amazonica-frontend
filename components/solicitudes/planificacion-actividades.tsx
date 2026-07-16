@@ -242,16 +242,41 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
             <FormItem>
               <FormControl>
                 <Input
-                  type="number"
-                  step="0.5"
-                  min="0.5"
+                  type="text"
+                  inputMode="decimal"
                   {...field}
+                  value={field.value ?? ''}
                   className="bg-muted h-9 text-center text-xs font-bold"
-                  onChange={(e) =>
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(Math.max(0.5, current + 0.5));
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(Math.max(0.5, current - 0.5));
+                    }
+                  }}
+                  onWheel={(e) => {
+                    if (document.activeElement === e.target) {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(
+                        Math.max(0.5, current + (e.deltaY < 0 ? 0.5 : -0.5))
+                      );
+                    }
+                  }}
+                  onChange={(e) => {
+                    const raw = e.target.value;
                     field.onChange(
-                      e.target.value === '' ? undefined : Number(e.target.value)
-                    )
-                  }
+                      raw === ''
+                        ? null
+                        : /^\d*\.?\d*$/.test(raw)
+                          ? Number(raw)
+                          : field.value
+                    );
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -288,15 +313,41 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
             <FormItem>
               <FormControl>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   {...field}
-                  min={0}
+                  value={field.value ?? ''}
                   className="h-9 text-center text-xs"
-                  onChange={(e) =>
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(Math.max(1, current + 1));
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(Math.max(1, current - 1));
+                    }
+                  }}
+                  onWheel={(e) => {
+                    if (document.activeElement === e.target) {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(
+                        Math.max(1, current + (e.deltaY < 0 ? 1 : -1))
+                      );
+                    }
+                  }}
+                  onChange={(e) => {
+                    const raw = e.target.value;
                     field.onChange(
-                      e.target.value === '' ? undefined : Number(e.target.value)
-                    )
-                  }
+                      raw === ''
+                        ? null
+                        : /^\d*\.?\d*$/.test(raw)
+                          ? Number(raw)
+                          : field.value
+                    );
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -314,15 +365,41 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
             <FormItem>
               <FormControl>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   {...field}
-                  min={0}
+                  value={field.value ?? ''}
                   className="h-9 text-center text-xs"
-                  onChange={(e) =>
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(Math.max(0, current + 1));
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(Math.max(0, current - 1));
+                    }
+                  }}
+                  onWheel={(e) => {
+                    if (document.activeElement === e.target) {
+                      e.preventDefault();
+                      const current = Number(field.value) || 0;
+                      field.onChange(
+                        Math.max(0, current + (e.deltaY < 0 ? 1 : -1))
+                      );
+                    }
+                  }}
+                  onChange={(e) => {
+                    const raw = e.target.value;
                     field.onChange(
-                      e.target.value === '' ? undefined : Number(e.target.value)
-                    )
-                  }
+                      raw === ''
+                        ? null
+                        : /^\d*\.?\d*$/.test(raw)
+                          ? Number(raw)
+                          : field.value
+                    );
+                  }}
                 />
               </FormControl>
               <FormMessage />

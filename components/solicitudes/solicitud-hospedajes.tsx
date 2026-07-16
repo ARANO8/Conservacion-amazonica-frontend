@@ -464,16 +464,20 @@ function HospedajeCard({
                 <FieldLabel>Nº Personas</FieldLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    min={1}
+                    type="text"
+                    inputMode="decimal"
                     {...field}
-                    onChange={(e) =>
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      const raw = e.target.value;
                       field.onChange(
-                        e.target.value === ''
-                          ? undefined
-                          : Number(e.target.value)
-                      )
-                    }
+                        raw === ''
+                          ? null
+                          : /^\d*\.?\d*$/.test(raw)
+                            ? Number(raw)
+                            : field.value
+                      );
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -490,16 +494,20 @@ function HospedajeCard({
                 <FieldLabel>Nº Noches</FieldLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    min={1}
+                    type="text"
+                    inputMode="decimal"
                     {...field}
-                    onChange={(e) =>
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      const raw = e.target.value;
                       field.onChange(
-                        e.target.value === ''
-                          ? undefined
-                          : Number(e.target.value)
-                      )
-                    }
+                        raw === ''
+                          ? null
+                          : /^\d*\.?\d*$/.test(raw)
+                            ? Number(raw)
+                            : field.value
+                      );
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -541,8 +549,8 @@ function HospedajeCard({
                   {selectedRegion && (
                     <div className="flex items-center gap-2">
                       <Input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         className={
                           isInternacionalMode
                             ? 'h-9 w-40 px-2 py-0 text-right text-sm font-semibold'
@@ -556,7 +564,13 @@ function HospedajeCard({
                         value={field.value || ''}
                         onChange={(e) => {
                           const val = e.target.value;
-                          field.onChange(val === '' ? '' : Number(val));
+                          field.onChange(
+                            val === ''
+                              ? null
+                              : /^\d*\.?\d*$/.test(val)
+                                ? Number(val)
+                                : field.value
+                          );
                         }}
                         onBlur={(e) => {
                           // Para internacional no clampeamos al rango

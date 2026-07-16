@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useForm, FieldErrors } from 'react-hook-form';
+import { useForm, FieldErrors, FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Field,
@@ -217,34 +217,68 @@ export default function SolicitudForm({
   const watchActividades = form.watch('actividades');
   const hasTerceros = watchActividades?.some((a) => (a.cantTerceros ?? 0) > 0);
 
-  const logValidationErrors = () => {
-    console.error('Errores de validación Zod:', form.formState.errors);
-  };
-
   const handleNext = async () => {
     if (step === 'PLANIFICACION') {
-      const isValid = await form.trigger([
+      const actividades = form.getValues('actividades') || [];
+      const planificacionPaths = [
         'planificacionLugares',
         'planificacionObjetivo',
-        'actividades',
-      ]);
+      ] as string[];
+      actividades.forEach((_, i) => {
+        planificacionPaths.push(
+          `actividades.${i}.fechaInicio`,
+          `actividades.${i}.fechaFin`,
+          `actividades.${i}.cantDias`,
+          `actividades.${i}.actividadProgramada`,
+          `actividades.${i}.cantInstitucion`,
+          `actividades.${i}.cantTerceros`
+        );
+      });
+      const isValid = await form.trigger(
+        planificacionPaths as FieldPath<FormData>[]
+      );
       if (isValid) {
         setStep('SOLICITUD');
         window.scrollTo(0, 0);
       } else {
-        logValidationErrors();
         toast.error('Corrige los errores en la planificación');
       }
       return;
     }
 
     if (step === 'SOLICITUD') {
-      const isValid = await form.trigger([
-        'motivo',
-        'items',
-        'viaticos',
-        'hospedajes',
-      ]);
+      const items = form.getValues('items') || [];
+      const viaticos = form.getValues('viaticos') || [];
+      const hospedajes = form.getValues('hospedajes') || [];
+      const solicitudPaths = ['motivo'] as string[];
+      items.forEach((_, i) => {
+        solicitudPaths.push(
+          `items.${i}.montoNeto`,
+          `items.${i}.cantidad`,
+          `items.${i}.costoUnitario`,
+          `items.${i}.detalle`
+        );
+      });
+      viaticos.forEach((_, i) => {
+        solicitudPaths.push(
+          `viaticos.${i}.montoNeto`,
+          `viaticos.${i}.costoUnitario`,
+          `viaticos.${i}.liquidoPagable`
+        );
+      });
+      hospedajes.forEach((_, i) => {
+        solicitudPaths.push(
+          `hospedajes.${i}.region`,
+          `hospedajes.${i}.destino`,
+          `hospedajes.${i}.personas`,
+          `hospedajes.${i}.noches`,
+          `hospedajes.${i}.cantidadUnitaria`,
+          `hospedajes.${i}.costoTotal`
+        );
+      });
+      const isValid = await form.trigger(
+        solicitudPaths as FieldPath<FormData>[]
+      );
       if (isValid) {
         // Validación de Presupuestos: Verificar que todos los viáticos/gastos/hospedajes tengan fuente
         const watchViaticos = form.getValues('viaticos') || [];
@@ -330,7 +364,6 @@ export default function SolicitudForm({
         setStep('RESPALDOS');
         window.scrollTo(0, 0);
       } else {
-        logValidationErrors();
         toast.error('Corrige los errores en el detalle económico');
       }
       return;
@@ -349,35 +382,25 @@ export default function SolicitudForm({
         }
         window.scrollTo(0, 0);
       } else {
-        logValidationErrors();
         toast.error('Corrige los errores en los documentos de respaldo');
       }
       return;
     }
 
     if (step === 'NOMINA') {
-      const isValid = await form.trigger(['nomina']);
+      const nomina = form.getValues('nomina') || [];
+      const nominaPaths = [] as string[];
+      nomina.forEach((_, i) => {
+        nominaPaths.push(
+          `nomina.${i}.nombreCompleto`,
+          `nomina.${i}.procedenciaInstitucion`
+        );
+      });
+      const isValid = await form.trigger(nominaPaths as FieldPath<FormData>[]);
       if (isValid) {
         setIsReviewModalOpen(true);
       } else {
-        logValidationErrors();
-        const errors = form.formState.errors;
-        if (errors.nomina) {
-          // Obtener el primer mensaje de error para mostrarlo
-          const primerError = Array.isArray(errors.nomina)
-            ? errors.nomina.find((e) => e !== undefined)
-            : errors.nomina;
-
-          const mensajeDetallado = primerError
-            ? JSON.stringify(primerError)
-            : 'Error desconocido';
-
-          toast.error(
-            `Corrige los errores en la nómina. Detalle: ${mensajeDetallado}`
-          );
-        } else {
-          toast.error('Corrige los errores en la nómina');
-        }
+        toast.error('Corrige los errores en la nómina');
       }
       return;
     }

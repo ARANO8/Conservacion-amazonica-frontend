@@ -147,7 +147,7 @@ function GastoCard({
   tiposGasto,
   fuentesDisponibles,
 }: GastoCardProps) {
-  const { setValue, trigger } = useFormContext<FormData>();
+  const { setValue } = useFormContext<FormData>();
 
   const cantidad = useWatch({
     control,
@@ -394,16 +394,23 @@ function GastoCard({
                 </Label>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     {...field}
+                    value={field.value ?? ''}
                     className="w-full"
-                    min={0}
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
                     onChange={(e) => {
                       const raw = e.target.value;
-                      field.onChange(raw === '' ? undefined : Number(raw));
+                      field.onChange(
+                        raw === ''
+                          ? null
+                          : /^\d*\.?\d*$/.test(raw)
+                            ? Number(raw)
+                            : field.value
+                      );
                     }}
                   />
                 </FormControl>
@@ -421,16 +428,23 @@ function GastoCard({
                 </Label>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     {...field}
+                    value={field.value ?? ''}
                     className="w-full"
-                    min={0}
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
                     onChange={(e) => {
                       const raw = e.target.value;
-                      field.onChange(raw === '' ? undefined : Number(raw));
+                      field.onChange(
+                        raw === ''
+                          ? null
+                          : /^\d*\.?\d*$/.test(raw)
+                            ? Number(raw)
+                            : field.value
+                      );
                     }}
                   />
                 </FormControl>

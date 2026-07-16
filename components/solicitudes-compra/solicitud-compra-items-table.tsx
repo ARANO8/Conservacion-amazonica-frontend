@@ -84,17 +84,20 @@ export function SolicitudCompraItemsTable() {
                         <Field>
                           <FormControl>
                             <Input
-                              type="number"
-                              min={0}
-                              step="0.01"
+                              type="text"
+                              inputMode="decimal"
                               {...field}
-                              onChange={(e) =>
+                              value={field.value ?? ''}
+                              onChange={(e) => {
+                                const raw = e.target.value;
                                 field.onChange(
-                                  e.target.value === ''
-                                    ? undefined
-                                    : Number(e.target.value)
-                                )
-                              }
+                                  raw === ''
+                                    ? null
+                                    : /^\d*\.?\d*$/.test(raw)
+                                      ? Number(raw)
+                                      : field.value
+                                );
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -152,17 +155,20 @@ export function SolicitudCompraItemsTable() {
                         <Field>
                           <FormControl>
                             <Input
-                              type="number"
-                              min={0}
-                              step="0.01"
+                              type="text"
+                              inputMode="decimal"
                               {...field}
-                              onChange={(e) =>
+                              value={field.value ?? ''}
+                              onChange={(e) => {
+                                const raw = e.target.value;
                                 field.onChange(
-                                  e.target.value === ''
-                                    ? undefined
-                                    : Number(e.target.value)
-                                )
-                              }
+                                  raw === ''
+                                    ? null
+                                    : /^\d*\.?\d*$/.test(raw)
+                                      ? Number(raw)
+                                      : field.value
+                                );
+                              }}
                             />
                           </FormControl>
                           <FormMessage />

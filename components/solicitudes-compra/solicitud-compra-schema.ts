@@ -6,13 +6,19 @@ export const itemGastoCompraSchema = z.object({
     .trim()
     .min(1, 'La descripción es obligatoria')
     .max(500),
-  cantidad: z.coerce
-    .number({ invalid_type_error: 'Ingrese una cantidad válida' })
-    .positive('La cantidad debe ser mayor a 0'),
+  cantidad: z.preprocess(
+    (v) => (v === null ? undefined : v),
+    z.coerce
+      .number({ invalid_type_error: 'Ingrese una cantidad válida' })
+      .positive('La cantidad debe ser mayor a 0')
+  ),
   uso: z.string().trim().max(100).optional().or(z.literal('')),
-  costoUnitario: z.coerce
-    .number({ invalid_type_error: 'Ingrese un precio válido' })
-    .min(0, 'El precio no puede ser negativo'),
+  costoUnitario: z.preprocess(
+    (v) => (v === null ? undefined : v),
+    z.coerce
+      .number({ invalid_type_error: 'Ingrese un precio válido' })
+      .min(0, 'El precio no puede ser negativo')
+  ),
 });
 
 export const solicitudCompraSchema = z.object({
