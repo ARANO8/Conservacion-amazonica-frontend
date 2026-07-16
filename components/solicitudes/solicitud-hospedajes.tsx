@@ -467,7 +467,13 @@ function HospedajeCard({
                     type="number"
                     min={1}
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === ''
+                          ? undefined
+                          : Number(e.target.value)
+                      )
+                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -487,7 +493,13 @@ function HospedajeCard({
                     type="number"
                     min={1}
                     {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === ''
+                          ? undefined
+                          : Number(e.target.value)
+                      )
+                    }
                   />
                 </FormControl>
                 <FormMessage />

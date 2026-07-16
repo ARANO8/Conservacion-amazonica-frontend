@@ -79,9 +79,13 @@ export const formSchema = z.object({
       z.object({
         fechaInicio: z.union([z.string(), z.date()]),
         fechaFin: z.union([z.string(), z.date()]),
-        cantDias: z.number().optional(),
+        cantDias: z
+          .number({ required_error: 'Días es requerido' })
+          .min(0.5, 'Mínimo 0.5 días'),
         actividadProgramada: z.string().min(1, 'Actividad requerida'),
-        cantInstitucion: z.number().min(0),
+        cantInstitucion: z
+          .number({ required_error: 'Pers. Inst. es requerido' })
+          .min(1, 'Debe haber al menos 1 persona institucional'),
         cantTerceros: z.number().min(0),
       })
     )

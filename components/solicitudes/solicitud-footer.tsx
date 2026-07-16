@@ -10,6 +10,7 @@ interface SolicitudFooterProps {
   onNext: () => void;
   onBack: () => void;
   loading?: boolean;
+  hasTerceros?: boolean;
 }
 
 export default function SolicitudFooter({
@@ -17,6 +18,7 @@ export default function SolicitudFooter({
   onNext,
   onBack,
   loading = false,
+  hasTerceros = false,
 }: SolicitudFooterProps) {
   const { control } = useFormContext<FormData>();
 
@@ -116,7 +118,7 @@ export default function SolicitudFooter({
             size="lg"
             className="min-w-[160px] shadow-lg transition-all"
           >
-            {step === 'NOMINA' ? (
+            {step === 'NOMINA' || (!hasTerceros && step === 'RESPALDOS') ? (
               <>
                 Revisar y Enviar <ChevronRight className="ml-2 h-4 w-4" />
               </>

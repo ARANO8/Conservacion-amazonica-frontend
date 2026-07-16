@@ -247,7 +247,11 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                   min="0.5"
                   {...field}
                   className="bg-muted h-9 text-center text-xs font-bold"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
+                  }
                 />
               </FormControl>
             </FormItem>
@@ -288,7 +292,11 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                   {...field}
                   min={0}
                   className="h-9 text-center text-xs"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -310,7 +318,11 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                   {...field}
                   min={0}
                   className="h-9 text-center text-xs"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === '' ? undefined : Number(e.target.value)
+                    )
+                  }
                 />
               </FormControl>
               <FormMessage />

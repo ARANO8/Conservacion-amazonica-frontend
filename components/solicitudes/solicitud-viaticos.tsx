@@ -640,9 +640,11 @@ function ViaticoCard({
                         : precioUnitarioLista
                     }
                     onChange={(e) => {
-                      const val =
-                        e.target.value === '' ? 0 : parseFloat(e.target.value);
-                      field.onChange(val);
+                      field.onChange(
+                        e.target.value === ''
+                          ? undefined
+                          : parseFloat(e.target.value)
+                      );
                     }}
                     readOnly={!isExterior}
                     className={

@@ -10,11 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  FormField,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
+import { FormField, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -48,9 +44,7 @@ export function SolicitudCompraItemsTable() {
   return (
     <FieldSet>
       <div className="mb-3 flex items-center justify-between">
-        <FieldLegend className="mb-0">
-          Descripción del Gasto
-        </FieldLegend>
+        <FieldLegend className="mb-0">Descripción del Gasto</FieldLegend>
         <Button
           type="button"
           variant="outline"
@@ -69,12 +63,8 @@ export function SolicitudCompraItemsTable() {
               <TableHead className="w-[90px]">Cantidad</TableHead>
               <TableHead>Descripción</TableHead>
               <TableHead className="w-[120px]">Uso</TableHead>
-              <TableHead className="w-[130px]">
-                P/Unit. (Bs)
-              </TableHead>
-              <TableHead className="w-[130px] text-right">
-                Total (Bs)
-              </TableHead>
+              <TableHead className="w-[130px]">P/Unit. (Bs)</TableHead>
+              <TableHead className="w-[130px] text-right">Total (Bs)</TableHead>
               <TableHead className="w-[50px]" />
             </TableRow>
           </TableHeader>
@@ -98,6 +88,13 @@ export function SolicitudCompraItemsTable() {
                               min={0}
                               step="0.01"
                               {...field}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === ''
+                                    ? undefined
+                                    : Number(e.target.value)
+                                )
+                              }
                             />
                           </FormControl>
                           <FormMessage />
@@ -137,12 +134,8 @@ export function SolicitudCompraItemsTable() {
                                 <SelectValue placeholder="—" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Oficina">
-                                  Oficina
-                                </SelectItem>
-                                <SelectItem value="Campo">
-                                  Campo
-                                </SelectItem>
+                                <SelectItem value="Oficina">Oficina</SelectItem>
+                                <SelectItem value="Campo">Campo</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -163,6 +156,13 @@ export function SolicitudCompraItemsTable() {
                               min={0}
                               step="0.01"
                               {...field}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === ''
+                                    ? undefined
+                                    : Number(e.target.value)
+                                )
+                              }
                             />
                           </FormControl>
                           <FormMessage />

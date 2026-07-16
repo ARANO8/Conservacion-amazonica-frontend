@@ -215,6 +215,7 @@ export default function SolicitudForm({
   usePreventNavigation(!isSubmitSuccessful);
 
   const watchActividades = form.watch('actividades');
+  const hasTerceros = watchActividades?.some((a) => (a.cantTerceros ?? 0) > 0);
 
   const logValidationErrors = () => {
     console.error('Errores de validación Zod:', form.formState.errors);
@@ -341,7 +342,11 @@ export default function SolicitudForm({
         'urlCotizaciones',
       ]);
       if (isValid) {
-        setStep('NOMINA');
+        if (hasTerceros) {
+          setStep('NOMINA');
+        } else {
+          setIsReviewModalOpen(true);
+        }
         window.scrollTo(0, 0);
       } else {
         logValidationErrors();
@@ -456,7 +461,7 @@ export default function SolicitudForm({
 
   return (
     <div className="bg-background flex h-[calc(100vh-4rem)] w-full flex-col overflow-hidden">
-      <SolicitudHeader step={step} />
+      <SolicitudHeader step={step} hasTerceros={hasTerceros} />
 
       <Form {...form}>
         <div className="relative flex flex-1 flex-col overflow-hidden">
@@ -562,6 +567,7 @@ export default function SolicitudForm({
             onNext={handleNext}
             onBack={handleBack}
             loading={loading}
+            hasTerceros={hasTerceros}
           />
         </div>
 

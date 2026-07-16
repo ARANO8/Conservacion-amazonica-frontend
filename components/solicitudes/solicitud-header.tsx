@@ -3,9 +3,13 @@ import { WizardStep } from './solicitud-schema';
 
 interface SolicitudHeaderProps {
   step: WizardStep;
+  hasTerceros?: boolean;
 }
 
-export default function SolicitudHeader({ step }: SolicitudHeaderProps) {
+export default function SolicitudHeader({
+  step,
+  hasTerceros,
+}: SolicitudHeaderProps) {
   return (
     <div className="shrink-0 border-b p-4 px-6">
       <div className="flex items-center justify-between">
@@ -45,16 +49,20 @@ export default function SolicitudHeader({ step }: SolicitudHeaderProps) {
           >
             3. Respaldos
           </span>
-          <ChevronRight className="text-muted-foreground h-3 w-3" />
-          <span
-            className={
-              step === 'NOMINA'
-                ? 'text-primary font-bold'
-                : 'text-muted-foreground'
-            }
-          >
-            4. Nómina
-          </span>
+          {hasTerceros && (
+            <>
+              <ChevronRight className="text-muted-foreground h-3 w-3" />
+              <span
+                className={
+                  step === 'NOMINA'
+                    ? 'text-primary font-bold'
+                    : 'text-muted-foreground'
+                }
+              >
+                4. Nómina
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

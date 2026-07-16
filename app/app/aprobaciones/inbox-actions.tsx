@@ -115,13 +115,17 @@ export function InboxActions({
       toast.error('Debe ingresar el código de transferencia');
       return;
     }
+    if (!urlComprobante.trim()) {
+      toast.error('Debe ingresar la URL del comprobante');
+      return;
+    }
 
     try {
       setSubmitting(true);
       await solicitudesService.desembolsar(
         request.id,
         codigoDesembolso.trim(),
-        urlComprobante.trim() || undefined
+        urlComprobante.trim()
       );
       toast.success('Solicitud desembolsada correctamente');
       setIsApproveOpen(false);
@@ -262,10 +266,7 @@ export function InboxActions({
                 htmlFor="urlComprobante"
                 className="text-sm leading-none font-medium"
               >
-                URL del Comprobante{' '}
-                <span className="text-muted-foreground ml-1 font-normal">
-                  (opcional)
-                </span>
+                URL del Comprobante <span className="text-destructive">*</span>
               </label>
               <Input
                 id="urlComprobante"
@@ -295,7 +296,9 @@ export function InboxActions({
             <Button
               className="bg-blue-600 hover:bg-blue-700"
               onClick={handleDesembolsar}
-              disabled={submitting || !codigoDesembolso.trim()}
+              disabled={
+                submitting || !codigoDesembolso.trim() || !urlComprobante.trim()
+              }
             >
               {submitting ? 'Procesando...' : 'Confirmar Desembolso'}
             </Button>

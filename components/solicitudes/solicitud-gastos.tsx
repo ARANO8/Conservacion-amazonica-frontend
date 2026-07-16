@@ -397,18 +397,13 @@ function GastoCard({
                     type="number"
                     {...field}
                     className="w-full"
-                    value={field.value ?? 0}
                     min={0}
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
                     onChange={(e) => {
-                      const val = Number(e.target.value);
-                      field.onChange(val);
-                      // Only trigger validation if value is valid to clear existing error
-                      if (val >= 1) {
-                        trigger(`items.${index}.cantidad`);
-                      }
+                      const raw = e.target.value;
+                      field.onChange(raw === '' ? undefined : Number(raw));
                     }}
                   />
                 </FormControl>
@@ -429,18 +424,13 @@ function GastoCard({
                     type="number"
                     {...field}
                     className="w-full"
-                    value={field.value}
                     min={0}
                     onKeyDown={(e) =>
                       ['-', 'e'].includes(e.key) && e.preventDefault()
                     }
                     onChange={(e) => {
-                      const val = Number(e.target.value);
-                      field.onChange(val);
-                      // Only trigger validation if value is valid to clear existing error
-                      if (val > 0) {
-                        trigger(`items.${index}.costoUnitario`);
-                      }
+                      const raw = e.target.value;
+                      field.onChange(raw === '' ? undefined : Number(raw));
                     }}
                   />
                 </FormControl>
