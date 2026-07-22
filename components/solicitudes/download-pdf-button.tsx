@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
+import { downloadBlob } from '@/lib/utils/download-blob';
 
 interface DownloadPdfButtonProps {
   solicitudId: number;
@@ -20,18 +20,15 @@ export function DownloadPdfButton({
   const handleDownload = async () => {
     try {
       setIsLoading(true);
-      const blob = await solicitudesService.downloadPdf(solicitudId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${codigoSolicitud}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('Documento PDF descargado correctamente.');
-    } catch {
-      toast.error('No se pudo descargar el documento PDF.');
+      await downloadBlob(
+        () => solicitudesService.downloadPdf(solicitudId),
+        codigoSolicitud,
+        {
+          notFoundMessage: 'No se encontró el PDF de la solicitud.',
+          errorMessage: 'No se pudo descargar el PDF de la solicitud.',
+          successMessage: 'PDF de solicitud descargado correctamente.',
+        }
+      );
     } finally {
       setIsLoading(false);
     }

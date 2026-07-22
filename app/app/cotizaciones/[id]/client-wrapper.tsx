@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { Pencil, FileDown, Link2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,6 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDateShort, formatMoney } from '@/lib/utils';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import { cotizacionesService } from '@/lib/services/cotizaciones-service';
 import type { CotizacionResponse } from '@/types/cotizacion-backend';
 
@@ -59,24 +59,13 @@ export function CotizacionDetalleClientWrapper({
 
   const handleDownloadPdf = async () => {
     if (!cotizacion) return;
-    try {
-      const blob = await cotizacionesService.downloadPdf(cotizacion.id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${cotizacion.codigoCotizacion}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('PDF descargado correctamente.');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        toast.info('No se encontró la cotización solicitada.');
-        return;
+    await downloadBlob(
+      () => cotizacionesService.downloadPdf(cotizacion.id),
+      cotizacion.codigoCotizacion,
+      {
+        notFoundMessage: 'No se encontró la cotización solicitada.',
       }
-      toast.error('No se pudo descargar el PDF.');
-    }
+    );
   };
 
   if (loading) {

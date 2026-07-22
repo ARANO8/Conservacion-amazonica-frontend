@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import {
   Eye,
   MoreHorizontal,
@@ -17,6 +16,7 @@ import { toast } from 'sonner';
 
 import { cotizacionesService } from '@/lib/services/cotizaciones-service';
 import { formatDateShort, formatMoney } from '@/lib/utils';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import type { CotizacionResponse } from '@/types/cotizacion-backend';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,24 +49,11 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 async function handleDownloadPdf(id: number, fileName: string): Promise<void> {
-  try {
-    const blob = await cotizacionesService.downloadPdf(id);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    toast.success('PDF de cotización descargado correctamente.');
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      toast.info('No se encontró la cotización solicitada.');
-      return;
-    }
-    toast.error('No se pudo descargar el PDF de la cotización.');
-  }
+  await downloadBlob(() => cotizacionesService.downloadPdf(id), fileName, {
+    notFoundMessage: 'No se encontró la cotización solicitada.',
+    errorMessage: 'No se pudo descargar el PDF de la cotización.',
+    successMessage: 'PDF de cotización descargado correctamente.',
+  });
 }
 
 export default function MisCotizacionesPage() {

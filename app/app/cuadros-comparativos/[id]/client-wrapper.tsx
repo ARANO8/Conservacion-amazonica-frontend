@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn, formatDate, formatMoney } from '@/lib/utils';
 import { cuadrosComparativosService } from '@/lib/services/cuadros-comparativos-service';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import { CuadroAnalisis } from '@/components/cuadros-comparativos/cuadro-analisis';
 import type { AnalisisInput } from '@/lib/cuadro-analisis';
 import { useAuthStore } from '@/store/auth-store';
@@ -97,24 +98,13 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
 
   const handleDownloadPdf = async () => {
     if (!cuadro) return;
-    try {
-      const blob = await cuadrosComparativosService.downloadPdf(cuadro.id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${cuadro.codigoCuadro}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('PDF descargado correctamente.');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        toast.info('No se encontró el cuadro solicitado.');
-        return;
+    await downloadBlob(
+      () => cuadrosComparativosService.downloadPdf(cuadro.id),
+      cuadro.codigoCuadro,
+      {
+        notFoundMessage: 'No se encontró el cuadro solicitado.',
       }
-      toast.error('No se pudo descargar el PDF.');
-    }
+    );
   };
 
   const runAction = async (fn: () => Promise<unknown>, successMsg: string) => {

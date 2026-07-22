@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { Eye, FileSpreadsheet, MoreHorizontal, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import { formatDateShort, formatMoney } from '@/lib/utils';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import { RendicionResponse } from '@/types/rendicion-backend';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,25 +47,15 @@ async function handleDownloadPdf(
   rendicionId: number,
   fileName: string
 ): Promise<void> {
-  try {
-    const blob = await rendicionesService.downloadPdf(rendicionId);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    toast.success('PDF de rendición descargado correctamente.');
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      toast.info('Descarga PDF para rendiciones en preparación.');
-      return;
+  await downloadBlob(
+    () => rendicionesService.downloadPdf(rendicionId),
+    fileName,
+    {
+      notFoundMessage: 'Descarga PDF para rendiciones en preparación.',
+      errorMessage: 'No se pudo descargar el PDF de la rendición.',
+      successMessage: 'PDF de rendición descargado correctamente.',
     }
-
-    toast.error('No se pudo descargar el PDF de la rendición.');
-  }
+  );
 }
 
 export default function MisRendicionesPage() {

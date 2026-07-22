@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { Pencil, FileDown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatMoney } from '@/lib/utils';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import { ordenesCompraService } from '@/lib/services/ordenes-compra-service';
 import type { OrdenCompraResponse } from '@/types/orden-compra-backend';
 
@@ -47,24 +47,13 @@ export function OrdenDetalleClientWrapper({ ordenId }: Props) {
 
   const handleDownloadPdf = async () => {
     if (!orden) return;
-    try {
-      const blob = await ordenesCompraService.downloadPdf(orden.id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${orden.codigoOrden}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('PDF descargado correctamente.');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        toast.info('No se encontró la orden solicitada.');
-        return;
+    await downloadBlob(
+      () => ordenesCompraService.downloadPdf(orden.id),
+      orden.codigoOrden,
+      {
+        notFoundMessage: 'No se encontró la orden solicitada.',
       }
-      toast.error('No se pudo descargar el PDF.');
-    }
+    );
   };
 
   if (loading) {

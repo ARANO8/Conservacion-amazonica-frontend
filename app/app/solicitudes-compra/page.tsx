@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { formatDateShort, formatMoney } from '@/lib/utils';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -112,24 +113,10 @@ export default function SolicitudesCompraPage() {
   };
 
   const handleDownloadPdf = async (id: number, codigo: string) => {
-    try {
-      const blob = await solicitudesService.downloadPdf(id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${codigo}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('PDF descargado correctamente.');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        toast.info('No se encontró el PDF de la solicitud.');
-        return;
-      }
-      toast.error('No se pudo descargar el PDF.');
-    }
+    await downloadBlob(() => solicitudesService.downloadPdf(id), codigo, {
+      notFoundMessage: 'No se encontró el PDF de la solicitud.',
+      errorMessage: 'No se pudo descargar el PDF.',
+    });
   };
 
   return (

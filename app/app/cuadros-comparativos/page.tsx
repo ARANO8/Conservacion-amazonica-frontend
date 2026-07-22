@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import {
   Eye,
   MoreHorizontal,
@@ -15,6 +14,7 @@ import { toast } from 'sonner';
 
 import { cuadrosComparativosService } from '@/lib/services/cuadros-comparativos-service';
 import { formatDateShort } from '@/lib/utils';
+import { downloadBlob } from '@/lib/utils/download-blob';
 import type { CuadroComparativoResponse } from '@/types/cuadro-comparativo-backend';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,24 +47,15 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 
 async function handleDownloadPdf(id: number, fileName: string): Promise<void> {
-  try {
-    const blob = await cuadrosComparativosService.downloadPdf(id);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    toast.success('PDF del cuadro comparativo descargado.');
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      toast.info('No se encontró el cuadro solicitado.');
-      return;
+  await downloadBlob(
+    () => cuadrosComparativosService.downloadPdf(id),
+    fileName,
+    {
+      notFoundMessage: 'No se encontró el cuadro solicitado.',
+      errorMessage: 'No se pudo descargar el PDF del cuadro comparativo.',
+      successMessage: 'PDF del cuadro comparativo descargado.',
     }
-    toast.error('No se pudo descargar el PDF del cuadro comparativo.');
-  }
+  );
 }
 
 export default function CuadrosComparativosPage() {

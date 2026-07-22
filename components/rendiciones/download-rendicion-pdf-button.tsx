@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import axios from 'axios';
 import { Download, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
+import { downloadBlob } from '@/lib/utils/download-blob';
 
 interface DownloadRendicionPdfButtonProps {
   rendicionId: number;
@@ -21,22 +20,15 @@ export function DownloadRendicionPdfButton({
   const handleDownload = async () => {
     try {
       setIsLoading(true);
-      const blob = await rendicionesService.downloadPdf(rendicionId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${fileName}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('PDF de rendición descargado correctamente.');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        toast.info('Descarga PDF para rendiciones en preparación.');
-      } else {
-        toast.error('No se pudo descargar el PDF de la rendición.');
-      }
+      await downloadBlob(
+        () => rendicionesService.downloadPdf(rendicionId),
+        fileName,
+        {
+          notFoundMessage: 'Descarga PDF para rendiciones en preparación.',
+          errorMessage: 'No se pudo descargar el PDF de la rendición.',
+          successMessage: 'PDF de rendición descargado correctamente.',
+        }
+      );
     } finally {
       setIsLoading(false);
     }
