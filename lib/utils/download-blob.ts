@@ -48,6 +48,7 @@ export async function downloadBlob(
     }
     return true;
   } catch (error: unknown) {
+    console.error('[downloadBlob] Error descargando PDF:', error);
     if (axios.isAxiosError(error) && error.response?.status === 404) {
       toast.info(
         options?.notFoundMessage ?? 'No se encontró el PDF solicitado.'
