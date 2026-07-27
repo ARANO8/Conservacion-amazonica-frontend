@@ -198,10 +198,6 @@ function GastoRow({
       shouldValidate: true,
       shouldDirty: true,
     });
-    setValue(`gastos.${index}.montoTotal`, taxResult.montoBruto, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
     setValue(`gastos.${index}.montoNeto`, taxResult.montoNeto, {
       shouldValidate: true,
       shouldDirty: true,

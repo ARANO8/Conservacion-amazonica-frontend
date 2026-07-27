@@ -155,17 +155,13 @@ export function GastoCard({
     );
   }, [montoTotal, tipoDocumento, categoria, tipoRetencion]);
 
-  // Sync montoNeto whenever taxResult changes
+  // Sync computed tax fields whenever taxResult changes
   useEffect(() => {
     setValue(`gastos.${index}.montoBruto`, taxResult.montoBruto, {
       shouldValidate: true,
       shouldDirty: true,
     });
     setValue(`gastos.${index}.montoImpuestos`, taxResult.totalRetenciones, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-    setValue(`gastos.${index}.montoTotal`, taxResult.montoBruto, {
       shouldValidate: true,
       shouldDirty: true,
     });
