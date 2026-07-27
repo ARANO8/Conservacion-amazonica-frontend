@@ -42,6 +42,25 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     ),
   },
   {
+    id: 'codigoDesembolso',
+    header: 'Cód. Desembolso',
+    accessorFn: (row) => row.codigoDesembolso,
+    cell: ({ row }) => {
+      const cod = row.original.codigoDesembolso;
+      if (row.original.estado !== 'DESEMBOLSADO' || !cod) {
+        return <span className="text-muted-foreground text-xs">-</span>;
+      }
+      return (
+        <Badge
+          variant="outline"
+          className="border-blue-300 bg-blue-50 font-mono text-xs text-blue-700 dark:border-blue-700 dark:bg-blue-950/40 dark:text-blue-400"
+        >
+          {cod}
+        </Badge>
+      );
+    },
+  },
+  {
     id: 'revisar',
     header: 'Revisar',
     cell: ({ row }) => {

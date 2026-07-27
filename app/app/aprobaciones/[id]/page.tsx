@@ -43,6 +43,7 @@ import {
   Info,
   ExternalLink,
   Paperclip,
+  Banknote,
 } from 'lucide-react';
 import Link from 'next/link';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
@@ -451,6 +452,48 @@ export default function AprobacionDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Datos del Desembolso - visible cuando estado es DESEMBOLSADO */}
+      {solicitud.estado === 'DESEMBOLSADO' && (
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+              <Banknote className="h-5 w-5" />
+              Datos del Desembolso
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-muted-foreground text-sm">
+                Código de desembolso
+              </p>
+              <p className="font-mono text-lg font-bold">
+                {solicitud.codigoDesembolso || '-'}
+              </p>
+            </div>
+            {solicitud.urlComprobante && (
+              <div className="flex flex-col gap-1">
+                <p className="text-muted-foreground text-sm">Comprobante</p>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="w-fit border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900"
+                >
+                  <a
+                    href={solicitud.urlComprobante}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Ver Comprobante Adjunto
+                  </a>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Totals Summary */}
       <Card className="bg-muted/50">

@@ -152,6 +152,7 @@ export default function SolicitudesCompraPage() {
                 <TableHead>Fecha</TableHead>
                 <TableHead>Motivo</TableHead>
                 <TableHead>Estado</TableHead>
+                <TableHead>Cód. Desembolso</TableHead>
                 <TableHead className="text-right">Total (Bs)</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -160,7 +161,7 @@ export default function SolicitudesCompraPage() {
               {solicitudes.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="text-muted-foreground h-24 text-center"
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -190,6 +191,21 @@ export default function SolicitudesCompraPage() {
                         <Badge variant="outline" className={badge.className}>
                           {badge.label}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {sol.estado === 'DESEMBOLSADO' &&
+                        sol.codigoDesembolso ? (
+                          <Badge
+                            variant="outline"
+                            className="border-blue-300 bg-blue-50 font-mono text-xs text-blue-700 dark:border-blue-700 dark:bg-blue-950/40 dark:text-blue-400"
+                          >
+                            {sol.codigoDesembolso}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">
+                            -
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right font-semibold">
                         {formatMoney(Number(sol.montoTotalNeto))}
