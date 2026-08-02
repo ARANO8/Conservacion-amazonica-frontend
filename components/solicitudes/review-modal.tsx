@@ -103,15 +103,6 @@ export default function ReviewModal({
     0
   );
 
-  const totalNomina = (data.nomina || []).reduce(
-    (acc: number, n) => acc + (Number(n.montoNeto) || 0),
-    0
-  );
-  const totalLiquidoNomina = (data.nomina || []).reduce(
-    (acc: number, n) => acc + (Number(n.liquidoPagable) || 0),
-    0
-  );
-
   const totalHospedajes = (data.hospedajes || []).reduce(
     (acc: number, h) =>
       acc +
@@ -125,13 +116,9 @@ export default function ReviewModal({
     0
   );
 
-  const totalGeneral =
-    totalViaticos + totalGastos + totalNomina + totalHospedajes;
+  const totalGeneral = totalViaticos + totalGastos + totalHospedajes;
   const totalLiquidoGeneral =
-    totalLiquidoViaticos +
-    totalLiquidoGastos +
-    totalLiquidoNomina +
-    totalLiquidoHospedajes;
+    totalLiquidoViaticos + totalLiquidoGastos + totalLiquidoHospedajes;
 
   const partidasMapped = useMemo(() => {
     return mapFormToBreakdown(data, misSelecciones, conceptos, tiposGasto);

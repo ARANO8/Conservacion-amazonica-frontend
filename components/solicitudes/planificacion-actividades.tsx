@@ -106,8 +106,9 @@ export default function PlanificacionActividades({
               fechaFin: toInputDate(today),
               cantDias: 1,
               actividadProgramada: '',
-              cantInstitucion: 0,
+              cantInstitucion: 1,
               cantTerceros: 0,
+              terceros: [],
             });
           }}
         >

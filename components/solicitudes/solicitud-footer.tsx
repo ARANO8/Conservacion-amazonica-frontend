@@ -26,14 +26,12 @@ export default function SolicitudFooter({
   const watchFuentes = useWatch({ control, name: 'fuentesSeleccionadas' });
   const watchViaticos = useWatch({ control, name: 'viaticos' });
   const watchItems = useWatch({ control, name: 'items' });
-  const watchNomina = useWatch({ control, name: 'nomina' });
   const watchHospedajes = useWatch({ control, name: 'hospedajes' });
 
   const totales = useMemo(() => {
     const fuentes = watchFuentes || [];
     const viaticos = watchViaticos || [];
     const items = watchItems || [];
-    const nomina = watchNomina || [];
     const hospedajes = watchHospedajes || [];
 
     // 1. PRESUPUESTO TOTAL (Suma de montos reservados en las fuentes)
@@ -44,7 +42,7 @@ export default function SolicitudFooter({
 
     // 2. TOTAL NETO (Presupuestado - Incluye Impuestos/Impacto)
     const totalNeto =
-      [...viaticos, ...items, ...nomina].reduce(
+      [...viaticos, ...items].reduce(
         (acc: number, item) => acc + (Number(item?.montoNeto) || 0),
         0
       ) +
@@ -59,7 +57,7 @@ export default function SolicitudFooter({
 
     // 3. TOTAL EJECUTADO (BRUTO) (Líquido a recibir)
     const totalBruto =
-      [...viaticos, ...items, ...nomina].reduce(
+      [...viaticos, ...items].reduce(
         (acc: number, item) => acc + (Number(item?.liquidoPagable) || 0),
         0
       ) +
@@ -72,7 +70,7 @@ export default function SolicitudFooter({
     const saldoGlobal = totalFuentes - totalNeto;
 
     return { totalFuentes, totalNeto, totalBruto, saldoGlobal };
-  }, [watchFuentes, watchViaticos, watchItems, watchNomina, watchHospedajes]);
+  }, [watchFuentes, watchViaticos, watchItems, watchHospedajes]);
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">

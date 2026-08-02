@@ -70,6 +70,7 @@ export interface CreateSolicitudPayload {
   nominasTerceros: {
     nombreCompleto: string;
     procedenciaInstitucion: string;
+    planificacionIndex?: number;
   }[];
   hospedajes: {
     poaId: number;
@@ -276,6 +277,7 @@ export interface SolicitudResponse {
     id: number;
     nombreCompleto: string;
     procedenciaInstitucion: string;
+    planificacionId?: number | null;
   }>;
   codigoDesembolso?: string;
   urlComprobante?: string;

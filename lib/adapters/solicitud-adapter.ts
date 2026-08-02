@@ -83,11 +83,16 @@ export const adaptFormToPayload = (
     })
     .filter((gasto): gasto is NonNullable<typeof gasto> => !!gasto);
 
-  // 4. Mapeo de Nómina
-  const nominasTerceros = (formData.nomina || []).map((n) => ({
-    nombreCompleto: n.nombreCompleto,
-    procedenciaInstitucion: n.procedenciaInstitucion,
-  }));
+  // 4. Mapeo de Nómina — se aplana desde cada actividad. El índice coincide
+  // con el del array `planificaciones` porque ambos se derivan de
+  // `formData.actividades` en el mismo orden.
+  const nominasTerceros = formData.actividades.flatMap((act, index) =>
+    (act.terceros || []).map((t) => ({
+      nombreCompleto: t.nombreCompleto,
+      procedenciaInstitucion: t.procedenciaInstitucion,
+      planificacionIndex: index,
+    }))
+  );
 
   // 5. Mapeo de Hospedajes
   const hospedajes = (formData.hospedajes || [])
@@ -178,7 +183,35 @@ export const adaptResponseToFormData = (
     cantInstitucion: Number(p.cantidadPersonasInstitucional) || 0,
     cantTerceros: Number(p.cantidadPersonasTerceros) || 0,
     cantDias: Number(p.diasCalculados) || 0,
+    terceros: [] as {
+      nombreCompleto: string;
+      procedenciaInstitucion: string;
+    }[],
   }));
+
+  // 1b. Repartir las personas externas dentro de su actividad de origen.
+  // Las solicitudes anteriores a la FK `planificacionId` no tienen el vínculo:
+  // caen en la primera actividad que declare terceros.
+  const planificacionIdToIndex = new Map<number, number>();
+  (response.planificaciones || []).forEach((p, index) => {
+    planificacionIdToIndex.set(p.id, index);
+  });
+  const indiceFallback = actividades.findIndex((a) => a.cantTerceros > 0);
+
+  (response.personasExternas || []).forEach((persona) => {
+    const indice =
+      persona.planificacionId != null
+        ? (planificacionIdToIndex.get(persona.planificacionId) ??
+          indiceFallback)
+        : indiceFallback;
+
+    if (indice < 0 || !actividades[indice]) return;
+
+    actividades[indice].terceros.push({
+      nombreCompleto: persona.nombreCompleto,
+      procedenciaInstitucion: persona.procedenciaInstitucion,
+    });
+  });
 
   // 0. Pre-calculo: Mapa de ID de SolicitudPresupuesto a ID de POA (Catálogo)
   // Esto es necesario porque los viáticos/gastos apuntan al ID de la relación (SolicitudPresupuesto),
@@ -365,12 +398,6 @@ export const adaptResponseToFormData = (
     viaticos,
     items,
     hospedajes,
-    nomina: (response.personasExternas || []).map((p) => ({
-      nombreCompleto: p.nombreCompleto,
-      procedenciaInstitucion: p.procedenciaInstitucion,
-      montoNeto: 0, // Placeholder if needed by schema
-      liquidoPagable: 0,
-    })),
     fechaInicio: response.fechaInicio
       ? new Date(response.fechaInicio)
       : undefined,

@@ -94,8 +94,23 @@ export const formSchema = z.object({
         ),
         cantTerceros: z.preprocess(
           (v) => (v === null ? undefined : v),
-          z.number().min(0)
+          z.number().min(0).max(50, 'Máximo 50 terceros por actividad')
         ),
+        // Nómina de terceros de esta actividad (Paso 4). Se autogenera a
+        // partir de cantTerceros y se mantiene anidada para que sobreviva a
+        // reordenamientos y eliminaciones de actividades.
+        terceros: z
+          .array(
+            z.object({
+              nombreCompleto: z
+                .string()
+                .min(1, 'El nombre completo es requerido'),
+              procedenciaInstitucion: z
+                .string()
+                .min(1, 'La procedencia/institución es requerida'),
+            })
+          )
+          .default([]),
       })
     )
     .min(1, 'Debes agregar al menos una actividad'),
@@ -231,26 +246,6 @@ export const formSchema = z.object({
     )
     .optional(),
 
-  // Nómina de Terceros (Paso 3)
-  nomina: z
-    .array(
-      z.object({
-        nombreCompleto: z.string().min(1, 'El nombre completo es requerido'),
-        procedenciaInstitucion: z
-          .string()
-          .min(1, 'La procedencia/institución es requerida'),
-        montoNeto: z
-          .number()
-          .min(0, 'Monto debe ser mayor o igual a 0')
-          .optional(),
-        liquidoPagable: z
-          .number()
-          .min(0, 'Monto debe ser mayor o igual a 0')
-          .optional(),
-      })
-    )
-    .optional(),
-
   // Confirmación Final
   destinatario: z.preprocess(
     (value) => (value === null || value === undefined ? '' : value),
@@ -301,8 +296,9 @@ export const defaultValues: FormData = {
       fechaFin: new Date().toISOString().split('T')[0],
       cantDias: 1,
       actividadProgramada: '',
-      cantInstitucion: 0,
+      cantInstitucion: 1,
       cantTerceros: 0,
+      terceros: [],
     },
   ],
   interino: false,
@@ -319,7 +315,6 @@ export const defaultValues: FormData = {
   fechaInicio: '',
   fechaFin: '',
   motivo: '',
-  nomina: [],
   destinatario: '',
   urlCuadroComparativo: '',
   urlCotizaciones: [''],

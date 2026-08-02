@@ -41,6 +41,7 @@ import {
 } from '@/components/solicitudes/solicitud-schema';
 import { useCatalogos } from '@/hooks/use-catalogos';
 import { usePreventNavigation } from '@/hooks/use-prevent-navigation';
+import { useSyncTerceros } from '@/hooks/use-sync-terceros';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
@@ -213,6 +214,9 @@ export default function SolicitudForm({
 
   // Dirty Form Protection: Prevent accidental reload/close ALWAYS until success.
   usePreventNavigation(!isSubmitSuccessful);
+
+  // Genera/recorta las cards de terceros del paso NOMINA según el paso 1.
+  useSyncTerceros(form);
 
   const watchActividades = form.watch('actividades');
   const hasTerceros = watchActividades?.some((a) => (a.cantTerceros ?? 0) > 0);
@@ -388,13 +392,30 @@ export default function SolicitudForm({
     }
 
     if (step === 'NOMINA') {
-      const nomina = form.getValues('nomina') || [];
+      const actividades = form.getValues('actividades') || [];
+
+      // La cantidad registrada debe coincidir con lo declarado en el paso 1
+      for (const actividad of actividades) {
+        const declarados = Number(actividad.cantTerceros) || 0;
+        const registrados = (actividad.terceros || []).length;
+        if (declarados !== registrados) {
+          toast.error(
+            `En "${
+              actividad.actividadProgramada || 'la actividad'
+            }" declaraste ${declarados} tercero(s) pero registraste ${registrados}`
+          );
+          return;
+        }
+      }
+
       const nominaPaths = [] as string[];
-      nomina.forEach((_, i) => {
-        nominaPaths.push(
-          `nomina.${i}.nombreCompleto`,
-          `nomina.${i}.procedenciaInstitucion`
-        );
+      actividades.forEach((actividad, i) => {
+        (actividad.terceros || []).forEach((_, j) => {
+          nominaPaths.push(
+            `actividades.${i}.terceros.${j}.nombreCompleto`,
+            `actividades.${i}.terceros.${j}.procedenciaInstitucion`
+          );
+        });
       });
       const isValid = await form.trigger(nominaPaths as FieldPath<FormData>[]);
       if (isValid) {

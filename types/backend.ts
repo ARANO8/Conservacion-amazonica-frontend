@@ -145,6 +145,7 @@ export interface CreateHospedajeDto {
 export interface CreateNominaDto {
   nombreCompleto: string;
   procedenciaInstitucion: string;
+  planificacionIndex?: number;
 }
 
 export interface CreateSolicitudDto {
