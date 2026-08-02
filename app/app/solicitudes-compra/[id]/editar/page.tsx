@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { solicitudesService } from '@/lib/services/solicitudes-service';
+import { esPartidaConsultoria } from '@/lib/tax-calculator';
 import SolicitudCompraForm from '@/components/solicitudes-compra/solicitud-compra-form';
 import type { SolicitudCompraFormData } from '@/components/solicitudes-compra/solicitud-compra-schema';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
@@ -14,13 +15,23 @@ function adaptResponseToCompraFormData(
   solicitud: SolicitudResponse
 ): Partial<SolicitudCompraFormData> {
   const poaId = solicitud.presupuestos?.[0]?.poa?.id ?? 0;
+  const gastosCompra = solicitud.gastosCompra ?? [];
 
-  const items = (solicitud.gastosCompra ?? []).map((gc) => ({
+  // La partida POA determina si esto es un contrato de consultoría.
+  const partidaNombre =
+    gastosCompra[0]?.solicitudPresupuesto?.poa?.estructura?.partida?.nombre ??
+    solicitud.presupuestos?.[0]?.poa?.estructura?.partida?.nombre ??
+    '';
+  const esConsultoria = esPartidaConsultoria(partidaNombre);
+
+  const items = gastosCompra.map((gc) => ({
     descripcion: gc.descripcion,
     cantidad: Number(gc.cantidad),
     uso: gc.uso ?? '',
     costoUnitario: Number(gc.costoUnitario),
   }));
+
+  const contrato = esConsultoria ? gastosCompra[0] : undefined;
 
   return {
     aprobadorId:
@@ -31,6 +42,15 @@ function adaptResponseToCompraFormData(
     chequeANombreDe: solicitud.chequeANombreDe ?? '',
     descripcion: solicitud.descripcion ?? '',
     items: items.length > 0 ? items : undefined,
+    esConsultoria,
+    partidaNombre,
+    tipoDocumento: contrato?.tipoDocumento ?? 'RECIBO',
+    montoLiquido: contrato ? Number(contrato.total) : undefined,
+    pagos: (contrato?.pagos ?? []).map((p) => ({
+      monto: Number(p.monto),
+      fechaPago: p.fechaPago,
+      descripcion: p.descripcion ?? '',
+    })),
   };
 }
 

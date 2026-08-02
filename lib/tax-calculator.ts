@@ -93,6 +93,37 @@ export function getCategoriaFromPartida(
   return 'GENERAL';
 }
 
+/**
+ * Detecta si una partida POA corresponde a un contrato de consultoría,
+ * a partir de su nombre — mismo criterio que `getCategoriaFromPartida`.
+ * Cubre CONSULTORES, CONSULTOR 1..6 y CONSULTORIA...
+ */
+export function esPartidaConsultoria(nombrePartida?: string | null): boolean {
+  return normalizeString(nombrePartida).includes('CONSULTOR');
+}
+
+/** Tipo de documento admitido en un contrato de consultoría. */
+export type TipoDocConsultoria = 'FACTURA' | 'RECIBO';
+
+/**
+ * Gross-up de un contrato de consultoría: el usuario indica el líquido que
+ * recibe el consultor y aquí se obtiene el bruto que se carga al POA.
+ *
+ * FACTURA → factor 1.00 (el consultor declara sus impuestos)
+ * RECIBO  → factor 0.84 (RC-IVA 13% + IT 3%)
+ */
+export function calcularMontosConsultoria(
+  montoLiquido: number,
+  tipoDocumento: TipoDocConsultoria
+): TaxResult {
+  return calcularMontoBrutoRendicion(
+    montoLiquido,
+    tipoDocumento,
+    'GENERAL',
+    'SERVICIO'
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Función principal
 // ---------------------------------------------------------------------------

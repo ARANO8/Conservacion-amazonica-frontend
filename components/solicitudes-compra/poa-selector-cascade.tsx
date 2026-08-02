@@ -3,17 +3,8 @@
 import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
-import {
-  Check,
-  ChevronDown,
-  Loader2,
-  X,
-  Wallet,
-} from 'lucide-react';
-import {
-  Field,
-  FieldLabel,
-} from '@/components/ui/field';
+import { Check, ChevronDown, Loader2, X, Wallet } from 'lucide-react';
+import { Field, FieldLabel } from '@/components/ui/field';
 import {
   Select,
   SelectContent,
@@ -36,6 +27,7 @@ import {
 } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { esPartidaConsultoria } from '@/lib/tax-calculator';
 import { PoaCard } from '@/components/solicitudes/poa-card';
 import { catalogosService } from '@/lib/services/catalogos-service';
 import type { PoaStructureItem } from '@/types/backend';
@@ -170,7 +162,6 @@ export function PoaSelectorCascade({
         i.estructura?.partida?.id === localPartidaId
     );
   }, [poaStructure, localProyectoId, localGrupoId, localPartidaId]);
-
 
   // ---- Handlers ----
   const handlePoaCodeSelect = useCallback(
@@ -364,8 +355,21 @@ export function PoaSelectorCascade({
                 disabled={!localGrupoId}
                 value={localPartidaId ? String(localPartidaId) : ''}
                 onValueChange={(v) => {
-                  setLocalPartidaId(Number(v));
+                  const partidaId = Number(v);
+                  setLocalPartidaId(partidaId);
                   form.setValue('poaId', 0);
+
+                  // El nombre de la partida define si es un contrato de
+                  // consultoría; se resuelve aquí para que la sección aparezca
+                  // sin esperar a que se elija la línea POA.
+                  const partida = availablePartidas.find(
+                    (p) => p.id === partidaId
+                  );
+                  const nombre = partida?.nombre ?? '';
+                  form.setValue('partidaNombre', nombre, { shouldDirty: true });
+                  form.setValue('esConsultoria', esPartidaConsultoria(nombre), {
+                    shouldDirty: true,
+                  });
                 }}
               >
                 <SelectTrigger>

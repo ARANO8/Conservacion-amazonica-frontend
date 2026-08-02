@@ -1,17 +1,12 @@
 'use client';
 
-import { useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { toast } from 'sonner';
-import {
-  ShoppingCart,
-  ArrowLeft,
-  Loader2,
-  SendHorizonal,
-} from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Loader2, SendHorizonal } from 'lucide-react';
 
 import {
   Field,
@@ -32,6 +27,10 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 import { formatMoney } from '@/lib/utils';
+import {
+  calcularMontosConsultoria,
+  esPartidaConsultoria,
+} from '@/lib/tax-calculator';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { catalogosService } from '@/lib/services/catalogos-service';
 import { useAuthStore } from '@/store/auth-store';
@@ -45,6 +44,7 @@ import {
 import CompraReviewModal from './compra-review-modal';
 import { PoaSelectorCascade } from './poa-selector-cascade';
 import { SolicitudCompraItemsTable } from './solicitud-compra-items-table';
+import { ConsultoriaSection } from './consultoria-section';
 
 interface UsuarioOption {
   id: number;
@@ -86,7 +86,9 @@ export default function SolicitudCompraForm({
 
   // States from cascade selection needed for review modal
   const [selectedPoaCode, setSelectedPoaCode] = useState('');
-  const [selectedPoaItem, setSelectedPoaItem] = useState<PoaStructureItem | undefined>(undefined);
+  const [selectedPoaItem, setSelectedPoaItem] = useState<
+    PoaStructureItem | undefined
+  >(undefined);
 
   const form = useForm<SolicitudCompraFormData>({
     resolver: zodResolver(solicitudCompraSchema),
@@ -102,6 +104,11 @@ export default function SolicitudCompraForm({
         initialValues?.items && initialValues.items.length > 0
           ? initialValues.items
           : [{ ...emptyItem }],
+      esConsultoria: initialValues?.esConsultoria ?? false,
+      partidaNombre: initialValues?.partidaNombre ?? '',
+      tipoDocumento: initialValues?.tipoDocumento ?? 'RECIBO',
+      montoLiquido: initialValues?.montoLiquido,
+      pagos: initialValues?.pagos ?? [],
     },
     mode: 'onBlur',
   });
@@ -121,22 +128,65 @@ export default function SolicitudCompraForm({
           initialValues.items && initialValues.items.length > 0
             ? initialValues.items
             : [{ ...emptyItem }],
+        esConsultoria: initialValues.esConsultoria ?? false,
+        partidaNombre: initialValues.partidaNombre ?? '',
+        tipoDocumento: initialValues.tipoDocumento ?? 'RECIBO',
+        montoLiquido: initialValues.montoLiquido,
+        pagos: initialValues.pagos ?? [],
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const watchedItems = useWatch({ control: form.control, name: 'items' });
+  const esConsultoria = useWatch({
+    control: form.control,
+    name: 'esConsultoria',
+  });
+  const montoLiquido = useWatch({
+    control: form.control,
+    name: 'montoLiquido',
+  });
+  const tipoDocumento = useWatch({
+    control: form.control,
+    name: 'tipoDocumento',
+  });
 
-  const total = useMemo(
-    () =>
-      (watchedItems ?? []).reduce((acc, item) => {
-        return (
-          acc +
-          (Number(item?.cantidad) || 0) * (Number(item?.costoUnitario) || 0)
-        );
-      }, 0),
-    [watchedItems]
+  // En consultorías el total con cargo al POA es el bruto tras la retención.
+  const total = useMemo(() => {
+    if (esConsultoria) {
+      return calcularMontosConsultoria(
+        Number(montoLiquido) || 0,
+        tipoDocumento ?? 'RECIBO'
+      ).montoBruto;
+    }
+    return (watchedItems ?? []).reduce((acc, item) => {
+      return (
+        acc + (Number(item?.cantidad) || 0) * (Number(item?.costoUnitario) || 0)
+      );
+    }, 0);
+  }, [esConsultoria, montoLiquido, tipoDocumento, watchedItems]);
+
+  // La partida POA elegida define si la solicitud es un contrato de consultoría.
+  // Sólo se recalcula cuando hay línea POA seleccionada: al resetearla, la
+  // cascada ya dejó puesto el valor correcto a partir del nivel Partida.
+  const handlePoaChange = useCallback(
+    (code: string, item?: PoaStructureItem) => {
+      setSelectedPoaCode(code);
+      setSelectedPoaItem(item);
+
+      const nombrePartida = item?.estructura?.partida?.nombre;
+      if (!nombrePartida) return;
+
+      const esConsultoriaPartida = esPartidaConsultoria(nombrePartida);
+      form.setValue('partidaNombre', nombrePartida, { shouldDirty: true });
+      if (form.getValues('esConsultoria') !== esConsultoriaPartida) {
+        form.setValue('esConsultoria', esConsultoriaPartida, {
+          shouldDirty: true,
+        });
+      }
+    },
+    [form]
   );
 
   // ---- Carga inicial de opciones ----
@@ -146,10 +196,14 @@ export default function SolicitudCompraForm({
       try {
         setLoadingOpts(true);
         const [usuariosRes, codes] = await Promise.all([
-          api.get<UsuarioOption[]>('/usuarios/lookup/activos', { signal: controller.signal }),
+          api.get<UsuarioOption[]>('/usuarios/lookup/activos', {
+            signal: controller.signal,
+          }),
           catalogosService.getPoaLookup(controller.signal),
         ]);
-        setUsuarioOptions(usuariosRes.data.filter((u) => String(u.id) !== String(user?.id)));
+        setUsuarioOptions(
+          usuariosRes.data.filter((u) => String(u.id) !== String(user?.id))
+        );
         setPoaCodes(codes);
       } catch (err) {
         if (axios.isCancel(err)) return;
@@ -166,12 +220,43 @@ export default function SolicitudCompraForm({
     };
   }, [user?.id]);
 
-  // ---- Abrir modal (valida campos del form body antes de abrir) ----
+  // ---- Abrir modal (valida el cuerpo del form antes de abrir) ----
+  // Las reglas de consultoría viven en un superRefine a nivel de objeto, que
+  // zod no ejecuta si algún campo base falla (aprobadorId aún vale 0 aquí,
+  // se completa dentro del modal). Por eso se comprueban a mano.
   const handleOpenReview = async () => {
     const isValid = await form.trigger(['poaId', 'motivoSolicitud', 'items']);
-    if (isValid) {
-      setIsReviewOpen(true);
+    if (!isValid) return;
+
+    if (form.getValues('esConsultoria')) {
+      const liquido = Number(form.getValues('montoLiquido')) || 0;
+      const pagos = form.getValues('pagos') ?? [];
+
+      if (liquido <= 0) {
+        toast.error('Ingresa el monto del contrato de consultoría');
+        return;
+      }
+      if (pagos.length === 0) {
+        toast.error('Define al menos un pago parcial');
+        return;
+      }
+      const suma = pagos.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
+      if (Math.abs(suma - liquido) > 0.01) {
+        toast.error(
+          `Los pagos suman ${formatMoney(suma)} y el contrato es de ${formatMoney(liquido)}`
+        );
+        return;
+      }
+      if (pagos.some((p) => !p.fechaPago)) {
+        toast.error('Cada pago parcial necesita una fecha');
+        return;
+      }
+    } else if ((form.getValues('items') ?? []).length === 0) {
+      toast.error('Agrega al menos un ítem de gasto');
+      return;
     }
+
+    setIsReviewOpen(true);
   };
 
   // ---- Payload y submit ----
@@ -183,13 +268,30 @@ export default function SolicitudCompraForm({
     proyecto: data.proyecto || undefined,
     chequeANombreDe: data.chequeANombreDe,
     descripcion: data.descripcion || undefined,
-    gastosCompra: data.items.map((item) => ({
-      descripcion: item.descripcion,
-      cantidad: Number(item.cantidad),
-      uso: item.uso || undefined,
-      costoUnitario: Number(item.costoUnitario),
-      poaId: data.poaId,
-    })),
+    // Una consultoría viaja como un único gasto de compra con su cronograma;
+    // el resto de compras mantiene una línea por ítem.
+    gastosCompra: data.esConsultoria
+      ? [
+          {
+            descripcion: data.motivoSolicitud,
+            cantidad: 1,
+            costoUnitario: Number(data.montoLiquido) || 0,
+            poaId: data.poaId,
+            tipoDocumento: data.tipoDocumento,
+            pagos: (data.pagos ?? []).map((p) => ({
+              monto: Number(p.monto) || 0,
+              fechaPago: new Date(p.fechaPago).toISOString(),
+              descripcion: p.descripcion || undefined,
+            })),
+          },
+        ]
+      : data.items.map((item) => ({
+          descripcion: item.descripcion,
+          cantidad: Number(item.cantidad),
+          uso: item.uso || undefined,
+          costoUnitario: Number(item.costoUnitario),
+          poaId: data.poaId,
+        })),
     planificaciones: [] as [],
     viaticos: [] as [],
     gastos: [] as [],
@@ -302,17 +404,18 @@ export default function SolicitudCompraForm({
                       poaCodes={poaCodes}
                       initialValues={initialValues}
                       initialPoaCode={initialPoaCode}
-                      onPoaChange={(code, item) => {
-                        setSelectedPoaCode(code);
-                        setSelectedPoaItem(item);
-                      }}
+                      onPoaChange={handlePoaChange}
                     />
                   </FieldSet>
 
                   <Separator />
 
                   {/* ---- Sección 3: Descripción del Gasto ---- */}
-                  <SolicitudCompraItemsTable />
+                  {esConsultoria ? (
+                    <ConsultoriaSection />
+                  ) : (
+                    <SolicitudCompraItemsTable />
+                  )}
 
                   <Separator />
 
@@ -348,7 +451,9 @@ export default function SolicitudCompraForm({
               <div className="flex items-center gap-6">
                 <div className="flex flex-col text-right">
                   <span className="text-primary text-[10px] font-black tracking-tight uppercase">
-                    Total Solicitado
+                    {esConsultoria
+                      ? 'Total Solicitado (Incl. Retenciones)'
+                      : 'Total Solicitado'}
                   </span>
                   <span className="text-primary text-xl font-black">
                     {formatMoney(total)}

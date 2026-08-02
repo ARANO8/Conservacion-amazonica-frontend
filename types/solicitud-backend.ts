@@ -1,5 +1,13 @@
 export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 
+export interface PagoParcialResponse {
+  id: number;
+  numero: number;
+  monto: number | string;
+  fechaPago: string;
+  descripcion?: string | null;
+}
+
 export interface GastoCompraResponse {
   id: number;
   cantidad: number | string;
@@ -8,6 +16,16 @@ export interface GastoCompraResponse {
   costoUnitario: number | string;
   total: number | string;
   solicitudPresupuestoId: number;
+  tipoDocumento?: 'FACTURA' | 'RECIBO';
+  montoPresupuestado?: number | string;
+  iva?: number | string;
+  it?: number | string;
+  pagos?: PagoParcialResponse[];
+  solicitudPresupuesto?: {
+    poa?: {
+      estructura?: { partida?: { id: number; nombre: string } };
+    };
+  };
 }
 
 export interface CreateSolicitudCompraPayload {
@@ -24,6 +42,8 @@ export interface CreateSolicitudCompraPayload {
     uso?: string;
     costoUnitario: number;
     poaId: number;
+    tipoDocumento?: 'FACTURA' | 'RECIBO';
+    pagos?: { monto: number; fechaPago: string; descripcion?: string }[];
   }[];
   planificaciones: [];
   viaticos: [];

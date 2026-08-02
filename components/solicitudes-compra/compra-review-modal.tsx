@@ -35,8 +35,18 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { formatMoney, cn } from '@/lib/utils';
+import { calcularMontosConsultoria } from '@/lib/tax-calculator';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { PoaStructureItem } from '@/types/backend';
 import type { SolicitudCompraFormData } from './solicitud-compra-schema';
+
+const formatFechaPago = (value: string | Date | undefined): string => {
+  if (!value) return '—';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return format(date, "d 'de' MMM yyyy", { locale: es });
+};
 
 interface UsuarioOption {
   id: number;
@@ -73,18 +83,30 @@ export default function CompraReviewModal({
   const watchedItems = useWatch<SolicitudCompraFormData, 'items'>({
     name: 'items',
   });
+  const watchedPagos = useWatch<SolicitudCompraFormData, 'pagos'>({
+    name: 'pagos',
+  });
 
   const aprobadorSeleccionado = useMemo(
     () => usuarioOptions.find((u) => u.id === data.aprobadorId),
     [usuarioOptions, data.aprobadorId]
   );
 
-  // Cálculo directo sin useMemo para evitar dependencia estancada
-  const total = (watchedItems ?? []).reduce(
-    (acc, item) =>
-      acc + (Number(item?.cantidad) || 0) * (Number(item?.costoUnitario) || 0),
-    0
+  const taxResult = calcularMontosConsultoria(
+    Number(data.montoLiquido) || 0,
+    data.tipoDocumento ?? 'RECIBO'
   );
+
+  // Cálculo directo sin useMemo para evitar dependencia estancada.
+  // En consultorías el POA se afecta por el bruto, no por el líquido.
+  const total = data.esConsultoria
+    ? taxResult.montoBruto
+    : (watchedItems ?? []).reduce(
+        (acc, item) =>
+          acc +
+          (Number(item?.cantidad) || 0) * (Number(item?.costoUnitario) || 0),
+        0
+      );
 
   const canConfirm =
     !loading && !!data.aprobadorId && !!data.chequeANombreDe?.trim();
@@ -208,60 +230,137 @@ export default function CompraReviewModal({
               )}
             </section>
 
-            {/* ---- Descripción del gasto ---- */}
-            <section className="space-y-2">
-              <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                Descripción del Gasto
-              </h3>
-              <div className="rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-muted-foreground px-3 py-2 text-left text-[10px] font-bold uppercase">
-                        Descripción
-                      </th>
-                      <th className="text-muted-foreground px-3 py-2 text-center text-[10px] font-bold uppercase">
-                        Cant.
-                      </th>
-                      <th className="text-muted-foreground px-3 py-2 text-right text-[10px] font-bold uppercase">
-                        P/Unit.
-                      </th>
-                      <th className="text-muted-foreground px-3 py-2 text-right text-[10px] font-bold uppercase">
-                        Total
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(watchedItems ?? []).map((item, i) => {
-                      const subtotal =
-                        (Number(item?.cantidad) || 0) *
-                        (Number(item?.costoUnitario) || 0);
-                      return (
+            {/* ---- Consultoría: retención + cronograma de pagos ---- */}
+            {data.esConsultoria && (
+              <section className="space-y-2">
+                <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                  Contrato de Consultoría
+                </h3>
+
+                <div className="space-y-1.5 rounded-lg border p-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Líquido al consultor
+                    </span>
+                    <span className="font-medium">
+                      {formatMoney(taxResult.montoNeto)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Tipo de documento
+                    </span>
+                    <span>{data.tipoDocumento}</span>
+                  </div>
+                  {taxResult.desglose.map((d) => (
+                    <div key={d.label} className="flex justify-between">
+                      <span className="text-muted-foreground">{d.label}</span>
+                      <span>{formatMoney(d.monto)}</span>
+                    </div>
+                  ))}
+                  <Separator className="my-1" />
+                  <div className="flex justify-between font-semibold">
+                    <span>Bruto con cargo al POA</span>
+                    <span>{formatMoney(taxResult.montoBruto)}</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-muted-foreground px-3 py-2 text-left text-[10px] font-bold uppercase">
+                          Pago
+                        </th>
+                        <th className="text-muted-foreground px-3 py-2 text-left text-[10px] font-bold uppercase">
+                          Fecha
+                        </th>
+                        <th className="text-muted-foreground px-3 py-2 text-right text-[10px] font-bold uppercase">
+                          Monto
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(watchedPagos ?? []).map((pago, i) => (
                         <tr key={i} className="border-b last:border-0">
-                          <td className="px-3 py-2 font-medium">
-                            {item?.descripcion || '—'}
-                            {item?.uso && (
+                          <td className="px-3 py-2">
+                            <span className="font-medium">Pago {i + 1}</span>
+                            {pago?.descripcion && (
                               <span className="text-muted-foreground ml-1 text-xs">
-                                ({item.uso})
+                                ({pago.descripcion})
                               </span>
                             )}
                           </td>
-                          <td className="px-3 py-2 text-center">
-                            {item?.cantidad}
-                          </td>
-                          <td className="px-3 py-2 text-right">
-                            {formatMoney(Number(item?.costoUnitario) || 0)}
+                          <td className="px-3 py-2">
+                            {formatFechaPago(pago?.fechaPago)}
                           </td>
                           <td className="px-3 py-2 text-right font-semibold">
-                            {formatMoney(subtotal)}
+                            {formatMoney(Number(pago?.monto) || 0)}
                           </td>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {/* ---- Descripción del gasto ---- */}
+            {!data.esConsultoria && (
+              <section className="space-y-2">
+                <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                  Descripción del Gasto
+                </h3>
+                <div className="rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-muted-foreground px-3 py-2 text-left text-[10px] font-bold uppercase">
+                          Descripción
+                        </th>
+                        <th className="text-muted-foreground px-3 py-2 text-center text-[10px] font-bold uppercase">
+                          Cant.
+                        </th>
+                        <th className="text-muted-foreground px-3 py-2 text-right text-[10px] font-bold uppercase">
+                          P/Unit.
+                        </th>
+                        <th className="text-muted-foreground px-3 py-2 text-right text-[10px] font-bold uppercase">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(watchedItems ?? []).map((item, i) => {
+                        const subtotal =
+                          (Number(item?.cantidad) || 0) *
+                          (Number(item?.costoUnitario) || 0);
+                        return (
+                          <tr key={i} className="border-b last:border-0">
+                            <td className="px-3 py-2 font-medium">
+                              {item?.descripcion || '—'}
+                              {item?.uso && (
+                                <span className="text-muted-foreground ml-1 text-xs">
+                                  ({item.uso})
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              {item?.cantidad}
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              {formatMoney(Number(item?.costoUnitario) || 0)}
+                            </td>
+                            <td className="px-3 py-2 text-right font-semibold">
+                              {formatMoney(subtotal)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
           </div>
         </div>
 
