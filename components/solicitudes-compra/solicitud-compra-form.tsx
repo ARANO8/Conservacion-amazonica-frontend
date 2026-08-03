@@ -263,7 +263,8 @@ export default function SolicitudCompraForm({
   const buildPayload = (data: SolicitudCompraFormData) => ({
     tipo: 'COMPRA_SERVICIO' as const,
     poaIds: [data.poaId],
-    aprobadorId: data.aprobadorId,
+    // Las consultorías nacen en ejecución, sin aprobador de contrato
+    ...(data.esConsultoria ? {} : { aprobadorId: data.aprobadorId }),
     motivoViaje: data.motivoSolicitud,
     proyecto: data.proyecto || undefined,
     chequeANombreDe: data.chequeANombreDe,

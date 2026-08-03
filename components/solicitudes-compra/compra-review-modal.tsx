@@ -108,8 +108,11 @@ export default function CompraReviewModal({
         0
       );
 
+  // Las consultorías no llevan aprobador: el contrato nace en ejecución
   const canConfirm =
-    !loading && !!data.aprobadorId && !!data.chequeANombreDe?.trim();
+    !loading &&
+    !!data.chequeANombreDe?.trim() &&
+    (data.esConsultoria || !!data.aprobadorId);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -368,95 +371,104 @@ export default function CompraReviewModal({
 
         <Separator className="shrink-0" />
 
-        {/* Selección de aprobador — fuera del scroll para evitar clipping del popover */}
-        <div className="shrink-0 space-y-3">
-          <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-            Enviar solicitud a: <span className="text-destructive">*</span>
-          </h3>
-
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <p className="text-[13px] leading-tight font-medium">
-                Selecciona a tu inmediato superior o al coordinador del área
-                para la aprobación de esta solicitud.
-              </p>
-            </div>
+        {/* Selección de aprobador — fuera del scroll para evitar clipping del popover.
+            Un contrato de consultoría no se aprueba como un todo: nace en
+            ejecución y el aprobador se elige al solicitar cada pago. */}
+        {data.esConsultoria ? (
+          <div className="text-muted-foreground shrink-0 rounded-lg border border-dashed p-3 text-xs">
+            El contrato queda registrado y en ejecución. La aprobación se hace
+            al solicitar cada pago del cronograma.
           </div>
+        ) : (
+          <div className="shrink-0 space-y-3">
+            <h3 className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+              Enviar solicitud a: <span className="text-destructive">*</span>
+            </h3>
 
-          <Popover open={comboOpen} onOpenChange={setComboOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                role="combobox"
-                aria-expanded={comboOpen}
-                className={cn(
-                  'w-full justify-between overflow-hidden font-normal',
-                  !data.aprobadorId && 'text-muted-foreground'
-                )}
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p className="text-[13px] leading-tight font-medium">
+                  Selecciona a tu inmediato superior o al coordinador del área
+                  para la aprobación de esta solicitud.
+                </p>
+              </div>
+            </div>
+
+            <Popover open={comboOpen} onOpenChange={setComboOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={comboOpen}
+                  className={cn(
+                    'w-full justify-between overflow-hidden font-normal',
+                    !data.aprobadorId && 'text-muted-foreground'
+                  )}
+                >
+                  <span className="truncate text-left">
+                    {aprobadorSeleccionado
+                      ? `${aprobadorSeleccionado.nombreCompleto}${aprobadorSeleccionado.cargo ? ` — ${aprobadorSeleccionado.cargo}` : ''}`
+                      : 'Seleccionar responsable...'}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[var(--radix-popover-trigger-width)] p-0"
+                align="start"
+                side="top"
+                sideOffset={4}
+                collisionPadding={16}
               >
-                <span className="truncate text-left">
-                  {aprobadorSeleccionado
-                    ? `${aprobadorSeleccionado.nombreCompleto}${aprobadorSeleccionado.cargo ? ` — ${aprobadorSeleccionado.cargo}` : ''}`
-                    : 'Seleccionar responsable...'}
-                </span>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] p-0"
-              align="start"
-              side="top"
-              sideOffset={4}
-              collisionPadding={16}
-            >
-              <Command>
-                <CommandInput placeholder="Buscar destinatario..." />
-                {/*
+                <Command>
+                  <CommandInput placeholder="Buscar destinatario..." />
+                  {/*
                   no-scrollbar (clase base de CommandList) oculta el scrollbar vía
                   display:none (webkit) y scrollbar-width:none (Firefox).
                   !block + !important sobreescribe display:none en webkit.
                   scrollbar-width:thin sobreescribe scrollbar-width:none en Firefox.
                 */}
-                <CommandList className="[&::-webkit-scrollbar-thumb]:bg-border max-h-[200px] [scrollbar-width:thin] [&::-webkit-scrollbar]:!block [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
-                  <CommandEmpty>No se encontró el usuario.</CommandEmpty>
-                  <CommandGroup>
-                    {usuarioOptions.map((u) => (
-                      <CommandItem
-                        key={u.id}
-                        value={u.nombreCompleto}
-                        onSelect={() => {
-                          setValue('aprobadorId', u.id);
-                          setComboOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4 shrink-0',
-                            data.aprobadorId === u.id
-                              ? 'opacity-100'
-                              : 'opacity-0'
-                          )}
-                        />
-                        <span className="truncate">
-                          {u.nombreCompleto}
-                          {u.cargo ? ` — ${u.cargo}` : ''}
-                        </span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                  <CommandList className="[&::-webkit-scrollbar-thumb]:bg-border max-h-[200px] [scrollbar-width:thin] [&::-webkit-scrollbar]:!block [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+                    <CommandEmpty>No se encontró el usuario.</CommandEmpty>
+                    <CommandGroup>
+                      {usuarioOptions.map((u) => (
+                        <CommandItem
+                          key={u.id}
+                          value={u.nombreCompleto}
+                          onSelect={() => {
+                            setValue('aprobadorId', u.id);
+                            setComboOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4 shrink-0',
+                              data.aprobadorId === u.id
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                          <span className="truncate">
+                            {u.nombreCompleto}
+                            {u.cargo ? ` — ${u.cargo}` : ''}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-          {!data.aprobadorId && (
-            <p className="text-destructive text-sm">
-              Debes seleccionar un destinatario para enviar la solicitud.
-            </p>
-          )}
-        </div>
+            {!data.aprobadorId && (
+              <p className="text-destructive text-sm">
+                Debes seleccionar un destinatario para enviar la solicitud.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Total — al final, antes de los botones de acción */}
         <div className="flex shrink-0 items-center justify-end gap-4 border-t pt-3">

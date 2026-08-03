@@ -34,10 +34,12 @@ export const pagoParcialSchema = z.object({
 
 export const solicitudCompraSchema = z
   .object({
+    // Las consultorías no llevan aprobador de contrato: nacen en ejecución y
+    // el aprobador se elige al solicitar cada pago. Se valida en superRefine.
     aprobadorId: z
       .number({ invalid_type_error: 'Seleccione un aprobador' })
       .int()
-      .positive('Seleccione un aprobador'),
+      .optional(),
     poaId: z
       .number({ invalid_type_error: 'Seleccione una partida presupuestaria' })
       .int()
@@ -72,6 +74,13 @@ export const solicitudCompraSchema = z
   })
   .superRefine((data, ctx) => {
     if (!data.esConsultoria) {
+      if (!data.aprobadorId || data.aprobadorId <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['aprobadorId'],
+          message: 'Seleccione un aprobador',
+        });
+      }
       if (data.items.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

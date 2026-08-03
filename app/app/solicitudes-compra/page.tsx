@@ -64,6 +64,11 @@ const ESTADO_BADGE: Record<string, { label: string; className: string }> = {
     className:
       'border-green-300 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300',
   },
+  EN_EJECUCION: {
+    label: 'En ejecución',
+    className:
+      'border-indigo-300 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',
+  },
   EJECUTADO: {
     label: 'Ejecutado',
     className:

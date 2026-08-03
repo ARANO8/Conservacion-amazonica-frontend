@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import { CronogramaPagos } from '@/components/solicitudes-compra/cronograma-pagos';
 
 const ESTADO_BADGE: Record<string, { label: string; className: string }> = {
   PENDIENTE: {
@@ -40,6 +41,11 @@ const ESTADO_BADGE: Record<string, { label: string; className: string }> = {
     label: 'Desembolsado',
     className:
       'border-green-300 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+  },
+  EN_EJECUCION: {
+    label: 'En ejecución',
+    className:
+      'border-indigo-300 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',
   },
   EJECUTADO: {
     label: 'Ejecutado',
@@ -62,20 +68,29 @@ export default function DetalleSolicitudCompraPage() {
   const [solicitud, setSolicitud] = useState<SolicitudResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = useCallback(
+    async (conSpinner = true) => {
       try {
-        setLoading(true);
+        if (conSpinner) setLoading(true);
         const data = await solicitudesService.getSolicitudById(params.id);
         setSolicitud(data);
       } catch {
         toast.error('No se pudo cargar la solicitud.');
       } finally {
-        setLoading(false);
+        if (conSpinner) setLoading(false);
       }
-    };
+    },
+    [params.id]
+  );
+
+  useEffect(() => {
     void fetchData();
-  }, [params.id]);
+  }, [fetchData]);
+
+  // Un contrato de consultoría es el gasto de compra que trae cronograma
+  const contrato = (solicitud?.gastosCompra ?? []).find(
+    (gc) => (gc.pagos ?? []).length > 0
+  );
 
   const handleDownloadPdf = async () => {
     if (!solicitud) return;
@@ -239,6 +254,15 @@ export default function DetalleSolicitudCompraPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Cronograma de pagos (contratos de consultoría) */}
+          {contrato && (
+            <CronogramaPagos
+              solicitudId={solicitud.id}
+              pagos={contrato.pagos ?? []}
+              onActualizado={() => fetchData(false)}
+            />
+          )}
 
           {/* Observaciones */}
           {solicitud.descripcion && (

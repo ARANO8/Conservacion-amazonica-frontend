@@ -23,6 +23,12 @@ function tipoLabel(tipo: NotificacionBackend['tipo']): string {
     SOLICITUD_OBSERVADA: 'Observada',
     RENDICION_PENDIENTE: 'Rendición pendiente',
     RENDICION_OBSERVADA: 'Rendición observada',
+    CUADRO_PENDIENTE_VALIDACION: 'Cuadro por validar',
+    CUADRO_PENDIENTE_REVISION: 'Cuadro por revisar',
+    CUADRO_OBSERVADO: 'Cuadro observado',
+    CUADRO_APROBADO: 'Cuadro aprobado',
+    PAGO_PENDIENTE_APROBACION: 'Pago por aprobar',
+    PAGO_REALIZADO: 'Pago registrado',
   };
   return labels[tipo] ?? tipo;
 }

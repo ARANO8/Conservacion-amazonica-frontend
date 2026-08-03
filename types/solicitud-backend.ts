@@ -1,11 +1,24 @@
 export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 
+export type EstadoPagoParcial =
+  | 'PLANIFICADO'
+  | 'SOLICITADO'
+  | 'APROBADO'
+  | 'PAGADO';
+
 export interface PagoParcialResponse {
   id: number;
   numero: number;
   monto: number | string;
   fechaPago: string;
   descripcion?: string | null;
+  estado: EstadoPagoParcial;
+  urlComprobante?: string | null;
+  urlInforme?: string | null;
+  fechaPagoReal?: string | null;
+  solicitadoPorId?: number | null;
+  aprobadorId?: number | null;
+  pagadoPorId?: number | null;
 }
 
 export interface GastoCompraResponse {
@@ -30,7 +43,8 @@ export interface GastoCompraResponse {
 
 export interface CreateSolicitudCompraPayload {
   poaIds: number[];
-  aprobadorId: number;
+  /** No aplica a consultorías: nacen en ejecución y se aprueba cada cuota */
+  aprobadorId?: number;
   tipo: 'COMPRA_SERVICIO';
   proyecto?: string;
   motivoViaje: string;

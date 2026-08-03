@@ -41,7 +41,9 @@ export const solicitudesService = {
    * @param id The ID of the solicitud to fetch.
    */
   async getSolicitudById(id: string | number, signal?: AbortSignal) {
-    const response = await api.get<SolicitudResponse>(`/solicitudes/${id}`, { signal });
+    const response = await api.get<SolicitudResponse>(`/solicitudes/${id}`, {
+      signal,
+    });
     return response.data;
   },
 
@@ -64,8 +66,15 @@ export const solicitudesService = {
   /**
    * Creates a new Solicitud de Compras/Servicios (COMPRA_SERVICIO).
    */
-  async createSolicitudCompra(payload: CreateSolicitudCompraPayload, signal?: AbortSignal) {
-    const response = await api.post<SolicitudResponse>('/solicitudes', payload, { signal });
+  async createSolicitudCompra(
+    payload: CreateSolicitudCompraPayload,
+    signal?: AbortSignal
+  ) {
+    const response = await api.post<SolicitudResponse>(
+      '/solicitudes',
+      payload,
+      { signal }
+    );
     return response.data;
   },
 
@@ -73,7 +82,9 @@ export const solicitudesService = {
    * Fetches solicitudes filtered by tipo=COMPRA_SERVICIO (client-side filter).
    */
   async getSolicitudesCompra(signal?: AbortSignal) {
-    const response = await api.get<SolicitudResponse[]>('/solicitudes', { signal });
+    const response = await api.get<SolicitudResponse[]>('/solicitudes', {
+      signal,
+    });
     return response.data.filter((s) => s.tipo === 'COMPRA_SERVICIO');
   },
 
@@ -90,12 +101,16 @@ export const solicitudesService = {
     fechaDesembolso?: string,
     signal?: AbortSignal
   ) {
-    const response = await api.patch(`/solicitudes/${id}/desembolsar`, {
-      codigoDesembolso,
-      ...(urlComprobante ? { urlComprobante } : {}),
-      ...(banco ? { banco } : {}),
-      ...(fechaDesembolso ? { fechaDesembolso } : {}),
-    }, { signal });
+    const response = await api.patch(
+      `/solicitudes/${id}/desembolsar`,
+      {
+        codigoDesembolso,
+        ...(urlComprobante ? { urlComprobante } : {}),
+        ...(banco ? { banco } : {}),
+        ...(fechaDesembolso ? { fechaDesembolso } : {}),
+      },
+      { signal }
+    );
     return response.data;
   },
 
@@ -111,12 +126,48 @@ export const solicitudesService = {
     return response.data;
   },
 
-  /**
-   * Marca una solicitud como EJECUTADA después de una rendición exitosa.
-   * @param id The ID of the solicitud to mark as executed.
-   */
-  async marcarEjecutada(id: string | number, signal?: AbortSignal) {
-    const response = await api.patch(`/solicitudes/${id}/ejecutar`, {}, { signal });
+  // --- Pagos parciales de contratos de consultoría ---
+
+  /** Adquisiciones solicita el pago de una cuota. PLANIFICADO → SOLICITADO */
+  async solicitarPago(
+    solicitudId: number | string,
+    pagoId: number,
+    data: { aprobadorId: number; urlComprobante: string; urlInforme?: string },
+    signal?: AbortSignal
+  ) {
+    const response = await api.patch(
+      `/solicitudes/${solicitudId}/pagos/${pagoId}/solicitar`,
+      data,
+      { signal }
+    );
+    return response.data;
+  },
+
+  /** El aprobador asignado aprueba la cuota. SOLICITADO → APROBADO */
+  async aprobarPago(
+    solicitudId: number | string,
+    pagoId: number,
+    signal?: AbortSignal
+  ) {
+    const response = await api.patch(
+      `/solicitudes/${solicitudId}/pagos/${pagoId}/aprobar`,
+      {},
+      { signal }
+    );
+    return response.data;
+  },
+
+  /** Tesorería registra el pago. APROBADO → PAGADO (la última cierra el contrato) */
+  async pagarPago(
+    solicitudId: number | string,
+    pagoId: number,
+    signal?: AbortSignal
+  ) {
+    const response = await api.patch(
+      `/solicitudes/${solicitudId}/pagos/${pagoId}/pagar`,
+      {},
+      { signal }
+    );
     return response.data;
   },
 };
