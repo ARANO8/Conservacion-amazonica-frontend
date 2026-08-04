@@ -771,51 +771,6 @@ export function RendicionDetailClient({
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Informe</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {rendicion.informeGastos ? (
-            <>
-              <p className="text-sm">
-                Periodo: {formatDate(rendicion.informeGastos.fechaInicio)} -{' '}
-                {formatDate(rendicion.informeGastos.fechaFin)}
-              </p>
-              {rendicion.informeGastos.actividades?.length ? (
-                <div className="space-y-2">
-                  {rendicion.informeGastos.actividades.map(
-                    (actividad, index) => (
-                      <div key={actividad.id} className="rounded-md border p-3">
-                        <p className="text-sm font-semibold">
-                          Actividad #{index + 1}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          Fecha: {formatDate(actividad.fecha)}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          Lugar: {actividad.lugar}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          Persona / Institucion: {actividad.personaInstitucion}
-                        </p>
-                        <p className="mt-2 text-sm whitespace-pre-wrap">
-                          {actividad.actividadesRealizadas}
-                        </p>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">Sin informe.</p>
-              )}
-            </>
-          ) : (
-            <p className="text-muted-foreground text-sm">Sin informe.</p>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Observaciones */}
       {rendicion.observaciones && (
         <Card>

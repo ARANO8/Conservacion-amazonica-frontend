@@ -30,16 +30,6 @@ export interface CreateRendicionApiPayload {
     partidaId: number;
     tipoRetencion?: 'BIEN' | 'SERVICIO' | 'ALQUILER';
   }>;
-  informeGastos?: {
-    fechaInicio: string;
-    fechaFin: string;
-    actividades: Array<{
-      fecha: string;
-      lugar: string;
-      personaInstitucion: string;
-      actividadesRealizadas: string;
-    }>;
-  };
   observaciones?: string;
 }
 
@@ -52,7 +42,6 @@ export interface UpdateRendicionApiPayload {
   fechaRendicion?: string;
   comprobanteUrl?: string;
   gastos?: CreateRendicionApiPayload['gastos'];
-  informeGastos?: CreateRendicionApiPayload['informeGastos'];
   observaciones?: string;
 }
 
@@ -101,23 +90,6 @@ export function adaptCreateRendicionPayload(
     })),
   };
 
-  if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
-    payload.informeGastos = {
-      fechaInicio:
-        toIsoDateString(data.informeGastos.fechaInicio) ??
-        new Date().toISOString(),
-      fechaFin:
-        toIsoDateString(data.informeGastos.fechaFin) ??
-        new Date().toISOString(),
-      actividades: data.informeGastos.actividades.map((actividad) => ({
-        fecha: toIsoDateString(actividad.fecha) ?? new Date().toISOString(),
-        lugar: actividad.lugar,
-        personaInstitucion: actividad.personaInstitucion,
-        actividadesRealizadas: actividad.actividadesRealizadas,
-      })),
-    };
-  }
-
   if (data.observaciones) {
     payload.observaciones = data.observaciones;
   }
@@ -165,26 +137,6 @@ export function adaptRendicionResponseToFormData(
       tipoRetencion:
         (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
     })),
-
-    // Informe de gastos
-    informeGastos: rendicion.informeGastos
-      ? {
-          fechaInicio: rendicion.informeGastos.fechaInicio ?? '',
-          fechaFin: rendicion.informeGastos.fechaFin ?? '',
-          actividades: (rendicion.informeGastos.actividades ?? []).map(
-            (act) => ({
-              fecha: act.fecha ?? '',
-              lugar: act.lugar ?? '',
-              personaInstitucion: act.personaInstitucion ?? '',
-              actividadesRealizadas: act.actividadesRealizadas ?? '',
-            })
-          ),
-        }
-      : {
-          fechaInicio: '',
-          fechaFin: '',
-          actividades: [],
-        },
   };
 
   return formData;
@@ -224,23 +176,6 @@ export function adaptUpdateRendicionPayload(
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
     })),
   };
-
-  if (data.informeGastos && data.informeGastos.actividades?.length > 0) {
-    payload.informeGastos = {
-      fechaInicio:
-        toIsoDateString(data.informeGastos.fechaInicio) ??
-        new Date().toISOString(),
-      fechaFin:
-        toIsoDateString(data.informeGastos.fechaFin) ??
-        new Date().toISOString(),
-      actividades: data.informeGastos.actividades.map((actividad) => ({
-        fecha: toIsoDateString(actividad.fecha) ?? new Date().toISOString(),
-        lugar: actividad.lugar,
-        personaInstitucion: actividad.personaInstitucion,
-        actividadesRealizadas: actividad.actividadesRealizadas,
-      })),
-    };
-  }
 
   if (data.observaciones) {
     payload.observaciones = data.observaciones;

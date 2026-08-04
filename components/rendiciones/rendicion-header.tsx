@@ -12,11 +12,6 @@ const STEPS: { key: WizardStepRendicion; label: string; short: string }[] = [
     label: '2. Rendición de Gastos',
     short: '2. Gastos',
   },
-  {
-    key: 'INFORME_GASTOS',
-    label: '3. Informe',
-    short: '3. Informe',
-  },
 ];
 
 interface RendicionHeaderProps {

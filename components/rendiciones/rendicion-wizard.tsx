@@ -44,7 +44,6 @@ import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
 import Paso2Gastos from './paso2-gastos';
-import Paso4Informe from './paso4-informe';
 import { RendicionReviewModal } from './rendicion-review-modal';
 
 interface RendicionWizardProps {
@@ -140,22 +139,11 @@ export default function RendicionWizard({
       return;
     }
 
+    // Último paso: se valida y se abre la confirmación de envío
     if (step === 'GASTOS_RESPALDO') {
-      const isValid = await form.trigger(['gastos']);
+      const isValid = await form.trigger(['gastos', 'comprobanteUrl']);
       if (!isValid) {
         toast.error('Revisa los gastos antes de continuar');
-        return;
-      }
-      setStep('INFORME_GASTOS');
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    if (step === 'INFORME_GASTOS') {
-      const isValid = await form.trigger(['informeGastos']);
-      if (!isValid) {
-        // El toast ahora será mostrado solo por handleInvalidSubmit
-        // si hay errores reales en la validación de Zod
         return;
       }
       setIsModalOpen(true);
@@ -171,9 +159,6 @@ export default function RendicionWizard({
         setStep('SELECCION');
         window.scrollTo(0, 0);
       }
-    } else if (step === 'INFORME_GASTOS') {
-      setStep('GASTOS_RESPALDO');
-      window.scrollTo(0, 0);
     }
   };
 
@@ -231,15 +216,7 @@ export default function RendicionWizard({
     const firstErrorField = Object.keys(errors)[0];
     let errorMessage = 'Completa todos los campos requeridos';
 
-    if (firstErrorField === 'informeGastos') {
-      // Extraer el error específico del informe si existe
-      const informeError = errors.informeGastos as FieldError | undefined;
-      if (informeError?.message) {
-        errorMessage = informeError.message;
-      } else {
-        errorMessage = 'Revisa el informe antes de continuar';
-      }
-    } else if (firstErrorField) {
+    if (firstErrorField) {
       const fieldError = errors[firstErrorField as keyof typeof errors] as
         | FieldError
         | undefined;
@@ -309,8 +286,6 @@ export default function RendicionWizard({
           {step === 'GASTOS_RESPALDO' && (
             <Paso2Gastos solicitud={solicitudSeleccionada} />
           )}
-
-          {step === 'INFORME_GASTOS' && <Paso4Informe />}
         </div>
 
         {/* Footer con navegación */}

@@ -51,14 +51,13 @@ export default function RendicionFooter({
   }, [gastos]);
 
   const saldo = montoAnticipado - totalRendido;
-  const isLastStep = step === 'INFORME_GASTOS';
+  const isLastStep = step === 'GASTOS_RESPALDO';
   // En modo edición, el primer paso es GASTOS_RESPALDO (no SELECCION)
   const isFirstStep = isEditMode
     ? step === 'GASTOS_RESPALDO'
     : step === 'SELECCION';
   const showFinancialSummary =
-    (step === 'GASTOS_RESPALDO' || step === 'INFORME_GASTOS') &&
-    montoAnticipado > 0;
+    step === 'GASTOS_RESPALDO' && montoAnticipado > 0;
 
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">

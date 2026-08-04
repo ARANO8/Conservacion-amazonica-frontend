@@ -115,25 +115,6 @@ export interface GastoRendicionResponse {
   };
 }
 
-export interface ActividadInformeResponse {
-  id: number;
-  informeId: number;
-  fecha: string;
-  lugar: string;
-  personaInstitucion: string;
-  actividadesRealizadas: string;
-}
-
-export interface InformeGastosResponse {
-  id: number;
-  rendicionId: number;
-  fechaInicio: string;
-  fechaFin: string;
-  createdAt?: string;
-  updatedAt?: string;
-  actividades: ActividadInformeResponse[];
-}
-
 // ---------------------------------------------------------------------------
 // Main Rendición Response
 // ---------------------------------------------------------------------------
@@ -162,7 +143,6 @@ export interface RendicionResponse {
     detalle: string;
     monto: string;
   }[];
-  informeGastos?: InformeGastosResponse | null;
   historialAprobaciones?: HistorialAprobacionResponse[];
 
   // Legacy aliases for convenience (not from backend, added by frontend)

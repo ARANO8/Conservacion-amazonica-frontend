@@ -97,6 +97,10 @@ function buildViajesItems(rol?: Role) {
   if (esRolOperativo(rol)) {
     items.push({ title: 'Mis Solicitudes', url: '/app/solicitudes' });
     items.push({ title: 'Mis Rendiciones', url: '/app/rendiciones' });
+    items.push({
+      title: 'Informe de Actividades',
+      url: '/app/informe-actividades',
+    });
   }
 
   return items;

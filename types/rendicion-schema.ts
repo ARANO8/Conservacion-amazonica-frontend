@@ -26,10 +26,7 @@ export type TipoRetencion = z.infer<typeof TipoRetencionEnum>;
 export const EstadoGastoEnum = z.enum(['PENDIENTE', 'COMPROBADO', 'RECHAZADO']);
 export type EstadoGasto = z.infer<typeof EstadoGastoEnum>;
 
-export type WizardStepRendicion =
-  | 'SELECCION'
-  | 'GASTOS_RESPALDO'
-  | 'INFORME_GASTOS';
+export type WizardStepRendicion = 'SELECCION' | 'GASTOS_RESPALDO';
 
 // ---------------------------------------------------------------------------
 // Sub-schemas
@@ -69,41 +66,6 @@ export const GastoRendicionSchema = z.object({
 
 export type GastoRendicion = z.infer<typeof GastoRendicionSchema>;
 
-/**
- * Actividad individual del Anexo 7 (Informe de Gastos).
- */
-export const ActividadInformeSchema = z.object({
-  fecha: z.union([z.string().min(1, 'La fecha es requerida'), z.date()]),
-  lugar: z.string().min(1, 'El lugar es requerido'),
-  personaInstitucion: z
-    .string()
-    .min(1, 'La persona o institución es requerida'),
-  actividadesRealizadas: z
-    .string()
-    .min(1, 'La descripción de actividades es requerida'),
-});
-
-export type ActividadInforme = z.infer<typeof ActividadInformeSchema>;
-
-/**
- * Anexo 7: Informe de Gastos (resumen de actividades realizadas en viaje).
- */
-export const InformeGastosSchema = z.object({
-  fechaInicio: z.union([
-    z.string().min(1, 'La fecha de inicio es requerida'),
-    z.date(),
-  ]),
-  fechaFin: z.union([
-    z.string().min(1, 'La fecha de fin es requerida'),
-    z.date(),
-  ]),
-  actividades: z
-    .array(ActividadInformeSchema)
-    .min(1, 'Debes registrar al menos una actividad'),
-});
-
-export type InformeGastos = z.infer<typeof InformeGastosSchema>;
-
 // ---------------------------------------------------------------------------
 // Schema principal del formulario de rendición
 // ---------------------------------------------------------------------------
@@ -125,9 +87,6 @@ export const CreateRendicionSchema = z.object({
     .string()
     .url('Debes ingresar una URL válida para los comprobantes'),
 
-  // --- Paso 4: INFORME_GASTOS ---
-  informeGastos: InformeGastosSchema.optional().nullable(),
-
   /** Observaciones generales de la rendición */
   observaciones: z.string().optional(),
 });
@@ -143,10 +102,5 @@ export const defaultRendicionValues: CreateRendicionInput = {
   aprobadorActualId: 0,
   gastos: [],
   comprobanteUrl: '',
-  informeGastos: {
-    fechaInicio: '',
-    fechaFin: '',
-    actividades: [],
-  },
   observaciones: '',
 };

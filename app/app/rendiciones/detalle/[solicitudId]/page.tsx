@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { ArrowLeft, Calendar, NotebookPen, ReceiptText } from 'lucide-react';
+import { ArrowLeft, Calendar, ReceiptText } from 'lucide-react';
 
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import {
@@ -275,64 +275,6 @@ export default function RendicionDetalleBySolicitudPage() {
                 </TableBody>
               </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <NotebookPen className="h-5 w-5" />
-            Informe (Anexo 7)
-          </CardTitle>
-          <CardDescription className="text-amzdesk-helper">
-            Rango de viaje y actividades realizadas durante la comisión.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {rendicion.informeGastos ? (
-            <>
-              <div className="bg-muted/40 rounded-md p-3">
-                <span className="text-amzdesk-label">Periodo: </span>
-                {formatDateShort(rendicion.informeGastos.fechaInicio)} al{' '}
-                {formatDateShort(rendicion.informeGastos.fechaFin)}
-              </div>
-
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-amzdesk-table-header">
-                      Fecha
-                    </TableHead>
-                    <TableHead className="text-amzdesk-table-header">
-                      Lugar
-                    </TableHead>
-                    <TableHead className="text-amzdesk-table-header">
-                      Persona / Institución
-                    </TableHead>
-                    <TableHead className="text-amzdesk-table-header">
-                      Actividades Realizadas
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rendicion.informeGastos.actividades.map((actividad) => (
-                    <TableRow key={actividad.id}>
-                      <TableCell>{formatDateShort(actividad.fecha)}</TableCell>
-                      <TableCell>{actividad.lugar}</TableCell>
-                      <TableCell>{actividad.personaInstitucion}</TableCell>
-                      <TableCell className="max-w-[520px] whitespace-pre-wrap">
-                        {actividad.actividadesRealizadas}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </>
-          ) : (
-            <p className="text-amzdesk-helper">
-              Esta rendición no incluye informe.
-            </p>
           )}
         </CardContent>
       </Card>
