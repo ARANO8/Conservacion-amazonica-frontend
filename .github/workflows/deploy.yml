@@ -66,10 +66,12 @@ jobs:
         with:
           context: .
           push: true
-          # Ruta relativa: el frontend comparte dominio con la API, asi que la
-          # imagen no queda atada a ningun entorno concreto.
+          # Rutas relativas: el frontend comparte dominio con la API, asi que la
+          # imagen no queda atada a ningun dominio concreto. El prefijo si va
+          # horneado, porque Next lo necesita al compilar.
           build-args: |
-            NEXT_PUBLIC_API_URL=/api
+            NEXT_PUBLIC_BASE_PATH=/amzdesk
+            NEXT_PUBLIC_API_URL=/amzdesk/api
           tags: |
             ${{ steps.vars.outputs.repo }}:sha-${{ github.sha }}
             ${{ steps.vars.outputs.repo }}:latest
@@ -99,12 +101,12 @@ jobs:
       - name: Smoke test
         run: |
           for intento in $(seq 1 12); do
-            if curl -fsS -o /dev/null "${{ secrets.APP_URL }}/login"; then
-              echo "El frontend responde correctamente en /login"
+            if curl -fsS -o /dev/null "${{ secrets.APP_URL }}/amzdesk/login"; then
+              echo "El frontend responde correctamente en /amzdesk/login"
               exit 0
             fi
             echo "Intento $intento: el frontend aun no responde, reintentando en 5s..."
             sleep 5
           done
-          echo "::error::El frontend no respondio a /login tras 60 segundos"
+          echo "::error::El frontend no respondio a /amzdesk/login tras 60 segundos"
           exit 1

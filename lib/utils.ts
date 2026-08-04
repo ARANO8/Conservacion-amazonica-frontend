@@ -45,3 +45,17 @@ export function normalizeString(text?: string | null): string {
     .trim()
     .toUpperCase();
 }
+
+/**
+ * URL absoluta a una ruta interna, para enlaces que se comparten fuera de la
+ * aplicaci\u00f3n.
+ *
+ * Next antepone el `basePath` a `<Link>` y a `router.push`, pero no a
+ * `window.location.origin`. En producci\u00f3n la aplicaci\u00f3n cuelga de `/amzdesk`,
+ * as\u00ed que concatenar el origen con la ruta a secas produce un enlace roto.
+ */
+export function absoluteAppUrl(path: string): string {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${origin}${basePath}${path}`;
+}

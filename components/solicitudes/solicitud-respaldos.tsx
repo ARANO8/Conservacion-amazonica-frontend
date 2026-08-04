@@ -18,6 +18,7 @@ import { cotizacionesService } from '@/lib/services/cotizaciones-service';
 import type { CuadroComparativoResponse } from '@/types/cuadro-comparativo-backend';
 import type { CotizacionResponse } from '@/types/cotizacion-backend';
 import Link from 'next/link';
+import { absoluteAppUrl } from '@/lib/utils';
 
 interface SolicitudRespaldosProps {
   control: Control<FormData>;
@@ -29,7 +30,9 @@ export default function SolicitudRespaldos({
   setValue,
 }: SolicitudRespaldosProps) {
   const [cuadros, setCuadros] = useState<CuadroComparativoResponse[]>([]);
-  const [cotizacionesList, setCotizacionesList] = useState<CotizacionResponse[]>([]);
+  const [cotizacionesList, setCotizacionesList] = useState<
+    CotizacionResponse[]
+  >([]);
   const [isLoadingList, setIsLoadingList] = useState(false);
 
   useEffect(() => {
@@ -99,7 +102,7 @@ export default function SolicitudRespaldos({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <div className="relative flex-1">
                       <Link2 className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                       <Input
@@ -111,7 +114,7 @@ export default function SolicitudRespaldos({
                       />
                     </div>
                     <select
-                      className="bg-background border-input rounded-md border px-3 py-2 text-sm sm:max-w-[240px] focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+                      className="bg-background border-input focus:ring-ring rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none disabled:opacity-60 sm:max-w-[240px]"
                       disabled={cuadros.length === 0}
                       onChange={(e) => {
                         if (e.target.value) {
@@ -130,7 +133,7 @@ export default function SolicitudRespaldos({
                         cuadros.find(
                           (c) =>
                             field.value ===
-                            `${window.location.origin}/app/cuadros-comparativos/${c.id}`
+                            absoluteAppUrl(`/app/cuadros-comparativos/${c.id}`)
                         )?.id ?? ''
                       }
                     >
@@ -142,7 +145,9 @@ export default function SolicitudRespaldos({
                           {cuadros.map((c) => (
                             <option
                               key={c.id}
-                              value={`${window.location.origin}/app/cuadros-comparativos/${c.id}`}
+                              value={absoluteAppUrl(
+                                `/app/cuadros-comparativos/${c.id}`
+                              )}
                             >
                               {c.codigoCuadro} ({c.estado})
                             </option>
@@ -153,11 +158,11 @@ export default function SolicitudRespaldos({
                   </div>
                 </FormControl>
                 {cuadros.length === 0 && (
-                  <p className="text-muted-foreground text-xs mt-1">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     Tip: Puedes crear y validar cuadros comparativos en el{' '}
                     <Link
                       href="/app/cuadros-comparativos"
-                      className="text-primary hover:underline font-semibold"
+                      className="text-primary font-semibold hover:underline"
                     >
                       módulo de Cuadros Comparativos
                     </Link>{' '}
@@ -191,7 +196,7 @@ export default function SolicitudRespaldos({
                 name={`urlCotizaciones.${idx}`}
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                       <FormControl>
                         <div className="relative flex-1">
                           <Link2 className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -204,7 +209,7 @@ export default function SolicitudRespaldos({
                         </div>
                       </FormControl>
                       <select
-                        className="bg-background border-input rounded-md border px-3 py-2 text-sm sm:max-w-[240px] focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+                        className="bg-background border-input focus:ring-ring rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none disabled:opacity-60 sm:max-w-[240px]"
                         disabled={cotizacionesList.length === 0}
                         onChange={(e) => {
                           if (e.target.value) {
@@ -223,19 +228,23 @@ export default function SolicitudRespaldos({
                           cotizacionesList.find(
                             (c) =>
                               field.value ===
-                              `${window.location.origin}/app/cotizaciones/${c.id}`
+                              absoluteAppUrl(`/app/cotizaciones/${c.id}`)
                           )?.id ?? ''
                         }
                       >
                         {cotizacionesList.length === 0 ? (
-                          <option value="">No hay cotizaciones disponibles</option>
+                          <option value="">
+                            No hay cotizaciones disponibles
+                          </option>
                         ) : (
                           <>
                             <option value="">-- Vincular del sistema --</option>
                             {cotizacionesList.map((c) => (
                               <option
                                 key={c.id}
-                                value={`${window.location.origin}/app/cotizaciones/${c.id}`}
+                                value={absoluteAppUrl(
+                                  `/app/cotizaciones/${c.id}`
+                                )}
                               >
                                 {c.codigoCotizacion} ({c.proveedorNombre})
                               </option>
@@ -249,7 +258,7 @@ export default function SolicitudRespaldos({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveCotizacion(idx)}
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-9 w-9 shrink-0 p-0 self-end sm:self-auto"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-9 w-9 shrink-0 self-end p-0 sm:self-auto"
                         >
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">
@@ -259,11 +268,11 @@ export default function SolicitudRespaldos({
                       )}
                     </div>
                     {cotizacionesList.length === 0 && idx === 0 && (
-                      <p className="text-muted-foreground text-xs mt-1">
+                      <p className="text-muted-foreground mt-1 text-xs">
                         Tip: Puedes registrar cotizaciones en el{' '}
                         <Link
                           href="/app/cotizaciones"
-                          className="text-primary hover:underline font-semibold"
+                          className="text-primary font-semibold hover:underline"
                         >
                           módulo de Cotizaciones
                         </Link>{' '}
