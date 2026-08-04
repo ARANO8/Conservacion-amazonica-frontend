@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 import {
   FormField,
@@ -21,7 +22,8 @@ import { SolicitudResponse } from '@/types/solicitud-backend';
 import { formatMoney } from '@/lib/utils';
 import { PartidasAprobadas } from './partidas-aprobadas';
 import { GastoTable } from './gasto-table';
-import { RetencionesTable } from './retenciones-table';
+import { ResumenAnexo4Blocks } from './resumen-anexo4';
+import { resumirAnexo4, type GastoAnexo4 } from '@/lib/rendicion-anexo4';
 
 export default function Paso2Gastos({
   solicitud,
@@ -48,6 +50,23 @@ export default function Paso2Gastos({
   }, 0);
 
   const granTotalRendido = totalMontoTotal;
+
+  const importeRecibido = Number(solicitud?.montoTotalNeto ?? 0);
+
+  const resumen = useMemo(() => {
+    const presupuestos = solicitud?.presupuestos ?? [];
+    const items: GastoAnexo4[] = (gastos ?? []).map(
+      (g: Record<string, unknown>) => ({
+        montoLiquido: Number(g?.montoTotal ?? 0),
+        tipoDocumento: g?.tipoDocumento as string | undefined,
+        tipoRetencion: g?.tipoRetencion as string | undefined,
+        nombrePartida:
+          presupuestos.find((p) => p.id === Number(g?.partidaId ?? 0))?.poa
+            ?.estructura?.partida?.nombre ?? null,
+      })
+    );
+    return resumirAnexo4(items, importeRecibido);
+  }, [gastos, solicitud, importeRecibido]);
 
   return (
     <FieldSet>
@@ -92,6 +111,15 @@ export default function Paso2Gastos({
       </div>
 
       <FieldGroup className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Percent className="text-muted-foreground h-4 w-4 shrink-0" />
+          <p className="text-foreground text-sm">
+            Las retenciones de RC-IVA (13%), IUE (5%) e IT (3%) se calculan
+            automáticamente en la misma tabla, según el tipo de documento y la
+            categoría de la partida presupuestaria.
+          </p>
+        </div>
+
         <GastoTable
           fields={gastosFields}
           append={appendGasto}
@@ -100,20 +128,10 @@ export default function Paso2Gastos({
           form={form}
         />
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Percent className="text-muted-foreground h-4 w-4 shrink-0" />
-            <h3 className="text-sm font-bold tracking-wider uppercase">
-              Retenciones Impositivas por Gasto
-            </h3>
-          </div>
-          <p className="text-foreground text-sm">
-            Cálculo automático de retenciones de RC-IVA (13%), IUE (5%) e IT
-            (3%) según el tipo de documento y la categoría de la partida
-            presupuestaria.
-          </p>
-          <RetencionesTable form={form} solicitud={solicitud} />
-        </div>
+        <ResumenAnexo4Blocks
+          resumen={resumen}
+          importeRecibido={importeRecibido}
+        />
 
         <Separator className="my-6" />
 

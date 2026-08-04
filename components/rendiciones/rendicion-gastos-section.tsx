@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn, formatMoney, formatDate, formatDateShort } from '@/lib/utils';
+import { desglosarGastoPersistido } from '@/lib/rendicion-anexo4';
 import { catalogosService } from '@/lib/services/catalogos-service';
 import type { GastoRendicionResponse } from '@/types/rendicion-backend';
 import type { PartidaContable } from '@/types/catalogs';
@@ -445,96 +446,133 @@ export function RendicionGastosSection({
                   Fecha
                 </TableHead>
                 <TableHead className="text-amzdesk-table-header w-[90px] text-right">
-                  Bruto
+                  Total
                 </TableHead>
                 <TableHead className="text-amzdesk-table-header w-[85px] text-right">
-                  Retenc.
+                  RC-IVA 13%
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header w-[80px] text-right">
+                  IUE 5%
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header w-[80px] text-right">
+                  IT 3%
                 </TableHead>
                 <TableHead className="text-amzdesk-table-header w-[90px] text-right">
-                  Efectivo
+                  Total imp.
+                </TableHead>
+                <TableHead className="text-amzdesk-table-header w-[90px] text-right">
+                  Neto
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {gastos.map((gasto) => (
-                <TableRow key={gasto.id}>
-                  <TableCell className="align-middle">
-                    <EstadoGastoControl
-                      estado={gastoValidaciones[gasto.id]?.estado ?? 'vacio'}
-                      observacion={
-                        gastoValidaciones[gasto.id]?.observacion ?? ''
-                      }
-                      onChange={(estado, observacion) =>
-                        onGastoValidacionChange?.(gasto.id, estado, observacion)
-                      }
-                    />
-                    {gastoValidaciones[gasto.id]?.estado === 'observado' &&
-                    gastoValidaciones[gasto.id]?.observacion ? (
-                      <p className="mt-1 text-[10px] leading-tight text-red-600">
-                        {gastoValidaciones[gasto.id]?.observacion}
-                      </p>
-                    ) : null}
-                  </TableCell>
-                  <TableCell>
-                    <p className="text-xs leading-tight font-medium">
-                      {gasto.concepto || '-'}
-                    </p>
-                    <p className="text-muted-foreground text-[10px] leading-tight">
-                      {gasto.tipoDocumento}{' '}
-                      {gasto.numeroDocumento || gasto.nroDocumento || 'S/N'}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    {canEditPartidaContable && onUpdatePartidaContable ? (
-                      <PartidaContableCombobox
-                        currentCodigo={gasto.partidaContable?.codigo ?? null}
-                        onUpdate={async (codigo) => {
-                          await onUpdatePartidaContable(gasto.id, codigo);
-                        }}
+              {gastos.map((gasto) => {
+                // Sólo el reparto por impuesto se deriva; los montos son los
+                // guardados, que son los que se cargaron al POA.
+                const desglose = desglosarGastoPersistido({
+                  montoNeto: toNumber(gasto.montoNeto ?? gasto.monto),
+                  montoBruto: toNumber(
+                    gasto.montoTotal ?? gasto.montoBruto ?? gasto.monto
+                  ),
+                  montoImpuestos: toNumber(gasto.montoImpuestos),
+                  tipoDocumento: gasto.tipoDocumento,
+                  tipoRetencion: gasto.tipoRetencion,
+                  nombrePartida:
+                    gasto.partida?.poa?.estructura?.partida?.nombre ?? null,
+                });
+                return (
+                  <TableRow key={gasto.id}>
+                    <TableCell className="align-middle">
+                      <EstadoGastoControl
+                        estado={gastoValidaciones[gasto.id]?.estado ?? 'vacio'}
+                        observacion={
+                          gastoValidaciones[gasto.id]?.observacion ?? ''
+                        }
+                        onChange={(estado, observacion) =>
+                          onGastoValidacionChange?.(
+                            gasto.id,
+                            estado,
+                            observacion
+                          )
+                        }
                       />
-                    ) : gasto.partidaContable ? (
-                      <span className="text-[11px] leading-tight font-medium">
-                        {gasto.partidaContable.codigo}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground text-[11px]">
-                        —
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <PartidaPresupuestariaCombobox
-                      presupuestos={partidasPresupuestarias}
-                      currentPartidaId={gasto.partidaId ?? null}
-                      onUpdate={async (partidaId) => {
-                        await onUpdatePartidaPresupuestaria?.(
-                          gasto.id,
-                          partidaId
-                        );
-                      }}
-                      readOnly={!canEditPartidaPresupuestaria}
-                    />
-                  </TableCell>
-                  <TableCell className="text-[11px] whitespace-nowrap">
-                    {gasto.fecha || gasto.fechaDocumento
-                      ? formatDateShort((gasto.fecha || gasto.fechaDocumento)!)
-                      : '-'}
-                  </TableCell>
-                  <TableCell className="text-right text-[11px] font-medium whitespace-nowrap tabular-nums">
-                    {formatMoney(
-                      toNumber(
-                        gasto.montoTotal ?? gasto.montoBruto ?? gasto.monto
-                      )
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right text-[11px] font-medium whitespace-nowrap text-orange-600 tabular-nums">
-                    {formatMoney(toNumber(gasto.montoImpuestos))}
-                  </TableCell>
-                  <TableCell className="text-right text-[11px] font-medium whitespace-nowrap text-emerald-600 tabular-nums">
-                    {formatMoney(toNumber(gasto.montoNeto ?? gasto.monto))}
-                  </TableCell>
-                </TableRow>
-              ))}
+                      {gastoValidaciones[gasto.id]?.estado === 'observado' &&
+                      gastoValidaciones[gasto.id]?.observacion ? (
+                        <p className="mt-1 text-[10px] leading-tight text-red-600">
+                          {gastoValidaciones[gasto.id]?.observacion}
+                        </p>
+                      ) : null}
+                    </TableCell>
+                    <TableCell>
+                      <p className="text-xs leading-tight font-medium">
+                        {gasto.concepto || '-'}
+                      </p>
+                      <p className="text-muted-foreground text-[10px] leading-tight">
+                        {gasto.tipoDocumento}{' '}
+                        {gasto.numeroDocumento || gasto.nroDocumento || 'S/N'}
+                      </p>
+                    </TableCell>
+                    <TableCell>
+                      {canEditPartidaContable && onUpdatePartidaContable ? (
+                        <PartidaContableCombobox
+                          currentCodigo={gasto.partidaContable?.codigo ?? null}
+                          onUpdate={async (codigo) => {
+                            await onUpdatePartidaContable(gasto.id, codigo);
+                          }}
+                        />
+                      ) : gasto.partidaContable ? (
+                        <span className="text-[11px] leading-tight font-medium">
+                          {gasto.partidaContable.codigo}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-[11px]">
+                          —
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <PartidaPresupuestariaCombobox
+                        presupuestos={partidasPresupuestarias}
+                        currentPartidaId={gasto.partidaId ?? null}
+                        onUpdate={async (partidaId) => {
+                          await onUpdatePartidaPresupuestaria?.(
+                            gasto.id,
+                            partidaId
+                          );
+                        }}
+                        readOnly={!canEditPartidaPresupuestaria}
+                      />
+                    </TableCell>
+                    <TableCell className="text-[11px] whitespace-nowrap">
+                      {gasto.fecha || gasto.fechaDocumento
+                        ? formatDateShort(
+                            (gasto.fecha || gasto.fechaDocumento)!
+                          )
+                        : '-'}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] font-medium whitespace-nowrap tabular-nums">
+                      {formatMoney(desglose.bruto)}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] whitespace-nowrap tabular-nums">
+                      {desglose.rcIva > 0 ? formatMoney(desglose.rcIva) : '—'}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] whitespace-nowrap tabular-nums">
+                      {desglose.iue > 0 ? formatMoney(desglose.iue) : '—'}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] whitespace-nowrap tabular-nums">
+                      {desglose.it > 0 ? formatMoney(desglose.it) : '—'}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] font-medium whitespace-nowrap text-orange-600 tabular-nums">
+                      {desglose.totalImpuestos > 0
+                        ? formatMoney(desglose.totalImpuestos)
+                        : '—'}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] font-bold whitespace-nowrap text-emerald-600 tabular-nums">
+                      {formatMoney(desglose.neto)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

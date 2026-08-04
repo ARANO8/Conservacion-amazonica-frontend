@@ -36,7 +36,13 @@ import {
   CreateRendicionInput,
   GastoRendicion,
   TipoDocumentoGastoEnum,
+  TipoRetencionEnum,
 } from '@/types/rendicion-schema';
+import {
+  desglosarGasto,
+  resumirAnexo4,
+  type GastoAnexo4,
+} from '@/lib/rendicion-anexo4';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
 
 function round2(value: number): number {
@@ -142,6 +148,7 @@ function GastoRow({
   onRemove,
   onTabLastCell,
   showPartidaColumn,
+  saldoAcumulado,
 }: {
   index: number;
   form: UseFormReturn<CreateRendicionInput>;
@@ -149,6 +156,8 @@ function GastoRow({
   onRemove: () => void;
   onTabLastCell: () => void;
   showPartidaColumn: boolean;
+  /** Saldo corriente tras descontar el líquido de esta fila */
+  saldoAcumulado: number;
 }) {
   const { control, setValue } = form;
   const [montoInput, setMontoInput] = useState<string>('');
@@ -209,6 +218,25 @@ function GastoRow({
     index,
     setValue,
   ]);
+
+  const desglose = useMemo(
+    () =>
+      desglosarGasto({
+        montoLiquido:
+          typeof montoTotal === 'number'
+            ? montoTotal
+            : Number.parseFloat(String(montoTotal ?? 0)) || 0,
+        tipoDocumento,
+        tipoRetencion,
+        nombrePartida,
+      }),
+    [montoTotal, tipoDocumento, tipoRetencion, nombrePartida]
+  );
+
+  // El selector sólo tiene sentido cuando la regla depende de bien/servicio/alquiler
+  const needsTipoRetencion =
+    (tipoDocumento === 'RECIBO' || tipoDocumento === 'BOLETA') &&
+    categoria === 'GENERAL';
 
   const presupuestos = solicitud?.presupuestos ?? [];
 
@@ -421,9 +449,83 @@ function GastoRow({
         </span>
       </td>
 
-      {/* SALDO */}
-      <td className="w-[100px] px-1 py-1 text-right text-xs tabular-nums">
-        <span className="font-medium">—</span>
+      {/* SALDO corriente */}
+      <td className="border-border w-[100px] border-r px-1 py-1 text-right text-xs tabular-nums">
+        <span className="font-medium">{formatMoney(saldoAcumulado)}</span>
+      </td>
+
+      {/* ---- Retenciones impositivas ---- */}
+
+      {/* Tipo de retención (sólo aplica a recibo/boleta de partida general) */}
+      <td className="w-[95px] px-1 py-1">
+        {needsTipoRetencion ? (
+          <FormField
+            control={control}
+            name={`gastos.${index}.tipoRetencion`}
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="h-7 px-1 text-[11px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {TipoRetencionEnum.options.map((tipo) => (
+                      <SelectItem
+                        key={tipo}
+                        value={tipo}
+                        className="text-[11px]"
+                      >
+                        {tipo === 'BIEN'
+                          ? 'Bien'
+                          : tipo === 'SERVICIO'
+                            ? 'Servicio'
+                            : 'Alquiler'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+        ) : (
+          <span className="text-muted-foreground block text-center text-[11px]">
+            —
+          </span>
+        )}
+      </td>
+
+      {/* TOTAL (bruto) */}
+      <td className="w-[95px] px-1 py-1 text-right text-xs tabular-nums">
+        {desglose.bruto > 0 ? formatMoney(desglose.bruto) : '—'}
+      </td>
+
+      {/* RC-IVA 13% */}
+      <td className="w-[85px] px-1 py-1 text-right text-xs tabular-nums">
+        {desglose.rcIva > 0 ? formatMoney(desglose.rcIva) : '—'}
+      </td>
+
+      {/* IUE 5% */}
+      <td className="w-[85px] px-1 py-1 text-right text-xs tabular-nums">
+        {desglose.iue > 0 ? formatMoney(desglose.iue) : '—'}
+      </td>
+
+      {/* IT 3% */}
+      <td className="w-[85px] px-1 py-1 text-right text-xs tabular-nums">
+        {desglose.it > 0 ? formatMoney(desglose.it) : '—'}
+      </td>
+
+      {/* TOTAL IMPUESTOS */}
+      <td className="w-[95px] px-1 py-1 text-right text-xs font-semibold tabular-nums">
+        {desglose.totalImpuestos > 0
+          ? formatMoney(desglose.totalImpuestos)
+          : '—'}
+      </td>
+
+      {/* NETO */}
+      <td className="border-border w-[95px] border-r px-1 py-1 text-right text-xs font-bold tabular-nums">
+        {desglose.neto > 0 ? formatMoney(desglose.neto) : '—'}
       </td>
 
       {/* Remove */}
@@ -465,7 +567,38 @@ export function GastoTable({
   );
   const showPartidaColumn = presupuestos.length > 1;
 
-  const gastosWatch = useWatch({ control: form.control, name: 'gastos' }) ?? [];
+  const gastosWatchRaw = useWatch({ control: form.control, name: 'gastos' });
+  const gastosWatch = useMemo(() => gastosWatchRaw ?? [], [gastosWatchRaw]);
+
+  // Mismos cálculos que usan el resumen y el detalle, para que no diverjan
+  const gastosAnexo = useMemo<GastoAnexo4[]>(
+    () =>
+      gastosWatch.map((g: Record<string, unknown>) => ({
+        montoLiquido: Number(g?.montoTotal ?? 0),
+        tipoDocumento: g?.tipoDocumento as string | undefined,
+        tipoRetencion: g?.tipoRetencion as string | undefined,
+        nombrePartida:
+          presupuestos.find((p) => p.id === Number(g?.partidaId ?? 0))?.poa
+            ?.estructura?.partida?.nombre ?? null,
+      })),
+    [gastosWatch, presupuestos]
+  );
+
+  const resumen = useMemo(
+    () => resumirAnexo4(gastosAnexo, montoAvance),
+    [gastosAnexo, montoAvance]
+  );
+
+  // Saldo corriente por fila: arranca en el anticipo y descuenta el líquido
+  const saldosPorFila = useMemo(
+    () =>
+      gastosAnexo.reduce<number[]>((acc, g) => {
+        const previo = acc.length > 0 ? acc[acc.length - 1] : montoAvance;
+        acc.push(round2(previo - desglosarGasto(g).neto));
+        return acc;
+      }, []),
+    [gastosAnexo, montoAvance]
+  );
 
   function handleAgregar() {
     append({
@@ -534,6 +667,12 @@ export function GastoTable({
             >
               MONTO BS
             </th>
+            <th
+              colSpan={7}
+              className="text-muted-foreground border-border border-r px-1 py-1 text-center text-[10px] font-bold tracking-wider uppercase"
+            >
+              RETENCIONES IMPOSITIVAS
+            </th>
             <th className="border-border w-8 border-r px-1 py-1" />
           </tr>
           {/* Header sub-row: INGRESOS | EGRESOS | SALDO */}
@@ -553,6 +692,27 @@ export function GastoTable({
             </th>
             <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
               SALDO
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-center text-[10px] font-semibold">
+              TIPO RET.
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              TOTAL
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              RC-IVA 13%
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              IUE 5%
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              IT 3%
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              TOTAL IMP.
+            </th>
+            <th className="text-muted-foreground border-border border-r px-1 py-0.5 text-right text-[10px] font-semibold">
+              NETO
             </th>
             <th colSpan={1} />
           </tr>
@@ -592,6 +752,15 @@ export function GastoTable({
             <td className="border-border border-r px-1 py-1 text-right text-[11px] font-bold">
               {formatMoney(montoAvance)}
             </td>
+            {/* El anticipo no tiene retención: las 7 columnas impositivas van vacías */}
+            {Array.from({ length: 7 }).map((_, i) => (
+              <td
+                key={i}
+                className="border-border border-r px-1 py-1 text-right text-[11px]"
+              >
+                —
+              </td>
+            ))}
             <td className="w-8 px-1 py-1" />
           </tr>
 
@@ -599,7 +768,7 @@ export function GastoTable({
           {fields.length === 0 ? (
             <tr>
               <td
-                colSpan={11 + (showPartidaColumn ? 1 : 0)}
+                colSpan={18 + (showPartidaColumn ? 1 : 0)}
                 className="text-muted-foreground px-4 py-6 text-center text-xs"
               >
                 No hay gastos agregados. Presiona &quot;+ Agregar fila&quot;
@@ -616,6 +785,7 @@ export function GastoTable({
                 onRemove={() => remove(index)}
                 onTabLastCell={handleTabLastCell}
                 showPartidaColumn={showPartidaColumn}
+                saldoAcumulado={saldosPorFila[index] ?? montoAvance}
               />
             ))
           )}
@@ -633,34 +803,36 @@ export function GastoTable({
               {formatMoney(montoAvance)}
             </td>
             <td className="border-border border-r px-1 py-1 text-right text-[11px] text-red-600">
-              {formatMoney(
-                gastosWatch.reduce(
-                  (sum: number, g: { montoNeto?: number }) =>
-                    sum + Number(g?.montoNeto ?? 0),
-                  0
-                )
-              )}
+              {formatMoney(resumen.totales.neto)}
             </td>
             <td className="border-border border-r px-1 py-1 text-right text-[11px] text-orange-600">
-              {formatMoney(
-                gastosWatch.reduce(
-                  (sum: number, g: { montoTotal?: number }) =>
-                    sum + Number(g?.montoTotal ?? 0),
-                  0
-                )
-              )}
+              {formatMoney(resumen.totales.bruto)}
             </td>
             <td className="border-border border-r px-1 py-1 text-right text-[11px] font-bold">
-              {formatMoney(
-                round2(
-                  montoAvance -
-                    gastosWatch.reduce(
-                      (sum: number, g: { montoTotal?: number }) =>
-                        sum + Number(g?.montoTotal ?? 0),
-                      0
-                    )
-                )
-              )}
+              {formatMoney(resumen.saldoEfectivo)}
+            </td>
+            <td className="border-border border-r" />
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
+              {formatMoney(resumen.totales.bruto)}
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
+              {resumen.totales.rcIva > 0
+                ? formatMoney(resumen.totales.rcIva)
+                : '—'}
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
+              {resumen.totales.iue > 0 ? formatMoney(resumen.totales.iue) : '—'}
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
+              {resumen.totales.it > 0 ? formatMoney(resumen.totales.it) : '—'}
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px]">
+              {resumen.totales.totalImpuestos > 0
+                ? formatMoney(resumen.totales.totalImpuestos)
+                : '—'}
+            </td>
+            <td className="border-border border-r px-1 py-1 text-right text-[11px] font-bold">
+              {formatMoney(resumen.totales.neto)}
             </td>
             <td colSpan={1} />
           </tr>

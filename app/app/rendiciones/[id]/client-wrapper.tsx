@@ -31,6 +31,11 @@ import { formatMoney, formatDate } from '@/lib/utils';
 import { RendicionGastosSection } from '@/components/rendiciones/rendicion-gastos-section';
 import { RendicionSolicitudSection } from '@/components/rendiciones/rendicion-solicitud-section';
 import { RendicionPartidasPresupuestarias } from '@/components/rendiciones/rendicion-partidas-presupuestarias';
+import { ResumenAnexo4Blocks } from '@/components/rendiciones/resumen-anexo4';
+import {
+  resumirAnexo4,
+  desglosarGastoPersistido,
+} from '@/lib/rendicion-anexo4';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
 import { useAuthStore } from '@/store/auth-store';
 import { catalogosService } from '@/lib/services/catalogos-service';
@@ -221,6 +226,36 @@ export function RendicionDetailClient({
   const saldoLiquido = useMemo(
     () => toNumber(rendicion.saldoLiquido),
     [rendicion.saldoLiquido]
+  );
+
+  // Cifras del ANEXO 4, calculadas igual que en el wizard y en el PDF.
+  // Las declaraciones juradas también son egreso, así que entran al resumen.
+  const resumenAnexo4 = useMemo(
+    () =>
+      resumirAnexo4(
+        [
+          ...gastosRegistrados.map((g) => ({
+            montoLiquido: toNumber(g.montoNeto ?? g.monto),
+            tipoDocumento: g.tipoDocumento,
+            // Sobre lo guardado, igual que el PDF
+            desglose: desglosarGastoPersistido({
+              montoNeto: toNumber(g.montoNeto ?? g.monto),
+              montoBruto: toNumber(g.montoTotal ?? g.montoBruto ?? g.monto),
+              montoImpuestos: toNumber(g.montoImpuestos),
+              tipoDocumento: g.tipoDocumento,
+              tipoRetencion: g.tipoRetencion,
+              nombrePartida:
+                g.partida?.poa?.estructura?.partida?.nombre ?? null,
+            }),
+          })),
+          ...(rendicion.declaracionesJuradas ?? []).map((dj) => ({
+            montoLiquido: toNumber(dj.monto),
+            tipoDocumento: 'DJ',
+          })),
+        ],
+        montoRecibido
+      ),
+    [gastosRegistrados, rendicion.declaracionesJuradas, montoRecibido]
   );
 
   const usuariosFiltrados = useMemo(
@@ -534,7 +569,9 @@ export function RendicionDetailClient({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">Saldo Líquido</CardTitle>
+            <CardTitle className="text-amzdesk-label">
+              Saldo Presupuestario
+            </CardTitle>
             <Banknote className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
@@ -547,12 +584,20 @@ export function RendicionDetailClient({
             </div>
             <p className="text-amzdesk-helper">
               {montoRecibido > 0
-                ? `Recibido: ${formatMoney(montoRecibido)} | Gastado: ${formatMoney(rendicion.montoRespaldado)}`
-                : 'Recibido - Total respaldado'}
+                ? `Recibido: ${formatMoney(montoRecibido)} | Con cargo al POA: ${formatMoney(rendicion.montoRespaldado)}`
+                : 'Recibido - Total con cargo al POA'}
             </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Liquidación de caja y conteo de documentos (ANEXO 4) */}
+      {gastosRegistrados.length > 0 && (
+        <ResumenAnexo4Blocks
+          resumen={resumenAnexo4}
+          importeRecibido={montoRecibido}
+        />
+      )}
 
       {/* Solicitud Section */}
       <RendicionSolicitudSection solicitud={rendicion.solicitud} />

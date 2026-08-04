@@ -155,6 +155,13 @@ export interface RendicionResponse {
   solicitud: SolicitudResponse;
   aprobadorActual?: HistorialUsuario | null;
   gastosRendicion: GastoRendicionResponse[];
+  /** Gastos menores sin comprobante; cuentan como egreso y no retienen */
+  declaracionesJuradas?: {
+    id: number;
+    fecha: string;
+    detalle: string;
+    monto: string;
+  }[];
   informeGastos?: InformeGastosResponse | null;
   historialAprobaciones?: HistorialAprobacionResponse[];
 
