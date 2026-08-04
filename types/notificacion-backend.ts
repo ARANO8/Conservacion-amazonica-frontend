@@ -3,6 +3,8 @@
  * Corresponden al modelo Notificacion en Prisma del backend
  */
 
+import type { TipoSolicitud } from './solicitud-backend';
+
 export type TipoNotificacion =
   | 'SOLICITUD_ASIGNADA'
   | 'SOLICITUD_DERIVADA'
@@ -15,6 +17,7 @@ export type TipoNotificacion =
   | 'CUADRO_OBSERVADO'
   | 'CUADRO_APROBADO'
   | 'PAGO_PENDIENTE_APROBACION'
+  | 'PAGO_OBSERVADO'
   | 'PAGO_REALIZADO';
 
 export interface NotificacionBackend {
@@ -34,6 +37,8 @@ export interface NotificacionBackend {
     codigoSolicitud: string;
     descripcion?: string | null;
     estado?: string;
+    /** Define a qué formulario de corrección apunta una SOLICITUD_OBSERVADA */
+    tipo?: TipoSolicitud;
     // Rendición asociada (para resolver URLs de notificaciones RENDICION_PENDIENTE)
     rendicion?: {
       id: number;

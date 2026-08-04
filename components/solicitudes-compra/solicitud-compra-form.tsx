@@ -45,6 +45,7 @@ import CompraReviewModal from './compra-review-modal';
 import { PoaSelectorCascade } from './poa-selector-cascade';
 import { SolicitudCompraItemsTable } from './solicitud-compra-items-table';
 import { ConsultoriaSection } from './consultoria-section';
+import { ObservacionAlert } from '@/components/shared/observacion-alert';
 
 interface UsuarioOption {
   id: number;
@@ -64,12 +65,15 @@ interface Props {
   solicitudId?: number;
   initialValues?: Partial<SolicitudCompraFormData>;
   initialPoaCode?: string;
+  /** Motivo de la devolución, para que el emisor sepa qué corregir */
+  observacion?: string | null;
 }
 
 export default function SolicitudCompraForm({
   solicitudId,
   initialValues,
   initialPoaCode,
+  observacion,
 }: Props) {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -368,6 +372,7 @@ export default function SolicitudCompraForm({
               className="space-y-6"
             >
               <div className="animate-in fade-in duration-500">
+                <ObservacionAlert observacion={observacion} className="mb-6" />
                 <FieldGroup>
                   {/* ---- Sección 1: Información General ---- */}
                   <FieldSet>

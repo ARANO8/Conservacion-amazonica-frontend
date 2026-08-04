@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EstadoBadge } from '@/components/shared/estado-badge';
+import { ObservacionAlert } from '@/components/shared/observacion-alert';
 import {
   Card,
   CardContent,
@@ -147,6 +148,8 @@ export default function SolicitudDetailPage() {
       </div>
 
       <Separator />
+
+      <ObservacionAlert observacion={solicitud.observacion} />
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

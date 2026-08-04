@@ -30,6 +30,7 @@ import SolicitudRespaldos from '@/components/solicitudes/solicitud-respaldos';
 import ReviewModal from '@/components/solicitudes/review-modal';
 import SolicitudHeader from '@/components/solicitudes/solicitud-header';
 import SolicitudFooter from '@/components/solicitudes/solicitud-footer';
+import { ObservacionAlert } from '@/components/shared/observacion-alert';
 import { solicitudesService } from '@/lib/services/solicitudes-service';
 import { adaptFormToPayload } from '@/lib/adapters/solicitud-adapter';
 import { SeleccionPresupuesto, PoaStructureItem, Poa } from '@/types/backend';
@@ -176,12 +177,15 @@ interface SolicitudFormProps {
   initialValues?: Partial<FormData>;
   isEditMode?: boolean;
   solicitudId?: number | string;
+  /** Motivo de la devolución, para que el emisor sepa qué corregir */
+  observacion?: string | null;
 }
 
 export default function SolicitudForm({
   initialValues,
   isEditMode = false,
   solicitudId,
+  observacion,
 }: SolicitudFormProps) {
   const router = useRouter();
   const [step, setStep] = useState<WizardStep>('PLANIFICACION');
@@ -518,6 +522,9 @@ export default function SolicitudForm({
               }}
               className="space-y-6"
             >
+              {/* Visible en todos los pasos: el motivo puede afectar a cualquiera */}
+              <ObservacionAlert observacion={observacion} />
+
               <div className="animate-in fade-in duration-500">
                 {step === 'PLANIFICACION' && (
                   <FieldGroup>

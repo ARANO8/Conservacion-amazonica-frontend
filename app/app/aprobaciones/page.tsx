@@ -28,6 +28,7 @@ function tipoLabel(tipo: NotificacionBackend['tipo']): string {
     CUADRO_OBSERVADO: 'Cuadro observado',
     CUADRO_APROBADO: 'Cuadro aprobado',
     PAGO_PENDIENTE_APROBACION: 'Pago por aprobar',
+    PAGO_OBSERVADO: 'Pago observado',
     PAGO_REALIZADO: 'Pago registrado',
   };
   return labels[tipo] ?? tipo;
@@ -94,6 +95,17 @@ function resolveNotificationUrl(notification: NotificacionBackend): string {
       return `/app/rendiciones/${rendicionId}`;
     }
     return '#';
+  }
+
+  // Una solicitud observada se corrige en el formulario de su propio tipo.
+  // Se resuelve por la relación y no por urlDestino, para reparar también las
+  // notificaciones antiguas que quedaron apuntando siempre a /app/solicitudes.
+  if (notification.tipo === 'SOLICITUD_OBSERVADA' && notification.solicitudId) {
+    const base =
+      notification.solicitud?.tipo === 'COMPRA_SERVICIO'
+        ? '/app/solicitudes-compra'
+        : '/app/solicitudes';
+    return `${base}/${notification.solicitudId}/editar`;
   }
 
   // Para otros tipos, usar urlDestino o construir URL de aprobaciones

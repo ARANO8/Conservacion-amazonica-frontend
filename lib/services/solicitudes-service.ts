@@ -128,7 +128,7 @@ export const solicitudesService = {
 
   // --- Pagos parciales de contratos de consultoría ---
 
-  /** Adquisiciones solicita el pago de una cuota. PLANIFICADO → SOLICITADO */
+  /** Adquisiciones solicita el pago de una cuota. PLANIFICADO | OBSERVADO → SOLICITADO */
   async solicitarPago(
     solicitudId: number | string,
     pagoId: number,
@@ -152,6 +152,21 @@ export const solicitudesService = {
     const response = await api.patch(
       `/solicitudes/${solicitudId}/pagos/${pagoId}/aprobar`,
       {},
+      { signal }
+    );
+    return response.data;
+  },
+
+  /** El aprobador devuelve la cuota con comentarios. SOLICITADO → OBSERVADO */
+  async observarPago(
+    solicitudId: number | string,
+    pagoId: number,
+    observacion: string,
+    signal?: AbortSignal
+  ) {
+    const response = await api.patch(
+      `/solicitudes/${solicitudId}/pagos/${pagoId}/observar`,
+      { observacion },
       { signal }
     );
     return response.data;

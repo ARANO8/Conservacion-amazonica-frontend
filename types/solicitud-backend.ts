@@ -3,6 +3,7 @@ export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 export type EstadoPagoParcial =
   | 'PLANIFICADO'
   | 'SOLICITADO'
+  | 'OBSERVADO'
   | 'APROBADO'
   | 'PAGADO';
 
@@ -16,6 +17,8 @@ export interface PagoParcialResponse {
   urlComprobante?: string | null;
   urlInforme?: string | null;
   fechaPagoReal?: string | null;
+  /** Motivo de la última devolución a Adquisiciones */
+  observacion?: string | null;
   solicitadoPorId?: number | null;
   aprobadorId?: number | null;
   pagadoPorId?: number | null;
@@ -155,6 +158,8 @@ export interface SolicitudResponse {
   urlCotizaciones?: string[];
   fechaCreacion: string; // ISO String
   estado: string;
+  /** Motivo con el que el revisor devolvió la solicitud (distinto de `descripcion`) */
+  observacion?: string | null;
   montoTotalNeto: string;
   montoTotalPresupuestado: string;
   usuarioEmisorId?: number | string;

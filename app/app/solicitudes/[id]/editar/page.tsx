@@ -16,6 +16,7 @@ export default function EditSolicitudPage() {
   const [initialData, setInitialData] = useState<Partial<FormData> | null>(
     null
   );
+  const [observacion, setObservacion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function EditSolicitudPage() {
         }
 
         const formData = adaptResponseToFormData(solicitud);
+        setObservacion(solicitud.observacion ?? null);
         setInitialData(formData);
       } catch {
         toast.error('Error al cargar la solicitud');
@@ -61,6 +63,7 @@ export default function EditSolicitudPage() {
       initialValues={initialData}
       isEditMode={true}
       solicitudId={id}
+      observacion={observacion}
     />
   );
 }

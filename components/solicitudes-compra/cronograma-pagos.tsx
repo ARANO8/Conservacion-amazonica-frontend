@@ -9,6 +9,8 @@ import {
   ChevronsUpDown,
   ExternalLink,
   Info,
+  MessageSquareWarning,
+  RotateCcw,
   SendHorizonal,
 } from 'lucide-react';
 
@@ -25,6 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
   PopoverContent,
@@ -69,6 +72,11 @@ const ESTADO_PAGO: Record<
     className:
       'border-yellow-300 bg-yellow-50 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-300',
   },
+  OBSERVADO: {
+    label: 'Observado',
+    className:
+      'border-orange-300 bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
+  },
   APROBADO: {
     label: 'Aprobado',
     className:
@@ -101,9 +109,12 @@ export function CronogramaPagos({
   const [pagoActivo, setPagoActivo] = useState<PagoParcialResponse | null>(
     null
   );
+  /** Qué diálogo está abierto para `pagoActivo` */
+  const [modo, setModo] = useState<'solicitar' | 'observar'>('solicitar');
   const [aprobadorId, setAprobadorId] = useState<number>(0);
   const [urlComprobante, setUrlComprobante] = useState('');
   const [urlInforme, setUrlInforme] = useState('');
+  const [observacion, setObservacion] = useState('');
   const [comboOpen, setComboOpen] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
@@ -115,17 +126,27 @@ export function CronogramaPagos({
     [pagos]
   );
   const pagados = ordenados.filter((p) => p.estado === 'PAGADO').length;
+  const observados = ordenados.filter((p) => p.estado === 'OBSERVADO').length;
 
   const destinatarios = useMemo(
     () => usuarios.filter((u) => Number(u.id) !== currentUserId),
     [usuarios, currentUserId]
   );
 
+  // Al corregir una cuota observada se reutiliza el respaldo ya cargado para
+  // que Adquisiciones sólo tenga que cambiar lo que motivó la devolución.
   const abrirSolicitud = (pago: PagoParcialResponse) => {
     setPagoActivo(pago);
-    setAprobadorId(0);
-    setUrlComprobante('');
-    setUrlInforme('');
+    setModo('solicitar');
+    setAprobadorId(pago.aprobadorId ?? 0);
+    setUrlComprobante(pago.urlComprobante ?? '');
+    setUrlInforme(pago.urlInforme ?? '');
+  };
+
+  const abrirObservacion = (pago: PagoParcialResponse) => {
+    setPagoActivo(pago);
+    setModo('observar');
+    setObservacion('');
   };
 
   const ejecutar = async (accion: () => Promise<unknown>, exito: string) => {
@@ -172,6 +193,23 @@ export function CronogramaPagos({
     );
   };
 
+  const confirmarObservacion = () => {
+    if (!pagoActivo) return;
+    if (observacion.trim().length < 5) {
+      toast.error('Describe el motivo de la observación');
+      return;
+    }
+    void ejecutar(
+      () =>
+        solicitudesService.observarPago(
+          solicitudId,
+          pagoActivo.id,
+          observacion.trim()
+        ),
+      `Pago ${pagoActivo.numero} devuelto a Adquisiciones`
+    );
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
@@ -179,6 +217,8 @@ export function CronogramaPagos({
           <CardTitle className="text-base">Cronograma de Pagos</CardTitle>
           <p className="text-muted-foreground mt-1 text-xs">
             {pagados} de {ordenados.length} cuotas pagadas
+            {observados > 0 &&
+              ` · ${observados} observada${observados > 1 ? 's' : ''}`}
           </p>
         </div>
       </CardHeader>
@@ -203,7 +243,7 @@ export function CronogramaPagos({
                   Monto (Bs)
                 </TableHead>
                 <TableHead className="w-[120px]">Estado</TableHead>
-                <TableHead className="w-[190px] text-right">Acción</TableHead>
+                <TableHead className="w-[230px] text-right">Acción</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -242,6 +282,11 @@ export function CronogramaPagos({
                           )}
                         </span>
                       )}
+                      {pago.estado === 'OBSERVADO' && pago.observacion && (
+                        <span className="mt-1 block text-xs text-orange-700 dark:text-orange-300">
+                          Observación: {pago.observacion}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDateShort(pago.fechaPago)}
@@ -274,24 +319,46 @@ export function CronogramaPagos({
                         </Button>
                       )}
 
-                      {pago.estado === 'SOLICITADO' && esAprobador && (
+                      {pago.estado === 'OBSERVADO' && (
                         <Button
                           size="sm"
-                          disabled={enviando}
-                          onClick={() =>
-                            void ejecutar(
-                              () =>
-                                solicitudesService.aprobarPago(
-                                  solicitudId,
-                                  pago.id
-                                ),
-                              `Pago ${pago.numero} aprobado`
-                            )
-                          }
+                          variant="outline"
+                          onClick={() => abrirSolicitud(pago)}
                         >
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Aprobar pago
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Corregir y reenviar
                         </Button>
+                      )}
+
+                      {pago.estado === 'SOLICITADO' && esAprobador && (
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={enviando}
+                            onClick={() => abrirObservacion(pago)}
+                          >
+                            <MessageSquareWarning className="mr-2 h-4 w-4" />
+                            Observar
+                          </Button>
+                          <Button
+                            size="sm"
+                            disabled={enviando}
+                            onClick={() =>
+                              void ejecutar(
+                                () =>
+                                  solicitudesService.aprobarPago(
+                                    solicitudId,
+                                    pago.id
+                                  ),
+                                `Pago ${pago.numero} aprobado`
+                              )
+                            }
+                          >
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Aprobar
+                          </Button>
+                        </div>
                       )}
 
                       {pago.estado === 'SOLICITADO' && !esAprobador && (
@@ -340,13 +407,16 @@ export function CronogramaPagos({
 
       {/* Diálogo de solicitud de pago */}
       <Dialog
-        open={!!pagoActivo}
+        open={!!pagoActivo && modo === 'solicitar'}
         onOpenChange={(open) => !open && setPagoActivo(null)}
       >
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle>
-              Solicitar pago {pagoActivo?.numero}
+              {pagoActivo?.estado === 'OBSERVADO'
+                ? 'Corregir y reenviar pago'
+                : 'Solicitar pago'}{' '}
+              {pagoActivo?.numero}
               {pagoActivo ? ` — ${formatMoney(Number(pagoActivo.monto))}` : ''}
             </DialogTitle>
             <DialogDescription>
@@ -355,6 +425,13 @@ export function CronogramaPagos({
           </DialogHeader>
 
           <div className="space-y-4">
+            {pagoActivo?.estado === 'OBSERVADO' && pagoActivo.observacion && (
+              <div className="rounded-md border border-orange-300 bg-orange-50 p-3 text-xs text-orange-800 dark:bg-orange-950/40 dark:text-orange-200">
+                <span className="font-semibold">Motivo de la devolución:</span>{' '}
+                {pagoActivo.observacion}
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <Label>
                 Comprobante del consultor{' '}
@@ -451,6 +528,57 @@ export function CronogramaPagos({
             <Button onClick={confirmarSolicitud} disabled={enviando}>
               <SendHorizonal className="mr-2 h-4 w-4" />
               Enviar solicitud
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de observación (devolución a Adquisiciones) */}
+      <Dialog
+        open={!!pagoActivo && modo === 'observar'}
+        onOpenChange={(open) => !open && setPagoActivo(null)}
+      >
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>
+              Observar pago {pagoActivo?.numero}
+              {pagoActivo ? ` — ${formatMoney(Number(pagoActivo.monto))}` : ''}
+            </DialogTitle>
+            <DialogDescription>
+              La cuota vuelve a Adquisiciones para que corrija el respaldo y la
+              reenvíe. El contrato sigue en ejecución.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-1.5">
+            <Label>
+              Motivo de la observación{' '}
+              <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              rows={4}
+              placeholder="Ej. El recibo no coincide con el monto de la cuota"
+              value={observacion}
+              onChange={(e) => setObservacion(e.target.value)}
+              maxLength={500}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setPagoActivo(null)}
+              disabled={enviando}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmarObservacion}
+              disabled={enviando}
+            >
+              <MessageSquareWarning className="mr-2 h-4 w-4" />
+              Devolver con observación
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -61,6 +61,7 @@ export default function EditarSolicitudCompraPage() {
     useState<Partial<SolicitudCompraFormData> | null>(null);
   const [solicitudId, setSolicitudId] = useState<number | null>(null);
   const [initialPoaCode, setInitialPoaCode] = useState<string>('');
+  const [observacion, setObservacion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function EditarSolicitudCompraPage() {
         }
 
         setSolicitudId(solicitud.id);
+        setObservacion(solicitud.observacion ?? null);
         setInitialPoaCode(solicitud.presupuestos?.[0]?.poa?.codigoPoa ?? '');
         setInitialValues(adaptResponseToCompraFormData(solicitud));
       } catch {
@@ -111,6 +113,7 @@ export default function EditarSolicitudCompraPage() {
       solicitudId={solicitudId}
       initialValues={initialValues}
       initialPoaCode={initialPoaCode}
+      observacion={observacion}
     />
   );
 }

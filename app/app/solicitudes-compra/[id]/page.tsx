@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { CronogramaPagos } from '@/components/solicitudes-compra/cronograma-pagos';
+import { ObservacionAlert } from '@/components/shared/observacion-alert';
 
 const ESTADO_BADGE: Record<string, { label: string; className: string }> = {
   PENDIENTE: {
@@ -161,6 +162,8 @@ export default function DetalleSolicitudCompraPage() {
             </Button>
           </div>
 
+          <ObservacionAlert observacion={solicitud.observacion} />
+
           {/* Cabecera de la solicitud */}
           <Card>
             <CardHeader>
@@ -225,6 +228,16 @@ export default function DetalleSolicitudCompraPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {(solicitud.gastosCompra ?? []).length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          className="text-muted-foreground py-6 text-center text-sm"
+                        >
+                          Esta solicitud no tiene ítems de gasto registrados.
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {(solicitud.gastosCompra ?? []).map((gc) => (
                       <TableRow key={gc.id}>
                         <TableCell>{Number(gc.cantidad)}</TableCell>
@@ -264,11 +277,13 @@ export default function DetalleSolicitudCompraPage() {
             />
           )}
 
-          {/* Observaciones */}
+          {/* Texto libre del emisor — no confundir con el motivo de una devolución */}
           {solicitud.descripcion && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Observaciones</CardTitle>
+                <CardTitle className="text-base">
+                  Descripción adicional
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{solicitud.descripcion}</p>
