@@ -1,0 +1,110 @@
+name: Deploy
+
+# Solo `main` despliega. `develop` es la rama de desarrollo y no publica nada:
+# llegar al VPS es un acto deliberado, fusionar develop en main.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Dos despliegues simultaneos dejarian el VPS en un estado indeterminado.
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verificar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # next.config.ts no ignora errores de compilacion: cualquier fallo de
+      # tipos o de lint tumba el build. Mejor detectarlo antes de construir.
+      - name: Chequeo de tipos
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+  build-push:
+    name: Construir y publicar imagen
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.vars.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # GHCR solo acepta nombres en minuscula y el repo tiene mayusculas.
+      - id: vars
+        run: |
+          echo "repo=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # Ruta relativa: el frontend comparte dominio con la API, asi que la
+          # imagen no queda atada a ningun entorno concreto.
+          build-args: |
+            NEXT_PUBLIC_API_URL=/api
+          tags: |
+            ${{ steps.vars.outputs.repo }}:sha-${{ github.sha }}
+            ${{ steps.vars.outputs.repo }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Desplegar en el VPS
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Actualizar el servicio frontend
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            cd /opt/amzdesk
+            sed -i "s|^FRONTEND_IMAGE=.*|FRONTEND_IMAGE=${{ needs.build-push.outputs.image }}|" .env
+            docker compose pull frontend
+            docker compose up -d frontend
+            docker image prune -f
+
+      - name: Smoke test
+        run: |
+          for intento in $(seq 1 12); do
+            if curl -fsS -o /dev/null "${{ secrets.APP_URL }}/login"; then
+              echo "El frontend responde correctamente en /login"
+              exit 0
+            fi
+            echo "Intento $intento: el frontend aun no responde, reintentando en 5s..."
+            sleep 5
+          done
+          echo "::error::El frontend no respondio a /login tras 60 segundos"
+          exit 1

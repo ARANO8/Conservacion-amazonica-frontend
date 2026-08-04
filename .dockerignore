@@ -28,6 +28,9 @@ pnpm-debug.log*
 .dockerignore
 .husky
 
+# CI/CD (runs on GitHub, not inside the image)
+.github
+
 # System files
 .DS_Store
 Thumbs.db

@@ -16,8 +16,9 @@ export function ApiStatus() {
       if (isInitial) setIsLoading(true);
       try {
         const baseURL = process.env.NEXT_PUBLIC_API_URL;
-        // Ping a la raíz o a /doc como sugirió el usuario
-        await axios.get(`${baseURL}/doc`, { timeout: 5000 });
+        // Endpoint público de salud: comprueba el servicio y su conexión con la
+        // base de datos, y está exento del rate limiting.
+        await axios.get(`${baseURL}/health`, { timeout: 5000 });
         setStatus('connected');
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
