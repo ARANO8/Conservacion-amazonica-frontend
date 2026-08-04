@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, useFieldArray, useWatch } from 'react-hook-form';
+import {
+  useForm,
+  useFieldArray,
+  useWatch,
+  type FieldErrors,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -72,6 +77,9 @@ interface CuadroComparativoBuilderProps {
 }
 
 const NINGUNO = 'none';
+
+/** Debe coincidir con el `.min()` de `cotizaciones` en cuadroComparativoSchema */
+const MIN_COTIZACIONES = 2;
 
 export default function CuadroComparativoBuilder({
   cuadroId,
@@ -171,7 +179,10 @@ export default function CuadroComparativoBuilder({
       watchedItems.reduce((acc, item) => {
         const celda = item?.precios?.[ci];
         if (!celda || celda.noMenciona) return acc;
-        return acc + (Number(celda.precioUnitario) || 0) * (Number(item.cantidad) || 0);
+        return (
+          acc +
+          (Number(celda.precioUnitario) || 0) * (Number(item.cantidad) || 0)
+        );
       }, 0)
     );
   }, [cols, watchedItems]);
@@ -304,6 +315,22 @@ export default function CuadroComparativoBuilder({
     toggleCotizacion(newCot);
   };
 
+  // Sin esto, un rechazo de zod no ejecuta onSubmit y la pantalla queda muda:
+  // ni toast, ni navegación, ni petición. Las reglas de nivel de arreglo
+  // (mínimo de cotizaciones e ítems) no tienen un FormMessage donde mostrarse.
+  const onInvalid = (errores: FieldErrors<CuadroComparativoFormData>) => {
+    const motivo =
+      errores.cotizaciones?.message ??
+      errores.items?.message ??
+      errores.items?.root?.message;
+
+    toast.error(
+      typeof motivo === 'string'
+        ? motivo
+        : 'Revisa los campos marcados en rojo antes de guardar.'
+    );
+  };
+
   const onSubmit = async (data: CuadroComparativoFormData) => {
     try {
       setSaving(true);
@@ -337,16 +364,26 @@ export default function CuadroComparativoBuilder({
     );
   }
 
-  const seleccionadasIds = new Set(watchedCotizaciones.map((c) => c.cotizacionId));
+  const seleccionadasIds = new Set(
+    watchedCotizaciones.map((c) => c.cotizacionId)
+  );
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        className="space-y-6 p-6"
+      >
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle className="text-base">
-              1. Selecciona las cotizaciones a comparar
-            </CardTitle>
+            <div className="space-y-1">
+              <CardTitle className="text-base">
+                1. Selecciona las cotizaciones a comparar
+              </CardTitle>
+              <p className="text-muted-foreground text-xs">
+                {cols.length} de {MIN_COTIZACIONES} mínimo
+              </p>
+            </div>
             <Button
               type="button"
               variant="outline"
@@ -390,8 +427,8 @@ export default function CuadroComparativoBuilder({
                           )}
                         </div>
                         <p className="text-muted-foreground text-xs">
-                          {cot.codigoCotizacion} · {cot.lineas?.length ?? 0} ítems
-                          · {formatMoney(cot.total)}
+                          {cot.codigoCotizacion} · {cot.lineas?.length ?? 0}{' '}
+                          ítems · {formatMoney(cot.total)}
                         </p>
                         {isExterna && cot.adjuntoUrl && (
                           <a
@@ -409,6 +446,20 @@ export default function CuadroComparativoBuilder({
                   );
                 })}
               </div>
+            )}
+
+            {cols.length > 0 && cols.length < MIN_COTIZACIONES && (
+              <p className="text-muted-foreground mt-3 text-xs">
+                Un cuadro comparativo necesita al menos {MIN_COTIZACIONES}{' '}
+                cotizaciones. Si el proveedor no está registrado, usa
+                &laquo;Cotización externa rápida&raquo;.
+              </p>
+            )}
+
+            {form.formState.errors.cotizaciones?.message && (
+              <p className="text-destructive mt-3 text-sm">
+                {form.formState.errors.cotizaciones.message}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -462,7 +513,9 @@ export default function CuadroComparativoBuilder({
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[40px]">#</TableHead>
-                      <TableHead className="min-w-[220px]">Descripción</TableHead>
+                      <TableHead className="min-w-[220px]">
+                        Descripción
+                      </TableHead>
                       <TableHead className="w-[90px]">Cant.</TableHead>
                       <TableHead className="w-[110px]">Unid.</TableHead>
                       {cols.map((c) => (
@@ -655,7 +708,10 @@ export default function CuadroComparativoBuilder({
                           TOTALES
                         </TableCell>
                         {cols.map((c, ci) => (
-                          <TableCell key={c.cotizacionId} className="text-center">
+                          <TableCell
+                            key={c.cotizacionId}
+                            className="text-center"
+                          >
                             {formatMoney(totalesPorColumna[ci] ?? 0)}
                           </TableCell>
                         ))}
@@ -665,6 +721,14 @@ export default function CuadroComparativoBuilder({
                   </TableBody>
                 </Table>
               </div>
+
+              {(form.formState.errors.items?.message ??
+                form.formState.errors.items?.root?.message) && (
+                <p className="text-destructive mt-3 text-sm">
+                  {form.formState.errors.items?.message ??
+                    form.formState.errors.items?.root?.message}
+                </p>
+              )}
             </CardContent>
           </Card>
         )}
@@ -704,7 +768,9 @@ export default function CuadroComparativoBuilder({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={NINGUNO}>Sin recomendación</SelectItem>
+                        <SelectItem value={NINGUNO}>
+                          Sin recomendación
+                        </SelectItem>
                         {cols.map((c, ci) => (
                           <SelectItem key={c.cotizacionId} value={String(ci)}>
                             {c.proveedorNombre} ·{' '}
