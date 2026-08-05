@@ -106,11 +106,16 @@ jobs:
             # La peticion sale por el puerto 80 del host, o sea que atraviesa el
             # proxy `edge`: comprueba el mismo camino que usa un navegador,
             # incluido que el prefijo /amzdesk se reenvie completo.
+            # Se entra por /amzdesk SIGUIENDO las redirecciones, no directo a
+            # /amzdesk/login. Comprobar solo la pagina final oculto una vez un
+            # bucle de redirecciones entre nginx y Next que dejaba la aplicacion
+            # inservible con el smoke test en verde. Con --max-redirs, un bucle
+            # agota los saltos y el codigo final deja de ser 200.
             echo "Esperando a que el frontend responda..."
             for intento in $(seq 1 24); do
-              CODIGO=$(curl -s -o /dev/null -w '%{http_code}' -m 10 http://127.0.0.1/amzdesk/login || true)
+              CODIGO=$(curl -s -L --max-redirs 5 -o /dev/null -w '%{http_code}' -m 15 http://127.0.0.1/amzdesk || true)
               if [ "$CODIGO" = "200" ]; then
-                echo "El frontend responde 200 en /amzdesk/login"
+                echo "El frontend responde 200 entrando por /amzdesk"
                 exit 0
               fi
               echo "Intento $intento: HTTP ${CODIGO:-sin respuesta}"
