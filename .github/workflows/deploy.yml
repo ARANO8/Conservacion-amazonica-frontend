@@ -83,7 +83,7 @@ jobs:
     needs: build-push
     runs-on: ubuntu-latest
     steps:
-      - name: Actualizar el servicio frontend
+      - name: Actualizar el servicio frontend y comprobarlo
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -98,15 +98,25 @@ jobs:
             docker compose up -d frontend
             docker image prune -f
 
-      - name: Smoke test
-        run: |
-          for intento in $(seq 1 12); do
-            if curl -fsS -o /dev/null "${{ secrets.APP_URL }}/amzdesk/login"; then
-              echo "El frontend responde correctamente en /amzdesk/login"
-              exit 0
-            fi
-            echo "Intento $intento: el frontend aun no responde, reintentando en 5s..."
-            sleep 5
-          done
-          echo "::error::El frontend no respondio a /amzdesk/login tras 60 segundos"
-          exit 1
+            # El smoke test corre AQUI DENTRO y no desde el runner a proposito:
+            # el proxy que esta delante del VPS responde 403 a las peticiones
+            # que llegan desde GitHub Actions, asi que una comprobacion externa
+            # fallaria siempre sin decir nada sobre el estado real del servicio.
+            #
+            # La peticion sale por el puerto 80 del host, o sea que atraviesa el
+            # proxy `edge`: comprueba el mismo camino que usa un navegador,
+            # incluido que el prefijo /amzdesk se reenvie completo.
+            echo "Esperando a que el frontend responda..."
+            for intento in $(seq 1 24); do
+              CODIGO=$(curl -s -o /dev/null -w '%{http_code}' -m 10 http://127.0.0.1/amzdesk/login || true)
+              if [ "$CODIGO" = "200" ]; then
+                echo "El frontend responde 200 en /amzdesk/login"
+                exit 0
+              fi
+              echo "Intento $intento: HTTP ${CODIGO:-sin respuesta}"
+              sleep 5
+            done
+
+            echo "El frontend no llego a responder 200. Ultimos registros:"
+            docker compose logs --tail 50 frontend
+            exit 1
