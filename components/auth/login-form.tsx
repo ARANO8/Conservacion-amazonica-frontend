@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import Image from 'next/image';
+import { withBasePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -194,7 +195,7 @@ export function LoginForm({
         <div className="bg-background dark:bg-card fixed inset-0 z-[9999] flex flex-col items-center justify-center">
           <div className="animate-pulse">
             <Image
-              src="/Logo-AMZ-desk-ok.webp"
+              src={withBasePath('/Logo-AMZ-desk-ok.webp')}
               alt="Logo AMZdesk"
               width={300}
               height={100}

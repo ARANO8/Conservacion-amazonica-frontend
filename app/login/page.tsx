@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { withBasePath } from '@/lib/utils';
 import { LoginForm } from '@/components/auth/login-form';
 import { ApiStatus } from '@/components/auth/api-status';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -14,7 +15,7 @@ export default function LoginPage() {
       </div>
       <div className="w-full max-w-sm">
         <Image
-          src="/Logo-AMZ-desk-ok.webp"
+          src={withBasePath('/Logo-AMZ-desk-ok.webp')}
           alt="AMZdesk"
           width={180}
           height={60}

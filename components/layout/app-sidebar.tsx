@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
+import { withBasePath } from '@/lib/utils';
 import {
   BarChart3,
   Bell,
@@ -246,7 +247,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex flex-row items-center justify-between px-2 py-2">
             <a href="#">
               <Image
-                src="/Logo-AMZ-desk-ok.webp"
+                src={withBasePath('/Logo-AMZ-desk-ok.webp')}
                 alt="AMZdesk"
                 width={120}
                 height={40}
