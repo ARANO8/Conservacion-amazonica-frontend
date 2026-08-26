@@ -102,6 +102,10 @@ function buildViajesItems(rol?: Role) {
       title: 'Informe de Actividades',
       url: '/app/informe-actividades',
     });
+    items.push({
+      title: 'Declaración de Movilidad',
+      url: '/app/declaracion-movilidad',
+    });
   }
 
   return items;
