@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint",
+    "spec:sync": "curl -s http://localhost:3000/doc-json -o backend-spec.json",
     "prepare": "husky"
   },
   "dependencies": {
