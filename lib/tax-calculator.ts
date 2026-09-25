@@ -17,8 +17,7 @@
  *   - components/solicitudes/solicitud-viaticos.tsx
  *       INSTITUCIONAL: montoNeto (presupuestado) = netoTotal / 0.87
  *       → netoTotal (líquido) = montoNeto × 0.87  (RC-IVA 13%)
- *       TERCEROS:      montoNeto = netoTotal / 0.84
- *       → netoTotal = montoNeto × 0.84  (RC-IVA 13% + IT 3%)
+ *       TERCEROS:      igual que INSTITUCIONAL (RC-IVA 13%, factor 0.87)
  *
  * En el contexto de Rendición, la terminología invierte la perspectiva:
  *   montoTotal  → lo que realmente se pagó (bruto, incluyendo retenciones)
@@ -142,7 +141,8 @@ export function calcularMontosConsultoria(
  * | RECIBO+BIEN          | 0.92   | IUE 5% + IT 3%   (= 8% total)     |
  * | RECIBO+SERVICIO      | 0.84   | RC-IVA 13% + IT 3% (≈ 16% total)  |
  * | RECIBO+ALQUILER      | 0.84   | IVA 13% + IT 3%  (= 16% total)    |
- * | PVT / PAT            | 0.84   | RC-IVA 13% + IT 3% (= 16% total)  |
+ * | PVT                  | 0.87   | RC-IVA 13%                         |
+ * | PAT                  | 0.84   | RC-IVA 13% + IT 3% (= 16% total)  |
  *
  * @param montoNeto       Monto líquido (neto, sin impuestos).
  * @param tipoDocumento   Tipo de comprobante presentado.
@@ -176,9 +176,12 @@ export function calcularMontoBrutoRendicion(
     };
   }
 
-  // --- 2. LV / RECIBO+VIATICO --- Factor 0.87 (RC-IVA 13%)
+  // --- 2. LV / PVT / RECIBO+VIATICO --- Factor 0.87 (RC-IVA 13%)
+  // Los viáticos de terceros (PVT) retienen igual que los institucionales
+  // desde el Instructivo de Viaje y Viáticos del 03/08/2026.
   if (
     tipoDocumento === 'LV' ||
+    tipoDocumento === 'PVT' ||
     (tipoDocumento === 'RECIBO' && categoria === 'VIATICO')
   ) {
     const total = round2(neto / 0.87);
@@ -191,8 +194,8 @@ export function calcularMontoBrutoRendicion(
     };
   }
 
-  // --- 3. PVT / PAT --- Factor 0.84 (RC-IVA 13% + IT 3%)
-  if (tipoDocumento === 'PVT' || tipoDocumento === 'PAT') {
+  // --- 3. PAT --- Factor 0.84 (RC-IVA 13% + IT 3%)
+  if (tipoDocumento === 'PAT') {
     const total = round2(neto / 0.84);
     const rcIva = round2(total * 0.13);
     const it = round2(total * 0.03);

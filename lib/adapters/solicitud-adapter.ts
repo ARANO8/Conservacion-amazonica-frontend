@@ -108,6 +108,7 @@ export const adaptFormToPayload = (
         poaId,
         region: h.region || '',
         destino: h.destino || '',
+        tipoPersonal: h.tipoPersonal || 'INSTITUCIONAL',
         tipoDocumento: h.tipoDocumento || 'RECIBO',
         personas: Number(h.personas) || 1,
         noches: Number(h.noches) || 1,
@@ -351,6 +352,10 @@ export const adaptResponseToFormData = (
     poaId: Number(h.poaId) || 0,
     region: h.region || '',
     destino: h.destino || '',
+    tipoPersonal:
+      h.tipoPersonal === 'TERCEROS'
+        ? ('TERCEROS' as const)
+        : ('INSTITUCIONAL' as const),
     tipoDocumento: (h.tipoDocumento as 'FACTURA' | 'RECIBO') || 'RECIBO',
     personas: Number(h.personas) || 1,
     noches: Number(h.noches) || 1,
@@ -367,6 +372,10 @@ export const adaptResponseToFormData = (
         poaId: Number(p.poa?.id) || 0,
         region: h.region || '',
         destino: h.destino || '',
+        tipoPersonal:
+          h.tipoPersonal === 'TERCEROS'
+            ? ('TERCEROS' as const)
+            : ('INSTITUCIONAL' as const),
         tipoDocumento: (h.tipoDocumento as 'FACTURA' | 'RECIBO') || 'RECIBO',
         personas: Number(h.personas) || 1,
         noches: Number(h.noches) || 1,

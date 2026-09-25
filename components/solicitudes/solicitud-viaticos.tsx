@@ -282,14 +282,15 @@ function ViaticoCard({
   }, [selectedPlanificaciones, watchTipoDestino, setValue, index, dirtyFields]);
 
   // Get the unit price from the selected concept
-  const precioUnitarioLista = useMemo(() => {
-    if (!watchConceptoId || !watchTipoDestino) return 0;
+  // null mientras el catálogo no cargó: así no se pisa el costo guardado
+  const precioUnitarioLista = useMemo<number | null>(() => {
+    if (!watchConceptoId || !watchTipoDestino) return null;
 
     const conceptoObj = conceptos.find(
       (c) => String(c.id) === String(watchConceptoId)
     );
 
-    if (!conceptoObj) return 0;
+    if (!conceptoObj) return null;
 
     const priceStr =
       watchTipoDestino === 'INSTITUCIONAL'
@@ -299,15 +300,32 @@ function ViaticoCard({
     return priceStr ? parseFloat(priceStr) : 0;
   }, [watchConceptoId, watchTipoDestino, conceptos]);
 
-  // Sync costoUnitario for non-exterior concepts
+  // Sync costoUnitario for non-exterior concepts. También con 0: un concepto
+  // sin tarifa para el tipo elegido (p. ej. terceros en pueblos) no debe
+  // arrastrar el precio del concepto anterior.
   useEffect(() => {
-    if (!isExterior && precioUnitarioLista > 0) {
+    if (!isExterior && precioUnitarioLista !== null) {
       setValue(`viaticos.${index}.costoUnitario`, precioUnitarioLista, {
         shouldDirty: true,
         shouldValidate: true,
       });
     }
   }, [isExterior, precioUnitarioLista, index, setValue]);
+
+  // Las tarifas internacionales se definen en USD: se muestra la conversión
+  const conversionUsd = useMemo(() => {
+    const concepto = conceptos.find(
+      (c) => String(c.id) === String(watchConceptoId)
+    );
+    if (concepto?.moneda !== 'USD') return null;
+    const original =
+      watchTipoDestino === 'TERCEROS'
+        ? concepto.precioTercerosOriginal
+        : concepto.precioInstitucionalOriginal;
+    return `USD ${Number(original ?? 0).toFixed(2)} x TC ${Number(
+      concepto.tipoCambio ?? 0
+    ).toFixed(2)}`;
+  }, [conceptos, watchConceptoId, watchTipoDestino]);
 
   // Calculate total: días × personas × costo unitario (manual or fixed)
   const netoTotal = useMemo(() => {
@@ -318,15 +336,15 @@ function ViaticoCard({
   }, [dias, personas, watchCostoUnitario]);
 
   useEffect(() => {
-    const factor = watchTipoDestino === 'TERCEROS' ? 0.84 : 0.87;
-    const brutoTotal = netoTotal / factor;
+    // RC-IVA 13% para institucionales y terceros (instructivo 03/08/2026)
+    const brutoTotal = netoTotal / 0.87;
 
     const resultBruto = Number(brutoTotal.toFixed(2));
     setValue(`viaticos.${index}.montoNeto`, resultBruto, {
       shouldValidate: resultBruto > 0,
       shouldDirty: true,
     });
-  }, [netoTotal, watchTipoDestino, setValue, index]);
+  }, [netoTotal, setValue, index]);
 
   useEffect(() => {
     // Neto a Recibir (Liquido Pagable)
@@ -417,7 +435,8 @@ function ViaticoCard({
                   >
                     {conceptos.map((concepto) => (
                       <SelectItem key={concepto.id} value={String(concepto.id)}>
-                        {concepto.nombre}
+                        {concepto.nombre.replaceAll('_', ' ')}
+                        {concepto.moneda === 'USD' ? ' (USD)' : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -637,7 +656,7 @@ function ViaticoCard({
                     value={
                       field.value !== undefined
                         ? field.value
-                        : precioUnitarioLista
+                        : (precioUnitarioLista ?? 0)
                     }
                     onChange={(e) => {
                       field.onChange(
@@ -654,6 +673,11 @@ function ViaticoCard({
                     }
                   />
                 </FormControl>
+                {conversionUsd && (
+                  <p className="text-muted-foreground text-xs">
+                    {conversionUsd}
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -683,6 +707,7 @@ function ViaticoCard({
           </div>
           <div className="bg-border hidden h-8 w-[1px] sm:block" />
           <div className="flex flex-wrap gap-4">
+            {/* Institucionales y terceros retienen solo RC-IVA 13% */}
             <div className="flex flex-col">
               <span className="text-foreground text-sm uppercase">
                 RC-IVA 13%
@@ -691,14 +716,6 @@ function ViaticoCard({
                 {formatMoney((Number(montoNeto) || 0) * 0.13)}
               </span>
             </div>
-            {watchTipoDestino === 'TERCEROS' && (
-              <div className="flex flex-col">
-                <span className="text-foreground text-sm uppercase">IT 3%</span>
-                <span className="text-sm font-semibold">
-                  {formatMoney((Number(montoNeto) || 0) * 0.03)}
-                </span>
-              </div>
-            )}
           </div>
         </div>
 

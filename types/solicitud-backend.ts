@@ -114,6 +114,7 @@ export interface CreateSolicitudPayload {
     poaId: number;
     region: string;
     destino: string;
+    tipoPersonal: 'INSTITUCIONAL' | 'TERCEROS';
     tipoDocumento: string;
     personas: number;
     noches: number;
@@ -291,6 +292,7 @@ export interface SolicitudResponse {
       id: number;
       region: string;
       destino: string;
+      tipoPersonal?: 'INSTITUCIONAL' | 'TERCEROS';
       tipoDocumento?: string;
       personas: number;
       noches: number;
@@ -310,6 +312,7 @@ export interface SolicitudResponse {
     id: number;
     region: string;
     destino: string;
+    tipoPersonal?: 'INSTITUCIONAL' | 'TERCEROS';
     tipoDocumento?: string;
     personas: number;
     noches: number;

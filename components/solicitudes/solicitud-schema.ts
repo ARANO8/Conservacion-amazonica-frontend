@@ -230,6 +230,10 @@ export const formSchema = z.object({
         ),
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
+        // Institucional o socio: cada uno tiene su propio rango de tarifas
+        tipoPersonal: z
+          .enum(['INSTITUCIONAL', 'TERCEROS'])
+          .default('INSTITUCIONAL'),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
         personas: z.preprocess(
           (v) => (v === null ? undefined : v),

@@ -1,8 +1,14 @@
 export interface Concepto {
   id: number;
   nombre: string;
+  /** Tarifas líquidas diarias ya convertidas a Bs. */
   precioInstitucional?: string;
   precioTerceros?: string;
+  /** Moneda de la tarifa del instructivo; USD en los viáticos internacionales. */
+  moneda?: 'BOB' | 'USD';
+  tipoCambio?: string;
+  precioInstitucionalOriginal?: string;
+  precioTercerosOriginal?: string;
 }
 
 export interface Grupo {

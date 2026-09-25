@@ -26,43 +26,80 @@ import { formatMoney, normalizeString } from '@/lib/utils';
 import { toast } from 'sonner';
 
 // --- Diccionario de Hospedajes ---
-export const HOSPEDAJE_DICT = {
+// Rangos por noche del Instructivo de Viaje y Viáticos (03/08/2026), distintos
+// para personal institucional y para socios (TERCEROS). Las localidades que el
+// instructivo no señala se pagan según oferta: van por "Otras localidades" o
+// "Internacional", con tarifa manual.
+type TipoPersonal = 'INSTITUCIONAL' | 'TERCEROS';
+
+interface RegionHospedaje {
+  destinos: readonly string[];
+  rangos: Record<TipoPersonal, { min: number; max: number }> | null;
+  editable: boolean;
+}
+
+export const HOSPEDAJE_DICT: Record<string, RegionHospedaje> = {
   'Eje troncal': {
     destinos: ['La Paz', 'Santa Cruz', 'Cochabamba'],
-    min: 243.6,
-    max: 522.0,
+    rangos: {
+      INSTITUCIONAL: { min: 250, max: 750 },
+      TERCEROS: { min: 250, max: 350 },
+    },
     editable: false,
   },
   'Bolivia Sur': {
     destinos: ['Sucre', 'Potosi', 'Oruro', 'Tarija'],
-    min: 208.8,
-    max: 487.2,
+    rangos: {
+      INSTITUCIONAL: { min: 200, max: 500 },
+      TERCEROS: { min: 200, max: 250 },
+    },
     editable: false,
   },
   'Bolivia Norte': {
     destinos: ['Trinidad', 'Cobija'],
-    min: 180.96,
-    max: 348.0,
+    rangos: {
+      INSTITUCIONAL: { min: 180, max: 350 },
+      TERCEROS: { min: 180, max: 230 },
+    },
     editable: false,
   },
   'Ciudades Intermedias': {
+    destinos: [
+      'Rurrenabaque',
+      'San Buenaventura',
+      'Coroico',
+      'Apolo',
+      'Caranavi',
+    ],
+    rangos: {
+      INSTITUCIONAL: { min: 140, max: 350 },
+      TERCEROS: { min: 140, max: 200 },
+    },
+    editable: false,
+  },
+  'Otras localidades': {
     destinos: [],
-    min: 139.2,
-    max: 348.0,
+    rangos: null,
     editable: true,
   },
-  'Pueblos y Comunidades': {
-    destinos: [],
-    min: 40.0,
-    max: 200.0,
-    editable: true,
-  },
-} as const;
+};
+
+const ETIQUETA_PERSONAL: Record<TipoPersonal, string> = {
+  INSTITUCIONAL: 'Institucional',
+  TERCEROS: 'Socio',
+};
 
 // Constante para identificar la opción internacional
 const REGION_INTERNACIONAL = 'Internacional';
 
 type RegionKeys = keyof typeof HOSPEDAJE_DICT;
+
+function rangoDe(
+  region: string,
+  tipoPersonal: TipoPersonal
+): { min: number; max: number } | null {
+  return HOSPEDAJE_DICT[region]?.rangos?.[tipoPersonal] ?? null;
+}
 
 interface SolicitudHospedajesProps {
   fuentesDisponibles: SeleccionPresupuesto[];
@@ -139,6 +176,7 @@ export default function SolicitudHospedajes({
                 poaId: 0,
                 region: '',
                 destino: '',
+                tipoPersonal: 'INSTITUCIONAL',
                 tipoDocumento: 'RECIBO',
                 personas: 1,
                 noches: 1,
@@ -176,6 +214,9 @@ function HospedajeCard({
     name: `hospedajes.${index}.region`,
   }) as RegionKeys | typeof REGION_INTERNACIONAL | '';
 
+  const tipoPersonal: TipoPersonal =
+    useWatch({ control, name: `hospedajes.${index}.tipoPersonal` }) ??
+    'INSTITUCIONAL';
   const personas = useWatch({ control, name: `hospedajes.${index}.personas` });
   const noches = useWatch({ control, name: `hospedajes.${index}.noches` });
   const cantidadUnitaria = useWatch({
@@ -192,10 +233,10 @@ function HospedajeCard({
   const iva = useWatch({ control, name: `hospedajes.${index}.iva` }) || 0;
   const it = useWatch({ control, name: `hospedajes.${index}.it` }) || 0;
 
-  // Flag para detectar si es región internacional (permite entrada manual de destino y tarifa)
+  // Tarifa manual (sin rango): internacional, "Otras localidades" y regiones
+  // antiguas que ya no están en el instructivo
   const isInternacionalMode =
-    selectedRegion === REGION_INTERNACIONAL ||
-    (selectedRegion !== '' && !(selectedRegion in HOSPEDAJE_DICT));
+    selectedRegion !== '' && !rangoDe(selectedRegion, tipoPersonal);
 
   const calcularTotales = useCallback(() => {
     const pers = Number(personas) || 0;
@@ -231,17 +272,25 @@ function HospedajeCard({
     ? HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.destinos || []
     : [];
 
-  // Para internacional no hay rangos; para regiones del diccionario sí
-  const rangoMin = isInternacionalMode
-    ? 0
-    : selectedRegion
-      ? HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.min
-      : 0;
-  const rangoMax = isInternacionalMode
-    ? 0
-    : selectedRegion
-      ? HOSPEDAJE_DICT[selectedRegion as RegionKeys]?.max
-      : 0;
+  // Para tarifa manual no hay rangos; para regiones del diccionario sí
+  const rango = selectedRegion ? rangoDe(selectedRegion, tipoPersonal) : null;
+  const rangoMin = rango?.min ?? 0;
+  const rangoMax = rango?.max ?? 0;
+
+  // Al cambiar el tipo de personal la tarifa se lleva al nuevo rango
+  const ajustarTarifa = (region: string, tipo: TipoPersonal) => {
+    const nuevo = rangoDe(region, tipo);
+    const actual = Number(cantidadUnitaria) || 0;
+    const tarifa = !nuevo
+      ? actual
+      : actual < nuevo.min || actual > nuevo.max
+        ? nuevo.min
+        : actual;
+    setValue(`hospedajes.${index}.cantidadUnitaria`, tarifa, {
+      shouldDirty: true,
+    });
+    trigger(`hospedajes.${index}.cantidadUnitaria`);
+  };
 
   return (
     <div className="bg-card animate-in fade-in slide-in-from-top-2 overflow-hidden rounded-xl border shadow-sm duration-300">
@@ -319,28 +368,14 @@ function HospedajeCard({
                   onValueChange={(val) => {
                     field.onChange(val);
                     setValue(`hospedajes.${index}.destino`, ''); // Reset destino on region change
-
-                    // Para internacional no seteamos precio mínimo; para otras regiones sí
-                    if (val === REGION_INTERNACIONAL) {
-                      setValue(`hospedajes.${index}.cantidadUnitaria`, 0, {
-                        shouldValidate: false,
-                        shouldDirty: true,
-                      });
-                    } else {
-                      // Set default price based on region to avoid validation errors
-                      const minPrice =
-                        HOSPEDAJE_DICT[val as RegionKeys]?.min || 0;
-                      setValue(
-                        `hospedajes.${index}.cantidadUnitaria`,
-                        minPrice,
-                        {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        }
-                      );
-                    }
-
-                    trigger(`hospedajes.${index}.cantidadUnitaria`); // Re-validate
+                    // Sin rango (internacional, otras localidades) la tarifa
+                    // se ingresa a mano; con rango arranca en el mínimo
+                    setValue(
+                      `hospedajes.${index}.cantidadUnitaria`,
+                      rangoDe(val, tipoPersonal)?.min ?? 0,
+                      { shouldDirty: true }
+                    );
+                    trigger(`hospedajes.${index}.cantidadUnitaria`);
                   }}
                   value={field.value}
                 >
@@ -419,6 +454,47 @@ function HospedajeCard({
                     </SelectContent>
                   </Select>
                 )}
+                <FormMessage />
+              </Field>
+            )}
+          />
+
+          {/* TIPO DE PERSONAL */}
+          <FormField
+            control={control}
+            name={`hospedajes.${index}.tipoPersonal`}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel>Personal</FieldLabel>
+                <Select
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    if (selectedRegion) {
+                      ajustarTarifa(selectedRegion, val as TipoPersonal);
+                    }
+                  }}
+                  value={field.value || 'INSTITUCIONAL'}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar personal" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    className="max-h-[200px] w-[var(--radix-select-trigger-width)]"
+                  >
+                    {(Object.keys(ETIQUETA_PERSONAL) as TipoPersonal[]).map(
+                      (tipo) => (
+                        <SelectItem key={tipo} value={tipo}>
+                          {ETIQUETA_PERSONAL[tipo]}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </Field>
             )}
@@ -616,11 +692,18 @@ function HospedajeCard({
                           <span>Máx: {rangoMax}</span>
                         </div>
                       )}
+                      {selectedRegion && (
+                        <p className="text-muted-foreground text-xs">
+                          Rango {ETIQUETA_PERSONAL[tipoPersonal].toLowerCase()}.
+                          Una tarifa en el rango superior requiere justificación
+                          y autorización de Dirección Ejecutiva.
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <p className="text-muted-foreground text-sm italic">
-                      Ingrese la tarifa manualmente para hospedaje
-                      internacional.
+                      Ingrese la tarifa manualmente: se paga de acuerdo a la
+                      oferta y necesidad de hospedaje.
                     </p>
                   )}
                 </FormControl>
