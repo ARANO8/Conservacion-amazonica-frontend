@@ -126,6 +126,18 @@ export const solicitudesService = {
     return response.data;
   },
 
+  /**
+   * ANEXO 2 de una solicitud de viaje, en HTML. Sale de la misma plantilla que
+   * el PDF, así el detalle y el documento impreso son idénticos.
+   */
+  async getAnexo2Html(id: string | number, signal?: AbortSignal) {
+    const response = await api.get<string>(`/solicitudes/${id}/anexo2`, {
+      responseType: 'text',
+      signal,
+    });
+    return response.data;
+  },
+
   // --- Pagos parciales de contratos de consultoría ---
 
   /** Adquisiciones solicita el pago de una cuota. PLANIFICADO | OBSERVADO → SOLICITADO */

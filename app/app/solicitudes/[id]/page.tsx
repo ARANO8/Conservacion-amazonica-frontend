@@ -48,6 +48,7 @@ import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-break
 import { mapResponseToBreakdown } from '@/lib/mappers/breakdown-mapper';
 import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
 import { formatMoney, formatDateShort } from '@/lib/utils';
+import { Anexo2Viewer } from '@/components/solicitudes/anexo2-viewer';
 
 export default function SolicitudDetailPage() {
   const params = useParams();
@@ -121,6 +122,8 @@ export default function SolicitudDetailPage() {
     );
   }
 
+  const esViaje = solicitud.tipo !== 'COMPRA_SERVICIO';
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -151,90 +154,110 @@ export default function SolicitudDetailPage() {
 
       <ObservacionAlert observacion={solicitud.observacion} />
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">Solicitante</CardTitle>
-            <User className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto">
-              {solicitud.usuarioEmisor?.nombreCompleto || 'Sin asignar'}
-            </div>
-            <p className="text-amzdesk-helper">
-              {solicitud.usuarioEmisor?.cargo ||
-                solicitud.usuarioEmisor?.email ||
-                ''}
-            </p>
-          </CardContent>
-        </Card>
+      {/* Las solicitudes de viaje se muestran en el formato oficial ANEXO 2,
+          idéntico al PDF; debajo queda lo que el anexo no recoge. */}
+      {esViaje && (
+        <Anexo2Viewer
+          solicitudId={solicitud.id}
+          codigoSolicitud={solicitud.codigoSolicitud}
+        />
+      )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">
-              Periodo del Viaje
-            </CardTitle>
-            <Calendar className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto">
-              {solicitud.fechaInicio
-                ? `${formatDateShort(solicitud.fechaInicio)} - ${formatDateShort(solicitud.fechaFin || solicitud.fechaInicio)}`
-                : formatDateShort(solicitud.fechaSolicitud)}
-            </div>
-            <p className="text-amzdesk-helper">
-              Solicitado: {formatDateShort(solicitud.fechaSolicitud)}
-            </p>
-          </CardContent>
-        </Card>
+      {!esViaje && (
+        <>
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-amzdesk-label">
+                  Solicitante
+                </CardTitle>
+                <User className="text-muted-foreground h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-amzdesk-monto">
+                  {solicitud.usuarioEmisor?.nombreCompleto || 'Sin asignar'}
+                </div>
+                <p className="text-amzdesk-helper">
+                  {solicitud.usuarioEmisor?.cargo ||
+                    solicitud.usuarioEmisor?.email ||
+                    ''}
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">Destino</CardTitle>
-            <MapPin className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto">
-              {solicitud.lugarViaje || '-'}
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-amzdesk-label">
+                  Periodo del Viaje
+                </CardTitle>
+                <Calendar className="text-muted-foreground h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-amzdesk-monto">
+                  {solicitud.fechaInicio
+                    ? `${formatDateShort(solicitud.fechaInicio)} - ${formatDateShort(solicitud.fechaFin || solicitud.fechaInicio)}`
+                    : formatDateShort(solicitud.fechaSolicitud)}
+                </div>
+                <p className="text-amzdesk-helper">
+                  Solicitado: {formatDateShort(solicitud.fechaSolicitud)}
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">Monto Total</CardTitle>
-            <DollarSign className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto text-emerald-600">
-              {formatMoney(solicitud.montoTotalNeto)}
-            </div>
-            <p className="text-amzdesk-helper">
-              Presupuestado: {formatMoney(solicitud.montoTotalPresupuestado)}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-amzdesk-label">Destino</CardTitle>
+                <MapPin className="text-muted-foreground h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-amzdesk-monto">
+                  {solicitud.lugarViaje || '-'}
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Motivo y Descripción */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Motivo del Viaje
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="font-medium">{solicitud.motivoViaje}</p>
-          {solicitud.descripcion && (
-            <div>
-              <p className="text-amzdesk-helper mb-1">Descripción adicional:</p>
-              <p className="text-amzdesk-helper">{solicitud.descripcion}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-amzdesk-label">
+                  Monto Total
+                </CardTitle>
+                <DollarSign className="text-muted-foreground h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-amzdesk-monto text-emerald-600">
+                  {formatMoney(solicitud.montoTotalNeto)}
+                </div>
+                <p className="text-amzdesk-helper">
+                  Presupuestado:{' '}
+                  {formatMoney(solicitud.montoTotalPresupuestado)}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Motivo y Descripción */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Motivo del Viaje
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="font-medium">{solicitud.motivoViaje}</p>
+              {solicitud.descripcion && (
+                <div>
+                  <p className="text-amzdesk-helper mb-1">
+                    Descripción adicional:
+                  </p>
+                  <p className="text-amzdesk-helper">{solicitud.descripcion}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       {/* Documentos de Respaldo */}
       <Card>
@@ -493,26 +516,28 @@ export default function SolicitudDetailPage() {
       )}
 
       {/* Totals Summary */}
-      <Card className="bg-muted/50">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <p className="text-amzdesk-helper">Total liquido</p>
-              <p className="text-amzdesk-monto text-2xl text-emerald-600">
-                {formatMoney(solicitud.montoTotalNeto)}
-              </p>
+      {!esViaje && (
+        <Card className="bg-muted/50">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-amzdesk-helper">Total liquido</p>
+                <p className="text-amzdesk-monto text-2xl text-emerald-600">
+                  {formatMoney(solicitud.montoTotalNeto)}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-amzdesk-helper">
+                  Total Presupuestado (Incl. Impuestos)
+                </p>
+                <p className="text-amzdesk-monto text-2xl">
+                  {formatMoney(solicitud.montoTotalPresupuestado)}
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-amzdesk-helper">
-                Total Presupuestado (Incl. Impuestos)
-              </p>
-              <p className="text-amzdesk-monto text-2xl">
-                {formatMoney(solicitud.montoTotalPresupuestado)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       <Separator />
 
