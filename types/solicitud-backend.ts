@@ -300,6 +300,7 @@ export interface SolicitudResponse {
       it: number | string;
     }>;
     subtotalPresupuestado?: number | string;
+    subtotalNeto?: number | string;
   }>;
   fechaInicio?: string;
   fechaFin?: string;
