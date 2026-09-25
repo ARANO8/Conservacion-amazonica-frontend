@@ -130,14 +130,14 @@ function SolicitudResumenCard({ solicitud }: SolicitudResumenCardProps) {
           </div>
         </div>
 
-        {/* Aprobador (si existe) */}
-        {solicitud.aprobador && (
+        {/* Director de Programa: `aprobador` ya es null tras el desembolso */}
+        {solicitud.directorPrograma && (
           <div className="space-y-0.5">
             <span className="text-foreground text-sm font-bold tracking-wider uppercase">
-              Aprobado por
+              Director de Programa
             </span>
             <p className="text-foreground text-sm font-medium">
-              {solicitud.aprobador.nombreCompleto}
+              {solicitud.directorPrograma.nombreCompleto}
             </p>
           </div>
         )}

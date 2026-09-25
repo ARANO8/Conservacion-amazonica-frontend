@@ -184,6 +184,12 @@ export interface SolicitudResponse {
     nombreCompleto: string;
     nombre?: string;
   };
+  /** Revisa la solicitud y la deriva a Dirección Financiera; no cambia al derivar. */
+  directorPrograma?: {
+    id: number | string;
+    nombreCompleto: string;
+    cargo?: string | null;
+  } | null;
   viaticos?: Array<{
     id: number;
     dias: number;

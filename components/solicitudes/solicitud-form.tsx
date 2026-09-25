@@ -456,7 +456,9 @@ export default function SolicitudForm({
     const aprobadorId = Number(data.destinatario);
 
     if (!aprobadorId) {
-      toast.error('Por favor, selecciona un destinatario (aprobador)');
+      toast.error(
+        'Selecciona al Director de Programa que revisará la solicitud'
+      );
       return;
     }
 
@@ -649,6 +651,7 @@ export default function SolicitudForm({
           conceptos={conceptos}
           tiposGasto={tiposGasto}
           currentUserId={Number(user?.id)}
+          directorFijo={isEditMode && !!initialValues?.destinatario}
           onError={onError}
         />
 

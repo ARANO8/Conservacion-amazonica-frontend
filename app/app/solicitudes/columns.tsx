@@ -29,10 +29,9 @@ export const columns: ColumnDef<SolicitudResponse>[] = [
     cell: ({ row }) => formatDateShort(row.original.fechaSolicitud),
   },
   {
-    id: 'aprobador',
-    header: 'Aprobador',
-    accessorFn: (row) =>
-      row.aprobador?.nombreCompleto || row.aprobador?.nombre || '-',
+    id: 'directorPrograma',
+    header: 'Director de Programa',
+    accessorFn: (row) => row.directorPrograma?.nombreCompleto || '-',
   },
   {
     accessorKey: 'estado',

@@ -392,6 +392,10 @@ export const adaptResponseToFormData = (
       : hospedajesFromPresupuestos;
 
   return {
+    // Al subsanar, la solicitud vuelve al Director de Programa ya designado
+    destinatario: response.directorPrograma?.id
+      ? String(response.directorPrograma.id)
+      : '',
     planificacionLugares: response.lugarViaje || '',
     planificacionObjetivo: response.motivoViaje || '',
     motivo: response.descripcion || '',
@@ -399,7 +403,6 @@ export const adaptResponseToFormData = (
     urlCotizaciones: Array.isArray(response.urlCotizaciones)
       ? response.urlCotizaciones.filter((url): url is string => !!url)
       : [],
-    destinatario: response.aprobadorId ? String(response.aprobadorId) : '',
     proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,
     presupuestosIds: fuentesSeleccionadas
