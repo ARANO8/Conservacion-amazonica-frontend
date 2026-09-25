@@ -7,10 +7,10 @@
  */
 
 /** Divisor de grossing-up: celda F14 del Excel ("no tocar este valor"). */
-export const FACTOR_MOVILIDAD = 0.845;
+export const FACTOR_MOVILIDAD = 0.84;
 
-/** IUE 12.5% + IT 3%. La planilla rotula 15.5% aunque su fórmula usa 16%. */
-export const RETENCION_MOVILIDAD_RATE = 0.155;
+/** Retención impositiva por servicios del ANEXO 6. */
+export const RETENCION_MOVILIDAD_RATE = 0.16;
 
 export function round2(valor: number): number {
   return Math.round((valor + Number.EPSILON) * 100) / 100;
@@ -31,7 +31,7 @@ export interface ResumenMovilidad {
   totalLiquido: number;
 }
 
-/** Las tres filas del pie: TOTAL, menos retención 15.5%, TOTAL líquido. */
+/** Las tres filas del pie: TOTAL, menos retención 16%, TOTAL líquido. */
 export function resumirDeclaracion(montos: number[]): ResumenMovilidad {
   const totalBruto = round2(
     montos.reduce((acc, monto) => acc + (Number.isFinite(monto) ? monto : 0), 0)

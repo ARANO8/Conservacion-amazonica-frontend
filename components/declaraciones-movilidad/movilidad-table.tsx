@@ -252,7 +252,7 @@ function PieAnexo({
   const filas: { etiqueta: string; valor: number; destacada?: boolean }[] = [
     { etiqueta: 'TOTAL', valor: totalBruto },
     {
-      etiqueta: 'Menos retención impositiva por servicios 15.5%',
+      etiqueta: 'Menos retención impositiva por servicios 16%',
       valor: retencion,
     },
     { etiqueta: 'TOTAL', valor: totalLiquido, destacada: true },
