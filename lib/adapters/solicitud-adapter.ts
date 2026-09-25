@@ -33,6 +33,7 @@ export const adaptFormToPayload = (
     fechaFin: new Date(act.fechaFin).toISOString(),
     cantInstitucional: Number(act.cantInstitucion) || 0,
     cantTerceros: Number(act.cantTerceros) || 0,
+    participantesInstitucionalesIds: act.institucionales || [],
     dias: Number(act.cantDias) || 0, // Enviar valor manual del input (permite decimales)
   }));
 
@@ -187,6 +188,7 @@ export const adaptResponseToFormData = (
       nombreCompleto: string;
       procedenciaInstitucion: string;
     }[],
+    institucionales: (p.participantesInstitucionales || []).map((u) => u.id),
   }));
 
   // 1b. Repartir las personas externas dentro de su actividad de origen.

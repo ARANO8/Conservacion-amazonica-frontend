@@ -83,6 +83,7 @@ export interface CreateSolicitudPayload {
     fechaFin: string; // ISO String
     cantInstitucional: number;
     cantTerceros: number;
+    participantesInstitucionalesIds: number[];
     dias?: number; // Valor decimal editado manualmente por el usuario
   }[];
   viaticos: {
@@ -225,6 +226,11 @@ export interface SolicitudResponse {
     fechaFin: string;
     cantidadPersonasInstitucional: number;
     cantidadPersonasTerceros: number;
+    participantesInstitucionales?: Array<{
+      id: number;
+      nombreCompleto: string;
+      cargo?: string | null;
+    }>;
     diasCalculados?: number;
     dias?: number; // Propiedad que el backend envía con el valor decimal real
   }>;

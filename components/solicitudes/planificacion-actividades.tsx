@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { differenceInDays, format, parseISO, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { DateRange } from 'react-day-picker';
-import { CalendarIcon, Trash2 } from 'lucide-react';
+import { CalendarIcon, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -27,10 +27,13 @@ import {
 } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
+import SelectorPersonalInstitucional from '@/components/solicitudes/selector-personal-institucional';
+import type { Usuario } from '@/types/catalogs';
 
 interface PlanificacionActividadesProps {
   control: Control<FormData>;
   setValue: UseFormSetValue<FormData>;
+  usuarios: Usuario[];
 }
 
 function toDate(value: string | Date | undefined): Date | undefined {
@@ -64,6 +67,7 @@ function calculateCalendarDays(from: Date, to: Date): number {
 export default function PlanificacionActividades({
   control,
   setValue,
+  usuarios,
 }: PlanificacionActividadesProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -89,6 +93,7 @@ export default function PlanificacionActividades({
             control={control}
             setValue={setValue}
             remove={remove}
+            usuarios={usuarios}
           />
         ))}
       </div>
@@ -109,6 +114,7 @@ export default function PlanificacionActividades({
               cantInstitucion: 1,
               cantTerceros: 0,
               terceros: [],
+              institucionales: [],
             });
           }}
         >
@@ -124,9 +130,16 @@ interface ActividadRowProps {
   control: Control<FormData>;
   setValue: UseFormSetValue<FormData>;
   remove: (index: number) => void;
+  usuarios: Usuario[];
 }
 
-function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
+function ActividadRow({
+  idx,
+  control,
+  setValue,
+  remove,
+  usuarios,
+}: ActividadRowProps) {
   const fechaInicio = useWatch({
     control,
     name: `actividades.${idx}.fechaInicio`,
@@ -186,6 +199,43 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
   );
 
   const today = useMemo(() => startOfToday(), []);
+
+  const [selectorAbierto, setSelectorAbierto] = useState(false);
+
+  const cantInstitucion = useWatch({
+    control,
+    name: `actividades.${idx}.cantInstitucion`,
+  });
+  const actividadProgramada = useWatch({
+    control,
+    name: `actividades.${idx}.actividadProgramada`,
+  });
+  const institucionalesWatch = useWatch({
+    control,
+    name: `actividades.${idx}.institucionales`,
+  });
+  const institucionales = useMemo(
+    () => institucionalesWatch ?? [],
+    [institucionalesWatch]
+  );
+
+  const requeridos = Number(cantInstitucion) || 0;
+
+  // Si baja el conteo, se recorta la selección por el final.
+  useEffect(() => {
+    if (requeridos > 0 && institucionales.length > requeridos) {
+      setValue(
+        `actividades.${idx}.institucionales`,
+        institucionales.slice(0, requeridos),
+        { shouldDirty: true }
+      );
+    }
+  }, [requeridos, institucionales, idx, setValue]);
+
+  const nombresPorId = useMemo(
+    () => new Map(usuarios.map((u) => [u.id, u.nombreCompleto])),
+    [usuarios]
+  );
 
   return (
     <div className="bg-card hover:bg-muted/30 grid grid-cols-1 items-start gap-2 rounded-lg border p-3 transition-colors md:grid-cols-12 md:p-2">
@@ -319,6 +369,13 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
                   {...field}
                   value={field.value ?? ''}
                   className="h-9 text-center text-xs"
+                  onBlur={() => {
+                    field.onBlur();
+                    const cantidad = Number(field.value) || 0;
+                    if (cantidad > 0 && institucionales.length !== cantidad) {
+                      setSelectorAbierto(true);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'ArrowUp') {
                       e.preventDefault();
@@ -421,6 +478,48 @@ function ActividadRow({ idx, control, setValue, remove }: ActividadRowProps) {
           <span className="sr-only">Eliminar</span>
         </Button>
       </div>
+
+      {requeridos > 0 && (
+        <div className="flex flex-wrap items-center gap-2 border-t pt-2 md:col-span-12">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className={cn(
+              'h-7 text-xs',
+              institucionales.length !== requeridos &&
+                'border-destructive text-destructive'
+            )}
+            onClick={() => setSelectorAbierto(true)}
+          >
+            <Users className="mr-1 size-3.5" />
+            Personal institucional ({institucionales.length}/{requeridos})
+          </Button>
+          {institucionales.map((id) => (
+            <span
+              key={id}
+              className="bg-muted rounded-full px-2.5 py-0.5 text-xs"
+            >
+              {nombresPorId.get(id) ?? `Usuario #${id}`}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <SelectorPersonalInstitucional
+        open={selectorAbierto}
+        onOpenChange={setSelectorAbierto}
+        usuarios={usuarios}
+        requeridos={requeridos}
+        seleccionados={institucionales}
+        actividad={actividadProgramada}
+        onConfirm={(ids) =>
+          setValue(`actividades.${idx}.institucionales`, ids, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+      />
     </div>
   );
 }

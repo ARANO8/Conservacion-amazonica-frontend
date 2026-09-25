@@ -111,6 +111,9 @@ export const formSchema = z.object({
             })
           )
           .default([]),
+        // Nómina institucional: IDs de usuarios del sistema que participan.
+        // Se elige en el modal del Paso 1 y debe cuadrar con cantInstitucion.
+        institucionales: z.array(z.number()).default([]),
       })
     )
     .min(1, 'Debes agregar al menos una actividad'),
@@ -299,6 +302,7 @@ export const defaultValues: FormData = {
       cantInstitucion: 1,
       cantTerceros: 0,
       terceros: [],
+      institucionales: [],
     },
   ],
   interino: false,

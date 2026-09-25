@@ -245,12 +245,27 @@ export default function SolicitudForm({
       const isValid = await form.trigger(
         planificacionPaths as FieldPath<FormData>[]
       );
-      if (isValid) {
-        setStep('SOLICITUD');
-        window.scrollTo(0, 0);
-      } else {
+      if (!isValid) {
         toast.error('Corrige los errores en la planificación');
+        return;
       }
+
+      // La nómina institucional debe cuadrar con lo declarado en cada actividad
+      for (const actividad of actividades) {
+        const declarados = Number(actividad.cantInstitucion) || 0;
+        const seleccionados = (actividad.institucionales || []).length;
+        if (declarados !== seleccionados) {
+          toast.error(
+            `En "${
+              actividad.actividadProgramada || 'la actividad'
+            }" declaraste ${declarados} persona(s) institucional(es) pero seleccionaste ${seleccionados}`
+          );
+          return;
+        }
+      }
+
+      setStep('SOLICITUD');
+      window.scrollTo(0, 0);
       return;
     }
 
@@ -574,6 +589,7 @@ export default function SolicitudForm({
                       <PlanificacionActividades
                         control={form.control}
                         setValue={form.setValue}
+                        usuarios={usuarios}
                       />
                     </FieldSet>
                   </FieldGroup>
