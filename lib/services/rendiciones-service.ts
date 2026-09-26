@@ -25,7 +25,10 @@ export const rendicionesService = {
   /**
    * Envía la rendición ya adaptada al endpoint oficial del backend.
    */
-  async submitRendicion(payload: CreateRendicionApiPayload, signal?: AbortSignal) {
+  async submitRendicion(
+    payload: CreateRendicionApiPayload,
+    signal?: AbortSignal
+  ) {
     const response = await api.post('/rendiciones', payload, { signal });
     return response.data;
   },
@@ -61,7 +64,11 @@ export const rendicionesService = {
    * @param id El ID de la rendición a actualizar.
    * @param payload Los datos del formulario de rendición.
    */
-  async updateRendicion(id: string | number, payload: CreateRendicionInput, signal?: AbortSignal) {
+  async updateRendicion(
+    id: string | number,
+    payload: CreateRendicionInput,
+    signal?: AbortSignal
+  ) {
     const adaptedPayload = adaptUpdateRendicionPayload(payload);
     return this.submitUpdateRendicion(id, adaptedPayload, signal);
   },
@@ -76,7 +83,9 @@ export const rendicionesService = {
   },
 
   async getRendiciones(signal?: AbortSignal) {
-    const response = await api.get<RendicionResponse[]>('/rendiciones', { signal });
+    const response = await api.get<RendicionResponse[]>('/rendiciones', {
+      signal,
+    });
     return response.data;
   },
 
@@ -96,7 +105,10 @@ export const rendicionesService = {
    * Fetches rendiciones by solicitud ID.
    * @param solicitudId The ID of the solicitud.
    */
-  async getRendicionesBySolicitud(solicitudId: string | number, signal?: AbortSignal) {
+  async getRendicionesBySolicitud(
+    solicitudId: string | number,
+    signal?: AbortSignal
+  ) {
     const response = await api.get(`/rendiciones`, {
       params: { solicitudId },
       signal,
@@ -107,8 +119,13 @@ export const rendicionesService = {
   /**
    * Obtiene una rendición a partir del ID de solicitud.
    */
-  async getRendicionBySolicitud(solicitudId: string | number, signal?: AbortSignal) {
-    const response = await api.get(`/rendiciones/solicitud/${solicitudId}`, { signal });
+  async getRendicionBySolicitud(
+    solicitudId: string | number,
+    signal?: AbortSignal
+  ) {
+    const response = await api.get(`/rendiciones/solicitud/${solicitudId}`, {
+      signal,
+    });
     return response.data;
   },
 
@@ -117,7 +134,9 @@ export const rendicionesService = {
     payload: AprobarRendicionPayload,
     signal?: AbortSignal
   ) {
-    const response = await api.post(`/rendiciones/${id}/aprobar`, payload, { signal });
+    const response = await api.post(`/rendiciones/${id}/aprobar`, payload, {
+      signal,
+    });
     return response.data;
   },
 
@@ -126,7 +145,9 @@ export const rendicionesService = {
     payload: ObservarRendicionPayload,
     signal?: AbortSignal
   ) {
-    const response = await api.post(`/rendiciones/${id}/observar`, payload, { signal });
+    const response = await api.post(`/rendiciones/${id}/observar`, payload, {
+      signal,
+    });
     return response.data;
   },
 
@@ -159,6 +180,27 @@ export const rendicionesService = {
   async downloadPdf(id: string | number, signal?: AbortSignal) {
     const response = await api.get(`/rendiciones/${id}/pdf`, {
       responseType: 'blob',
+      signal,
+    });
+    return response.data;
+  },
+
+  /** ANEXO 4 en Excel, con fórmulas para saldos y totales. */
+  async downloadExcel(id: string | number, signal?: AbortSignal) {
+    const response = await api.get(`/rendiciones/${id}/excel`, {
+      responseType: 'blob',
+      signal,
+    });
+    return response.data;
+  },
+
+  /**
+   * ANEXO 4 en HTML. Sale de la misma plantilla que el PDF, así el detalle y
+   * el documento impreso son idénticos.
+   */
+  async getAnexo4Html(id: string | number, signal?: AbortSignal) {
+    const response = await api.get<string>(`/rendiciones/${id}/anexo4`, {
+      responseType: 'text',
       signal,
     });
     return response.data;

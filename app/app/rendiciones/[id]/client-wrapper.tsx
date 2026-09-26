@@ -11,36 +11,29 @@ import {
   AlertCircle,
   Info,
   ArrowLeft,
-  Banknote,
-  Calendar,
   CheckCircle,
   Check,
   ChevronsUpDown,
-  DollarSign,
   ExternalLink,
   FileSpreadsheet,
   FileText,
   ShieldCheck,
-  Wallet,
 } from 'lucide-react';
 import type {
   RendicionResponse,
   EstadoRendicion,
 } from '@/types/rendicion-backend';
-import { formatMoney, formatDate } from '@/lib/utils';
+import { formatMoney } from '@/lib/utils';
 import { RendicionGastosSection } from '@/components/rendiciones/rendicion-gastos-section';
 import { RendicionSolicitudSection } from '@/components/rendiciones/rendicion-solicitud-section';
 import { RendicionPartidasPresupuestarias } from '@/components/rendiciones/rendicion-partidas-presupuestarias';
-import { ResumenAnexo4Blocks } from '@/components/rendiciones/resumen-anexo4';
-import {
-  resumirAnexo4,
-  desglosarGastoPersistido,
-} from '@/lib/rendicion-anexo4';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
 import { useAuthStore } from '@/store/auth-store';
 import { catalogosService } from '@/lib/services/catalogos-service';
 import { Usuario, type PartidaContable } from '@/types/catalogs';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
+import { downloadBlob } from '@/lib/utils/download-blob';
+import { AnexoViewer } from '@/components/shared/anexo-viewer';
 import {
   Table,
   TableBody,
@@ -112,6 +105,31 @@ export function RendicionDetailClient({
   const [observeOpen, setObserveOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [descargando, setDescargando] = useState<'pdf' | 'xlsx' | null>(null);
+
+  const nombreArchivo = rendicion.solicitud?.codigoSolicitud
+    ? `Rendicion-${rendicion.solicitud.codigoSolicitud}`
+    : `rendicion-${rendicion.id}`;
+
+  const handleDescargar = async (formato: 'pdf' | 'xlsx') => {
+    setDescargando(formato);
+    try {
+      await downloadBlob(
+        () =>
+          formato === 'pdf'
+            ? rendicionesService.downloadPdf(rendicion.id)
+            : rendicionesService.downloadExcel(rendicion.id),
+        nombreArchivo,
+        {
+          formato,
+          errorMessage: `No se pudo descargar el ${formato === 'pdf' ? 'PDF' : 'Excel'} de la rendición.`,
+          successMessage: `${formato === 'pdf' ? 'PDF' : 'Excel'} de la rendición descargado correctamente.`,
+        }
+      );
+    } finally {
+      setDescargando(null);
+    }
+  };
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [derivadoAId, setDerivadoAId] = useState<string>('');
   const [comentarioAprobar, setComentarioAprobar] = useState('');
@@ -207,56 +225,6 @@ export function RendicionDetailClient({
       (g) => gastoValidaciones[g.id]?.estado === 'correcto'
     );
   }, [gastosRegistrados, gastoValidaciones]);
-
-  const totalEfectivoPagado = useMemo(
-    () =>
-      gastosRegistrados.reduce(
-        (acc, gasto) => acc + toNumber(gasto.montoNeto),
-        0
-      ),
-    [gastosRegistrados]
-  );
-
-  const montoRecibido = useMemo(
-    () => toNumber(rendicion.solicitud?.montoTotalNeto),
-    [rendicion.solicitud?.montoTotalNeto]
-  );
-
-  // Usar el valor calculado por el backend para consistencia
-  const saldoLiquido = useMemo(
-    () => toNumber(rendicion.saldoLiquido),
-    [rendicion.saldoLiquido]
-  );
-
-  // Cifras del ANEXO 4, calculadas igual que en el wizard y en el PDF.
-  // Las declaraciones juradas también son egreso, así que entran al resumen.
-  const resumenAnexo4 = useMemo(
-    () =>
-      resumirAnexo4(
-        [
-          ...gastosRegistrados.map((g) => ({
-            montoLiquido: toNumber(g.montoNeto ?? g.monto),
-            tipoDocumento: g.tipoDocumento,
-            // Sobre lo guardado, igual que el PDF
-            desglose: desglosarGastoPersistido({
-              montoNeto: toNumber(g.montoNeto ?? g.monto),
-              montoBruto: toNumber(g.montoTotal ?? g.montoBruto ?? g.monto),
-              montoImpuestos: toNumber(g.montoImpuestos),
-              tipoDocumento: g.tipoDocumento,
-              tipoRetencion: g.tipoRetencion,
-              nombrePartida:
-                g.partida?.poa?.estructura?.partida?.nombre ?? null,
-            }),
-          })),
-          ...(rendicion.declaracionesJuradas ?? []).map((dj) => ({
-            montoLiquido: toNumber(dj.monto),
-            tipoDocumento: 'DJ',
-          })),
-        ],
-        montoRecibido
-      ),
-    [gastosRegistrados, rendicion.declaracionesJuradas, montoRecibido]
-  );
 
   const usuariosFiltrados = useMemo(
     () => usuarios.filter((u) => Number(u.id) !== currentUserId),
@@ -471,18 +439,20 @@ export function RendicionDetailClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => toast.info('Funcionalidad en Proceso')}
+            onClick={() => handleDescargar('pdf')}
+            disabled={descargando !== null}
           >
             <FileText className="mr-1.5 h-4 w-4" />
-            PDF
+            {descargando === 'pdf' ? 'Generando...' : 'PDF'}
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => toast.info('Funcionalidad en Proceso')}
+            onClick={() => handleDescargar('xlsx')}
+            disabled={descargando !== null}
           >
             <FileSpreadsheet className="mr-1.5 h-4 w-4" />
-            Excel
+            {descargando === 'xlsx' ? 'Generando...' : 'Excel'}
           </Button>
         </div>
       </div>
@@ -519,85 +489,16 @@ export function RendicionDetailClient({
         </div>
       )}
 
-      {/* Main Info Card */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">
-              Fecha de Rendición
-            </CardTitle>
-            <Calendar className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto">
-              {formatDate(rendicion.fechaRendicion)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">
-              Dinero Recibido
-            </CardTitle>
-            <DollarSign className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto text-emerald-600">
-              {formatMoney(montoRecibido)}
-            </div>
-            <p className="text-amzdesk-helper">Según solicitud desembolsada</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">
-              Efectivo Ejecutado
-            </CardTitle>
-            <Wallet className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-amzdesk-monto text-blue-600">
-              {formatMoney(totalEfectivoPagado)}
-            </div>
-            <p className="text-amzdesk-helper">
-              Suma netos | Bruto: {formatMoney(rendicion.montoRespaldado)}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-amzdesk-label">
-              Saldo Presupuestario
-            </CardTitle>
-            <Banknote className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div
-              className={`text-amzdesk-monto ${
-                saldoLiquido > 0 ? 'text-emerald-600' : 'text-red-600'
-              }`}
-            >
-              {formatMoney(saldoLiquido)}
-            </div>
-            <p className="text-amzdesk-helper">
-              {montoRecibido > 0
-                ? `Recibido: ${formatMoney(montoRecibido)} | Con cargo al POA: ${formatMoney(rendicion.montoRespaldado)}`
-                : 'Recibido - Total con cargo al POA'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Liquidación de caja y conteo de documentos (ANEXO 4) */}
-      {gastosRegistrados.length > 0 && (
-        <ResumenAnexo4Blocks
-          resumen={resumenAnexo4}
-          importeRecibido={montoRecibido}
-        />
-      )}
+      {/* La rendición se ve en el formato oficial ANEXO 4, idéntico al PDF y
+          al Excel; debajo va lo que el anexo no recoge y las acciones. */}
+      <AnexoViewer
+        titulo="Anexo 4 — Rendición de Fondos en Avance"
+        cargarHtml={(signal) =>
+          rendicionesService.getAnexo4Html(rendicion.id, signal)
+        }
+        recargarCon={`${rendicion.id}-${rendicion.updatedAt ?? ''}`}
+        anchoMinimo={960}
+      />
 
       {/* Solicitud Section */}
       <RendicionSolicitudSection solicitud={rendicion.solicitud} />

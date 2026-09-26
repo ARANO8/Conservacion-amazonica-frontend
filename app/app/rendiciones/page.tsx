@@ -58,6 +58,21 @@ async function handleDownloadPdf(
   );
 }
 
+async function handleDownloadExcel(
+  rendicionId: number,
+  fileName: string
+): Promise<void> {
+  await downloadBlob(
+    () => rendicionesService.downloadExcel(rendicionId),
+    fileName,
+    {
+      formato: 'xlsx',
+      errorMessage: 'No se pudo descargar el Excel de la rendición.',
+      successMessage: 'Excel de la rendición descargado correctamente.',
+    }
+  );
+}
+
 export default function MisRendicionesPage() {
   const [rendiciones, setRendiciones] = useState<RendicionResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -184,7 +199,9 @@ export default function MisRendicionesPage() {
                                 event.preventDefault();
                                 void handleDownloadPdf(
                                   rendicion.id,
-                                  codigo || `rendicion-${rendicion.id}`
+                                  codigo
+                                    ? `Rendicion-${codigo}`
+                                    : `rendicion-${rendicion.id}`
                                 );
                               }}
                             >
@@ -193,7 +210,12 @@ export default function MisRendicionesPage() {
                             <DropdownMenuItem
                               onSelect={(event) => {
                                 event.preventDefault();
-                                toast.info('Funcionalidad en Proceso');
+                                void handleDownloadExcel(
+                                  rendicion.id,
+                                  codigo
+                                    ? `Rendicion-${codigo}`
+                                    : `rendicion-${rendicion.id}`
+                                );
                               }}
                             >
                               <FileSpreadsheet className="mr-2 h-4 w-4" />
