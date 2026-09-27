@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { informesActividadesService } from '@/lib/services/informes-actividades-service';
+import { informesViajeService } from '@/lib/services/informes-viaje-service';
 import { formatDateShort } from '@/lib/utils';
-import type { InformeActividadesResponse } from '@/types/informe-actividades-backend';
+import type { InformeViajeResponse } from '@/types/informe-viaje-backend';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -45,7 +45,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /** Los primeros lugares visitados, para reconocer el informe de un vistazo. */
-function resumenLugares(informe: InformeActividadesResponse): string {
+function resumenLugares(informe: InformeViajeResponse): string {
   const lugares = Array.from(
     new Set((informe.actividades ?? []).map((a) => a.lugar).filter(Boolean))
   );
@@ -53,21 +53,19 @@ function resumenLugares(informe: InformeActividadesResponse): string {
   return lugares.slice(0, 3).join(', ') + (lugares.length > 3 ? '...' : '');
 }
 
-export default function InformesActividadesPage() {
-  const [informes, setInformes] = useState<InformeActividadesResponse[]>([]);
+export default function InformesViajePage() {
+  const [informes, setInformes] = useState<InformeViajeResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [aEliminar, setAEliminar] = useState<InformeActividadesResponse | null>(
-    null
-  );
+  const [aEliminar, setAEliminar] = useState<InformeViajeResponse | null>(null);
   const [eliminando, setEliminando] = useState(false);
 
   const cargar = async () => {
     try {
       setLoading(true);
-      const data = await informesActividadesService.getAll();
+      const data = await informesViajeService.getAll();
       setInformes(data);
     } catch {
-      toast.error('No se pudieron cargar los informes de actividades.');
+      toast.error('No se pudieron cargar los informes de viaje.');
     } finally {
       setLoading(false);
     }
@@ -81,7 +79,7 @@ export default function InformesActividadesPage() {
     if (!aEliminar) return;
     try {
       setEliminando(true);
-      await informesActividadesService.remove(aEliminar.id);
+      await informesViajeService.remove(aEliminar.id);
       toast.success(`Informe ${aEliminar.codigoInforme} eliminado.`);
       setAEliminar(null);
       await cargar();
@@ -99,7 +97,7 @@ export default function InformesActividadesPage() {
           <ClipboardList className="text-primary h-7 w-7" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Informe de Actividades
+              Informe de Viaje
             </h1>
             <p className="text-muted-foreground">
               Bitácora de actividades realizadas en viaje (ANEXO 7).
@@ -108,7 +106,7 @@ export default function InformesActividadesPage() {
         </div>
 
         <Button asChild>
-          <Link href="/app/informe-actividades/nueva">
+          <Link href="/app/informes-viaje/nueva">
             <Plus className="mr-2 h-4 w-4" />
             Nuevo informe
           </Link>
@@ -180,7 +178,7 @@ export default function InformesActividadesPage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link
-                            href={`/app/informe-actividades/${informe.id}/editar`}
+                            href={`/app/informes-viaje/${informe.id}/editar`}
                             className="flex items-center"
                           >
                             <Pencil className="mr-2 h-4 w-4" />

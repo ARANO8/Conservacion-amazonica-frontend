@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * ANEXO 7 — Informe de Actividades.
+ * ANEXO 7 — Informe de Viaje.
  *
  * Bitácora independiente de un viaje: no cuelga de una solicitud ni de una
  * rendición, sólo de su autor.
@@ -20,7 +20,7 @@ export const ActividadInformeSchema = z.object({
 
 export type ActividadInforme = z.infer<typeof ActividadInformeSchema>;
 
-export const InformeActividadesSchema = z
+export const InformeViajeSchema = z
   .object({
     fechaInicio: z.union([
       z.string().min(1, 'La fecha de inicio es requerida'),
@@ -50,9 +50,9 @@ export const InformeActividadesSchema = z
     }
   });
 
-export type InformeActividadesInput = z.infer<typeof InformeActividadesSchema>;
+export type InformeViajeInput = z.infer<typeof InformeViajeSchema>;
 
-export const defaultInformeActividadesValues: InformeActividadesInput = {
+export const defaultInformeViajeValues: InformeViajeInput = {
   fechaInicio: '',
   fechaFin: '',
   actividades: [],

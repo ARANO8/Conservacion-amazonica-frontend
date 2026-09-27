@@ -1,9 +1,9 @@
 import api from '@/lib/api';
 import type {
-  InformeActividadesResponse,
-  CreateInformeActividadesPayload,
-} from '@/types/informe-actividades-backend';
-import type { InformeActividadesInput } from '@/types/informe-actividades-schema';
+  InformeViajeResponse,
+  CreateInformeViajePayload,
+} from '@/types/informe-viaje-backend';
+import type { InformeViajeInput } from '@/types/informe-viaje-schema';
 
 /** El backend espera fechas ISO; el formulario trabaja con `yyyy-MM-dd`. */
 function toIso(value: string | Date): string {
@@ -12,9 +12,7 @@ function toIso(value: string | Date): string {
   return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
 }
 
-function adaptPayload(
-  data: InformeActividadesInput
-): CreateInformeActividadesPayload {
+function adaptPayload(data: InformeViajeInput): CreateInformeViajePayload {
   return {
     fechaInicio: toIso(data.fechaInicio),
     fechaFin: toIso(data.fechaFin),
@@ -28,13 +26,13 @@ function adaptPayload(
 }
 
 /**
- * Service del módulo Informe de Actividades.
+ * Service del módulo Informe de Viaje.
  * El token Bearer lo inyecta el interceptor de `api` (lib/api.ts).
  */
-export const informesActividadesService = {
-  async create(data: InformeActividadesInput, signal?: AbortSignal) {
-    const response = await api.post<InformeActividadesResponse>(
-      '/informes-actividades',
+export const informesViajeService = {
+  async create(data: InformeViajeInput, signal?: AbortSignal) {
+    const response = await api.post<InformeViajeResponse>(
+      '/informes-viaje',
       adaptPayload(data),
       { signal }
     );
@@ -42,16 +40,15 @@ export const informesActividadesService = {
   },
 
   async getAll(signal?: AbortSignal) {
-    const response = await api.get<InformeActividadesResponse[]>(
-      '/informes-actividades',
-      { signal }
-    );
+    const response = await api.get<InformeViajeResponse[]>('/informes-viaje', {
+      signal,
+    });
     return response.data;
   },
 
   async getById(id: string | number, signal?: AbortSignal) {
-    const response = await api.get<InformeActividadesResponse>(
-      `/informes-actividades/${id}`,
+    const response = await api.get<InformeViajeResponse>(
+      `/informes-viaje/${id}`,
       { signal }
     );
     return response.data;
@@ -59,11 +56,11 @@ export const informesActividadesService = {
 
   async update(
     id: string | number,
-    data: InformeActividadesInput,
+    data: InformeViajeInput,
     signal?: AbortSignal
   ) {
-    const response = await api.patch<InformeActividadesResponse>(
-      `/informes-actividades/${id}`,
+    const response = await api.patch<InformeViajeResponse>(
+      `/informes-viaje/${id}`,
       adaptPayload(data),
       { signal }
     );
@@ -71,11 +68,11 @@ export const informesActividadesService = {
   },
 
   async remove(id: string | number, signal?: AbortSignal) {
-    const response = await api.delete(`/informes-actividades/${id}`, {
+    const response = await api.delete(`/informes-viaje/${id}`, {
       signal,
     });
     return response.data;
   },
 };
 
-export default informesActividadesService;
+export default informesViajeService;

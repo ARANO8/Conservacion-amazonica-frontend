@@ -101,8 +101,8 @@ function buildViajesItems(rol?: Role) {
     items.push({ title: 'Mis Solicitudes', url: '/app/solicitudes' });
     items.push({ title: 'Mis Rendiciones', url: '/app/rendiciones' });
     items.push({
-      title: 'Informe de Actividades',
-      url: '/app/informe-actividades',
+      title: 'Informe de Viaje',
+      url: '/app/informes-viaje',
     });
     items.push({
       title: 'Declaración de Movilidad',

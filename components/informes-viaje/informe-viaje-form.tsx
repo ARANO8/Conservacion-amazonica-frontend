@@ -33,12 +33,12 @@ import { Separator } from '@/components/ui/separator';
 import { FieldGroup, FieldSet, FieldLegend } from '@/components/ui/field';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { informesActividadesService } from '@/lib/services/informes-actividades-service';
+import { informesViajeService } from '@/lib/services/informes-viaje-service';
 import {
-  InformeActividadesSchema,
-  defaultInformeActividadesValues,
-  type InformeActividadesInput,
-} from '@/types/informe-actividades-schema';
+  InformeViajeSchema,
+  defaultInformeViajeValues,
+  type InformeViajeInput,
+} from '@/types/informe-viaje-schema';
 
 function toDate(value: string | Date | undefined | null): Date | undefined {
   if (!value) return undefined;
@@ -56,22 +56,22 @@ function formatRangeLabel(range: DateRange | undefined): string {
   return `${format(range.from, 'PPP', { locale: es })} - ${format(range.to, 'PPP', { locale: es })}`;
 }
 
-interface InformeActividadesFormProps {
+interface InformeViajeFormProps {
   informeId?: number;
-  initialValues?: InformeActividadesInput;
+  initialValues?: InformeViajeInput;
 }
 
-export default function InformeActividadesForm({
+export default function InformeViajeForm({
   informeId,
   initialValues,
-}: InformeActividadesFormProps) {
+}: InformeViajeFormProps) {
   const router = useRouter();
   const isEdit = typeof informeId === 'number';
   const [saving, setSaving] = useState(false);
 
-  const form = useForm<InformeActividadesInput>({
-    resolver: zodResolver(InformeActividadesSchema),
-    defaultValues: initialValues ?? defaultInformeActividadesValues,
+  const form = useForm<InformeViajeInput>({
+    resolver: zodResolver(InformeViajeSchema),
+    defaultValues: initialValues ?? defaultInformeViajeValues,
     mode: 'onBlur',
   });
 
@@ -147,23 +147,23 @@ export default function InformeActividadesForm({
     );
   };
 
-  const onSubmit = async (data: InformeActividadesInput) => {
+  const onSubmit = async (data: InformeViajeInput) => {
     try {
       setSaving(true);
       if (isEdit && informeId !== undefined) {
-        await informesActividadesService.update(informeId, data);
-        toast.success('Informe de actividades actualizado.');
+        await informesViajeService.update(informeId, data);
+        toast.success('Informe de viaje actualizado.');
       } else {
-        await informesActividadesService.create(data);
-        toast.success('Informe de actividades registrado.');
+        await informesViajeService.create(data);
+        toast.success('Informe de viaje registrado.');
       }
-      router.push('/app/informe-actividades');
+      router.push('/app/informes-viaje');
       router.refresh();
     } catch (error: unknown) {
       const mensaje =
         axios.isAxiosError(error) && error.response?.data?.message
           ? String(error.response.data.message)
-          : 'No se pudo guardar el informe de actividades.';
+          : 'No se pudo guardar el informe de viaje.';
       toast.error(mensaje);
     } finally {
       setSaving(false);
@@ -177,7 +177,7 @@ export default function InformeActividadesForm({
         className="space-y-6 p-6"
       >
         <FieldSet>
-          <FieldLegend>Anexo 7: Informe de Actividades</FieldLegend>
+          <FieldLegend>Anexo 7: Informe de Viaje</FieldLegend>
           <p className="text-foreground mb-6 text-sm">
             Registra el rango del viaje y detalla la bitácora de actividades
             realizadas.
@@ -390,7 +390,7 @@ export default function InformeActividadesForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push('/app/informe-actividades')}
+            onClick={() => router.push('/app/informes-viaje')}
           >
             Cancelar
           </Button>

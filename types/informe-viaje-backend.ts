@@ -1,6 +1,6 @@
 /**
- * Tipos del módulo Informe de Actividades (ANEXO 7).
- * Corresponden al modelo InformeActividades en Prisma del backend.
+ * Tipos del módulo Informe de Viaje (ANEXO 7).
+ * Corresponden al modelo InformeViaje en Prisma del backend.
  */
 
 export interface ActividadInformeResponse {
@@ -12,7 +12,7 @@ export interface ActividadInformeResponse {
   actividadesRealizadas: string;
 }
 
-export interface InformeActividadesResponse {
+export interface InformeViajeResponse {
   id: number;
   codigoInforme: string;
   fechaInicio: string; // ISO date
@@ -31,7 +31,7 @@ export interface InformeActividadesResponse {
   actividades: ActividadInformeResponse[];
 }
 
-export interface CreateInformeActividadesPayload {
+export interface CreateInformeViajePayload {
   fechaInicio: string; // ISO
   fechaFin: string; // ISO
   actividades: {

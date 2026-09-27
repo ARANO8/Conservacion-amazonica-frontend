@@ -7,20 +7,21 @@ import { ArrowLeft, ClipboardList, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import InformeActividadesForm from '@/components/informes-actividades/informe-actividades-form';
-import { informesActividadesService } from '@/lib/services/informes-actividades-service';
-import type { InformeActividadesInput } from '@/types/informe-actividades-schema';
+import InformeViajeForm from '@/components/informes-viaje/informe-viaje-form';
+import { informesViajeService } from '@/lib/services/informes-viaje-service';
+import type { InformeViajeInput } from '@/types/informe-viaje-schema';
 
 /** El formulario trabaja con `yyyy-MM-dd`; el backend devuelve ISO completo. */
 function toInputDate(iso: string): string {
   return iso.split('T')[0] ?? '';
 }
 
-export default function EditarInformeActividadesPage() {
+export default function EditarInformeViajePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [initialValues, setInitialValues] =
-    useState<InformeActividadesInput | null>(null);
+  const [initialValues, setInitialValues] = useState<InformeViajeInput | null>(
+    null
+  );
   const [informeId, setInformeId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +29,7 @@ export default function EditarInformeActividadesPage() {
     const cargar = async () => {
       try {
         setLoading(true);
-        const informe = await informesActividadesService.getById(params.id);
+        const informe = await informesViajeService.getById(params.id);
         setInformeId(informe.id);
         setInitialValues({
           fechaInicio: toInputDate(informe.fechaInicio),
@@ -41,8 +42,8 @@ export default function EditarInformeActividadesPage() {
           })),
         });
       } catch {
-        toast.error('No se pudo cargar el informe de actividades.');
-        router.push('/app/informe-actividades');
+        toast.error('No se pudo cargar el informe de viaje.');
+        router.push('/app/informes-viaje');
       } finally {
         setLoading(false);
       }
@@ -66,9 +67,9 @@ export default function EditarInformeActividadesPage() {
     <div className="flex flex-col gap-0">
       <div className="flex shrink-0 items-center gap-3 border-b px-6 py-4">
         <Button variant="ghost" size="icon" asChild className="shrink-0">
-          <Link href="/app/informe-actividades">
+          <Link href="/app/informes-viaje">
             <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Volver a informes de actividades</span>
+            <span className="sr-only">Volver a informes de viaje</span>
           </Link>
         </Button>
 
@@ -76,7 +77,7 @@ export default function EditarInformeActividadesPage() {
           <ClipboardList className="text-primary h-5 w-5 shrink-0" />
           <div>
             <h1 className="text-lg leading-tight font-bold">
-              Editar Informe de Actividades
+              Editar Informe de Viaje
             </h1>
             <p className="text-muted-foreground text-xs">
               Viajes y Viáticos — bitácora de actividades realizadas (ANEXO 7).
@@ -85,10 +86,7 @@ export default function EditarInformeActividadesPage() {
         </div>
       </div>
 
-      <InformeActividadesForm
-        informeId={informeId}
-        initialValues={initialValues}
-      />
+      <InformeViajeForm informeId={informeId} initialValues={initialValues} />
     </div>
   );
 }
