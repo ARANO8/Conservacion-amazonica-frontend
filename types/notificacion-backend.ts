@@ -18,7 +18,10 @@ export type TipoNotificacion =
   | 'CUADRO_APROBADO'
   | 'PAGO_PENDIENTE_APROBACION'
   | 'PAGO_OBSERVADO'
-  | 'PAGO_REALIZADO';
+  | 'PAGO_REALIZADO'
+  | 'PLAN_VIAJE_PENDIENTE'
+  | 'PLAN_VIAJE_APROBADO'
+  | 'PLAN_VIAJE_OBSERVADO';
 
 export interface NotificacionBackend {
   id: number;
@@ -31,6 +34,7 @@ export interface NotificacionBackend {
   updatedAt: string;
   usuarioId: number;
   solicitudId?: number | null;
+  planViajeId?: number | null;
   // Relación opcional
   solicitud?: {
     id: number;

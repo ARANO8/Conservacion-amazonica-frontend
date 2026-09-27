@@ -126,13 +126,17 @@ export function mapResponseToBreakdown(
 
     const items: BreakdownItem[] = [
       ...viaticosAsociados.map((v) => {
-        const planificacion = solicitud.planificaciones?.find(
-          (p) => p.id === v.planificacionId
-        );
+        const actividades = (v.planificaciones ?? [])
+          .map(
+            (vp) =>
+              solicitud.planViaje?.actividades.find((a) => a.id === vp.id)
+                ?.actividadProgramada
+          )
+          .filter(Boolean);
         return {
           id: v.id,
           nombre: v.concepto?.nombre || 'Viático',
-          detalle: planificacion?.actividadProgramada,
+          detalle: actividades.join(', ') || undefined,
           tipoDestino: v.tipoDestino,
           montoNeto: Number(v.montoPresupuestado) || 0,
           montoLiquido: Number(v.montoNeto) || 0,

@@ -1,28 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useForm, FieldErrors, FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Field,
-  FieldLabel,
-  FieldGroup,
-  FieldSet,
-  FieldLegend,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormMessage,
-} from '@/components/ui/form';
-import PlanificacionActividades from '@/components/solicitudes/planificacion-actividades';
+import { Form } from '@/components/ui/form';
+import { SeleccionPlanViaje } from '@/components/solicitudes/seleccion-plan-viaje';
+import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
 import SolicitudEconomica from '@/components/solicitudes/solicitud-economica';
 import { toast } from 'sonner';
 import NominaTercerosForm from '@/components/solicitudes/nomina-terceros-form';
@@ -179,6 +164,29 @@ interface SolicitudFormProps {
   solicitudId?: number | string;
   /** Motivo de la devolución, para que el emisor sepa qué corregir */
   observacion?: string | null;
+  /** Plan de viaje de la solicitud que se corrige */
+  planViajeInicial?: PlanViajeResponse | null;
+  /** Plan preseleccionado desde su detalle (`?planViajeId=`) */
+  planViajeIdInicial?: number;
+}
+
+/** Actividades del plan → `actividades` del formulario (solo lectura). */
+function actividadesDesdePlan(
+  plan: PlanViajeResponse,
+  previas: FormData['actividades'] = []
+): FormData['actividades'] {
+  return plan.actividades.map((a) => ({
+    planificacionId: a.id,
+    fechaInicio: a.fechaInicio.slice(0, 10),
+    fechaFin: a.fechaFin.slice(0, 10),
+    cantDias: Number(a.diasCalculados),
+    actividadProgramada: a.actividadProgramada,
+    cantInstitucion: a.cantidadPersonasInstitucional,
+    cantTerceros: a.cantidadPersonasTerceros,
+    // La nómina ya escrita de una actividad que sigue en el plan se conserva
+    terceros: previas.find((p) => p.planificacionId === a.id)?.terceros ?? [],
+    institucionales: a.participantesInstitucionales.map((p) => p.id),
+  }));
 }
 
 export default function SolicitudForm({
@@ -186,9 +194,14 @@ export default function SolicitudForm({
   isEditMode = false,
   solicitudId,
   observacion,
+  planViajeInicial = null,
+  planViajeIdInicial,
 }: SolicitudFormProps) {
   const router = useRouter();
-  const [step, setStep] = useState<WizardStep>('PLANIFICACION');
+  const [step, setStep] = useState<WizardStep>('PLAN');
+  const [planViaje, setPlanViaje] = useState<PlanViajeResponse | null>(
+    planViajeInicial
+  );
   const [loading, setLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [misSelecciones, setMisSelecciones] = useState<SeleccionPresupuesto[]>(
@@ -222,48 +235,47 @@ export default function SolicitudForm({
   // Genera/recorta las cards de terceros del paso NOMINA según el paso 1.
   useSyncTerceros(form);
 
+  /**
+   * Elegir el plan copia sus actividades y fija al Director de Programa que
+   * le dio el VoBo. Al cambiar de plan, las asignaciones de viáticos apuntan
+   * a actividades que ya no existen: se descartan.
+   */
+  const aplicarPlan = useCallback(
+    (plan: PlanViajeResponse) => {
+      const anterior = form.getValues('planViajeId');
+      setPlanViaje(plan);
+      form.setValue('planViajeId', plan.id, { shouldDirty: true });
+      form.setValue(
+        'actividades',
+        actividadesDesdePlan(plan, form.getValues('actividades')),
+        { shouldDirty: true }
+      );
+      if (plan.directorProgramaId) {
+        form.setValue('destinatario', String(plan.directorProgramaId));
+      }
+      if (anterior && anterior !== plan.id) {
+        const viaticos = form.getValues('viaticos') || [];
+        form.setValue(
+          'viaticos',
+          viaticos.map((v) => ({ ...v, planificacionIndexes: [] })),
+          { shouldDirty: true }
+        );
+      }
+    },
+    [form]
+  );
+
   const watchActividades = form.watch('actividades');
   const hasTerceros = watchActividades?.some((a) => (a.cantTerceros ?? 0) > 0);
 
   const handleNext = async () => {
-    if (step === 'PLANIFICACION') {
-      const actividades = form.getValues('actividades') || [];
-      const planificacionPaths = [
-        'planificacionLugares',
-        'planificacionObjetivo',
-      ] as string[];
-      actividades.forEach((_, i) => {
-        planificacionPaths.push(
-          `actividades.${i}.fechaInicio`,
-          `actividades.${i}.fechaFin`,
-          `actividades.${i}.cantDias`,
-          `actividades.${i}.actividadProgramada`,
-          `actividades.${i}.cantInstitucion`,
-          `actividades.${i}.cantTerceros`
+    if (step === 'PLAN') {
+      if (!form.getValues('planViajeId') || !planViaje) {
+        toast.error(
+          'Elige el plan de viaje aprobado del que nace la solicitud'
         );
-      });
-      const isValid = await form.trigger(
-        planificacionPaths as FieldPath<FormData>[]
-      );
-      if (!isValid) {
-        toast.error('Corrige los errores en la planificación');
         return;
       }
-
-      // La nómina institucional debe cuadrar con lo declarado en cada actividad
-      for (const actividad of actividades) {
-        const declarados = Number(actividad.cantInstitucion) || 0;
-        const seleccionados = (actividad.institucionales || []).length;
-        if (declarados !== seleccionados) {
-          toast.error(
-            `En "${
-              actividad.actividadProgramada || 'la actividad'
-            }" declaraste ${declarados} persona(s) institucional(es) pero seleccionaste ${seleccionados}`
-          );
-          return;
-        }
-      }
-
       setStep('SOLICITUD');
       window.scrollTo(0, 0);
       return;
@@ -447,7 +459,7 @@ export default function SolicitudForm({
   };
 
   const handleBack = () => {
-    if (step === 'SOLICITUD') setStep('PLANIFICACION');
+    if (step === 'SOLICITUD') setStep('PLAN');
     if (step === 'RESPALDOS') setStep('SOLICITUD');
     if (step === 'NOMINA') setStep('RESPALDOS');
   };
@@ -543,58 +555,14 @@ export default function SolicitudForm({
               <ObservacionAlert observacion={observacion} />
 
               <div className="animate-in fade-in duration-500">
-                {step === 'PLANIFICACION' && (
-                  <FieldGroup>
-                    <FieldSet>
-                      <FieldLegend>
-                        Información General de la Actividad
-                      </FieldLegend>
-                      <div className="grid gap-4">
-                        <FormField
-                          control={form.control}
-                          name="planificacionLugares"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Lugar de la actividad</FieldLabel>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder="Ej. La Paz - Santa Cruz - Beni"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </Field>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="planificacionObjetivo"
-                          render={({ field }) => (
-                            <Field>
-                              <FieldLabel>Objetivo de la actividad</FieldLabel>
-                              <FormControl>
-                                <Textarea
-                                  {...field}
-                                  placeholder="Describe el objetivo de esta actividad"
-                                  className="min-h-24"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </Field>
-                          )}
-                        />
-                      </div>
-                    </FieldSet>
-                    <Separator />
-                    <FieldSet>
-                      <FieldLegend>Cronograma de Actividades</FieldLegend>
-                      <PlanificacionActividades
-                        control={form.control}
-                        setValue={form.setValue}
-                        usuarios={usuarios}
-                      />
-                    </FieldSet>
-                  </FieldGroup>
+                {step === 'PLAN' && (
+                  <SeleccionPlanViaje
+                    plan={planViaje}
+                    planViajeIdInicial={planViajeIdInicial}
+                    onSeleccionar={aplicarPlan}
+                    isEditMode={isEditMode}
+                    solicitudId={solicitudId}
+                  />
                 )}
 
                 {step === 'SOLICITUD' && (
@@ -651,7 +619,12 @@ export default function SolicitudForm({
           conceptos={conceptos}
           tiposGasto={tiposGasto}
           currentUserId={Number(user?.id)}
-          directorFijo={isEditMode && !!initialValues?.destinatario}
+          // Lo fija el plan: quien dio el VoBo revisa la solicitud
+          directorFijo={
+            !!planViaje?.directorProgramaId ||
+            (isEditMode && !!initialValues?.destinatario)
+          }
+          planViaje={planViaje}
           onError={onError}
         />
 

@@ -69,14 +69,16 @@ const poaSchema = z.object({
 
 // Esquema Zod
 export const formSchema = z.object({
-  // Campos de Planificación (Paso 1)
-  planificacionLugares: z
-    .string()
-    .min(1, 'El lugar de la actividad es requerido'),
-  planificacionObjetivo: z.string().min(1, 'El objetivo es requerido'),
+  // Paso 1: el plan de viaje (ANEXO 1) aprobado del que nace la solicitud.
+  // Sus actividades se copian a `actividades` en solo lectura.
+  planViajeId: z.number({
+    required_error: 'Selecciona el plan de viaje aprobado',
+  }),
   actividades: z
     .array(
       z.object({
+        /** Id de la fila del plan: a él se asignan viáticos y nómina */
+        planificacionId: z.number(),
         fechaInicio: z.union([z.string(), z.date()]),
         fechaFin: z.union([z.string(), z.date()]),
         cantDias: z.preprocess(
@@ -112,7 +114,7 @@ export const formSchema = z.object({
           )
           .default([]),
         // Nómina institucional: IDs de usuarios del sistema que participan.
-        // Se elige en el modal del Paso 1 y debe cuadrar con cantInstitucion.
+        // Viene del plan de viaje, donde se eligió en su modal.
         institucionales: z.array(z.number()).default([]),
       })
     )
@@ -292,23 +294,11 @@ export const formSchema = z.object({
 
 export type FormData = z.infer<typeof formSchema>;
 
-export type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'RESPALDOS' | 'NOMINA';
+export type WizardStep = 'PLAN' | 'SOLICITUD' | 'RESPALDOS' | 'NOMINA';
 
-export const defaultValues: FormData = {
-  planificacionLugares: '',
-  planificacionObjetivo: '',
-  actividades: [
-    {
-      fechaInicio: new Date().toISOString().split('T')[0],
-      fechaFin: new Date().toISOString().split('T')[0],
-      cantDias: 1,
-      actividadProgramada: '',
-      cantInstitucion: 1,
-      cantTerceros: 0,
-      terceros: [],
-      institucionales: [],
-    },
-  ],
+/** `planViajeId` queda sin valor hasta elegir el plan en el Paso 1. */
+export const defaultValues = {
+  actividades: [],
   interino: false,
   items: [],
   viaticos: [],
@@ -326,4 +316,4 @@ export const defaultValues: FormData = {
   destinatario: '',
   urlCuadroComparativo: '',
   urlCotizaciones: [''],
-};
+} as Omit<FormData, 'planViajeId'> as FormData;

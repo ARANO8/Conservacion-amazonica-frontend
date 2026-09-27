@@ -297,7 +297,6 @@ export default function SolicitudCompraForm({
           costoUnitario: Number(item.costoUnitario),
           poaId: data.poaId,
         })),
-    planificaciones: [] as [],
     viaticos: [] as [],
     gastos: [] as [],
     nominasTerceros: [] as [],

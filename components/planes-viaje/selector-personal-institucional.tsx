@@ -32,8 +32,8 @@ interface SelectorPersonalInstitucionalProps {
 }
 
 /**
- * Modal del Paso 1 para elegir, entre los usuarios activos, al personal
- * institucional que participa en una actividad. La cantidad a elegir la fija
+ * Modal del Plan de Viaje (ANEXO 1) para elegir, entre los usuarios activos,
+ * al personal institucional que participa en una actividad. La cantidad a elegir la fija
  * la columna "Pers. Inst." de la fila.
  */
 export default function SelectorPersonalInstitucional({
