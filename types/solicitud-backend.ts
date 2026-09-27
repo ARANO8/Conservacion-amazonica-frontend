@@ -1,4 +1,5 @@
 import type { PlanViajeResponse } from './plan-viaje-backend';
+import type { InformeViajeResumen } from './informe-viaje-backend';
 
 export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 
@@ -224,6 +225,8 @@ export interface SolicitudResponse {
   /** Plan de viaje (ANEXO 1) del que nace la solicitud; sus actividades son el cronograma */
   planViajeId?: number | null;
   planViaje?: PlanViajeResponse | null;
+  /** ANEXO 7 del viaje (null si aún no existe) */
+  informeViaje?: InformeViajeResumen | null;
   presupuestos?: Array<{
     id: number;
     poa?: {

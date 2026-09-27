@@ -8,51 +8,38 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import InformeViajeForm from '@/components/informes-viaje/informe-viaje-form';
+import { informeEditable } from '@/components/informes-viaje/informe-viaje-estado';
+import { ObservacionAlert } from '@/components/shared/observacion-alert';
 import { informesViajeService } from '@/lib/services/informes-viaje-service';
-import type { InformeViajeInput } from '@/types/informe-viaje-schema';
-
-/** El formulario trabaja con `yyyy-MM-dd`; el backend devuelve ISO completo. */
-function toInputDate(iso: string): string {
-  return iso.split('T')[0] ?? '';
-}
+import { informeToForm } from '@/types/informe-viaje-schema';
+import type { InformeViajeResponse } from '@/types/informe-viaje-backend';
 
 export default function EditarInformeViajePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [initialValues, setInitialValues] = useState<InformeViajeInput | null>(
-    null
-  );
-  const [informeId, setInformeId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [informe, setInforme] = useState<InformeViajeResponse | null>(null);
 
   useEffect(() => {
-    const cargar = async () => {
-      try {
-        setLoading(true);
-        const informe = await informesViajeService.getById(params.id);
-        setInformeId(informe.id);
-        setInitialValues({
-          fechaInicio: toInputDate(informe.fechaInicio),
-          fechaFin: toInputDate(informe.fechaFin),
-          actividades: (informe.actividades ?? []).map((a) => ({
-            fecha: toInputDate(a.fecha),
-            lugar: a.lugar,
-            personaInstitucion: a.personaInstitucion,
-            actividadesRealizadas: a.actividadesRealizadas,
-          })),
-        });
-      } catch {
+    const controller = new AbortController();
+    informesViajeService
+      .getById(params.id, controller.signal)
+      .then((data) => {
+        if (!informeEditable(data)) {
+          toast.error('Este informe de viaje ya no se puede editar.');
+          router.replace(`/app/informes-viaje/${data.id}`);
+          return;
+        }
+        setInforme(data);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return;
         toast.error('No se pudo cargar el informe de viaje.');
         router.push('/app/informes-viaje');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void cargar();
+      });
+    return () => controller.abort();
   }, [params.id, router]);
 
-  if (loading || !initialValues || informeId === null) {
+  if (!informe) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="text-primary size-10 animate-spin" />
@@ -67,26 +54,38 @@ export default function EditarInformeViajePage() {
     <div className="flex flex-col gap-0">
       <div className="flex shrink-0 items-center gap-3 border-b px-6 py-4">
         <Button variant="ghost" size="icon" asChild className="shrink-0">
-          <Link href="/app/informes-viaje">
+          <Link href={`/app/informes-viaje/${informe.id}`}>
             <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Volver a informes de viaje</span>
+            <span className="sr-only">Volver al informe de viaje</span>
           </Link>
         </Button>
-
         <div className="flex items-center gap-2">
           <ClipboardList className="text-primary h-5 w-5 shrink-0" />
           <div>
             <h1 className="text-lg leading-tight font-bold">
-              Editar Informe de Viaje
+              Editar {informe.codigoInforme}
             </h1>
             <p className="text-muted-foreground text-xs">
-              Viajes y Viáticos — bitácora de actividades realizadas (ANEXO 7).
+              Informe de Viaje (ANEXO 7).
             </p>
           </div>
         </div>
       </div>
 
-      <InformeViajeForm informeId={informeId} initialValues={initialValues} />
+      {informe.estado === 'OBSERVADO' && (
+        <div className="px-6 pt-6">
+          <ObservacionAlert
+            titulo="Informe observado por el Director de Programa"
+            observacion={informe.observacion}
+          />
+        </div>
+      )}
+
+      <InformeViajeForm
+        informeId={informe.id}
+        initialValues={informeToForm(informe)}
+        codigoSolicitud={informe.solicitud?.codigoSolicitud}
+      />
     </div>
   );
 }

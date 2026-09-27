@@ -34,6 +34,7 @@ import { Usuario, type PartidaContable } from '@/types/catalogs';
 import { rendicionesService } from '@/lib/services/rendiciones-service';
 import { downloadBlob } from '@/lib/utils/download-blob';
 import { AnexoViewer } from '@/components/shared/anexo-viewer';
+import { InformeViajeAviso } from '@/components/informes-viaje/informe-viaje-aviso';
 import {
   Table,
   TableBody,
@@ -488,6 +489,15 @@ export function RendicionDetailClient({
           </Button>
         </div>
       )}
+
+      {/* Informe de Viaje (ANEXO 7) de esta solicitud, o aviso de que falta */}
+      <InformeViajeAviso
+        solicitud={rendicion.solicitud}
+        puedeCrear={
+          String(rendicion.solicitud?.usuarioEmisorId ?? '') ===
+          String(currentUserId)
+        }
+      />
 
       {/* La rendición se ve en el formato oficial ANEXO 4, idéntico al PDF y
           al Excel; debajo va lo que el anexo no recoge y las acciones. */}

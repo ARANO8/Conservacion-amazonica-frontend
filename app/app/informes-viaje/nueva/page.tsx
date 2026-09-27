@@ -1,8 +1,22 @@
+'use client';
+
+import { Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ClipboardList } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import InformeViajeForm from '@/components/informes-viaje/informe-viaje-form';
+
+/** Llega con `?solicitudId=` desde el aviso de la rendición. */
+function NuevoInforme() {
+  const solicitudId = Number(useSearchParams().get('solicitudId'));
+  return (
+    <InformeViajeForm
+      solicitudIdInicial={solicitudId > 0 ? solicitudId : undefined}
+    />
+  );
+}
 
 export default function NuevoInformeViajePage() {
   return (
@@ -14,7 +28,6 @@ export default function NuevoInformeViajePage() {
             <span className="sr-only">Volver a informes de viaje</span>
           </Link>
         </Button>
-
         <div className="flex items-center gap-2">
           <ClipboardList className="text-primary h-5 w-5 shrink-0" />
           <div>
@@ -22,13 +35,16 @@ export default function NuevoInformeViajePage() {
               Nuevo Informe de Viaje
             </h1>
             <p className="text-muted-foreground text-xs">
-              Viajes y Viáticos — bitácora de actividades realizadas (ANEXO 7).
+              Viajes y Viáticos — lo que se hizo realmente en el viaje (ANEXO
+              7).
             </p>
           </div>
         </div>
       </div>
 
-      <InformeViajeForm />
+      <Suspense>
+        <NuevoInforme />
+      </Suspense>
     </div>
   );
 }
