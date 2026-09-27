@@ -18,15 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { DocumentoViewer } from '@/components/shared/documento-viewer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -35,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { cn, formatDate, formatMoney } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import { cuadrosComparativosService } from '@/lib/services/cuadros-comparativos-service';
 import { downloadBlob } from '@/lib/utils/download-blob';
 import { CuadroAnalisis } from '@/components/cuadros-comparativos/cuadro-analisis';
@@ -173,9 +166,6 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
       </div>
     );
   }
-
-  const columnas = [...cuadro.cotizaciones].sort((a, b) => a.orden - b.orden);
-  const items = [...cuadro.items].sort((a, b) => a.orden - b.orden);
 
   const rol = user?.rol;
   const esEmisor = String(cuadro.usuarioEmisorId) === String(user?.id ?? '');
@@ -368,117 +358,18 @@ export function CuadroDetalleClientWrapper({ cuadroId }: Props) {
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            Comparativo de cotizaciones
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40px]">#</TableHead>
-                  <TableHead className="min-w-[200px]">Descripción</TableHead>
-                  <TableHead>Cant.</TableHead>
-                  <TableHead>Unid.</TableHead>
-                  {columnas.map((c) => (
-                    <TableHead
-                      key={c.id}
-                      className={cn(
-                        'text-center',
-                        c.id === cuadro.cotizacionRecomendadaId &&
-                          'bg-emerald-50 dark:bg-emerald-950/50'
-                      )}
-                    >
-                      {c.proveedorNombre}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((item) => {
-                  const precioByCol = new Map(
-                    item.precios.map((p) => [p.cuadroCotizacionId, p])
-                  );
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {item.orden}
-                      </TableCell>
-                      <TableCell>{item.descripcion}</TableCell>
-                      <TableCell>{Number(item.cantidad)}</TableCell>
-                      <TableCell>{item.unidad ?? '-'}</TableCell>
-                      {columnas.map((c) => {
-                        const p = precioByCol.get(c.id);
-                        const noMenciona = p?.noMenciona ?? true;
-                        const ganadora = item.cotizacionGanadoraId === c.id;
-                        return (
-                          <TableCell
-                            key={c.id}
-                            className={cn(
-                              'text-right',
-                              ganadora &&
-                                'bg-emerald-50 font-medium dark:bg-emerald-950/50'
-                            )}
-                          >
-                            {noMenciona ? (
-                              <span className="rounded bg-amber-100 px-1 text-xs text-amber-800 italic dark:bg-amber-950/60 dark:text-amber-300">
-                                No menciona
-                              </span>
-                            ) : (
-                              <>
-                                <div>{formatMoney(p?.precioUnitario ?? 0)}</div>
-                                <div className="text-muted-foreground text-xs">
-                                  {formatMoney(p?.total ?? 0)}
-                                </div>
-                              </>
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })}
-                <TableRow className="bg-muted/50 font-semibold">
-                  <TableCell colSpan={4} className="text-right">
-                    TOTALES
-                  </TableCell>
-                  {columnas.map((c) => (
-                    <TableCell
-                      key={c.id}
-                      className={cn(
-                        'text-right',
-                        c.id === cuadro.cotizacionRecomendadaId &&
-                          'bg-emerald-100 dark:bg-emerald-900/50'
-                      )}
-                    >
-                      {formatMoney(c.total)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* El cuadro tal como sale en el PDF (ANEXO 11, apaisado) */}
+      <DocumentoViewer
+        titulo="Anexo 11 — Cuadro Comparativo de Cotizaciones"
+        ruta={`/cuadros-comparativos/${cuadro.id}/documento`}
+        recargarCon={cuadro.updatedAt}
+        anchoMinimo={1000}
+      />
 
       <CuadroAnalisis
         input={analisisInput}
         recomendadaIndex={recomendadaIndex}
       />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Observaciones</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm whitespace-pre-line">
-            {cuadro.observaciones?.trim() || 'Sin observaciones.'}
-          </p>
-        </CardContent>
-      </Card>
 
       {cuadro.historialAprobaciones &&
         cuadro.historialAprobaciones.length > 0 && (
