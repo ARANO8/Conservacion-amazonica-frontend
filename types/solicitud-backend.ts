@@ -1,3 +1,5 @@
+import type { PlanViajeResponse } from './plan-viaje-backend';
+
 export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 
 export type EstadoPagoParcial =
@@ -62,7 +64,6 @@ export interface CreateSolicitudCompraPayload {
     tipoDocumento?: 'FACTURA' | 'RECIBO';
     pagos?: { monto: number; fechaPago: string; descripcion?: string }[];
   }[];
-  planificaciones: [];
   viaticos: [];
   gastos: [];
   nominasTerceros: [];
@@ -72,22 +73,14 @@ export interface CreateSolicitudCompraPayload {
 export interface CreateSolicitudPayload {
   poaIds: number[];
   aprobadorId: number;
-  lugarViaje: string;
-  motivoViaje: string;
+  /** Plan de viaje (ANEXO 1) aprobado: de él salen lugares, objetivo y fechas */
+  planViajeId: number;
   descripcion: string;
   urlCuadroComparativo?: string;
   urlCotizaciones?: string[];
-  planificaciones: {
-    actividad: string;
-    fechaInicio: string; // ISO String
-    fechaFin: string; // ISO String
-    cantInstitucional: number;
-    cantTerceros: number;
-    participantesInstitucionalesIds: number[];
-    dias?: number; // Valor decimal editado manualmente por el usuario
-  }[];
   viaticos: {
-    planificacionIndexes: number[];
+    /** Ids de las actividades del plan que cubre el viático */
+    planificacionIds: number[];
     conceptoId: number;
     tipoDestino: string;
     dias: number;
@@ -108,7 +101,8 @@ export interface CreateSolicitudPayload {
   nominasTerceros: {
     nombreCompleto: string;
     procedenciaInstitucion: string;
-    planificacionIndex?: number;
+    /** Id de la actividad del plan a la que pertenece */
+    planificacionId: number;
   }[];
   hospedajes: {
     poaId: number;
@@ -197,7 +191,8 @@ export interface SolicitudResponse {
     montoNeto: number | string;
     montoPresupuestado: number | string;
     tipoDestino: string;
-    planificacionId?: number;
+    /** Actividades del plan que cubre el viático */
+    planificaciones?: Array<{ id: number }>;
     concepto?: {
       id: number;
       nombre: string;
@@ -226,21 +221,9 @@ export interface SolicitudResponse {
     };
     costoUnitario?: number | string;
   }>;
-  planificaciones?: Array<{
-    id: number;
-    actividadProgramada: string;
-    fechaInicio: string;
-    fechaFin: string;
-    cantidadPersonasInstitucional: number;
-    cantidadPersonasTerceros: number;
-    participantesInstitucionales?: Array<{
-      id: number;
-      nombreCompleto: string;
-      cargo?: string | null;
-    }>;
-    diasCalculados?: number;
-    dias?: number; // Propiedad que el backend envía con el valor decimal real
-  }>;
+  /** Plan de viaje (ANEXO 1) del que nace la solicitud; sus actividades son el cronograma */
+  planViajeId?: number | null;
+  planViaje?: PlanViajeResponse | null;
   presupuestos?: Array<{
     id: number;
     poa?: {

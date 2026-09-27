@@ -26,11 +26,16 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { FormData } from '@/components/solicitudes/solicitud-schema';
-import SelectorPersonalInstitucional from '@/components/solicitudes/selector-personal-institucional';
+import {
+  actividadVacia,
+  type PlanViajeFormData,
+} from '@/components/planes-viaje/plan-viaje-schema';
+import SelectorPersonalInstitucional from '@/components/planes-viaje/selector-personal-institucional';
 import type { Usuario } from '@/types/catalogs';
 
-interface PlanificacionActividadesProps {
+type FormData = PlanViajeFormData;
+
+interface PlanViajeActividadesProps {
   control: Control<FormData>;
   setValue: UseFormSetValue<FormData>;
   usuarios: Usuario[];
@@ -64,11 +69,15 @@ function calculateCalendarDays(from: Date, to: Date): number {
   return Math.max(differenceInDays(end, start) + 1, 1);
 }
 
-export default function PlanificacionActividades({
+/**
+ * Cronograma del ANEXO 1: una tarjeta por actividad con fechas, días, lugar de
+ * salida y llegada, actividad programada y participantes.
+ */
+export default function PlanViajeActividades({
   control,
   setValue,
   usuarios,
-}: PlanificacionActividadesProps) {
+}: PlanViajeActividadesProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'actividades',
@@ -76,16 +85,7 @@ export default function PlanificacionActividades({
 
   return (
     <div className="space-y-4">
-      <div className="text-muted-foreground mb-1 hidden grid-cols-12 gap-2 px-2 text-[10px] font-bold tracking-wider uppercase md:grid">
-        <div className="col-span-4">Rango de Fechas</div>
-        <div className="col-span-1 text-center">Días</div>
-        <div className="col-span-4">Actividad Programada</div>
-        <div className="col-span-1 text-center leading-tight">Pers. Inst.</div>
-        <div className="col-span-1 text-center leading-tight">Pers. Terc.</div>
-        <div className="col-span-1"></div>
-      </div>
-
-      <div className="space-y-2">
+      <div className="space-y-3">
         {fields.map((field, idx) => (
           <ActividadRow
             key={field.id}
@@ -104,21 +104,9 @@ export default function PlanificacionActividades({
           size="sm"
           type="button"
           className="text-xs"
-          onClick={() => {
-            const today = new Date();
-            append({
-              fechaInicio: toInputDate(today),
-              fechaFin: toInputDate(today),
-              cantDias: 1,
-              actividadProgramada: '',
-              cantInstitucion: 1,
-              cantTerceros: 0,
-              terceros: [],
-              institucionales: [],
-            });
-          }}
+          onClick={() => append(actividadVacia())}
         >
-          + Agregar Actividad al Cronograma
+          + Agregar actividad al cronograma
         </Button>
       </div>
     </div>
@@ -238,9 +226,23 @@ function ActividadRow({
   );
 
   return (
-    <div className="bg-card hover:bg-muted/30 grid grid-cols-1 items-start gap-2 rounded-lg border p-3 transition-colors md:grid-cols-12 md:p-2">
+    <div className="bg-card hover:bg-muted/30 grid grid-cols-1 items-start gap-x-2 gap-y-3 rounded-lg border p-3 transition-colors md:grid-cols-12">
+      <div className="text-muted-foreground flex items-center justify-between md:col-span-12">
+        <span className="text-xs font-semibold">Actividad {idx + 1}</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-7 w-7 shrink-0"
+          type="button"
+          onClick={() => remove(idx)}
+        >
+          <Trash2 className="size-4" />
+          <span className="sr-only">Eliminar actividad {idx + 1}</span>
+        </Button>
+      </div>
+
       <div className="md:col-span-4">
-        <LabelMobile label="Rango de Fechas" />
+        <FieldLabel label="Fechas" />
 
         <FormField
           control={control}
@@ -284,8 +286,8 @@ function ActividadRow({
         />
       </div>
 
-      <div className="md:col-span-1">
-        <LabelMobile label="Días" />
+      <div className="md:col-span-2">
+        <FieldLabel label="Días" />
         <FormField
           control={control}
           name={`actividades.${idx}.cantDias`}
@@ -335,8 +337,48 @@ function ActividadRow({
         />
       </div>
 
-      <div className="md:col-span-4">
-        <LabelMobile label="Actividad Programada" />
+      <div className="md:col-span-3">
+        <FieldLabel label="Lugar de salida" />
+        <FormField
+          control={control}
+          name={`actividades.${idx}.lugarSalida`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Ej. La Paz"
+                  className="h-9 text-xs"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="md:col-span-3">
+        <FieldLabel label="Lugar de llegada" />
+        <FormField
+          control={control}
+          name={`actividades.${idx}.lugarLlegada`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Ej. Riberalta"
+                  className="h-9 text-xs"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="md:col-span-8">
+        <FieldLabel label="Actividad programada" />
         <FormField
           control={control}
           name={`actividades.${idx}.actividadProgramada`}
@@ -355,8 +397,8 @@ function ActividadRow({
         />
       </div>
 
-      <div className="md:col-span-1">
-        <LabelMobile label="Pers. Inst." />
+      <div className="md:col-span-2">
+        <FieldLabel label="Personal ACEAA" />
         <FormField
           control={control}
           name={`actividades.${idx}.cantInstitucion`}
@@ -414,8 +456,8 @@ function ActividadRow({
         />
       </div>
 
-      <div className="md:col-span-1">
-        <LabelMobile label="Pers. Terc." />
+      <div className="md:col-span-2">
+        <FieldLabel label="Terceros" />
         <FormField
           control={control}
           name={`actividades.${idx}.cantTerceros`}
@@ -466,19 +508,6 @@ function ActividadRow({
         />
       </div>
 
-      <div className="mt-2 flex justify-end md:col-span-1 md:mt-0">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-9 w-9 shrink-0"
-          type="button"
-          onClick={() => remove(idx)}
-        >
-          <Trash2 className="size-4" />
-          <span className="sr-only">Eliminar</span>
-        </Button>
-      </div>
-
       {requeridos > 0 && (
         <div className="flex flex-wrap items-center gap-2 border-t pt-2 md:col-span-12">
           <Button
@@ -524,9 +553,9 @@ function ActividadRow({
   );
 }
 
-function LabelMobile({ label }: { label: string }) {
+function FieldLabel({ label }: { label: string }) {
   return (
-    <div className="text-muted-foreground mb-1 text-[10px] font-bold uppercase md:hidden">
+    <div className="text-muted-foreground mb-1 text-[10px] font-bold tracking-wider uppercase">
       {label}
     </div>
   );

@@ -49,6 +49,7 @@ import { SeleccionPresupuesto } from '@/types/backend';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapFormToBreakdown } from '@/lib/mappers/breakdown-mapper';
 import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
+import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -62,10 +63,12 @@ interface ReviewModalProps {
   currentUserId?: number;
   onError?: (errors: FieldErrors<FormData>) => void;
   /**
-   * Al subsanar una observación la solicitud vuelve al Director de Programa
-   * designado al crearla: se muestra, pero no se puede cambiar.
+   * El Director de Programa lo fija el plan de viaje (quien le dio el VoBo):
+   * se muestra, pero no se puede cambiar.
    */
   directorFijo?: boolean;
+  /** Plan de viaje del que nace la solicitud: lugares y objetivo */
+  planViaje?: PlanViajeResponse | null;
 }
 
 export default function ReviewModal({
@@ -80,6 +83,7 @@ export default function ReviewModal({
   currentUserId,
   onError,
   directorFijo = false,
+  planViaje = null,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit, setValue } = useFormContext<FormData>();
   const [open, setOpen] = useState(false);
@@ -167,16 +171,14 @@ export default function ReviewModal({
                   <span className="text-muted-foreground text-xs font-bold uppercase">
                     Lugar/es:
                   </span>{' '}
-                  <span className="font-bold">{data.planificacionLugares}</span>
+                  <span className="font-bold">{planViaje?.lugaresViaje}</span>
                 </p>
 
                 <p className="text-sm">
                   <span className="text-muted-foreground shrink-0 text-xs font-bold uppercase">
                     Objetivo:
                   </span>{' '}
-                  <span className="font-bold">
-                    {data.planificacionObjetivo}
-                  </span>
+                  <span className="font-bold">{planViaje?.objetivoViaje}</span>
                 </p>
 
                 <p className="text-sm">
@@ -254,8 +256,7 @@ export default function ReviewModal({
                       <p className="bg-muted rounded-md border px-3 py-2 text-sm font-medium">
                         {nombreDirectorFijo || 'Director de Programa designado'}
                         <span className="text-muted-foreground block text-xs font-normal">
-                          La solicitud corregida vuelve al Director de Programa
-                          designado al crearla.
+                          Es quien dio el VoBo al plan de viaje.
                         </span>
                       </p>
                     ) : (

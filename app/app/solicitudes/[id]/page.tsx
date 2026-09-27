@@ -13,11 +13,13 @@ import { EstadoBadge } from '@/components/shared/estado-badge';
 import { ObservacionAlert } from '@/components/shared/observacion-alert';
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { PlanViajeResumen } from '@/components/planes-viaje/plan-viaje-resumen';
 import {
   Table,
   TableBody,
@@ -317,65 +319,35 @@ export default function SolicitudDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Planificaciones */}
+      {/* Plan de viaje (ANEXO 1) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
-            Planificación
+            Plan de Viaje{' '}
+            {solicitud.planViaje ? `— ${solicitud.planViaje.codigoPlan}` : ''}
           </CardTitle>
           <CardDescription className="text-amzdesk-helper">
-            Cronograma de actividades programadas
+            Cronograma de actividades con VoBo del Director de Programa (ANEXO
+            1)
           </CardDescription>
+          {solicitud.planViaje && (
+            <CardAction>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/app/planes-viaje/${solicitud.planViaje.id}`}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Ver ANEXO 1
+                </Link>
+              </Button>
+            </CardAction>
+          )}
         </CardHeader>
         <CardContent>
-          {solicitud.planificaciones && solicitud.planificaciones.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-amzdesk-table-header">
-                    Actividad
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header">
-                    Periodo
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header text-center">
-                    Días
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header text-center">
-                    Personal Inst.
-                  </TableHead>
-                  <TableHead className="text-amzdesk-table-header text-center">
-                    Terceros
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {solicitud.planificaciones.map((plan, idx) => (
-                  <TableRow key={plan.id || idx}>
-                    <TableCell className="font-medium">
-                      {plan.actividadProgramada}
-                    </TableCell>
-                    <TableCell>
-                      {formatDateShort(plan.fechaInicio)} -{' '}
-                      {formatDateShort(plan.fechaFin)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {plan.diasCalculados ?? '-'}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {plan.cantidadPersonasInstitucional}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {plan.cantidadPersonasTerceros}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          {solicitud.planViaje ? (
+            <PlanViajeResumen plan={solicitud.planViaje} />
           ) : (
             <p className="text-amzdesk-helper py-4 text-center">
-              Sin actividades planificadas registradas.
+              Sin plan de viaje asociado.
             </p>
           )}
         </CardContent>

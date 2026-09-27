@@ -7,6 +7,8 @@ interface ObservacionAlertProps {
   /** Motivo con el que el revisor devolvió la solicitud */
   observacion?: string | null;
   className?: string;
+  /** Qué documento fue observado; por defecto, la solicitud */
+  titulo?: string;
 }
 
 /**
@@ -16,6 +18,7 @@ interface ObservacionAlertProps {
 export function ObservacionAlert({
   observacion,
   className,
+  titulo = 'Solicitud observada',
 }: ObservacionAlertProps) {
   if (!observacion?.trim()) return null;
 
@@ -27,7 +30,7 @@ export function ObservacionAlert({
       )}
     >
       <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Solicitud observada</AlertTitle>
+      <AlertTitle>{titulo}</AlertTitle>
       <AlertDescription className="text-amber-800 dark:text-amber-300">
         {observacion}
       </AlertDescription>

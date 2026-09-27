@@ -96,6 +96,8 @@ function buildViajesItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
   if (esRolOperativo(rol)) {
+    // El plan (ANEXO 1) es el paso previo de toda solicitud de viaje
+    items.push({ title: 'Planes de Viaje', url: '/app/planes-viaje' });
     items.push({ title: 'Mis Solicitudes', url: '/app/solicitudes' });
     items.push({ title: 'Mis Rendiciones', url: '/app/rendiciones' });
     items.push({
