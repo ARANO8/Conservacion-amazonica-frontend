@@ -105,6 +105,10 @@ function buildViajesItems(rol?: Role) {
       url: '/app/informes-viaje',
     });
     items.push({
+      title: 'Liquidación de Viáticos',
+      url: '/app/liquidaciones-viaticos',
+    });
+    items.push({
       title: 'Declaración de Movilidad',
       url: '/app/declaracion-movilidad',
     });

@@ -1,5 +1,6 @@
 import type { PlanViajeResponse } from './plan-viaje-backend';
 import type { InformeViajeResumen } from './informe-viaje-backend';
+import type { LiquidacionViaticosResumen } from './liquidacion-viaticos-backend';
 
 export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 
@@ -227,6 +228,8 @@ export interface SolicitudResponse {
   planViaje?: PlanViajeResponse | null;
   /** ANEXO 7 del viaje (null si aún no existe) */
   informeViaje?: InformeViajeResumen | null;
+  /** ANEXO 5 del viaje (null si aún no existe) */
+  liquidacionViaticos?: LiquidacionViaticosResumen | null;
   presupuestos?: Array<{
     id: number;
     poa?: {

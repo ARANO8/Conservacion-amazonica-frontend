@@ -42,6 +42,7 @@ const createUsuarioSchema = z.object({
   password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
   rol: z.enum(['ADMIN', 'EJECUTIVO', 'CONTADOR', 'TESORERO', 'USUARIO']),
   cargo: z.string().optional(),
+  ci: z.string().max(30, 'Máximo 30 caracteres').optional(),
 });
 
 const updateUsuarioSchema = z.object({
@@ -56,6 +57,7 @@ const updateUsuarioSchema = z.object({
     ),
   rol: z.enum(['ADMIN', 'EJECUTIVO', 'CONTADOR', 'TESORERO', 'USUARIO']),
   cargo: z.string().optional(),
+  ci: z.string().max(30, 'Máximo 30 caracteres').optional(),
 });
 
 type CreateUsuarioFormValues = z.infer<typeof createUsuarioSchema>;
@@ -119,6 +121,7 @@ export function UsuarioFormModal({
       password: '',
       rol: 'USUARIO',
       cargo: '',
+      ci: '',
     },
   });
 
@@ -130,6 +133,7 @@ export function UsuarioFormModal({
         password: '',
         rol: 'USUARIO',
         cargo: '',
+        ci: '',
       });
       return;
     }
@@ -141,6 +145,7 @@ export function UsuarioFormModal({
         password: '',
         rol: mapRoleToFormRole(String(initialData.rol)),
         cargo: initialData.cargo || '',
+        ci: initialData.ci || '',
       });
     }
   }, [form, initialData, mode, open]);
@@ -172,6 +177,7 @@ export function UsuarioFormModal({
       password: values.password,
       rol: values.rol,
       cargo: values.cargo,
+      ci: values.ci,
     };
 
     if (mode === 'create') {
@@ -277,6 +283,20 @@ export function UsuarioFormModal({
                     <FormLabel>Cargo</FormLabel>
                     <FormControl>
                       <Input placeholder="Cargo del usuario" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ci"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>C.I.</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. 4876543 LP" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
