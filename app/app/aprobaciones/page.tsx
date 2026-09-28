@@ -33,6 +33,9 @@ function tipoLabel(tipo: NotificacionBackend['tipo']): string {
     PLAN_VIAJE_PENDIENTE: 'Plan por aprobar',
     PLAN_VIAJE_APROBADO: 'Plan aprobado',
     PLAN_VIAJE_OBSERVADO: 'Plan observado',
+    INFORME_VIAJE_PENDIENTE: 'Informe por revisar',
+    INFORME_VIAJE_REVISADO: 'Informe revisado',
+    INFORME_VIAJE_OBSERVADO: 'Informe observado',
   };
   return labels[tipo] ?? tipo;
 }
@@ -40,11 +43,16 @@ function tipoLabel(tipo: NotificacionBackend['tipo']): string {
 function tipoVariant(
   tipo: NotificacionBackend['tipo']
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
-  if (tipo === 'SOLICITUD_APROBADA' || tipo === 'PLAN_VIAJE_APROBADO')
+  if (
+    tipo === 'SOLICITUD_APROBADA' ||
+    tipo === 'PLAN_VIAJE_APROBADO' ||
+    tipo === 'INFORME_VIAJE_REVISADO'
+  )
     return 'default';
   if (
     tipo === 'SOLICITUD_OBSERVADA' ||
     tipo === 'PLAN_VIAJE_OBSERVADO' ||
+    tipo === 'INFORME_VIAJE_OBSERVADO' ||
     tipo === 'RENDICION_PENDIENTE' ||
     tipo === 'RENDICION_OBSERVADA'
   )

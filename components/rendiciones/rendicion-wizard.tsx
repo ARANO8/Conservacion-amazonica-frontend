@@ -44,6 +44,7 @@ import RendicionHeader from './rendicion-header';
 import RendicionFooter from './rendicion-footer';
 import Paso1Seleccion from './paso1-seleccion';
 import Paso2Gastos from './paso2-gastos';
+import { InformeViajeAviso } from '@/components/informes-viaje/informe-viaje-aviso';
 import { RendicionReviewModal } from './rendicion-review-modal';
 
 interface RendicionWizardProps {
@@ -284,7 +285,10 @@ export default function RendicionWizard({
           )}
 
           {step === 'GASTOS_RESPALDO' && (
-            <Paso2Gastos solicitud={solicitudSeleccionada} />
+            <>
+              <InformeViajeAviso solicitud={solicitudSeleccionada} puedeCrear />
+              <Paso2Gastos solicitud={solicitudSeleccionada} />
+            </>
           )}
         </div>
 
