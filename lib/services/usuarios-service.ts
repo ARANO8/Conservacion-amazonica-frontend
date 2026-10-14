@@ -15,6 +15,8 @@ export interface UsuarioListItem {
   email: string;
   rol: UsuarioRol | string;
   cargo?: string | null;
+  /** Cédula de identidad; la usa el ANEXO 5 */
+  ci?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,6 +27,7 @@ export interface CreateUsuarioInput {
   password: string;
   rol: 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
   cargo?: string;
+  ci?: string;
 }
 
 export interface UpdateUsuarioInput {
@@ -33,6 +36,7 @@ export interface UpdateUsuarioInput {
   password?: string;
   rol: 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
   cargo?: string;
+  ci?: string;
 }
 
 interface UsuarioPayload {
@@ -41,6 +45,7 @@ interface UsuarioPayload {
   password?: string;
   rol?: 'ADMIN' | 'EJECUTIVO' | 'CONTADOR' | 'TESORERO' | 'USUARIO';
   cargo?: string;
+  ci?: string;
 }
 
 function buildPayload(
@@ -55,6 +60,11 @@ function buildPayload(
   const cargo = input.cargo?.trim();
   if (cargo) {
     payload.cargo = cargo;
+  }
+
+  // Se envía aunque quede vacía, para poder borrarla
+  if (input.ci !== undefined) {
+    payload.ci = input.ci.trim();
   }
 
   if (input.password && input.password.trim().length > 0) {

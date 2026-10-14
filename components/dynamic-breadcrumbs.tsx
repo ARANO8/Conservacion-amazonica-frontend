@@ -17,6 +17,7 @@ const routeNameMap: Record<string, string> = {
   planificacion: 'Planificación',
   'planes-viaje': 'Planes de Viaje',
   'informes-viaje': 'Informes de Viaje',
+  'liquidaciones-viaticos': 'Liquidaciones de Viáticos',
   solicitudes: 'Solicitudes',
   solicitud: 'Solicitud',
   nueva: 'Nueva',
