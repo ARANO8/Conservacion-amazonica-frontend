@@ -69,10 +69,10 @@ const poaSchema = z.object({
 
 // Esquema Zod
 export const formSchema = z.object({
-  // Paso 1: el plan de viaje (ANEXO 1) aprobado del que nace la solicitud.
+  // Paso 1: el plan de viaje (ANEXO 1) del que nace la solicitud.
   // Sus actividades se copian a `actividades` en solo lectura.
   planViajeId: z.number({
-    required_error: 'Selecciona el plan de viaje aprobado',
+    required_error: 'Selecciona el plan de viaje',
   }),
   actividades: z
     .array(

@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Check, ChevronsUpDown, Save, Send } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 import {
   Form,
@@ -19,19 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
 import { catalogosService } from '@/lib/services/catalogos-service';
@@ -47,11 +34,14 @@ import type { Usuario } from '@/types/catalogs';
 const ETIQUETA =
   'w-[190px] shrink-0 text-xs font-bold tracking-wider uppercase';
 
+/** Firma el VoBo del ANEXO 1 en papel; no interviene en el sistema */
+const DIRECTOR_EJECUTIVO = 'Marcos F. Terán Valenzuela';
+
 interface PlanViajeFormProps {
   planId?: number;
   initialValues?: PlanViajeFormData;
-  /** Un plan vinculado a una solicitud no cambia de Director de Programa */
-  directorFijo?: boolean;
+  /** El plan respalda una solicitud observada que se está corrigiendo */
+  vinculado?: boolean;
   /** A dónde volver al guardar (p. ej. la solicitud observada que se corrige) */
   destino?: string;
 }
@@ -66,20 +56,19 @@ function mensajeDeError(error: unknown, porDefecto: string): string {
 
 /**
  * Formulario del Plan de Viaje, maquetado como la hoja del ANEXO 1:
- * encabezado, cronograma y pie con la emisión y el VoBo.
+ * encabezado, cronograma y pie con la emisión y las firmas.
  */
 export default function PlanViajeForm({
   planId,
   initialValues,
-  directorFijo = false,
+  vinculado = false,
   destino,
 }: PlanViajeFormProps) {
   const router = useRouter();
   const isEdit = typeof planId === 'number';
   const usuario = useAuthStore((state) => state.user);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [guardando, setGuardando] = useState<'guardar' | 'enviar' | null>(null);
-  const [directorAbierto, setDirectorAbierto] = useState(false);
+  const [guardando, setGuardando] = useState(false);
 
   const form = useForm<PlanViajeFormData>({
     resolver: zodResolver(planViajeSchema),
@@ -107,55 +96,15 @@ export default function PlanViajeForm({
     return () => controller.abort();
   }, [form, isEdit, usuario?.id]);
 
-  // Ni uno mismo ni Dirección Financiera (Tesorero), igual que en la solicitud
-  const directoresDisponibles = useMemo(
-    () =>
-      usuarios.filter(
-        (u) => String(u.id) !== String(usuario?.id) && u.rol !== 'TESORERO'
-      ),
-    [usuarios, usuario?.id]
-  );
-
-  const directorId = form.watch('directorProgramaId');
-  const nombreDirector = usuarios.find(
-    (u) => String(u.id) === directorId
-  )?.nombreCompleto;
-
-  /** La nómina institucional debe cuadrar antes de pedir el VoBo. */
-  const validarParaEnviar = (data: PlanViajeFormData): boolean => {
-    if (!data.directorProgramaId) {
-      toast.error('Selecciona al Director de Programa que dará el VoBo.');
-      return false;
-    }
-    for (const [i, a] of data.actividades.entries()) {
-      if (a.institucionales.length !== Number(a.cantInstitucion)) {
-        toast.error(
-          `En la actividad ${i + 1} declaraste ${a.cantInstitucion} persona(s) institucional(es) pero seleccionaste ${a.institucionales.length}.`
-        );
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const guardar = async (data: PlanViajeFormData, enviar: boolean) => {
-    if (enviar && !validarParaEnviar(data)) return;
-
-    setGuardando(enviar ? 'enviar' : 'guardar');
+  const guardar = async (data: PlanViajeFormData) => {
+    setGuardando(true);
     try {
       const plan =
         isEdit && planId !== undefined
           ? await planesViajeService.update(planId, data)
           : await planesViajeService.create(data);
 
-      if (enviar) {
-        await planesViajeService.enviar(plan.id);
-        toast.success(
-          `Plan ${plan.codigoPlan} enviado al Director de Programa para su VoBo.`
-        );
-      } else {
-        toast.success(`Plan ${plan.codigoPlan} guardado.`);
-      }
+      toast.success(`Plan ${plan.codigoPlan} guardado.`);
       router.push(destino ?? `/app/planes-viaje/${plan.id}`);
       router.refresh();
     } catch (error: unknown) {
@@ -163,7 +112,7 @@ export default function PlanViajeForm({
         mensajeDeError(error, 'No se pudo guardar el plan de viaje.')
       );
     } finally {
-      setGuardando(null);
+      setGuardando(false);
     }
   };
 
@@ -211,7 +160,7 @@ export default function PlanViajeForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((d) => guardar(d, false), onInvalid)}
+        onSubmit={form.handleSubmit(guardar, onInvalid)}
         className="space-y-6 p-6"
       >
         <header className="space-y-1">
@@ -317,88 +266,14 @@ export default function PlanViajeForm({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="directorProgramaId"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <span className="text-xs font-bold tracking-wider uppercase">
-                  VoBo — Director de Programa
-                </span>
-                {directorFijo ? (
-                  <p className="bg-muted rounded-md border px-3 py-2 text-sm">
-                    {nombreDirector ?? 'Director de Programa designado'}
-                  </p>
-                ) : (
-                  <Popover
-                    open={directorAbierto}
-                    onOpenChange={setDirectorAbierto}
-                  >
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={directorAbierto}
-                          className={cn(
-                            'h-9 w-full justify-between text-sm font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          <span className="truncate">
-                            {nombreDirector ?? 'Seleccionar...'}
-                          </span>
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] min-w-72 p-0"
-                      align="start"
-                    >
-                      <Command>
-                        <CommandInput placeholder="Buscar Director de Programa..." />
-                        <CommandList>
-                          <CommandEmpty>
-                            No se encontró el usuario.
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {directoresDisponibles.map((u) => (
-                              <CommandItem
-                                key={u.id}
-                                value={`${u.nombreCompleto} ${u.cargo ?? ''}`}
-                                onSelect={() => {
-                                  form.setValue(
-                                    'directorProgramaId',
-                                    String(u.id),
-                                    { shouldDirty: true }
-                                  );
-                                  setDirectorAbierto(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    'mr-2 h-4 w-4',
-                                    String(u.id) === field.value
-                                      ? 'opacity-100'
-                                      : 'opacity-0'
-                                  )}
-                                />
-                                {u.nombreCompleto}
-                                {u.cargo ? ` - ${u.cargo}` : ''}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                )}
-                <FormMessage className="text-sm" />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-1">
+            <span className="text-xs font-bold tracking-wider uppercase">
+              VoBo — Director Ejecutivo
+            </span>
+            <p className="bg-muted rounded-md border px-3 py-2 text-sm">
+              {DIRECTOR_EJECUTIVO}
+            </p>
+          </div>
         </section>
 
         <Separator />
@@ -416,26 +291,14 @@ export default function PlanViajeForm({
           >
             Cancelar
           </Button>
-          <Button type="submit" variant="secondary" disabled={!!guardando}>
+          <Button type="submit" disabled={guardando}>
             <Save className="mr-2 h-4 w-4" />
-            {guardando === 'guardar'
+            {guardando
               ? 'Guardando...'
-              : directorFijo
+              : vinculado
                 ? 'Guardar cambios'
-                : 'Guardar borrador'}
+                : 'Guardar plan'}
           </Button>
-          {!directorFijo && (
-            <Button
-              type="button"
-              disabled={!!guardando}
-              onClick={form.handleSubmit((d) => guardar(d, true), onInvalid)}
-            >
-              <Send className="mr-2 h-4 w-4" />
-              {guardando === 'enviar'
-                ? 'Enviando...'
-                : 'Guardar y enviar a VoBo'}
-            </Button>
-          )}
         </div>
       </form>
     </Form>

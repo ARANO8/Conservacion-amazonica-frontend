@@ -1,6 +1,5 @@
 import api from '@/lib/api';
 import type {
-  EstadoPlanViaje,
   PlanViajePayload,
   PlanViajeResponse,
 } from '@/types/plan-viaje-backend';
@@ -22,14 +21,12 @@ function toFechaCalendario(value: string | Date): string {
 export function adaptPlanViajePayload(
   data: PlanViajeFormData
 ): PlanViajePayload {
-  const directorId = Number(data.directorProgramaId);
   return {
     cargo: data.cargo.trim(),
     lugaresViaje: data.lugaresViaje.trim(),
     objetivoViaje: data.objetivoViaje.trim(),
     lugarEmision: data.lugarEmision.trim(),
     fechaEmision: toIso(data.fechaEmision),
-    ...(directorId ? { directorProgramaId: directorId } : {}),
     actividades: data.actividades.map((a) => ({
       ...(a.id ? { id: a.id } : {}),
       actividadProgramada: a.actividadProgramada.trim(),
@@ -59,10 +56,7 @@ export const planesViajeService = {
     return response.data;
   },
 
-  async getAll(
-    filtros?: { estado?: EstadoPlanViaje; disponibles?: boolean },
-    signal?: AbortSignal
-  ) {
+  async getAll(filtros?: { disponibles?: boolean }, signal?: AbortSignal) {
     const response = await api.get<PlanViajeResponse[]>('/planes-viaje', {
       params: filtros,
       signal,
@@ -70,18 +64,9 @@ export const planesViajeService = {
     return response.data;
   },
 
-  /** Aprobados, propios y sin solicitud: los que puede usar el wizard. */
+  /** Completos, propios y sin solicitud: los que puede usar el wizard. */
   async getDisponibles(signal?: AbortSignal) {
     return this.getAll({ disponibles: true }, signal);
-  },
-
-  /** Bandeja de VoBo del Director de Programa. */
-  async getPendientes(signal?: AbortSignal) {
-    const response = await api.get<PlanViajeResponse[]>(
-      '/planes-viaje/pendientes',
-      { signal }
-    );
-    return response.data;
   },
 
   async getById(id: string | number, signal?: AbortSignal) {
@@ -100,28 +85,6 @@ export const planesViajeService = {
       `/planes-viaje/${id}`,
       adaptPlanViajePayload(data),
       { signal }
-    );
-    return response.data;
-  },
-
-  async enviar(id: string | number) {
-    const response = await api.post<PlanViajeResponse>(
-      `/planes-viaje/${id}/enviar`
-    );
-    return response.data;
-  },
-
-  async aprobar(id: string | number) {
-    const response = await api.post<PlanViajeResponse>(
-      `/planes-viaje/${id}/aprobar`
-    );
-    return response.data;
-  },
-
-  async observar(id: string | number, motivo: string) {
-    const response = await api.post<PlanViajeResponse>(
-      `/planes-viaje/${id}/observar`,
-      { motivo }
     );
     return response.data;
   },

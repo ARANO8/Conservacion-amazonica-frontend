@@ -63,8 +63,8 @@ interface ReviewModalProps {
   currentUserId?: number;
   onError?: (errors: FieldErrors<FormData>) => void;
   /**
-   * El Director de Programa lo fija el plan de viaje (quien le dio el VoBo):
-   * se muestra, pero no se puede cambiar.
+   * Al subsanar, la solicitud vuelve al Director de Programa designado al
+   * crearla: se muestra, pero no se puede cambiar.
    */
   directorFijo?: boolean;
   /** Plan de viaje del que nace la solicitud: lugares y objetivo */
@@ -256,7 +256,7 @@ export default function ReviewModal({
                       <p className="bg-muted rounded-md border px-3 py-2 text-sm font-medium">
                         {nombreDirectorFijo || 'Director de Programa designado'}
                         <span className="text-muted-foreground block text-xs font-normal">
-                          Es quien dio el VoBo al plan de viaje.
+                          Es quien fue designado al crear la solicitud.
                         </span>
                       </p>
                     ) : (

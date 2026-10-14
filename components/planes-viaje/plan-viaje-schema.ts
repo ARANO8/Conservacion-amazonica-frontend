@@ -50,7 +50,6 @@ export const planViajeSchema = z.object({
   objetivoViaje: z.string().trim().min(1, 'El objetivo del viaje es requerido'),
   lugarEmision: z.string().trim().min(1, 'El lugar de emisión es requerido'),
   fechaEmision: z.string().min(1, 'La fecha de emisión es requerida'),
-  directorProgramaId: z.string().optional(),
   actividades: z
     .array(actividadPlanSchema)
     .min(1, 'Debes agregar al menos una actividad'),
@@ -85,7 +84,6 @@ export function planViajeDefaults(cargo = ''): PlanViajeFormData {
     objetivoViaje: '',
     lugarEmision: 'La Paz',
     fechaEmision: hoyCalendario(),
-    directorProgramaId: '',
     actividades: [actividadVacia()],
   };
 }
@@ -98,9 +96,6 @@ export function planViajeToForm(plan: PlanViajeResponse): PlanViajeFormData {
     objetivoViaje: plan.objetivoViaje,
     lugarEmision: plan.lugarEmision,
     fechaEmision: plan.fechaEmision.slice(0, 10),
-    directorProgramaId: plan.directorProgramaId
-      ? String(plan.directorProgramaId)
-      : '',
     actividades: plan.actividades.map((a) => ({
       id: a.id,
       fechaInicio: a.fechaInicio.slice(0, 10),

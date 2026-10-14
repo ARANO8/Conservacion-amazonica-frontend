@@ -19,7 +19,7 @@ import { formatFechaAnexo } from '@/lib/declaracion-movilidad';
 import { useAuthStore } from '@/store/auth-store';
 import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
 import {
-  PlanViajeEstadoBadge,
+  PlanViajeSituacionBadge,
   planDisponible,
   planEditable,
   solicitudVinculada,
@@ -51,11 +51,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-
-type Vista = 'mios' | 'por-aprobar';
 
 function rangoDelPlan(plan: PlanViajeResponse): string {
   if (plan.actividades.length === 0) return '—';
@@ -69,8 +65,6 @@ function rangoDelPlan(plan: PlanViajeResponse): string {
 export default function PlanesViajePage() {
   const usuario = useAuthStore((state) => state.user);
   const [planes, setPlanes] = useState<PlanViajeResponse[]>([]);
-  const [pendientes, setPendientes] = useState<PlanViajeResponse[]>([]);
-  const [vista, setVista] = useState<Vista>('mios');
   const [loading, setLoading] = useState(true);
   const [aEliminar, setAEliminar] = useState<PlanViajeResponse | null>(null);
   const [eliminando, setEliminando] = useState(false);
@@ -78,12 +72,7 @@ export default function PlanesViajePage() {
   const cargar = useCallback(async () => {
     try {
       setLoading(true);
-      const [todos, porAprobar] = await Promise.all([
-        planesViajeService.getAll(),
-        planesViajeService.getPendientes(),
-      ]);
-      setPlanes(todos);
-      setPendientes(porAprobar);
+      setPlanes(await planesViajeService.getAll());
     } catch {
       toast.error('No se pudieron cargar los planes de viaje.');
     } finally {
@@ -95,20 +84,15 @@ export default function PlanesViajePage() {
     void cargar();
   }, [cargar]);
 
-  // Con pendientes, el director entra directo a su bandeja de VoBo
-  useEffect(() => {
-    if (!loading && pendientes.length > 0) setVista('por-aprobar');
-  }, [loading, pendientes.length]);
-
   const esMio = useCallback(
     (plan: PlanViajeResponse) => String(plan.usuarioId) === String(usuario?.id),
     [usuario?.id]
   );
 
+  // ADMIN y EJECUTIVO reciben todos los planes; aquí cada uno ve los suyos
   const visibles = useMemo(
-    () =>
-      vista === 'por-aprobar' ? pendientes : planes.filter((p) => esMio(p)),
-    [vista, pendientes, planes, esMio]
+    () => planes.filter((p) => esMio(p)),
+    [planes, esMio]
   );
 
   const confirmarEliminar = async () => {
@@ -140,8 +124,8 @@ export default function PlanesViajePage() {
               Planes de Viaje
             </h1>
             <p className="text-muted-foreground">
-              Planificación del viaje con VoBo del Director de Programa (ANEXO
-              1). Es el paso previo de toda solicitud de viaje.
+              Planificación del viaje (ANEXO 1), con el VoBo del Director
+              Ejecutivo en papel. Es el paso previo de toda solicitud de viaje.
             </p>
           </div>
         </div>
@@ -152,32 +136,6 @@ export default function PlanesViajePage() {
             Nuevo plan de viaje
           </Link>
         </Button>
-      </div>
-
-      <div className="flex gap-2">
-        {(
-          [
-            ['mios', 'Mis planes', null],
-            ['por-aprobar', 'Por aprobar', pendientes.length],
-          ] as const
-        ).map(([clave, etiqueta, contador]) => (
-          <Button
-            key={clave}
-            variant={vista === clave ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setVista(clave)}
-          >
-            {etiqueta}
-            {contador ? (
-              <Badge
-                variant="secondary"
-                className={cn('ml-2', vista === clave && 'bg-background')}
-              >
-                {contador}
-              </Badge>
-            ) : null}
-          </Button>
-        ))}
       </div>
 
       {loading ? (
@@ -191,16 +149,12 @@ export default function PlanesViajePage() {
             <MapIcon className="text-muted-foreground h-8 w-8" />
           </div>
           <h2 className="text-lg font-semibold">
-            {vista === 'por-aprobar'
-              ? 'No tienes planes esperando tu VoBo'
-              : 'Aún no tienes planes de viaje'}
+            Aún no tienes planes de viaje
           </h2>
-          {vista === 'mios' && (
-            <p className="text-muted-foreground max-w-sm text-sm">
-              Planifica tu viaje con el botón &laquo;Nuevo plan de viaje&raquo;.
-              Cuando tenga el VoBo podrás iniciar la solicitud de fondos.
-            </p>
-          )}
+          <p className="text-muted-foreground max-w-sm text-sm">
+            Planifica tu viaje con el botón &laquo;Nuevo plan de viaje&raquo;.
+            Cuando esté completo podrás iniciar la solicitud de fondos.
+          </p>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -210,9 +164,6 @@ export default function PlanesViajePage() {
                 <TableHead className="w-[130px]">Código</TableHead>
                 <TableHead>Objetivo del viaje</TableHead>
                 <TableHead className="w-[200px]">Fechas</TableHead>
-                {vista === 'por-aprobar' && (
-                  <TableHead className="w-[200px]">Responsable</TableHead>
-                )}
                 <TableHead className="w-[140px]">Estado</TableHead>
                 <TableHead className="w-[140px]">Solicitud</TableHead>
                 <TableHead className="w-[60px]" />
@@ -221,7 +172,6 @@ export default function PlanesViajePage() {
             <TableBody>
               {visibles.map((plan) => {
                 const solicitud = solicitudVinculada(plan);
-                const mio = esMio(plan);
                 return (
                   <TableRow key={plan.id}>
                     <TableCell className="font-mono text-sm font-medium">
@@ -241,13 +191,8 @@ export default function PlanesViajePage() {
                     <TableCell className="text-sm">
                       {rangoDelPlan(plan)}
                     </TableCell>
-                    {vista === 'por-aprobar' && (
-                      <TableCell className="text-sm">
-                        {plan.usuario?.nombreCompleto ?? '—'}
-                      </TableCell>
-                    )}
                     <TableCell>
-                      <PlanViajeEstadoBadge estado={plan.estado} />
+                      <PlanViajeSituacionBadge plan={plan} />
                     </TableCell>
                     <TableCell className="font-mono text-xs">
                       {solicitud ? (
@@ -278,12 +223,10 @@ export default function PlanesViajePage() {
                               className="flex items-center"
                             >
                               <Eye className="mr-2 h-4 w-4" />
-                              {vista === 'por-aprobar'
-                                ? 'Revisar y dar VoBo'
-                                : 'Ver ANEXO 1'}
+                              Ver ANEXO 1
                             </Link>
                           </DropdownMenuItem>
-                          {mio && planDisponible(plan) && (
+                          {planDisponible(plan) && (
                             <DropdownMenuItem asChild>
                               <Link
                                 href={`/app/solicitudes/nueva?planViajeId=${plan.id}`}
@@ -294,7 +237,7 @@ export default function PlanesViajePage() {
                               </Link>
                             </DropdownMenuItem>
                           )}
-                          {mio && planEditable(plan) && (
+                          {planEditable(plan) && (
                             <DropdownMenuItem asChild>
                               <Link
                                 href={`/app/planes-viaje/${plan.id}/editar`}
@@ -305,7 +248,7 @@ export default function PlanesViajePage() {
                               </Link>
                             </DropdownMenuItem>
                           )}
-                          {mio && !solicitud && (
+                          {!solicitud && (
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => setAEliminar(plan)}

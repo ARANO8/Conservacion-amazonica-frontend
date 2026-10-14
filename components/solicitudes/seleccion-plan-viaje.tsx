@@ -39,7 +39,7 @@ function rangoDelPlan(plan: PlanViajeResponse): string {
 
 /**
  * Paso 1 del wizard: la solicitud de viaje nace de un plan (ANEXO 1) propio,
- * aprobado y libre. El plan se muestra en solo lectura.
+ * completo y libre. El plan se muestra en solo lectura.
  */
 export function SeleccionPlanViaje({
   plan,
@@ -65,7 +65,7 @@ export function SeleccionPlanViaje({
           onSeleccionar(inicial);
         } else {
           toast.error(
-            'Ese plan de viaje no está disponible: debe ser tuyo, estar aprobado y no respaldar otra solicitud.'
+            'Ese plan de viaje no está disponible: debe ser tuyo, estar completo y no respaldar otra solicitud.'
           );
         }
       })
@@ -132,11 +132,11 @@ export function SeleccionPlanViaje({
         <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
           <MapIcon className="text-muted-foreground h-7 w-7" />
         </div>
-        <h3 className="font-semibold">No tienes planes de viaje aprobados</h3>
+        <h3 className="font-semibold">No tienes planes de viaje disponibles</h3>
         <p className="text-muted-foreground max-w-md text-sm">
-          Toda solicitud de viaje nace de un Plan de Viaje (ANEXO 1) con el VoBo
-          del Director de Programa. Crea el plan, envíalo a VoBo y vuelve aquí
-          cuando esté aprobado.
+          Toda solicitud de viaje nace de un Plan de Viaje (ANEXO 1). Crea el
+          plan, completa su cronograma y la selección del personal, y vuelve
+          aquí.
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>
@@ -156,10 +156,9 @@ export function SeleccionPlanViaje({
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="font-semibold">Elige el plan de viaje aprobado</h3>
+        <h3 className="font-semibold">Elige el plan de viaje</h3>
         <p className="text-muted-foreground text-sm">
-          Lugares, objetivo, fechas, participantes y Director de Programa se
-          toman del plan.
+          Lugares, objetivo, fechas y participantes se toman del plan.
         </p>
       </div>
 

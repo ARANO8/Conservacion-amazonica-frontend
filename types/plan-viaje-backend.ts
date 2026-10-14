@@ -1,9 +1,8 @@
 /**
- * Plan de Viaje (ANEXO 1). Documento previo a la solicitud de viaje, con VoBo
- * del Director de Programa. Refleja el modelo PlanViaje del backend.
+ * Plan de Viaje (ANEXO 1). Documento previo a la solicitud de viaje. No pasa
+ * por aprobación: lo firma en papel el Director Ejecutivo. Refleja el modelo
+ * PlanViaje del backend.
  */
-
-export type EstadoPlanViaje = 'BORRADOR' | 'ENVIADO' | 'OBSERVADO' | 'APROBADO';
 
 export interface UsuarioResumen {
   id: number;
@@ -49,15 +48,10 @@ export interface PlanViajeResponse {
   objetivoViaje: string;
   lugarEmision: string;
   fechaEmision: string;
-  estado: EstadoPlanViaje;
-  observacion: string | null;
   usuarioId: number;
-  directorProgramaId: number | null;
-  fechaAprobacion: string | null;
   createdAt: string;
   updatedAt: string;
   usuario?: UsuarioResumen;
-  directorPrograma?: UsuarioResumen | null;
   actividades: ActividadPlanResponse[];
   /** Solicitud de viaje que respalda (si fue eliminada, el plan está libre) */
   solicitud?: {
@@ -89,6 +83,5 @@ export interface PlanViajePayload {
   objetivoViaje: string;
   lugarEmision?: string;
   fechaEmision: string;
-  directorProgramaId?: number;
   actividades: ActividadPlanPayload[];
 }

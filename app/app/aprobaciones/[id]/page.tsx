@@ -340,8 +340,7 @@ export default function AprobacionDetailPage() {
             {solicitud.planViaje ? `— ${solicitud.planViaje.codigoPlan}` : ''}
           </CardTitle>
           <CardDescription className="text-amzdesk-helper">
-            Cronograma de actividades con VoBo del Director de Programa (ANEXO
-            1)
+            Cronograma de actividades del plan de viaje (ANEXO 1)
           </CardDescription>
           {solicitud.planViaje && (
             <CardAction>
