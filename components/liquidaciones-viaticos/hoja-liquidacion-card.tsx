@@ -138,7 +138,10 @@ export function HojaLiquidacionCard({
   );
 
   return (
-    <div className="bg-card space-y-4 rounded-lg border p-4">
+    <section
+      aria-label={`Hoja de ${nombre}`}
+      className="bg-card space-y-4 rounded-lg border p-4"
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <UserRound className="text-primary h-5 w-5 shrink-0" />
@@ -247,7 +250,10 @@ export function HojaLiquidacionCard({
                           onValueChange={(v) => f.onChange(Number(v))}
                         >
                           <FormControl>
-                            <SelectTrigger className="h-8 w-full text-xs">
+                            <SelectTrigger
+                              aria-label={`Tarifa fila ${i + 1}`}
+                              className="h-8 w-full text-xs"
+                            >
                               <SelectValue placeholder="Elegir tarifa" />
                             </SelectTrigger>
                           </FormControl>
@@ -274,7 +280,10 @@ export function HojaLiquidacionCard({
                         value={String(f.value)}
                         onValueChange={(v) => f.onChange(Number(v))}
                       >
-                        <SelectTrigger className="h-8 text-xs">
+                        <SelectTrigger
+                          aria-label={`Porcentaje fila ${i + 1}`}
+                          className="h-8 text-xs"
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -297,6 +306,7 @@ export function HojaLiquidacionCard({
                         <FormControl>
                           <Input
                             type="number"
+                            aria-label={`Días fila ${i + 1}`}
                             step="0.5"
                             min="0.5"
                             className="h-8 text-right text-xs"
@@ -386,7 +396,7 @@ export function HojaLiquidacionCard({
         <Plus className="mr-1 h-4 w-4" />
         Agregar fila
       </Button>
-    </div>
+    </section>
   );
 }
 

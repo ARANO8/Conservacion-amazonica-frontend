@@ -55,6 +55,7 @@ export function DirectorProgramaSelect({
           type="button"
           variant="outline"
           role="combobox"
+          aria-label="Director de Programa"
           aria-expanded={abierto}
           disabled={disabled}
           className={cn(

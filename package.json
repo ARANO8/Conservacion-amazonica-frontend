@@ -12,6 +12,8 @@
     "start": "next start -p 3001",
     "lint": "eslint",
     "spec:sync": "curl -s http://localhost:3000/doc-json -o backend-spec.json",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --headed",
     "prepare": "husky"
   },
   "dependencies": {
@@ -46,6 +48,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "latest",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
