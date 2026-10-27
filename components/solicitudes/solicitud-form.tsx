@@ -236,9 +236,9 @@ export default function SolicitudForm({
   useSyncTerceros(form);
 
   /**
-   * Elegir el plan copia sus actividades y fija al Director de Programa que
-   * le dio el VoBo. Al cambiar de plan, las asignaciones de viáticos apuntan
-   * a actividades que ya no existen: se descartan.
+   * Elegir el plan copia sus actividades. Al cambiar de plan, las
+   * asignaciones de viáticos apuntan a actividades que ya no existen: se
+   * descartan. El Director de Programa se elige al enviar la solicitud.
    */
   const aplicarPlan = useCallback(
     (plan: PlanViajeResponse) => {
@@ -250,9 +250,6 @@ export default function SolicitudForm({
         actividadesDesdePlan(plan, form.getValues('actividades')),
         { shouldDirty: true }
       );
-      if (plan.directorProgramaId) {
-        form.setValue('destinatario', String(plan.directorProgramaId));
-      }
       if (anterior && anterior !== plan.id) {
         const viaticos = form.getValues('viaticos') || [];
         form.setValue(
@@ -271,9 +268,7 @@ export default function SolicitudForm({
   const handleNext = async () => {
     if (step === 'PLAN') {
       if (!form.getValues('planViajeId') || !planViaje) {
-        toast.error(
-          'Elige el plan de viaje aprobado del que nace la solicitud'
-        );
+        toast.error('Elige el plan de viaje del que nace la solicitud');
         return;
       }
       setStep('SOLICITUD');
@@ -619,11 +614,8 @@ export default function SolicitudForm({
           conceptos={conceptos}
           tiposGasto={tiposGasto}
           currentUserId={Number(user?.id)}
-          // Lo fija el plan: quien dio el VoBo revisa la solicitud
-          directorFijo={
-            !!planViaje?.directorProgramaId ||
-            (isEditMode && !!initialValues?.destinatario)
-          }
+          // Se designa al crear la solicitud; al subsanar vuelve al mismo
+          directorFijo={isEditMode && !!initialValues?.destinatario}
           planViaje={planViaje}
           onError={onError}
         />

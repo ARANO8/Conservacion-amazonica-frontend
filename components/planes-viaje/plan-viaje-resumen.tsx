@@ -35,14 +35,6 @@ export function PlanViajeResumen({ plan }: { plan: PlanViajeResponse }) {
             Objetivo del viaje
           </dt>
           <dd>{plan.objetivoViaje}</dd>
-          {plan.directorPrograma && (
-            <>
-              <dt className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
-                VoBo
-              </dt>
-              <dd>{plan.directorPrograma.nombreCompleto}</dd>
-            </>
-          )}
         </dl>
         <Link
           href={`/app/planes-viaje/${plan.id}`}

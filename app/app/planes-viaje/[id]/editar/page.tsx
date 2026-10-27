@@ -16,7 +16,6 @@ import {
   planViajeToForm,
   type PlanViajeFormData,
 } from '@/components/planes-viaje/plan-viaje-schema';
-import { ObservacionAlert } from '@/components/shared/observacion-alert';
 import { planesViajeService } from '@/lib/services/planes-viaje-service';
 import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
 
@@ -87,10 +86,6 @@ export default function EditarPlanViajePage() {
       </div>
 
       <div className="space-y-3 px-6 pt-6">
-        <ObservacionAlert
-          titulo="Plan observado por el Director de Programa"
-          observacion={plan.estado === 'OBSERVADO' ? plan.observacion : null}
-        />
         {solicitud && (
           <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
             Este plan respalda la solicitud {solicitud.codigoSolicitud}, que fue
@@ -103,7 +98,7 @@ export default function EditarPlanViajePage() {
       <PlanViajeForm
         planId={plan.id}
         initialValues={valores}
-        directorFijo={!!solicitud}
+        vinculado={!!solicitud}
         destino={destino}
       />
     </div>

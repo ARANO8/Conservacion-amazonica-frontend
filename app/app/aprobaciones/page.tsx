@@ -30,9 +30,6 @@ function tipoLabel(tipo: NotificacionBackend['tipo']): string {
     PAGO_PENDIENTE_APROBACION: 'Pago por aprobar',
     PAGO_OBSERVADO: 'Pago observado',
     PAGO_REALIZADO: 'Pago registrado',
-    PLAN_VIAJE_PENDIENTE: 'Plan por aprobar',
-    PLAN_VIAJE_APROBADO: 'Plan aprobado',
-    PLAN_VIAJE_OBSERVADO: 'Plan observado',
     INFORME_VIAJE_PENDIENTE: 'Informe por revisar',
     INFORME_VIAJE_REVISADO: 'Informe revisado',
     INFORME_VIAJE_OBSERVADO: 'Informe observado',
@@ -48,14 +45,12 @@ function tipoVariant(
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (
     tipo === 'SOLICITUD_APROBADA' ||
-    tipo === 'PLAN_VIAJE_APROBADO' ||
     tipo === 'INFORME_VIAJE_REVISADO' ||
     tipo === 'LIQUIDACION_VIATICOS_REVISADA'
   )
     return 'default';
   if (
     tipo === 'SOLICITUD_OBSERVADA' ||
-    tipo === 'PLAN_VIAJE_OBSERVADO' ||
     tipo === 'INFORME_VIAJE_OBSERVADO' ||
     tipo === 'LIQUIDACION_VIATICOS_OBSERVADA' ||
     tipo === 'RENDICION_PENDIENTE' ||
