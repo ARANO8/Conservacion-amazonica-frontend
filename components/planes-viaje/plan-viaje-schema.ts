@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
 import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
+import { LUGAR_EMISION_DEFAULT } from '@/lib/sedes';
 
 /** Los inputs numéricos quedan en null mientras el usuario borra el valor. */
 const numero = (schema: z.ZodNumber) =>
@@ -82,7 +83,7 @@ export function planViajeDefaults(cargo = ''): PlanViajeFormData {
     cargo,
     lugaresViaje: '',
     objetivoViaje: '',
-    lugarEmision: 'La Paz',
+    lugarEmision: LUGAR_EMISION_DEFAULT,
     fechaEmision: hoyCalendario(),
     actividades: [actividadVacia()],
   };

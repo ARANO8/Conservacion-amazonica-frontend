@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import type { UsuarioListItem } from '@/lib/services/usuarios-service';
+import { ETIQUETA_SEDE } from '@/lib/sedes';
 
 interface UsuariosColumnsOptions {
   onEdit: (usuario: UsuarioListItem) => void;
@@ -178,6 +179,12 @@ export function getUsuariosColumns({
       accessorKey: 'cargo',
       header: 'Cargo',
       cell: ({ row }) => row.original.cargo || '-',
+    },
+    {
+      accessorKey: 'sede',
+      header: 'Sede',
+      cell: ({ row }) =>
+        row.original.sede ? ETIQUETA_SEDE[row.original.sede] : '-',
     },
     {
       id: 'acciones',

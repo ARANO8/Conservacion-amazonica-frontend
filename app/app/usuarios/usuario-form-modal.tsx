@@ -35,6 +35,10 @@ import type {
   UpdateUsuarioInput,
   UsuarioListItem,
 } from '@/lib/services/usuarios-service';
+import { SEDE_OPTIONS, type Sede } from '@/lib/sedes';
+
+/** Valor del selector para "sin sede" (un SelectItem no admite '') */
+const SIN_SEDE = 'SIN_SEDE';
 
 const createUsuarioSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio'),
@@ -43,6 +47,7 @@ const createUsuarioSchema = z.object({
   rol: z.enum(['ADMIN', 'EJECUTIVO', 'CONTADOR', 'TESORERO', 'USUARIO']),
   cargo: z.string().optional(),
   ci: z.string().max(30, 'Máximo 30 caracteres').optional(),
+  sede: z.string().optional(),
 });
 
 const updateUsuarioSchema = z.object({
@@ -58,6 +63,7 @@ const updateUsuarioSchema = z.object({
   rol: z.enum(['ADMIN', 'EJECUTIVO', 'CONTADOR', 'TESORERO', 'USUARIO']),
   cargo: z.string().optional(),
   ci: z.string().max(30, 'Máximo 30 caracteres').optional(),
+  sede: z.string().optional(),
 });
 
 type CreateUsuarioFormValues = z.infer<typeof createUsuarioSchema>;
@@ -122,6 +128,7 @@ export function UsuarioFormModal({
       rol: 'USUARIO',
       cargo: '',
       ci: '',
+      sede: SIN_SEDE,
     },
   });
 
@@ -134,6 +141,7 @@ export function UsuarioFormModal({
         rol: 'USUARIO',
         cargo: '',
         ci: '',
+        sede: SIN_SEDE,
       });
       return;
     }
@@ -146,6 +154,7 @@ export function UsuarioFormModal({
         rol: mapRoleToFormRole(String(initialData.rol)),
         cargo: initialData.cargo || '',
         ci: initialData.ci || '',
+        sede: initialData.sede || SIN_SEDE,
       });
     }
   }, [form, initialData, mode, open]);
@@ -178,6 +187,7 @@ export function UsuarioFormModal({
       rol: values.rol,
       cargo: values.cargo,
       ci: values.ci,
+      sede: (values.sede === SIN_SEDE ? '' : values.sede) as Sede | '',
     };
 
     if (mode === 'create') {
@@ -298,6 +308,32 @@ export function UsuarioFormModal({
                     <FormControl>
                       <Input placeholder="Ej. 4876543 LP" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sede"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sede</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecciona una sede" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={SIN_SEDE}>Sin sede</SelectItem>
+                        {SEDE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

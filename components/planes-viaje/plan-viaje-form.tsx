@@ -30,6 +30,7 @@ import {
   type PlanViajeFormData,
 } from '@/components/planes-viaje/plan-viaje-schema';
 import type { Usuario } from '@/types/catalogs';
+import { etiquetaSede } from '@/lib/sedes';
 
 const ETIQUETA =
   'w-[190px] shrink-0 text-xs font-bold tracking-wider uppercase';
@@ -82,10 +83,16 @@ export default function PlanViajeForm({
       .getUsuarios(controller.signal)
       .then((lista) => {
         setUsuarios(lista);
-        // El cargo se precarga del usuario, pero queda editable
-        if (!isEdit && !form.getValues('cargo')) {
+        // Cargo y lugar de emisión se precargan del usuario, pero quedan
+        // editables
+        if (!isEdit) {
           const yo = lista.find((u) => String(u.id) === String(usuario?.id));
-          if (yo?.cargo) form.setValue('cargo', yo.cargo);
+          if (yo?.cargo && !form.getValues('cargo')) {
+            form.setValue('cargo', yo.cargo);
+          }
+          if (yo?.sede && !form.getFieldState('lugarEmision').isDirty) {
+            form.setValue('lugarEmision', etiquetaSede(yo.sede));
+          }
         }
       })
       .catch((error: unknown) => {
