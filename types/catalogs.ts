@@ -1,3 +1,5 @@
+import type { Sede } from '@/lib/sedes';
+
 export interface Concepto {
   id: number;
   nombre: string;
@@ -34,6 +36,7 @@ export interface Usuario {
   email?: string;
   rol?: string;
   cargo?: string;
+  sede?: Sede | null;
 }
 
 export interface PoaLookup {
