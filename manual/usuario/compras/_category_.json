@@ -1,0 +1,9 @@
+{
+  "label": "Compras y servicios",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Cotizaciones, cuadro comparativo, revisión, validación, aprobación, orden de compra, solicitud de fondos (ANEXO 3) y pagos por cuotas de consultorías.",
+    "slug": "/compras"
+  }
+}

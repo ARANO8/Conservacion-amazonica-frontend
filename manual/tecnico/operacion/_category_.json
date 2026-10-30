@@ -1,0 +1,9 @@
+{
+  "label": "Operación",
+  "position": 9,
+  "link": {
+    "type": "generated-index",
+    "description": "Logs, migraciones, seed, respaldos, recursos, rollback y problemas conocidos.",
+    "slug": "/operacion"
+  }
+}

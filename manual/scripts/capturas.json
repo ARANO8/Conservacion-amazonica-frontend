@@ -1,0 +1,181 @@
+[
+  { "archivo": "inicio-login", "ruta": "/login", "rol": "PUBLICO" },
+  { "archivo": "inicio-panel", "ruta": "/app/inicio", "rol": "ADMIN" },
+  {
+    "archivo": "inicio-notificaciones",
+    "ruta": "/app/aprobaciones",
+    "rol": "ADMIN"
+  },
+  {
+    "archivo": "inicio-documento-vista",
+    "ruta": "/app/cuadros-comparativos/1",
+    "rol": "EJECUTIVO",
+    "usuarioId": 1
+  },
+  {
+    "archivo": "inicio-base-documental",
+    "ruta": "/app/documentos",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+
+  {
+    "archivo": "viajes-plan-formulario",
+    "ruta": "/app/planes-viaje/nueva",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+  {
+    "archivo": "viajes-solicitud-detalle-economico",
+    "ruta": "/app/aprobaciones/20",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+  {
+    "archivo": "viajes-solicitud-revisar-enviar",
+    "ruta": "/app/solicitudes/nueva?planViajeId=34",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+  {
+    "archivo": "viajes-solicitud-revision-director",
+    "ruta": "/app/aprobaciones/20",
+    "rol": "USUARIO",
+    "usuarioId": 7
+  },
+  {
+    "archivo": "viajes-desembolso-dialogo",
+    "ruta": "/app/aprobaciones/33",
+    "rol": "TESORERO"
+  },
+  {
+    "archivo": "viajes-rendicion-gastos",
+    "ruta": "/app/rendiciones/2",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+  {
+    "archivo": "viajes-rendicion-revision",
+    "ruta": "/app/rendiciones/2",
+    "rol": "CONTADOR"
+  },
+  {
+    "archivo": "viajes-liquidacion-formulario",
+    "ruta": "/app/liquidaciones-viaticos/nueva",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+  {
+    "archivo": "viajes-liquidacion-revision",
+    "ruta": "/app/liquidaciones-viaticos/4",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+  {
+    "archivo": "viajes-movilidad-formulario",
+    "ruta": "/app/declaracion-movilidad/4/editar",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+  {
+    "archivo": "viajes-informe-formulario",
+    "ruta": "/app/informes-viaje/4/editar",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+  {
+    "archivo": "viajes-informe-revision",
+    "ruta": "/app/informes-viaje",
+    "rol": "ADMIN",
+    "usuarioId": 20
+  },
+
+  {
+    "archivo": "compras-cotizacion-form",
+    "ruta": "/app/cotizaciones/nueva",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+  {
+    "archivo": "compras-cuadro-builder",
+    "ruta": "/app/cuadros-comparativos/nueva",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+  {
+    "archivo": "compras-cuadro-validar",
+    "ruta": "/app/cuadros-comparativos/1",
+    "rol": "VALIDADOR_COMPRAS"
+  },
+  {
+    "archivo": "compras-cuadro-aprobar",
+    "ruta": "/app/cuadros-comparativos/1",
+    "rol": "EJECUTIVO",
+    "usuarioId": 1
+  },
+  {
+    "archivo": "compras-orden-form",
+    "ruta": "/app/ordenes-compra/nueva?cuadroId=1",
+    "rol": "EJECUTIVO",
+    "usuarioId": 1
+  },
+  {
+    "archivo": "compras-solicitud-revision",
+    "ruta": "/app/solicitudes-compra/nueva",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+  {
+    "archivo": "compras-cronograma",
+    "ruta": "/app/solicitudes-compra/34",
+    "rol": "TESORERO"
+  },
+
+  {
+    "archivo": "roles-director-solicitud",
+    "ruta": "/app/aprobaciones/30",
+    "rol": "USUARIO",
+    "usuarioId": 4
+  },
+  {
+    "archivo": "roles-tesoreria-desembolso",
+    "ruta": "/app/aprobaciones/33",
+    "rol": "TESORERO"
+  },
+  {
+    "archivo": "roles-contabilidad-rendicion",
+    "ruta": "/app/rendiciones/2",
+    "rol": "CONTADOR"
+  },
+  {
+    "archivo": "roles-validador-cuadro",
+    "ruta": "/app/cuadros-comparativos/1",
+    "rol": "VALIDADOR_COMPRAS"
+  },
+  {
+    "archivo": "roles-ejecutiva-cuadro",
+    "ruta": "/app/cuadros-comparativos/1",
+    "rol": "EJECUTIVO",
+    "usuarioId": 1
+  },
+  {
+    "archivo": "roles-personal-bandeja",
+    "ruta": "/app/aprobaciones",
+    "rol": "USUARIO",
+    "usuarioId": 3
+  },
+
+  { "archivo": "admin-usuarios", "ruta": "/app/usuarios", "rol": "ADMIN" },
+  {
+    "archivo": "admin-poa-termometro",
+    "ruta": "/app/inicio",
+    "rol": "TESORERO"
+  },
+  { "archivo": "admin-auditoria", "ruta": "/app/auditoria", "rol": "ADMIN" },
+  {
+    "archivo": "admin-monitor-solicitudes",
+    "ruta": "/app/monitor",
+    "rol": "ADMIN"
+  },
+  { "archivo": "admin-analitica", "ruta": "/app/analitica", "rol": "ADMIN" }
+]
