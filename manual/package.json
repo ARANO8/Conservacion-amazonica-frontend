@@ -2,6 +2,7 @@
   "name": "amzdesk-manual",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.14.0",
   "description": "Manuales de usuario y técnico de AMZ Desk",
   "scripts": {
     "start": "docusaurus start --port 3002",
