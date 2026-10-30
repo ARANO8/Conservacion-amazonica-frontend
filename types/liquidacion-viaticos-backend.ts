@@ -58,7 +58,6 @@ export interface LiquidacionViaticosResponse {
   codigoLiquidacion: string;
   lugarEmision: string;
   fechaEmision: string;
-  tipoCambio: string;
   estado: EstadoLiquidacionViaticos;
   observacion: string | null;
   fechaRevision: string | null;
