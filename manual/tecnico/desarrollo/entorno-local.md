@@ -102,10 +102,13 @@ se leen en tiempo de ejecución: cambiarlas en producción exige reconstruir la 
 build.
 :::
 
-`NEXT_PUBLIC_MANUAL_URL` (opcional) es la URL de los manuales que enlazan el login y el panel
-lateral (`lib/manual.ts`). En la imagen no hace falta: se deriva del `basePath`
-(`/amzdesk/manual`). En desarrollo, con el manual corriendo (`pnpm start` en `manual/`), se
-define como `http://localhost:3002/amzdesk/manual`.
+Los enlaces a los manuales del login y del panel lateral salen de `lib/manual.ts`. En la imagen
+se derivan del `basePath` (`/amzdesk/manual`). En desarrollo Next no sirve esa ruta: apuntan a
+los servidores de Docusaurus, que se arrancan dentro de `manual/` con `pnpm start` (usuario,
+`http://localhost:3002/amzdesk/manual/`) y `pnpm start:tecnico` (técnico,
+`http://localhost:3003/amzdesk/manual/tecnico/`). En desarrollo el técnico no pide sesión: esa
+comprobación la hace el nginx de producción. `NEXT_PUBLIC_MANUAL_URL` (opcional) fuerza otra URL
+base para los dos.
 
 ## Arrancar las aplicaciones
 
