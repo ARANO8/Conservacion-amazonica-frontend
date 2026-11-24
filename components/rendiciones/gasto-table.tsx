@@ -654,8 +654,8 @@ export function GastoTable({
               Tipo Doc.
             </th>
             {showPartidaColumn && (
-              <th className="text-muted-foreground border-border w-[130px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">
-                Partida
+              <th className="text-muted-foreground border-border w-[130px] border-r px-1 py-1 text-[10px] leading-tight font-bold tracking-wider uppercase">
+                Partida Presupuestaria
               </th>
             )}
             <th className="text-muted-foreground border-border min-w-[160px] border-r px-1 py-1 text-[10px] font-bold tracking-wider uppercase">

@@ -75,7 +75,7 @@ export default function SolicitudFooter({
   return (
     <div className="bg-background z-50 shrink-0 border-t p-4 px-6 md:pb-6">
       <div className="flex w-full items-center justify-between">
-        {step !== 'PLANIFICACION' ? (
+        {step !== 'PLAN' ? (
           <Button type="button" variant="outline" size="lg" onClick={onBack}>
             <ChevronLeft className="mr-2 size-4" /> Atrás
           </Button>
@@ -85,7 +85,7 @@ export default function SolicitudFooter({
 
         {/* Resumen Económico Alineado a la Derecha */}
         <div className="flex items-center gap-6">
-          {step !== 'PLANIFICACION' && (
+          {step !== 'PLAN' && (
             <div className="flex items-center gap-4 text-right">
               <div className="flex flex-col">
                 <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">

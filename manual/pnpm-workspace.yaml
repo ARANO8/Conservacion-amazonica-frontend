@@ -1,0 +1,8 @@
+# Proyecto independiente del frontend: sin este archivo pnpm lo trataría como
+# parte del workspace de la raíz.
+packages:
+  - .
+
+# tsx (script de capturas) necesita el binario de esbuild
+onlyBuiltDependencies:
+  - esbuild

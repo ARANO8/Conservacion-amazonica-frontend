@@ -66,6 +66,10 @@ export function InboxActions({
   const { usuarios, isLoading: loadingUsers } = useCatalogos();
 
   const isTesorero = currentUser?.rol === 'TESORERO';
+  // Viaje: el Director de Programa no elige a quién derivar, la solicitud va
+  // siempre a Dirección Financiera. Las compras mantienen la derivación libre.
+  const enviaADireccionFinanciera =
+    !isTesorero && request.tipo !== 'COMPRA_SERVICIO';
 
   const [isApproveOpen, setIsApproveOpen] = React.useState(false);
   const [isObserveOpen, setIsObserveOpen] = React.useState(false);
@@ -84,17 +88,25 @@ export function InboxActions({
 
   // ── Derivar (Admin / otros aprobadores) ──
   const handleAprobar = async () => {
-    if (!nuevoAprobadorId) {
+    if (!enviaADireccionFinanciera && !nuevoAprobadorId) {
       toast.error('Debe seleccionar el siguiente aprobador');
       return;
     }
 
     try {
       setSubmitting(true);
-      await api.patch(`/solicitudes/${request.id}/aprobar`, {
-        nuevoAprobadorId: Number(nuevoAprobadorId),
-      });
-      toast.success('Solicitud derivada correctamente');
+      // En un viaje el backend asigna a Dirección Financiera
+      await api.patch(
+        `/solicitudes/${request.id}/aprobar`,
+        enviaADireccionFinanciera
+          ? {}
+          : { nuevoAprobadorId: Number(nuevoAprobadorId) }
+      );
+      toast.success(
+        enviaADireccionFinanciera
+          ? 'Solicitud enviada a Dirección Financiera'
+          : 'Solicitud derivada correctamente'
+      );
       setIsApproveOpen(false);
       setNuevoAprobadorId('');
       if (mode === 'buttons') {
@@ -102,8 +114,10 @@ export function InboxActions({
       } else {
         router.refresh();
       }
-    } catch {
-      toast.error('Error al derivar la solicitud');
+    } catch (error) {
+      const mensaje = (error as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
+      toast.error(mensaje || 'Error al derivar la solicitud');
     } finally {
       setSubmitting(false);
     }
@@ -213,6 +227,11 @@ export function InboxActions({
             <Banknote className="mr-2 h-5 w-5" />
             Desembolsar
           </>
+        ) : enviaADireccionFinanciera ? (
+          <>
+            <CheckCircle className="mr-2 h-5 w-5" />
+            Enviar a Dirección Financiera
+          </>
         ) : (
           <>
             <CheckCircle className="mr-2 h-5 w-5" />
@@ -301,6 +320,37 @@ export function InboxActions({
               }
             >
               {submitting ? 'Procesando...' : 'Confirmar Desembolso'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      );
+    }
+
+    if (enviaADireccionFinanciera) {
+      return (
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar a Dirección Financiera</DialogTitle>
+            <DialogDescription>
+              Como Director de Programa confirmas que la solicitud está bien
+              estructurada. Pasará a Dirección Financiera para su aprobación y
+              desembolso.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsApproveOpen(false)}
+              disabled={submitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleAprobar}
+              disabled={submitting}
+            >
+              {submitting ? 'Procesando...' : 'Confirmar envío'}
             </Button>
           </DialogFooter>
         </DialogContent>

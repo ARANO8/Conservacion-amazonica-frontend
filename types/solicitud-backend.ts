@@ -1,3 +1,7 @@
+import type { PlanViajeResponse } from './plan-viaje-backend';
+import type { InformeViajeResumen } from './informe-viaje-backend';
+import type { LiquidacionViaticosResumen } from './liquidacion-viaticos-backend';
+
 export type TipoSolicitud = 'VIAJE' | 'COMPRA_SERVICIO';
 
 export type EstadoPagoParcial =
@@ -62,7 +66,6 @@ export interface CreateSolicitudCompraPayload {
     tipoDocumento?: 'FACTURA' | 'RECIBO';
     pagos?: { monto: number; fechaPago: string; descripcion?: string }[];
   }[];
-  planificaciones: [];
   viaticos: [];
   gastos: [];
   nominasTerceros: [];
@@ -72,21 +75,14 @@ export interface CreateSolicitudCompraPayload {
 export interface CreateSolicitudPayload {
   poaIds: number[];
   aprobadorId: number;
-  lugarViaje: string;
-  motivoViaje: string;
+  /** Plan de viaje (ANEXO 1) aprobado: de él salen lugares, objetivo y fechas */
+  planViajeId: number;
   descripcion: string;
   urlCuadroComparativo?: string;
   urlCotizaciones?: string[];
-  planificaciones: {
-    actividad: string;
-    fechaInicio: string; // ISO String
-    fechaFin: string; // ISO String
-    cantInstitucional: number;
-    cantTerceros: number;
-    dias?: number; // Valor decimal editado manualmente por el usuario
-  }[];
   viaticos: {
-    planificacionIndexes: number[];
+    /** Ids de las actividades del plan que cubre el viático */
+    planificacionIds: number[];
     conceptoId: number;
     tipoDestino: string;
     dias: number;
@@ -107,12 +103,14 @@ export interface CreateSolicitudPayload {
   nominasTerceros: {
     nombreCompleto: string;
     procedenciaInstitucion: string;
-    planificacionIndex?: number;
+    /** Id de la actividad del plan a la que pertenece */
+    planificacionId: number;
   }[];
   hospedajes: {
     poaId: number;
     region: string;
     destino: string;
+    tipoPersonal: 'INSTITUCIONAL' | 'TERCEROS';
     tipoDocumento: string;
     personas: number;
     noches: number;
@@ -182,6 +180,12 @@ export interface SolicitudResponse {
     nombreCompleto: string;
     nombre?: string;
   };
+  /** Revisa la solicitud y la deriva a Dirección Financiera; no cambia al derivar. */
+  directorPrograma?: {
+    id: number | string;
+    nombreCompleto: string;
+    cargo?: string | null;
+  } | null;
   viaticos?: Array<{
     id: number;
     dias: number;
@@ -189,7 +193,8 @@ export interface SolicitudResponse {
     montoNeto: number | string;
     montoPresupuestado: number | string;
     tipoDestino: string;
-    planificacionId?: number;
+    /** Actividades del plan que cubre el viático */
+    planificaciones?: Array<{ id: number }>;
     concepto?: {
       id: number;
       nombre: string;
@@ -218,16 +223,13 @@ export interface SolicitudResponse {
     };
     costoUnitario?: number | string;
   }>;
-  planificaciones?: Array<{
-    id: number;
-    actividadProgramada: string;
-    fechaInicio: string;
-    fechaFin: string;
-    cantidadPersonasInstitucional: number;
-    cantidadPersonasTerceros: number;
-    diasCalculados?: number;
-    dias?: number; // Propiedad que el backend envía con el valor decimal real
-  }>;
+  /** Plan de viaje (ANEXO 1) del que nace la solicitud; sus actividades son el cronograma */
+  planViajeId?: number | null;
+  planViaje?: PlanViajeResponse | null;
+  /** ANEXO 7 del viaje (null si aún no existe) */
+  informeViaje?: InformeViajeResumen | null;
+  /** ANEXO 5 del viaje (null si aún no existe) */
+  liquidacionViaticos?: LiquidacionViaticosResumen | null;
   presupuestos?: Array<{
     id: number;
     poa?: {
@@ -285,6 +287,7 @@ export interface SolicitudResponse {
       id: number;
       region: string;
       destino: string;
+      tipoPersonal?: 'INSTITUCIONAL' | 'TERCEROS';
       tipoDocumento?: string;
       personas: number;
       noches: number;
@@ -294,6 +297,7 @@ export interface SolicitudResponse {
       it: number | string;
     }>;
     subtotalPresupuestado?: number | string;
+    subtotalNeto?: number | string;
   }>;
   fechaInicio?: string;
   fechaFin?: string;
@@ -303,6 +307,7 @@ export interface SolicitudResponse {
     id: number;
     region: string;
     destino: string;
+    tipoPersonal?: 'INSTITUCIONAL' | 'TERCEROS';
     tipoDocumento?: string;
     personas: number;
     noches: number;

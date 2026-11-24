@@ -69,14 +69,16 @@ const poaSchema = z.object({
 
 // Esquema Zod
 export const formSchema = z.object({
-  // Campos de Planificación (Paso 1)
-  planificacionLugares: z
-    .string()
-    .min(1, 'El lugar de la actividad es requerido'),
-  planificacionObjetivo: z.string().min(1, 'El objetivo es requerido'),
+  // Paso 1: el plan de viaje (ANEXO 1) del que nace la solicitud.
+  // Sus actividades se copian a `actividades` en solo lectura.
+  planViajeId: z.number({
+    required_error: 'Selecciona el plan de viaje',
+  }),
   actividades: z
     .array(
       z.object({
+        /** Id de la fila del plan: a él se asignan viáticos y nómina */
+        planificacionId: z.number(),
         fechaInicio: z.union([z.string(), z.date()]),
         fechaFin: z.union([z.string(), z.date()]),
         cantDias: z.preprocess(
@@ -111,6 +113,9 @@ export const formSchema = z.object({
             })
           )
           .default([]),
+        // Nómina institucional: IDs de usuarios del sistema que participan.
+        // Viene del plan de viaje, donde se eligió en su modal.
+        institucionales: z.array(z.number()).default([]),
       })
     )
     .min(1, 'Debes agregar al menos una actividad'),
@@ -227,6 +232,10 @@ export const formSchema = z.object({
         ),
         region: z.string().min(1, 'La región es requerida'),
         destino: z.string().min(1, 'El destino es requerido'),
+        // Institucional o socio: cada uno tiene su propio rango de tarifas
+        tipoPersonal: z
+          .enum(['INSTITUCIONAL', 'TERCEROS'])
+          .default('INSTITUCIONAL'),
         tipoDocumento: z.enum(['FACTURA', 'RECIBO']).default('RECIBO'),
         personas: z.preprocess(
           (v) => (v === null ? undefined : v),
@@ -285,22 +294,11 @@ export const formSchema = z.object({
 
 export type FormData = z.infer<typeof formSchema>;
 
-export type WizardStep = 'PLANIFICACION' | 'SOLICITUD' | 'RESPALDOS' | 'NOMINA';
+export type WizardStep = 'PLAN' | 'SOLICITUD' | 'RESPALDOS' | 'NOMINA';
 
-export const defaultValues: FormData = {
-  planificacionLugares: '',
-  planificacionObjetivo: '',
-  actividades: [
-    {
-      fechaInicio: new Date().toISOString().split('T')[0],
-      fechaFin: new Date().toISOString().split('T')[0],
-      cantDias: 1,
-      actividadProgramada: '',
-      cantInstitucion: 1,
-      cantTerceros: 0,
-      terceros: [],
-    },
-  ],
+/** `planViajeId` queda sin valor hasta elegir el plan en el Paso 1. */
+export const defaultValues = {
+  actividades: [],
   interino: false,
   items: [],
   viaticos: [],
@@ -318,4 +316,4 @@ export const defaultValues: FormData = {
   destinatario: '',
   urlCuadroComparativo: '',
   urlCotizaciones: [''],
-};
+} as Omit<FormData, 'planViajeId'> as FormData;

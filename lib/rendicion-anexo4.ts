@@ -130,8 +130,13 @@ export function desglosarGastoPersistido({
 
   const categoria = getCategoriaFromPartida(nombrePartida ?? null);
 
-  // Factor 0.87 — sólo RC-IVA 13%
-  if (doc === 'LV' || (doc === 'RECIBO' && categoria === 'VIATICO')) {
+  // Factor 0.87 — sólo RC-IVA 13%. La planilla de viáticos de terceros (PVT)
+  // retiene igual que los institucionales desde el instructivo del 03/08/2026.
+  if (
+    doc === 'LV' ||
+    doc === 'PVT' ||
+    (doc === 'RECIBO' && categoria === 'VIATICO')
+  ) {
     return { ...base, rcIva: total };
   }
 

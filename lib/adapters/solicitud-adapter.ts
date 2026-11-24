@@ -26,15 +26,10 @@ export const adaptFormToPayload = (
     return parsed;
   };
 
-  // 1. Mapeo de Planificaciones (Actividades)
-  const planificaciones = formData.actividades.map((act) => ({
-    actividad: act.actividadProgramada,
-    fechaInicio: new Date(act.fechaInicio).toISOString(),
-    fechaFin: new Date(act.fechaFin).toISOString(),
-    cantInstitucional: Number(act.cantInstitucion) || 0,
-    cantTerceros: Number(act.cantTerceros) || 0,
-    dias: Number(act.cantDias) || 0, // Enviar valor manual del input (permite decimales)
-  }));
+  // 1. Las actividades son las del plan de viaje: en el formulario se
+  // referencian por posición y la API las espera por id.
+  const idDeActividad = (indice: number): number | undefined =>
+    formData.actividades[indice]?.planificacionId;
 
   // 2. Mapeo de Viáticos
   const viaticos = (formData.viaticos || [])
@@ -47,9 +42,9 @@ export const adaptFormToPayload = (
       }
 
       return {
-        planificacionIndexes: Array.isArray(v.planificacionIndexes)
-          ? v.planificacionIndexes.map(Number)
-          : [],
+        planificacionIds: (v.planificacionIndexes ?? [])
+          .map((indice) => idDeActividad(Number(indice)))
+          .filter((id): id is number => id !== undefined),
         conceptoId,
         tipoDestino: v.tipoDestino || 'INSTITUCIONAL',
         dias: Number(v.dias) || 0,
@@ -83,14 +78,12 @@ export const adaptFormToPayload = (
     })
     .filter((gasto): gasto is NonNullable<typeof gasto> => !!gasto);
 
-  // 4. Mapeo de Nómina — se aplana desde cada actividad. El índice coincide
-  // con el del array `planificaciones` porque ambos se derivan de
-  // `formData.actividades` en el mismo orden.
-  const nominasTerceros = formData.actividades.flatMap((act, index) =>
+  // 4. Mapeo de Nómina — se aplana desde cada actividad del plan
+  const nominasTerceros = formData.actividades.flatMap((act) =>
     (act.terceros || []).map((t) => ({
       nombreCompleto: t.nombreCompleto,
       procedenciaInstitucion: t.procedenciaInstitucion,
-      planificacionIndex: index,
+      planificacionId: act.planificacionId,
     }))
   );
 
@@ -107,6 +100,7 @@ export const adaptFormToPayload = (
         poaId,
         region: h.region || '',
         destino: h.destino || '',
+        tipoPersonal: h.tipoPersonal || 'INSTITUCIONAL',
         tipoDocumento: h.tipoDocumento || 'RECIBO',
         personas: Number(h.personas) || 1,
         noches: Number(h.noches) || 1,
@@ -123,12 +117,11 @@ export const adaptFormToPayload = (
   return {
     poaIds: normalizedPoaIds,
     aprobadorId: aprobadorId,
-    lugarViaje: formData.planificacionLugares,
-    motivoViaje: formData.planificacionObjetivo,
+    // Lugares, objetivo y fechas los toma el backend del plan
+    planViajeId: formData.planViajeId,
     descripcion: formData.motivo,
     urlCuadroComparativo: formData.urlCuadroComparativo || undefined,
     urlCotizaciones: (formData.urlCotizaciones || []).filter(Boolean),
-    planificaciones,
     viaticos,
     gastos,
     hospedajes,
@@ -175,11 +168,13 @@ export const adaptResponseToFormData = (
     };
   };
 
-  // 1. Mapeo de Planificaciones
-  const actividades = (response.planificaciones || []).map((p) => ({
+  // 1. Actividades: las del plan de viaje, en el orden del ANEXO 1
+  const actividadesDelPlan = response.planViaje?.actividades ?? [];
+  const actividades = actividadesDelPlan.map((p) => ({
+    planificacionId: p.id,
     actividadProgramada: p.actividadProgramada,
-    fechaInicio: p.fechaInicio ? new Date(p.fechaInicio) : new Date(),
-    fechaFin: p.fechaFin ? new Date(p.fechaFin) : new Date(),
+    fechaInicio: p.fechaInicio.slice(0, 10),
+    fechaFin: p.fechaFin.slice(0, 10),
     cantInstitucion: Number(p.cantidadPersonasInstitucional) || 0,
     cantTerceros: Number(p.cantidadPersonasTerceros) || 0,
     cantDias: Number(p.diasCalculados) || 0,
@@ -187,13 +182,14 @@ export const adaptResponseToFormData = (
       nombreCompleto: string;
       procedenciaInstitucion: string;
     }[],
+    institucionales: (p.participantesInstitucionales || []).map((u) => u.id),
   }));
 
   // 1b. Repartir las personas externas dentro de su actividad de origen.
   // Las solicitudes anteriores a la FK `planificacionId` no tienen el vínculo:
   // caen en la primera actividad que declare terceros.
   const planificacionIdToIndex = new Map<number, number>();
-  (response.planificaciones || []).forEach((p, index) => {
+  actividadesDelPlan.forEach((p, index) => {
     planificacionIdToIndex.set(p.id, index);
   });
   const indiceFallback = actividades.findIndex((a) => a.cantTerceros > 0);
@@ -302,13 +298,10 @@ export const adaptResponseToFormData = (
 
     return {
       id: v.id,
-      planificacionIndexes: v.planificacionId
-        ? [
-            response.planificaciones?.findIndex(
-              (p) => p.id === v.planificacionId
-            ) ?? 0,
-          ]
-        : [],
+      // Una actividad quitada del plan al corregirlo deja de estar asignada
+      planificacionIndexes: (v.planificaciones ?? [])
+        .map((p) => planificacionIdToIndex.get(p.id))
+        .filter((indice): indice is number => indice !== undefined),
       conceptoId: v.concepto?.id,
       tipoDestino:
         (v.tipoDestino as 'INSTITUCIONAL' | 'TERCEROS') || 'INSTITUCIONAL',
@@ -349,6 +342,10 @@ export const adaptResponseToFormData = (
     poaId: Number(h.poaId) || 0,
     region: h.region || '',
     destino: h.destino || '',
+    tipoPersonal:
+      h.tipoPersonal === 'TERCEROS'
+        ? ('TERCEROS' as const)
+        : ('INSTITUCIONAL' as const),
     tipoDocumento: (h.tipoDocumento as 'FACTURA' | 'RECIBO') || 'RECIBO',
     personas: Number(h.personas) || 1,
     noches: Number(h.noches) || 1,
@@ -365,6 +362,10 @@ export const adaptResponseToFormData = (
         poaId: Number(p.poa?.id) || 0,
         region: h.region || '',
         destino: h.destino || '',
+        tipoPersonal:
+          h.tipoPersonal === 'TERCEROS'
+            ? ('TERCEROS' as const)
+            : ('INSTITUCIONAL' as const),
         tipoDocumento: (h.tipoDocumento as 'FACTURA' | 'RECIBO') || 'RECIBO',
         personas: Number(h.personas) || 1,
         noches: Number(h.noches) || 1,
@@ -381,14 +382,16 @@ export const adaptResponseToFormData = (
       : hospedajesFromPresupuestos;
 
   return {
-    planificacionLugares: response.lugarViaje || '',
-    planificacionObjetivo: response.motivoViaje || '',
+    // Al subsanar, la solicitud vuelve al Director de Programa ya designado
+    destinatario: response.directorPrograma?.id
+      ? String(response.directorPrograma.id)
+      : '',
+    ...(response.planViajeId ? { planViajeId: response.planViajeId } : {}),
     motivo: response.descripcion || '',
     urlCuadroComparativo: response.urlCuadroComparativo || '',
     urlCotizaciones: Array.isArray(response.urlCotizaciones)
       ? response.urlCotizaciones.filter((url): url is string => !!url)
       : [],
-    destinatario: response.aprobadorId ? String(response.aprobadorId) : '',
     proyecto: response.presupuestos?.[0]?.poa?.estructura?.proyecto?.id || '',
     actividades,
     presupuestosIds: fuentesSeleccionadas

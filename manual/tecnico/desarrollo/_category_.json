@@ -1,0 +1,9 @@
+{
+  "label": "Desarrollo",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "Entorno local, base de datos, pruebas, convenciones y mantenimiento de este manual.",
+    "slug": "/desarrollo"
+  }
+}

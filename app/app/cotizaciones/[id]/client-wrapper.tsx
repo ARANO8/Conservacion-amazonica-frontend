@@ -21,6 +21,7 @@ import { formatDateShort, formatMoney } from '@/lib/utils';
 import { downloadBlob } from '@/lib/utils/download-blob';
 import { cotizacionesService } from '@/lib/services/cotizaciones-service';
 import type { CotizacionResponse } from '@/types/cotizacion-backend';
+import { DocumentoViewer } from '@/components/shared/documento-viewer';
 
 interface CotizacionDetalleClientWrapperProps {
   cotizacionId: string;
@@ -132,6 +133,26 @@ export function CotizacionDetalleClientWrapper({
         </div>
       </div>
 
+      {cotizacion.tipo === 'EXTERNA' ? (
+        <CotizacionExterna cotizacion={cotizacion} />
+      ) : (
+        <DocumentoViewer
+          titulo="Formulario de Solicitud de Cotizaciones"
+          ruta={`/cotizaciones/${cotizacion.id}/documento`}
+          recargarCon={cotizacion.updatedAt}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Una cotización externa es el documento que envió el proveedor: el sistema
+ * no genera un PDF propio, así que se muestran sus datos.
+ */
+function CotizacionExterna({ cotizacion }: { cotizacion: CotizacionResponse }) {
+  return (
+    <>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Datos del Proveedor</CardTitle>
@@ -261,6 +282,6 @@ export function CotizacionDetalleClientWrapper({
           </CardContent>
         </Card>
       ) : null}
-    </div>
+    </>
   );
 }

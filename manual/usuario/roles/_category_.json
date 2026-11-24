@@ -1,0 +1,9 @@
+{
+  "label": "Guías por rol",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Qué te llega a la bandeja, qué puedes aprobar u observar y qué revisar antes de hacerlo, según tu papel en ACEAA.",
+    "slug": "/roles"
+  }
+}

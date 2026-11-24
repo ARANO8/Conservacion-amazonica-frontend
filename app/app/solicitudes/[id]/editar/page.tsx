@@ -8,6 +8,7 @@ import SolicitudForm from '@/components/solicitudes/solicitud-form';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { FormData } from '@/components/solicitudes/solicitud-schema';
+import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
 
 export default function EditSolicitudPage() {
   const params = useParams();
@@ -17,6 +18,7 @@ export default function EditSolicitudPage() {
     null
   );
   const [observacion, setObservacion] = useState<string | null>(null);
+  const [planViaje, setPlanViaje] = useState<PlanViajeResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +35,7 @@ export default function EditSolicitudPage() {
 
         const formData = adaptResponseToFormData(solicitud);
         setObservacion(solicitud.observacion ?? null);
+        setPlanViaje(solicitud.planViaje ?? null);
         setInitialData(formData);
       } catch {
         toast.error('Error al cargar la solicitud');
@@ -64,6 +67,7 @@ export default function EditSolicitudPage() {
       isEditMode={true}
       solicitudId={id}
       observacion={observacion}
+      planViajeInicial={planViaje}
     />
   );
 }

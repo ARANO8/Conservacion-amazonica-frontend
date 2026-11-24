@@ -62,6 +62,8 @@ export const GastoRendicionSchema = z.object({
    * Determina el factor de retención: BIEN=0.92, SERVICIO=0.84, ALQUILER=0.84.
    */
   tipoRetencion: TipoRetencionEnum.optional(),
+  /** Hoja del ANEXO 5 de la que se importó este gasto LV */
+  hojaLiquidacionId: z.number().optional(),
 });
 
 export type GastoRendicion = z.infer<typeof GastoRendicionSchema>;

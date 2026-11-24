@@ -42,11 +42,20 @@ export default function RendicionFooter({
     return Number(sol?.montoTotalPresupuestado ?? 0);
   }, [solicitudes, solicitudId]);
 
-  // Total rendido (suma de gastos ingresados)
-  const totalRendido = useMemo(() => {
+  // Total rendido: el líquido es lo que se teclea, el presupuestado le suma las
+  // retenciones. El anticipado esta presupuestado, asi que el saldo se calcula
+  // contra el presupuestado; el liquido se muestra solo como referencia.
+  const { totalLiquido, totalRendido } = useMemo(() => {
     return (gastos ?? []).reduce(
-      (acc, g) => acc + (Number(g?.montoTotal) || 0),
-      0
+      (acc, g) => {
+        const liquido = Number(g?.montoTotal) || 0;
+        const presupuestado = Number(g?.montoBruto) || liquido;
+        return {
+          totalLiquido: acc.totalLiquido + liquido,
+          totalRendido: acc.totalRendido + presupuestado,
+        };
+      },
+      { totalLiquido: 0, totalRendido: 0 }
     );
   }, [gastos]);
 
@@ -90,17 +99,23 @@ export default function RendicionFooter({
                 <span className="text-sm font-semibold">
                   {formatMoney(montoAnticipado)}
                 </span>
+                <span className="text-muted-foreground text-[10px] tracking-tight">
+                  Presupuestado
+                </span>
               </div>
 
               <Separator orientation="vertical" className="h-8" />
 
-              {/* Total Rendido */}
+              {/* Total Rendido: presupuestado arriba, liquido como referencia */}
               <div className="flex flex-col">
                 <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase">
                   Total Rendido
                 </span>
                 <span className="text-sm font-semibold">
                   {formatMoney(totalRendido)}
+                </span>
+                <span className="text-muted-foreground text-[10px] tracking-tight">
+                  Líquido: {formatMoney(totalLiquido)}
                 </span>
               </div>
 

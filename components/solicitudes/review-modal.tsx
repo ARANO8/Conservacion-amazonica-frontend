@@ -49,6 +49,7 @@ import { SeleccionPresupuesto } from '@/types/backend';
 import { PresupuestoBreakdown } from '@/components/solicitudes/presupuesto-breakdown';
 import { mapFormToBreakdown } from '@/lib/mappers/breakdown-mapper';
 import { CuentaBancariaCard } from '@/components/solicitudes/cuenta-bancaria-card';
+import type { PlanViajeResponse } from '@/types/plan-viaje-backend';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -61,6 +62,13 @@ interface ReviewModalProps {
   tiposGasto: TipoGasto[];
   currentUserId?: number;
   onError?: (errors: FieldErrors<FormData>) => void;
+  /**
+   * Al subsanar, la solicitud vuelve al Director de Programa designado al
+   * crearla: se muestra, pero no se puede cambiar.
+   */
+  directorFijo?: boolean;
+  /** Plan de viaje del que nace la solicitud: lugares y objetivo */
+  planViaje?: PlanViajeResponse | null;
 }
 
 export default function ReviewModal({
@@ -74,16 +82,27 @@ export default function ReviewModal({
   tiposGasto,
   currentUserId,
   onError,
+  directorFijo = false,
+  planViaje = null,
 }: ReviewModalProps) {
   const { watch, control, handleSubmit, setValue } = useFormContext<FormData>();
   const [open, setOpen] = useState(false);
 
   const data = watch();
 
-  const usuariosDisponibles = useMemo(() => {
-    if (!currentUserId) return usuarios;
-    return usuarios.filter((u) => u.id !== currentUserId);
-  }, [usuarios, currentUserId]);
+  // Ni uno mismo ni Dirección Financiera (Tesorero), que aprueba después
+  const usuariosDisponibles = useMemo(
+    () =>
+      usuarios.filter((u) => u.id !== currentUserId && u.rol !== 'TESORERO'),
+    [usuarios, currentUserId]
+  );
+
+  const nombreDirectorFijo = useMemo(
+    () =>
+      usuarios.find((u) => String(u.id) === String(data.destinatario))
+        ?.nombreCompleto,
+    [usuarios, data.destinatario]
+  );
 
   const totalViaticos = (data.viaticos || []).reduce(
     (acc: number, v) => acc + (Number(v.montoNeto) || 0),
@@ -152,16 +171,14 @@ export default function ReviewModal({
                   <span className="text-muted-foreground text-xs font-bold uppercase">
                     Lugar/es:
                   </span>{' '}
-                  <span className="font-bold">{data.planificacionLugares}</span>
+                  <span className="font-bold">{planViaje?.lugaresViaje}</span>
                 </p>
 
                 <p className="text-sm">
                   <span className="text-muted-foreground shrink-0 text-xs font-bold uppercase">
                     Objetivo:
                   </span>{' '}
-                  <span className="font-bold">
-                    {data.planificacionObjetivo}
-                  </span>
+                  <span className="font-bold">{planViaje?.objetivoViaje}</span>
                 </p>
 
                 <p className="text-sm">
@@ -218,7 +235,7 @@ export default function ReviewModal({
                 render={({ field }) => (
                   <FormItem className="space-y-3">
                     <FormLabel className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                      Enviar solicitud a:{' '}
+                      Director de Programa{' '}
                       <span className="text-destructive">*</span>
                     </FormLabel>
 
@@ -227,76 +244,86 @@ export default function ReviewModal({
                       <div className="flex items-start gap-2">
                         <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                         <p className="text-[13px] leading-tight font-medium">
-                          Importante: Selecciona a tu inmediato superior o al
-                          coordinador del área para la aprobación de esta
-                          solicitud.
+                          El Director de Programa revisa que la solicitud esté
+                          bien estructurada y la deriva a Dirección Financiera
+                          para su aprobación. En el Anexo 2 firma como
+                          &quot;Revisado por&quot; la Dirección Financiera.
                         </p>
                       </div>
                     </div>
 
-                    <Popover open={open} onOpenChange={setOpen}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className={cn(
-                              'w-full justify-between font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            {field.value
-                              ? usuariosDisponibles.find(
-                                  (usuario) =>
-                                    String(usuario.id) === field.value
-                                )?.nombreCompleto ||
-                                'Seleccionar responsable...'
-                              : 'Seleccionar responsable...'}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className="w-[var(--radix-popover-trigger-width)] p-0"
-                        align="start"
-                      >
-                        <Command>
-                          <CommandInput placeholder="Buscar destinatario..." />
-                          <CommandList>
-                            <CommandEmpty>
-                              No se encontró el usuario.
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {usuariosDisponibles.map((usuario) => (
-                                <CommandItem
-                                  key={usuario.id}
-                                  value={usuario.nombreCompleto}
-                                  onSelect={() => {
-                                    setValue(
-                                      'destinatario',
-                                      String(usuario.id)
-                                    );
-                                    setOpen(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      'mr-2 h-4 w-4',
+                    {directorFijo ? (
+                      <p className="bg-muted rounded-md border px-3 py-2 text-sm font-medium">
+                        {nombreDirectorFijo || 'Director de Programa designado'}
+                        <span className="text-muted-foreground block text-xs font-normal">
+                          Es quien fue designado al crear la solicitud.
+                        </span>
+                      </p>
+                    ) : (
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={open}
+                              className={cn(
+                                'w-full justify-between font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              {field.value
+                                ? usuariosDisponibles.find(
+                                    (usuario) =>
                                       String(usuario.id) === field.value
-                                        ? 'opacity-100'
-                                        : 'opacity-0'
-                                    )}
-                                  />
-                                  {usuario.nombreCompleto}{' '}
-                                  {usuario.cargo ? `- ${usuario.cargo}` : ''}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                                  )?.nombreCompleto ||
+                                  'Seleccionar Director de Programa...'
+                                : 'Seleccionar Director de Programa...'}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-[var(--radix-popover-trigger-width)] p-0"
+                          align="start"
+                        >
+                          <Command>
+                            <CommandInput placeholder="Buscar Director de Programa..." />
+                            <CommandList>
+                              <CommandEmpty>
+                                No se encontró el usuario.
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {usuariosDisponibles.map((usuario) => (
+                                  <CommandItem
+                                    key={usuario.id}
+                                    value={usuario.nombreCompleto}
+                                    onSelect={() => {
+                                      setValue(
+                                        'destinatario',
+                                        String(usuario.id)
+                                      );
+                                      setOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4',
+                                        String(usuario.id) === field.value
+                                          ? 'opacity-100'
+                                          : 'opacity-0'
+                                      )}
+                                    />
+                                    {usuario.nombreCompleto}{' '}
+                                    {usuario.cargo ? `- ${usuario.cargo}` : ''}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

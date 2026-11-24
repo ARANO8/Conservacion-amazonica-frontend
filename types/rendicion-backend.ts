@@ -91,6 +91,8 @@ export interface GastoRendicionResponse {
   montoImpuestos?: string;
   partidaId?: number;
   tipoRetencion?: string;
+  /** Hoja del ANEXO 5 de la que se importó el gasto LV */
+  hojaLiquidacionId?: number | null;
   partidaContableId?: number | null;
   partidaContable?: PartidaContable | null;
   partida?: {

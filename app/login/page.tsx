@@ -5,6 +5,7 @@ import { withBasePath } from '@/lib/utils';
 import { LoginForm } from '@/components/auth/login-form';
 import { ApiStatus } from '@/components/auth/api-status';
 import { ModeToggle } from '@/components/mode-toggle';
+import { MANUAL_USUARIO_URL } from '@/lib/manual';
 
 export default function LoginPage() {
   return (
@@ -24,6 +25,17 @@ export default function LoginPage() {
           style={{ width: 'auto', height: 'auto' }}
         />
         <LoginForm />
+        <p className="text-muted-foreground mt-6 text-center text-sm">
+          ¿Primera vez en AMZ Desk?{' '}
+          <a
+            href={MANUAL_USUARIO_URL}
+            target="_blank"
+            rel="noopener"
+            className="text-primary font-medium underline-offset-4 hover:underline"
+          >
+            Lee el manual de usuario
+          </a>
+        </p>
       </div>
     </div>
   );

@@ -1,8 +1,16 @@
+import type { Sede } from '@/lib/sedes';
+
 export interface Concepto {
   id: number;
   nombre: string;
+  /** Tarifas líquidas diarias ya convertidas a Bs. */
   precioInstitucional?: string;
   precioTerceros?: string;
+  /** Moneda de la tarifa del instructivo; USD en los viáticos internacionales. */
+  moneda?: 'BOB' | 'USD';
+  tipoCambio?: string;
+  precioInstitucionalOriginal?: string;
+  precioTercerosOriginal?: string;
 }
 
 export interface Grupo {
@@ -28,6 +36,7 @@ export interface Usuario {
   email?: string;
   rol?: string;
   cargo?: string;
+  sede?: Sede | null;
 }
 
 export interface PoaLookup {
@@ -50,4 +59,6 @@ export interface PartidaContable {
   id: number;
   codigo: string;
   nombre: string;
+  /** Cuenta que agrupa a otras: se muestra en el buscador pero no se elige. */
+  esEncabezado?: boolean;
 }

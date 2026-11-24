@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Proyecto aparte (Docusaurus) con su propio tsconfig
+    "manual/**",
   ]),
 ]);
 

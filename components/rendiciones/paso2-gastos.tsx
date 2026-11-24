@@ -24,6 +24,7 @@ import { PartidasAprobadas } from './partidas-aprobadas';
 import { GastoTable } from './gasto-table';
 import { ResumenAnexo4Blocks } from './resumen-anexo4';
 import { resumirAnexo4, type GastoAnexo4 } from '@/lib/rendicion-anexo4';
+import { ImportarLiquidacionViaticos } from '@/components/liquidaciones-viaticos/importar-liquidacion-viaticos';
 
 export default function Paso2Gastos({
   solicitud,
@@ -75,6 +76,12 @@ export default function Paso2Gastos({
         Registra cada gasto ejecutado (factura, recibo o boleta) y su partida
         presupuestaria. En esta etapa el respaldo documental es opcional.
       </p>
+
+      <ImportarLiquidacionViaticos
+        solicitud={solicitud}
+        gastos={gastos}
+        onImportar={(nuevos) => nuevos.forEach((g) => appendGasto(g))}
+      />
 
       <PartidasAprobadas solicitud={solicitud} gastos={gastos} />
 

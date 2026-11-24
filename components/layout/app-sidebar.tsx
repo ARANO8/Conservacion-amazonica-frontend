@@ -3,10 +3,13 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { withBasePath } from '@/lib/utils';
+import { MANUAL_TECNICO_URL, MANUAL_USUARIO_URL } from '@/lib/manual';
 import {
   BarChart3,
   Bell,
   BookOpen,
+  BookOpenText,
+  FileCode2,
   Files,
   Home,
   LayoutGrid,
@@ -96,11 +99,21 @@ function buildViajesItems(rol?: Role) {
   const items: { title: string; url: string }[] = [];
 
   if (esRolOperativo(rol)) {
+    // El plan (ANEXO 1) es el paso previo de toda solicitud de viaje
+    items.push({ title: 'Planes de Viaje', url: '/app/planes-viaje' });
     items.push({ title: 'Mis Solicitudes', url: '/app/solicitudes' });
     items.push({ title: 'Mis Rendiciones', url: '/app/rendiciones' });
     items.push({
-      title: 'Informe de Actividades',
-      url: '/app/informe-actividades',
+      title: 'Informe de Viaje',
+      url: '/app/informes-viaje',
+    });
+    items.push({
+      title: 'Liquidación de Viáticos',
+      url: '/app/liquidaciones-viaticos',
+    });
+    items.push({
+      title: 'Declaración de Movilidad',
+      url: '/app/declaracion-movilidad',
     });
   }
 
@@ -154,6 +167,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const comprasItems = buildComprasItems(userRole);
 
   const navSecondary = [
+    {
+      title: 'Manual de usuario',
+      icon: BookOpenText,
+      url: MANUAL_USUARIO_URL,
+      externo: true,
+    },
+    {
+      title: 'Manual técnico',
+      icon: FileCode2,
+      url: MANUAL_TECNICO_URL,
+      externo: true,
+    },
     {
       title: 'Soporte',
       icon: LifeBuoy,

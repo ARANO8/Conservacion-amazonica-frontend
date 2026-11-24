@@ -45,6 +45,7 @@ jobs:
       packages: write
     outputs:
       image: ${{ steps.vars.outputs.image }}
+      manual: ${{ steps.vars.outputs.manual }}
     steps:
       - uses: actions/checkout@v4
 
@@ -53,6 +54,7 @@ jobs:
         run: |
           echo "repo=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
           echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "manual=ghcr.io/${GITHUB_REPOSITORY,,}-manual:sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -78,6 +80,18 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Manuales de usuario y tecnico (spec 026): imagen nginx aparte, con su
+      # propio contexto. No depende de las variables de Next.
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./manual
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.repo }}-manual:sha-${{ github.sha }}
+            ${{ steps.vars.outputs.repo }}-manual:latest
+          cache-from: type=gha,scope=manual
+          cache-to: type=gha,mode=max,scope=manual
+
   deploy:
     name: Desplegar en el VPS
     needs: build-push
@@ -96,6 +110,21 @@ jobs:
             sed -i "s|^FRONTEND_IMAGE=.*|FRONTEND_IMAGE=${{ needs.build-push.outputs.image }}|" .env
             docker compose pull frontend
             docker compose up -d frontend
+
+            # Los manuales solo se actualizan si el compose del VPS ya tiene el
+            # servicio (paso manual de la spec 026). Asi el primer despliegue
+            # tras la spec no falla si aun no se configuro.
+            if docker compose config --services | grep -qx manual; then
+              if grep -q '^MANUAL_IMAGE=' .env; then
+                sed -i "s|^MANUAL_IMAGE=.*|MANUAL_IMAGE=${{ needs.build-push.outputs.manual }}|" .env
+              else
+                echo "MANUAL_IMAGE=${{ needs.build-push.outputs.manual }}" >> .env
+              fi
+              docker compose pull manual
+              docker compose up -d manual
+            else
+              echo "AVISO: el compose del VPS no tiene el servicio 'manual'; los manuales no se publicaron"
+            fi
             docker image prune -f
 
             # El smoke test corre AQUI DENTRO y no desde el runner a proposito:

@@ -8,24 +8,17 @@ import { ArrowLeft, FileDown, ShoppingCart, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { solicitudesService } from '@/lib/services/solicitudes-service';
-import { formatDateShort, formatMoney } from '@/lib/utils';
+import { formatDateShort } from '@/lib/utils';
 import { downloadBlob } from '@/lib/utils/download-blob';
 import type { SolicitudResponse } from '@/types/solicitud-backend';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { CronogramaPagos } from '@/components/solicitudes-compra/cronograma-pagos';
 import { ObservacionAlert } from '@/components/shared/observacion-alert';
+import { DocumentoViewer } from '@/components/shared/documento-viewer';
 
 const ESTADO_BADGE: Record<string, { label: string; className: string }> = {
   PENDIENTE: {
@@ -164,109 +157,12 @@ export default function DetalleSolicitudCompraPage() {
 
           <ObservacionAlert observacion={solicitud.observacion} />
 
-          {/* Cabecera de la solicitud */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                SOLICITUD DE FONDOS EN AVANCE
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <DatoLinea
-                label="A:"
-                value={solicitud.aprobador?.nombreCompleto ?? '-'}
-              />
-              <DatoLinea
-                label="DE:"
-                value={solicitud.usuarioEmisor?.nombreCompleto}
-              />
-              <DatoLinea
-                label="CARGO:"
-                value={solicitud.usuarioEmisor?.cargo}
-              />
-              <DatoLinea label="PROYECTO:" value={solicitud.proyecto} />
-              <div className="md:col-span-2">
-                <DatoLinea
-                  label="CÓDIGO DE ACTIVIDAD:"
-                  value={
-                    solicitud.presupuestos?.[0]?.poa
-                      ? `${solicitud.presupuestos[0].poa.codigoPoa ?? ''}${solicitud.presupuestos[0].poa.actividad ? ` — ${solicitud.presupuestos[0].poa.actividad.detalleDescripcion}` : ''}`
-                      : '-'
-                  }
-                />
-              </div>
-              <DatoLinea
-                label="CHEQUE A NOMBRE DE:"
-                value={solicitud.chequeANombreDe}
-              />
-              <DatoLinea
-                label="MOTIVO DE SOLICITUD:"
-                value={solicitud.motivoViaje}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Tabla de ítems */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">DESCRIPCIÓN DEL GASTO</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[90px]">Cantidad</TableHead>
-                      <TableHead>Descripción</TableHead>
-                      <TableHead className="w-[120px]">Uso</TableHead>
-                      <TableHead className="w-[130px] text-right">
-                        P/Unit. (Bs)
-                      </TableHead>
-                      <TableHead className="w-[130px] text-right">
-                        Total (Bs)
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(solicitud.gastosCompra ?? []).length === 0 && (
-                      <TableRow>
-                        <TableCell
-                          colSpan={5}
-                          className="text-muted-foreground py-6 text-center text-sm"
-                        >
-                          Esta solicitud no tiene ítems de gasto registrados.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {(solicitud.gastosCompra ?? []).map((gc) => (
-                      <TableRow key={gc.id}>
-                        <TableCell>{Number(gc.cantidad)}</TableCell>
-                        <TableCell>{gc.descripcion}</TableCell>
-                        <TableCell>{gc.uso ?? '-'}</TableCell>
-                        <TableCell className="text-right">
-                          {formatMoney(Number(gc.costoUnitario))}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatMoney(Number(gc.total))}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow className="font-semibold">
-                      <TableCell colSpan={4} className="text-right">
-                        TOTAL
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatMoney(Number(solicitud.montoTotalNeto))}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-              <p className="text-muted-foreground mt-3 text-xs italic">
-                * Se deben presentar facturas o recibos por estos gastos
-              </p>
-            </CardContent>
-          </Card>
+          {/* La solicitud tal como sale en el PDF (ANEXO 3) */}
+          <DocumentoViewer
+            titulo="Anexo 3 — Solicitud de Fondos en Avance"
+            ruta={`/solicitudes/${solicitud.id}/documento`}
+            recargarCon={solicitud.estado}
+          />
 
           {/* Cronograma de pagos (contratos de consultoría) */}
           {contrato && (

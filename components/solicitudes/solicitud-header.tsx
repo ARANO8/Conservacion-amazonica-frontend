@@ -14,7 +14,7 @@ export default function SolicitudHeader({
     <div className="shrink-0 border-b p-4 px-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">
-          {step === 'PLANIFICACION' && '1. Planificación'}
+          {step === 'PLAN' && '1. Plan de Viaje'}
           {step === 'SOLICITUD' && '2. Detalle Económico'}
           {step === 'RESPALDOS' && '3. Documentos de Respaldo'}
           {step === 'NOMINA' && '4. Nómina de Terceros'}
@@ -22,12 +22,12 @@ export default function SolicitudHeader({
         <div className="bg-muted flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium">
           <span
             className={
-              step === 'PLANIFICACION'
+              step === 'PLAN'
                 ? 'text-primary font-bold'
                 : 'text-muted-foreground'
             }
           >
-            1. Planificación
+            1. Plan de Viaje
           </span>
           <ChevronRight className="text-muted-foreground h-3 w-3" />
           <span

@@ -58,27 +58,48 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`
 ## Directory Structure
 
 ```
-app/                  # Next.js App Router pages (Server Components by default)
-  dashboard/          # Protected dashboard routes (middleware guards /dashboard/*)
+app/
+  app/                # Protected application routes (see the auth note below)
+    analitica/            aprobaciones/         auditoria/
+    cotizaciones/         cuadros-comparativos/ declaracion-movilidad/
+    documentos/           informe-actividades/  inicio/
+    monitor/              monitor-rendiciones/  ordenes-compra/
+    rendiciones/          solicitudes/          solicitudes-compra/
+    usuarios/
+    layout.tsx        # Sidebar shell + notification polling + AuthExpiredListener
+    page.tsx          # Redirects to /app/inicio
   login/              # Public auth page
   signup/             # Public auth page
+  layout.tsx  globals.css
 components/
-  auth/               # Login/signup forms (Client Components)
-  layout/             # Sidebar, nav
+  auth/               # Login/signup forms + auth-expired-listener.tsx
+  layout/             # app-sidebar, notificaciones-polling-provider
   solicitudes/        # Core domain forms and display components
+  rendiciones/  cotizaciones/  cuadros-comparativos/  ordenes-compra/
+  solicitudes-compra/  declaraciones-movilidad/  informes-actividades/
+  dashboard/  shared/
   ui/                 # shadcn/ui primitives (do not edit unless customizing)
+  theme-provider.tsx  mode-toggle.tsx  theme-toaster.tsx  dynamic-breadcrumbs.tsx
 hooks/                # Custom React hooks (use-*.ts naming)
 lib/
-  api.ts              # Axios instance with auth interceptors
-  adapters/           # Transform form data ↔ backend payloads
+  api.ts              # Axios instance with the 401 interceptor
+  adapters/           # Transform form data <-> backend payloads
   mappers/            # Data transformation utilities
-  services/           # API service objects (primary services live here)
+  services/           # API service objects — the ONLY place for services
+  utils/              # download-blob.ts
   utils.ts            # cn(), formatMoney(), normalizeString()
-services/             # Legacy service location — prefer lib/services/ for new code
+  theme-context.tsx   # Dark mode provider (replaced next-themes)
+  tax-calculator.ts   # Mirrors the backend retention factors
+  cuadro-analisis.ts  rendicion-anexo4.ts  declaracion-movilidad.ts
 store/                # Zustand stores (auth-store.ts)
-types/                # TypeScript interfaces matching backend contracts
-middleware.ts         # Next.js middleware for route protection
+types/                # TS interfaces matching the backend contract
+backend-spec.json     # OpenAPI dump of the backend; source of types/backend.ts
 ```
+
+> **There is no `middleware.ts` and no legacy `services/` directory.** Both are gone.
+> Route protection is reactive, not a server guard: an httpOnly cookie plus the 401
+> interceptor in `lib/api.ts` and `components/auth/auth-expired-listener.tsx`, which
+> calls `router.push('/login')`.
 
 ---
 
@@ -157,7 +178,7 @@ middleware.ts         # Next.js middleware for route protection
 - Tailwind CSS v4 utility classes exclusively — no custom CSS files except `globals.css`.
 - Use the `cn()` utility (`lib/utils.ts`) to merge conditional class names.
 - Follow the existing shadcn/ui token system (`bg-background`, `text-foreground`, `text-muted-foreground`, etc.).
-- Dark mode is supported via `next-themes`; use semantic tokens rather than hardcoded colors.
+- Dark mode comes from the custom `lib/theme-context.tsx` provider (`next-themes` was removed); use semantic tokens rather than hardcoded colors.
 
 ---
 
@@ -166,7 +187,7 @@ middleware.ts         # Next.js middleware for route protection
 ### Adding a New Page
 
 1. Create `app/<route>/page.tsx` as a Server Component (default export).
-2. If the route needs auth, it is already covered by `middleware.ts` for any path under `/dashboard/*`.
+2. Protected routes go under `app/app/`. There is no server-side guard: auth is enforced reactively by the 401 interceptor in `lib/api.ts`. Do not rely on the route path alone for authorization — the backend @Roles() guard is the real boundary.
 3. Import and compose existing UI components; add `'use client'` only to interactive leaf components.
 
 ### Adding a New API Service
@@ -193,7 +214,7 @@ middleware.ts         # Next.js middleware for route protection
 
 - Do not install alternative HTTP libraries — use the existing Axios `api` instance.
 - Do not use `next/router` (Pages Router) — this project uses App Router.
-- Do not write new files in `services/` (legacy); use `lib/services/` instead.
+- Do not recreate a top-level `services/` directory — all services live in `lib/services/`.
 - Do not add global CSS beyond what is in `globals.css`; prefer Tailwind utilities.
 - Do not commit directly to `main` without a PR if working collaboratively.
 - Do not skip Husky hooks (`--no-verify`); fix lint/format errors instead.

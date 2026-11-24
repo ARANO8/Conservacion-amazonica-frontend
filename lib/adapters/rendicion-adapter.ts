@@ -29,6 +29,7 @@ export interface CreateRendicionApiPayload {
     estado?: 'PENDIENTE' | 'COMPROBADO' | 'RECHAZADO';
     partidaId: number;
     tipoRetencion?: 'BIEN' | 'SERVICIO' | 'ALQUILER';
+    hojaLiquidacionId?: number;
   }>;
   observaciones?: string;
 }
@@ -87,6 +88,9 @@ export function adaptCreateRendicionPayload(
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
+      ...(gasto.hojaLiquidacionId
+        ? { hojaLiquidacionId: gasto.hojaLiquidacionId }
+        : {}),
     })),
   };
 
@@ -136,6 +140,7 @@ export function adaptRendicionResponseToFormData(
       partidaId: gasto.partidaId ?? 0,
       tipoRetencion:
         (gasto.tipoRetencion as 'BIEN' | 'SERVICIO' | 'ALQUILER') || undefined,
+      hojaLiquidacionId: gasto.hojaLiquidacionId ?? undefined,
     })),
   };
 
@@ -174,6 +179,9 @@ export function adaptUpdateRendicionPayload(
       ...(gasto.estado ? { estado: gasto.estado } : {}),
       partidaId: Number(gasto.partidaId),
       ...(gasto.tipoRetencion ? { tipoRetencion: gasto.tipoRetencion } : {}),
+      ...(gasto.hojaLiquidacionId
+        ? { hojaLiquidacionId: gasto.hojaLiquidacionId }
+        : {}),
     })),
   };
 

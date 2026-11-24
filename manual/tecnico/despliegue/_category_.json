@@ -1,0 +1,9 @@
+{
+  "label": "Despliegue",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "CI/CD, imágenes, stack de producción y proxy edge.",
+    "slug": "/despliegue"
+  }
+}

@@ -14,6 +14,8 @@ type NavSecondaryItem = {
   title: string;
   icon: LucideIcon;
   url?: string;
+  /** Fuera de la aplicación (otro sitio): pestaña nueva y sin basePath */
+  externo?: boolean;
   onClick?: () => void;
 };
 
@@ -33,6 +35,13 @@ export function NavSecondary({
                 <SidebarMenuButton size="sm" onClick={item.onClick}>
                   <item.icon />
                   <span>{item.title}</span>
+                </SidebarMenuButton>
+              ) : item.externo ? (
+                <SidebarMenuButton asChild size="sm">
+                  <a href={item.url} target="_blank" rel="noopener">
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton asChild size="sm">

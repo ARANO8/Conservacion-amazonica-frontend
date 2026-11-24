@@ -13,12 +13,61 @@ function round2(value: number): number {
   return Number.parseFloat(value.toFixed(2));
 }
 
+function toNumber(value: number | string | null | undefined): number {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Margen para que los redondeos a dos decimales no delaten una rendición exacta. */
+const TOLERANCIA = 0.01;
+
+const GRID_COMPARATIVO =
+  'grid grid-cols-[minmax(0,1fr)_minmax(64px,auto)_minmax(64px,auto)] items-center gap-x-3';
+
+interface FilaComparativaProps {
+  label: string;
+  aprobado: string;
+  rendido: string;
+  /** La fila del monto presupuestado, que es la que manda para el saldo. */
+  destacada?: boolean;
+}
+
+function FilaComparativa({
+  label,
+  aprobado,
+  rendido,
+  destacada = false,
+}: FilaComparativaProps) {
+  return (
+    <div className={GRID_COMPARATIVO}>
+      <span
+        className={`text-foreground text-sm tracking-wider uppercase ${destacada ? 'font-bold' : ''}`}
+      >
+        {label}
+      </span>
+      <span
+        className={`text-right text-sm tracking-tight ${destacada ? 'text-primary font-black' : 'font-semibold'}`}
+      >
+        {aprobado}
+      </span>
+      <span
+        className={`text-right text-sm tracking-tight ${destacada ? 'font-black' : 'font-semibold'}`}
+      >
+        {rendido}
+      </span>
+    </div>
+  );
+}
+
 interface PartidasAprobadasProps {
   solicitud: SolicitudResponse | null;
   gastos: CreateRendicionInput['gastos'];
 }
 
-export function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps) {
+export function PartidasAprobadas({
+  solicitud,
+  gastos,
+}: PartidasAprobadasProps) {
   const presupuestos = solicitud?.presupuestos ?? [];
 
   // Filtrar entradas que tengan al menos código POA para que la card tenga sentido
@@ -49,8 +98,9 @@ export function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps)
         </h3>
       </div>
       <p className="text-foreground text-sm">
-        Cada gasto registrado debe imputarse a una de estas partidas. El monto
-        mostrado es el subtotal presupuestado aprobado por línea.
+        Cada gasto registrado debe imputarse a una de estas partidas. El saldo
+        se calcula sobre el monto presupuestado —el líquido más sus impuestos—,
+        que es lo que se aprobó contra el POA. Importes en Bs.
       </p>
 
       {/* Grid de tarjetas */}
@@ -60,24 +110,41 @@ export function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps)
           const partida = p.poa?.estructura?.partida?.nombre ?? 'Sin partida';
           const proyecto = p.poa?.estructura?.proyecto?.nombre;
           const grupo = p.poa?.estructura?.grupo?.nombre;
-          const montoAprobado = Number(
-            p.subtotalPresupuestado ?? p.poa?.montoPresupuestado ?? 0
+          const aprobadoPresupuestado = round2(
+            toNumber(p.subtotalPresupuestado ?? p.poa?.montoPresupuestado)
           );
-          const montoRendido = (gastos ?? []).reduce((sum, gasto) => {
-            if (!gasto) return sum;
-            if (Number(gasto.partidaId) !== p.id) return sum;
-            return sum + (Number(gasto.montoTotal) || 0);
-          }, 0);
-          const saldo = round2(montoAprobado - montoRendido);
+          const tieneLiquidoAprobado =
+            p.subtotalNeto !== undefined && p.subtotalNeto !== null;
+          const aprobadoLiquido = round2(toNumber(p.subtotalNeto));
+
+          // El usuario teclea el líquido; el presupuestado le suma las
+          // retenciones. Comparar el presupuestado aprobado contra el líquido
+          // rendido es lo que hacía parecer que faltaba plata por rendir.
+          const rendido = (gastos ?? []).reduce(
+            (acc, gasto) => {
+              if (!gasto || Number(gasto.partidaId) !== p.id) return acc;
+              const liquido = toNumber(gasto.montoTotal);
+              const presupuestado = toNumber(gasto.montoBruto) || liquido;
+              return {
+                liquido: acc.liquido + liquido,
+                presupuestado: acc.presupuestado + presupuestado,
+              };
+            },
+            { liquido: 0, presupuestado: 0 }
+          );
+
+          const rendidoLiquido = round2(rendido.liquido);
+          const rendidoPresupuestado = round2(rendido.presupuestado);
+          const saldo = round2(aprobadoPresupuestado - rendidoPresupuestado);
 
           const saldoUi =
-            saldo > 0
+            saldo > TOLERANCIA
               ? {
                   label: `A DEVOLVER: ${formatMoney(saldo)} Bs.`,
                   className:
                     'text-amber-600 border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40',
                 }
-              : saldo < 0
+              : saldo < -TOLERANCIA
                 ? {
                     label: `A REEMBOLSAR: ${formatMoney(Math.abs(saldo))} Bs.`,
                     className:
@@ -116,31 +183,46 @@ export function PartidasAprobadas({ solicitud, gastos }: PartidasAprobadasProps)
               <CardContent className="pb-3">
                 <Separator className="mb-2" />
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
+                  {/* Encabezado de las dos columnas que se comparan */}
+                  <div className={GRID_COMPARATIVO}>
                     <div className="flex items-center gap-1">
                       <Banknote className="text-muted-foreground h-3.5 w-3.5" />
-                      <span className="text-foreground text-sm font-bold tracking-wider uppercase">
-                        Aprobado
-                      </span>
                     </div>
-                    <span className="text-primary text-sm font-black tracking-tight">
-                      {formatMoney(montoAprobado)}{' '}
-                      <span className="text-foreground text-sm font-normal">
-                        Bs.
-                      </span>
+                    <span className="text-muted-foreground text-right text-[10px] font-bold tracking-tight uppercase">
+                      Aprobado
                     </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-foreground text-sm font-bold tracking-wider uppercase">
+                    <span className="text-muted-foreground text-right text-[10px] font-bold tracking-tight uppercase">
                       Rendido
                     </span>
-                    <span className="text-sm font-bold tracking-tight">
-                      {formatMoney(montoRendido)}{' '}
-                      <span className="text-foreground text-sm font-normal">
-                        Bs.
-                      </span>
-                    </span>
                   </div>
+
+                  <FilaComparativa
+                    label="Líquido"
+                    aprobado={
+                      tieneLiquidoAprobado ? formatMoney(aprobadoLiquido) : '—'
+                    }
+                    rendido={formatMoney(rendidoLiquido)}
+                  />
+                  <FilaComparativa
+                    label="Presupuestado"
+                    aprobado={formatMoney(aprobadoPresupuestado)}
+                    rendido={formatMoney(rendidoPresupuestado)}
+                    destacada
+                  />
+                  <FilaComparativa
+                    label="Impuestos"
+                    aprobado={
+                      tieneLiquidoAprobado
+                        ? formatMoney(
+                            round2(aprobadoPresupuestado - aprobadoLiquido)
+                          )
+                        : '—'
+                    }
+                    rendido={formatMoney(
+                      round2(rendidoPresupuestado - rendidoLiquido)
+                    )}
+                  />
+
                   <Badge
                     variant="outline"
                     className={`mt-1 w-full justify-center text-sm font-extrabold tracking-wide ${saldoUi.className}`}
