@@ -23,8 +23,8 @@ Los terceros no van en el ANEXO 5: sus viáticos se rinden con la planilla de te
 3. En **¿Qué viaje liquidas?**, elige la solicitud. Solo aparecen tus solicitudes de viaje
    desembolsadas que aún no tienen liquidación. El sistema arma una hoja por cada persona de
    ACEAA del viaje, con los días de viático de la solicitud y las tarifas vigentes.
-4. Revisa la cabecera: **Lugar de emisión**, **Fecha** y **Revisado por — Director de
-   Programa**. El director viene propuesto desde la solicitud; puedes cambiarlo. No puedes
+4. Revisa la cabecera: **Lugar de emisión**, **Fecha** y **Director de Programa que
+   revisa**. El director viene propuesto desde la solicitud; puedes cambiarlo. No puedes
    elegirte a ti ni a Dirección Financiera.
 5. En **Hojas por persona**, revisa cada hoja:
    - **Cargo**, **Nº C.I.** (se toma del perfil), **Sede**, **Vía** (aérea, terrestre) y

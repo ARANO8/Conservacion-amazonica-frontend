@@ -14,10 +14,11 @@ En AMZ Desk **no es un rol del sistema**. Es la persona que el emisor elige, doc
 documento:
 
 - **En la solicitud de viaje**, al final del formulario, en la ventana **Revisar y Enviar
-  Solicitud**, campo **Director de Programa**. Su nombre firma como "Revisado por" en el
-  ANEXO 2.
-- **En el Informe de Viaje y en la Liquidación de Viáticos**, campo **Revisado por — Director
-  de Programa**.
+  Solicitud**, campo **Director de Programa**.
+- **En el Informe de Viaje y en la Liquidación de Viáticos**, campo **Director de Programa que
+  revisa**.
+
+En los documentos impresos, "Revisado por" lo firma siempre la Dirección Financiera.
 
 Reglas de esa elección:
 

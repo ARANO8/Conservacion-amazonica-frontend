@@ -429,7 +429,7 @@ export default function LiquidacionViaticosForm({
             render={({ field }) => (
               <FormItem className="space-y-1">
                 <span className="text-xs font-bold tracking-wider uppercase">
-                  Revisado por — Director de Programa
+                  Director de Programa que revisa
                 </span>
                 <DirectorProgramaSelect
                   usuarios={usuarios}

@@ -27,7 +27,7 @@ qué actividades se realizaron. Es el respaldo técnico de la rendición.
 5. En la tabla **Informe**, ajusta cada fila a lo que pasó de verdad:
    - **Fecha**, **Lugar**, **Persona / institución / lugar** y **Actividades realizadas**.
    - Usa **Agregar fila**, **Quitar fila**, **Subir fila** y **Bajar fila** para ordenarla.
-6. Al pie, completa **Lugar de emisión**, **Fecha** y **Revisado por — Director de Programa**.
+6. Al pie, completa **Lugar de emisión**, **Fecha** y **Director de Programa que revisa**.
    No puedes elegirte a ti ni a Dirección Financiera.
 7. Pulsa **Guardar borrador** para seguir después, o **Guardar y enviar a revisión**.
 
@@ -103,7 +103,7 @@ En el detalle del informe pulsa **Descargar PDF**.
 - **Lugar y fecha de emisión.**
 - **Firmas**, con nombre y cargo debajo de cada una:
   - **Preparado por**: tú.
-  - **Revisado por**: el Director de Programa que lo revisó.
+  - **Revisado por**: Dirección Financiera.
   - **Aprobado por**: el Director Ejecutivo.
 
 ## Consejos

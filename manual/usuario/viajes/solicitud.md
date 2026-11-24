@@ -133,8 +133,8 @@ La cantidad registrada debe coincidir con la del plan. Pulsa **Revisar y Enviar*
 Se abre la ventana **Revisar y Enviar Solicitud** con la planificación, la información bancaria
 del proyecto y el presupuesto por partida.
 
-1. En **Director de Programa**, busca y elige a quien revisará tu solicitud. Su nombre firmará
-   como "Revisado por" en el ANEXO 2. No puedes elegirte a ti ni a Dirección Financiera.
+1. En **Director de Programa**, busca y elige a quien revisará tu solicitud. En el ANEXO 2
+   firma como "Revisado por" la Dirección Financiera. No puedes elegirte a ti ni a Dirección Financiera.
 2. Revisa los totales y pulsa **Confirmar Envío**. Si algo está mal, usa **Volver a editar**.
 
 ![Ventana Revisar y Enviar Solicitud con el Director de Programa elegido](/img/capturas/viajes-solicitud-revisar-enviar.png)
@@ -217,7 +217,7 @@ El ANEXO 2 se ve en pantalla al abrir la solicitud y se descarga con **Descargar
 - **Otros gastos**, **TOTAL GENERAL**, observaciones y banco.
 - **Firmas**, con nombre y cargo debajo de cada una:
   - **Solicitado por**: tú.
-  - **Revisado por**: el Director de Programa que elegiste.
+  - **Revisado por**: Dirección Financiera.
   - **Aprobado por**: el Director Ejecutivo.
 - **Nombre de los viajeros**: cada persona del viaje con su cargo (los terceros sin cargo), y
   espacio para su firma y el importe recibido.
