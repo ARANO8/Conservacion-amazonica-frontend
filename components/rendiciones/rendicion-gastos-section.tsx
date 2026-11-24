@@ -239,31 +239,47 @@ function PartidaContableCombobox({
               {loading ? 'Buscando...' : 'No se encontró ninguna partida.'}
             </CommandEmpty>
             <CommandGroup>
-              {suggestions.map((pc) => (
-                <CommandItem
-                  key={pc.id}
-                  value={pc.codigo}
-                  onSelect={() => void handleSelect(pc)}
-                  className="text-xs"
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 h-3 w-3',
-                      pc.codigo === currentCodigo ? 'opacity-100' : 'opacity-0'
-                    )}
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-primary font-mono text-[11px] font-bold">
-                      {pc.codigo}
+              {suggestions.map((pc) =>
+                pc.esEncabezado ? (
+                  // Encabezado del plan: sirve de guía, no se puede elegir
+                  <div
+                    key={pc.id}
+                    role="presentation"
+                    className="text-muted-foreground bg-muted/50 flex flex-col px-2 py-1 select-none"
+                  >
+                    <span className="font-mono text-[10px]">{pc.codigo}</span>
+                    <span className="text-[10px] leading-tight font-semibold uppercase">
+                      {pc.nombre}
                     </span>
-                    {pc.nombre && (
-                      <span className="text-muted-foreground text-[10px] leading-tight">
-                        {pc.nombre}
-                      </span>
-                    )}
                   </div>
-                </CommandItem>
-              ))}
+                ) : (
+                  <CommandItem
+                    key={pc.id}
+                    value={pc.codigo}
+                    onSelect={() => void handleSelect(pc)}
+                    className="text-xs"
+                  >
+                    <Check
+                      className={cn(
+                        'mr-2 h-3 w-3',
+                        pc.codigo === currentCodigo
+                          ? 'opacity-100'
+                          : 'opacity-0'
+                      )}
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-primary font-mono text-[11px] font-bold">
+                        {pc.codigo}
+                      </span>
+                      {pc.nombre && (
+                        <span className="text-muted-foreground text-[10px] leading-tight">
+                          {pc.nombre}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                )
+              )}
             </CommandGroup>
           </CommandList>
         </Command>

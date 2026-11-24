@@ -31,7 +31,10 @@ import type { SolicitudResponse } from '@/types/solicitud-backend';
 import { useAuthStore } from '@/store/auth-store';
 import { catalogosService } from '@/lib/services/catalogos-service';
 import { Usuario, type PartidaContable } from '@/types/catalogs';
-import { rendicionesService } from '@/lib/services/rendiciones-service';
+import {
+  rendicionesService,
+  type OrdenAnexo4,
+} from '@/lib/services/rendiciones-service';
 import { downloadBlob } from '@/lib/utils/download-blob';
 import { AnexoViewer } from '@/components/shared/anexo-viewer';
 import { InformeViajeAviso } from '@/components/informes-viaje/informe-viaje-aviso';
@@ -86,6 +89,11 @@ const ESTADO_COLORS: Record<EstadoRendicion, string> = {
   RECHAZADA: 'bg-red-100 text-red-800',
 };
 
+const ORDENES_ANEXO: { valor: OrdenAnexo4; etiqueta: string }[] = [
+  { valor: 'partida', etiqueta: 'Código de partida' },
+  { valor: 'fecha', etiqueta: 'Fecha' },
+];
+
 function toNumber(value: string | number | null | undefined): number {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
   if (typeof value === 'string') {
@@ -107,6 +115,10 @@ export function RendicionDetailClient({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [descargando, setDescargando] = useState<'pdf' | 'xlsx' | null>(null);
+  // Orden de las filas del ANEXO 4; vale para la vista, el PDF y el Excel
+  const [ordenAnexo, setOrdenAnexo] = useState<OrdenAnexo4>('partida');
+  // Sube con cada partida vinculada, para que el ANEXO 4 se vuelva a pedir
+  const [versionAnexo, setVersionAnexo] = useState(0);
 
   const nombreArchivo = rendicion.solicitud?.codigoSolicitud
     ? `Rendicion-${rendicion.solicitud.codigoSolicitud}`
@@ -118,8 +130,16 @@ export function RendicionDetailClient({
       await downloadBlob(
         () =>
           formato === 'pdf'
-            ? rendicionesService.downloadPdf(rendicion.id)
-            : rendicionesService.downloadExcel(rendicion.id),
+            ? rendicionesService.downloadPdf(
+                rendicion.id,
+                undefined,
+                ordenAnexo
+              )
+            : rendicionesService.downloadExcel(
+                rendicion.id,
+                undefined,
+                ordenAnexo
+              ),
         nombreArchivo,
         {
           formato,
@@ -160,6 +180,7 @@ export function RendicionDetailClient({
         toast.success('Partida contable desvinculada.');
         onPartidaContableUpdated?.(gastoId, null);
       }
+      setVersionAnexo((v) => v + 1);
     } catch (error: unknown) {
       const message =
         error instanceof axios.AxiosError && error.response?.data?.message
@@ -183,6 +204,7 @@ export function RendicionDetailClient({
       } else {
         toast.success('Partida presupuestaria desvinculada.');
       }
+      setVersionAnexo((v) => v + 1);
     } catch (error: unknown) {
       const message =
         error instanceof axios.AxiosError && error.response?.data?.message
@@ -504,9 +526,32 @@ export function RendicionDetailClient({
       <AnexoViewer
         titulo="Anexo 4 — Rendición de Fondos en Avance"
         cargarHtml={(signal) =>
-          rendicionesService.getAnexo4Html(rendicion.id, signal)
+          rendicionesService.getAnexo4Html(rendicion.id, signal, ordenAnexo)
         }
-        recargarCon={`${rendicion.id}-${rendicion.updatedAt ?? ''}`}
+        recargarCon={`${rendicion.id}-${rendicion.updatedAt ?? ''}-${ordenAnexo}-${versionAnexo}`}
+        acciones={
+          <div
+            role="group"
+            aria-label="Orden de las filas del anexo"
+            className="flex items-center gap-2"
+          >
+            <span className="text-muted-foreground hidden text-sm sm:inline">
+              Ordenar por
+            </span>
+            {ORDENES_ANEXO.map(({ valor, etiqueta }) => (
+              <Button
+                key={valor}
+                type="button"
+                size="sm"
+                variant={ordenAnexo === valor ? 'default' : 'outline'}
+                aria-pressed={ordenAnexo === valor}
+                onClick={() => setOrdenAnexo(valor)}
+              >
+                {etiqueta}
+              </Button>
+            ))}
+          </div>
+        }
         anchoMinimo={960}
       />
 
