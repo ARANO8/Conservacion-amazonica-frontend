@@ -21,6 +21,9 @@ export interface ObservarRendicionPayload {
  * Service to handle Rendiciones (accountability reports) API calls.
  * El token Bearer es inyectado automáticamente por el interceptor de `api` (lib/api.ts).
  */
+/** Orden de las filas de gasto del ANEXO 4; el backend usa 'partida' por defecto. */
+export type OrdenAnexo4 = 'partida' | 'fecha';
+
 export const rendicionesService = {
   /**
    * Envía la rendición ya adaptada al endpoint oficial del backend.
@@ -177,8 +180,13 @@ export const rendicionesService = {
     return response.data;
   },
 
-  async downloadPdf(id: string | number, signal?: AbortSignal) {
+  async downloadPdf(
+    id: string | number,
+    signal?: AbortSignal,
+    orden?: OrdenAnexo4
+  ) {
     const response = await api.get(`/rendiciones/${id}/pdf`, {
+      params: { orden },
       responseType: 'blob',
       signal,
     });
@@ -186,8 +194,13 @@ export const rendicionesService = {
   },
 
   /** ANEXO 4 en Excel, con fórmulas para saldos y totales. */
-  async downloadExcel(id: string | number, signal?: AbortSignal) {
+  async downloadExcel(
+    id: string | number,
+    signal?: AbortSignal,
+    orden?: OrdenAnexo4
+  ) {
     const response = await api.get(`/rendiciones/${id}/excel`, {
+      params: { orden },
       responseType: 'blob',
       signal,
     });
@@ -198,8 +211,13 @@ export const rendicionesService = {
    * ANEXO 4 en HTML. Sale de la misma plantilla que el PDF, así el detalle y
    * el documento impreso son idénticos.
    */
-  async getAnexo4Html(id: string | number, signal?: AbortSignal) {
+  async getAnexo4Html(
+    id: string | number,
+    signal?: AbortSignal,
+    orden?: OrdenAnexo4
+  ) {
     const response = await api.get<string>(`/rendiciones/${id}/anexo4`, {
+      params: { orden },
       responseType: 'text',
       signal,
     });

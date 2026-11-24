@@ -59,4 +59,6 @@ export interface PartidaContable {
   id: number;
   codigo: string;
   nombre: string;
+  /** Cuenta que agrupa a otras: se muestra en el buscador pero no se elige. */
+  esEncabezado?: boolean;
 }

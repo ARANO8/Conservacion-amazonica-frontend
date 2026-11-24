@@ -3,10 +3,13 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { withBasePath } from '@/lib/utils';
+import { MANUAL_TECNICO_URL, MANUAL_USUARIO_URL } from '@/lib/manual';
 import {
   BarChart3,
   Bell,
   BookOpen,
+  BookOpenText,
+  FileCode2,
   Files,
   Home,
   LayoutGrid,
@@ -164,6 +167,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const comprasItems = buildComprasItems(userRole);
 
   const navSecondary = [
+    {
+      title: 'Manual de usuario',
+      icon: BookOpenText,
+      url: MANUAL_USUARIO_URL,
+      externo: true,
+    },
+    {
+      title: 'Manual técnico',
+      icon: FileCode2,
+      url: MANUAL_TECNICO_URL,
+      externo: true,
+    },
     {
       title: 'Soporte',
       icon: LifeBuoy,

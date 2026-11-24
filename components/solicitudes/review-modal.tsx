@@ -246,8 +246,8 @@ export default function ReviewModal({
                         <p className="text-[13px] leading-tight font-medium">
                           El Director de Programa revisa que la solicitud esté
                           bien estructurada y la deriva a Dirección Financiera
-                          para su aprobación. Su nombre firma como
-                          &quot;Revisado por&quot; en el Anexo 2.
+                          para su aprobación. En el Anexo 2 firma como
+                          &quot;Revisado por&quot; la Dirección Financiera.
                         </p>
                       </div>
                     </div>

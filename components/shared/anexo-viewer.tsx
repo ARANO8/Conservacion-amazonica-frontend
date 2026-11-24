@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import { FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 interface AnexoViewerProps {
   titulo: string;
@@ -37,18 +38,26 @@ export function AnexoViewer({
 }: AnexoViewerProps) {
   const [html, setHtml] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [altura, setAltura] = useState(1100);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    setHtml(null);
+    // El documento anterior sigue a la vista mientras llega el nuevo, para
+    // que un cambio de orden no haga saltar la página
+    setCargando(true);
     setError(false);
 
     cargarHtml(controller.signal)
-      .then(setHtml)
+      .then((nuevo) => {
+        setHtml(nuevo);
+        setCargando(false);
+      })
       .catch((err) => {
-        if (!axios.isCancel(err)) setError(true);
+        if (axios.isCancel(err)) return;
+        setError(true);
+        setCargando(false);
       });
 
     return () => controller.abort();
@@ -66,7 +75,7 @@ export function AnexoViewer({
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <FileText className="h-5 w-5" />
           {titulo}
@@ -93,7 +102,10 @@ export function AnexoViewer({
             // Sin scripts: solo se permite leer su altura desde la página
             sandbox="allow-same-origin"
             onLoad={ajustarAltura}
-            className="block w-full border-0"
+            className={cn(
+              'block w-full border-0 transition-opacity',
+              cargando && 'opacity-50'
+            )}
             style={{ height: altura, minWidth: anchoMinimo }}
           />
         )}

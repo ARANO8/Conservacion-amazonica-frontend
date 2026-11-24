@@ -1,0 +1,9 @@
+{
+  "label": "Referencia",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "Estados de cada documento, impuestos y retenciones, preguntas frecuentes y glosario.",
+    "slug": "/referencia"
+  }
+}
